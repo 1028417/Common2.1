@@ -45,7 +45,7 @@ BOOL CMenuGuide::Popup()
 
 	if (!*this)
 	{
-		CResourceLock ResourceLock(m_Page.m_Module);
+		CResourceLock ResourceLock(m_Page.m_resModule);
 
 		__AssertReturn(__super::LoadMenu(m_uIDMenu), FALSE);
 	}

@@ -22,13 +22,13 @@ class __CommonPrjExt CPage: public CPropertyPage
 	DECLARE_MESSAGE_MAP();
 
 public:
-	CPage(IModuleApp& Module, UINT nIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
+	CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
 	virtual ~CPage() {}
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 
-	IModuleApp& m_Module;
+	CResourceModule& m_resModule;
 
 private:
 	CString m_cstrTitle;

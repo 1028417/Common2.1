@@ -44,16 +44,56 @@ struct tagHotkeyInfo
 	}
 };
 
+class CMainWnd;
+
 enum E_ResourceType
 {
 	RCT_Icon
 	, RCT_Menu
 };
 
-class CMainWnd;
+class CResourceModule
+{
+public:
+	CResourceModule(const string& strDllName="")
+		: m_strDllName(strDllName)
+	{
+	}
+
+private:
+	string m_strDllName;
+
+	virtual HINSTANCE GetHInstance()
+	{
+		return GetModuleHandleA(__DllFile(m_strDllName).c_str());
+	}
+
+public:
+	void ActivateResource()
+	{
+		AfxSetResourceHandle(GetHInstance());
+	}
+
+	HANDLE GetResource(E_ResourceType eResourceType, UINT nID)
+	{
+		ActivateResource();
+
+		switch (eResourceType)
+		{
+		case RCT_Icon:
+			return ::LoadIcon(GetHInstance(), MAKEINTRESOURCE(nID));
+		case RCT_Menu:
+			return ::LoadMenu(GetHInstance(), MAKEINTRESOURCE(nID));
+		default:
+			;
+		}
+
+		return NULL;
+	}
+};
 
 // IModuleApp
-class __CommonPrjExt IModuleApp: public CWinApp
+class __CommonPrjExt IModuleApp: public CWinApp, public CResourceModule
 {
 friend class CMainApp;
 
@@ -62,11 +102,9 @@ public:
 
 	virtual ~IModuleApp();
 
+	HINSTANCE GetHInstance() override;
+
 public:
-	void ActivateResource();
-	
-	HANDLE GetResource(E_ResourceType eResourceType, UINT nID);
-	
 	virtual BOOL HandleCommand(UINT nID) { return FALSE; }
 
 	virtual LRESULT HandleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) { return 0; }
@@ -81,15 +119,13 @@ protected:
 
 class CModuleApp : public IModuleApp {};
 
-class CMainWnd;
-
 class CResourceLock
 {
 public:
-	CResourceLock(IModuleApp& Module)
+	CResourceLock(CResourceModule& resModule)
 	{
 		m_hPreInstance = AfxGetResourceHandle();
-		Module.ActivateResource();
+		resModule.ActivateResource();
 	}
 
 	~CResourceLock()
@@ -112,8 +148,17 @@ typedef vector<IModuleApp*> ModuleVector;
 class __CommonPrjExt CMainApp: public IModuleApp
 {
 public:
-	CMainApp() {}
+	CMainApp()
+	{
+		_pMainApp = this;
+	}
+
 	virtual ~CMainApp() {}
+
+	static CMainApp* GetMainApp()
+	{
+		return _pMainApp;
+	}
 
 	static CMainWnd* GetMainWnd()
 	{
@@ -121,7 +166,8 @@ public:
 	}
 
 private:
-	static class CMainWnd *_pMainWnd;
+	static CMainApp *_pMainApp;
+	static CMainWnd *_pMainWnd;
 
 	static ModuleVector m_vctModules;
 

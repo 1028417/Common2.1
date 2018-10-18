@@ -16,29 +16,16 @@ IModuleApp::~IModuleApp()
 {
 }
 
-void IModuleApp::ActivateResource()
+HINSTANCE IModuleApp::GetHInstance()
 {
-	AfxSetResourceHandle(m_hInstance);
-}
-
-HANDLE IModuleApp::GetResource(E_ResourceType eResourceType, UINT nID)
-{
-	ActivateResource();
-
-	switch (eResourceType)
-	{
-	case RCT_Icon:
-		return ::LoadIcon(m_hInstance, MAKEINTRESOURCE(nID));
-	case RCT_Menu:
-		return ::LoadMenu(m_hInstance, MAKEINTRESOURCE(nID));
-	default:
-		;
-	}
-
-	return NULL;
+	return m_hInstance;
 }
 
 // CMainApp
+
+CMainApp *CMainApp::_pMainApp = NULL;
+
+CMainWnd *CMainApp::_pMainWnd = NULL;
 
 ModuleVector CMainApp::m_vctModules;
 
@@ -47,8 +34,6 @@ map<UINT, LPVOID> CMainApp::m_mapInterfaces;
 map<char, LPVOID> CMainApp::m_mapHotkeyInfos;
 
 vector<tagHotkeyInfo> CMainApp::m_vctHotkeyInfos;
-
-CMainWnd *CMainApp::_pMainWnd = NULL;
 
 wstring CMainApp::GetAppPath()
 {
@@ -105,7 +90,7 @@ BOOL CMainApp::InitInstance()
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->hwnd == CMainApp::GetMainWnd()->GetSafeHwnd())
+	if (pMsg->hwnd == _pMainWnd->GetSafeHwnd())
 	{
 		switch (pMsg->message)
 		{
@@ -287,6 +272,8 @@ BOOL CMainApp::Quit()
 			(void)::UnregisterHotKey(CMainApp::GetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
 		}
 	}
+
+	(void)_pMainWnd->DestroyWindow();
 
 	AfxPostQuitMessage(0);
 

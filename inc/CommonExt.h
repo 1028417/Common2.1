@@ -7,6 +7,12 @@
 #define __CommonPrjExt __declspec(dllimport)
 #endif
 
+#ifdef _DEBUG
+#define __DllFile(_x) (_x + string("d.dll"))
+#else
+#define __DllFile(_x) (_x + string(".dll"))
+#endif
+
 #include <CommonDef.h>
 
 #include <util.h>

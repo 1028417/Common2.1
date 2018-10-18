@@ -33,9 +33,7 @@ protected:
 	typedef vector<CDockView*> TD_DockViewVector;
 
 public:
-	CMainWnd()
-	{
-	}
+	CMainWnd(){}
 
 	virtual ~CMainWnd()
 	{
