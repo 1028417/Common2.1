@@ -92,32 +92,35 @@ public:
 	}
 };
 
-// IModuleApp
-class __CommonPrjExt IModuleApp: public CWinApp, public CResourceModule
+// CModuleApp
+class __CommonPrjExt CModuleApp: public CWinApp, public CResourceModule
 {
 friend class CMainApp;
 
 public:
-	IModuleApp();
+	CModuleApp() {}
 
-	virtual ~IModuleApp();
+	virtual ~CModuleApp() {}
 
-	HINSTANCE GetHInstance() override;
-
-public:
-	virtual BOOL HandleCommand(UINT nID) { return FALSE; }
-
-	virtual LRESULT HandleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) { return 0; }
+	HINSTANCE GetHInstance() override
+	{
+		return m_hInstance;
+	}
+	
+protected:
+	virtual BOOL InitInstance() override;
 
 protected:
 	virtual BOOL OnReady(CMainWnd& MainWnd) { return TRUE; }
 
+	virtual BOOL HandleCommand(UINT nID) { return FALSE; }
+
 	virtual BOOL HandleHotkey(const tagHotkeyInfo& HotkeyInfo) { return FALSE; }
+
+	virtual LRESULT HandleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) { return 0; }
 
 	virtual BOOL OnQuit() { return TRUE; }
 };
-
-class CModuleApp : public IModuleApp {};
 
 class CResourceLock
 {
@@ -143,62 +146,78 @@ private:
 struct tagMainWndInfo;
 
 //CMainApp
-typedef vector<IModuleApp*> ModuleVector;
+typedef vector<CModuleApp*> ModuleVector;
 
-class __CommonPrjExt CMainApp: public IModuleApp
+interface IController
+{
+	virtual CMainWnd* run() = 0;
+
+	virtual bool handleCommand(UINT nID) = 0;
+
+	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo) = 0;
+
+	virtual LRESULT handleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) = 0;
+
+	virtual void stop() = 0;
+};
+
+class __CommonPrjExt CMainApp: public CModuleApp
 {
 public:
-	CMainApp()
-	{
-		_pMainApp = this;
-	}
+	CMainApp() {}
 
 	virtual ~CMainApp() {}
 
 	static CMainApp* GetMainApp()
 	{
-		return _pMainApp;
+		return (CMainApp*)AfxGetApp();
 	}
 
 	static CMainWnd* GetMainWnd()
 	{
-		return _pMainWnd;
+		return (CMainWnd*)AfxGetMainWnd();
+	}
+
+	wstring GetAppPath(const wstring& strPath)
+	{
+		return m_strAppPath + strPath;
 	}
 
 private:
-	static CMainApp *_pMainApp;
-	static CMainWnd *_pMainWnd;
+	virtual IController& getController() = 0;
 
-	static ModuleVector m_vctModules;
+	wstring m_strAppPath;
 
-	static map<UINT, LPVOID> m_mapInterfaces;
+	ModuleVector m_vctModules;
 
-	static map<char, LPVOID> m_mapHotkeyInfos;
+	map<UINT, LPVOID> m_mapInterfaces;
 
-	static vector<tagHotkeyInfo> m_vctHotkeyInfos;
+	vector<tagHotkeyInfo> m_vctHotkeyInfos;
 
 protected:
 	virtual BOOL InitInstance() override;
 	
-	virtual CMainWnd* OnInitMainWnd(tagMainWndInfo& MainWndInfo)=0;
-	
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 private:
-	static bool HandleHotkey(LPARAM lParam, bool bGlobal);
-	static bool HandleHotkey(tagHotkeyInfo &HotkeyInfo);
+	bool HandleHotkey(LPARAM lParam, bool bGlobal);
+	bool HandleHotkey(tagHotkeyInfo &HotkeyInfo);
 
-	static BOOL OnCommand(UINT nID);
+	BOOL OnCommand(UINT nID);
 
 public:
-	static wstring GetAppPath();
-
-	static BOOL Quit();
+	BOOL Quit();
 
 	static void DoEvents(bool bOnce=false);
 
-	static BOOL AddModule(IModuleApp& Module);
+	static BOOL AddModule(CModuleApp& Module);
 
+	BOOL RegisterInterface(UINT nIndex, LPVOID lpInterface);
+	LPVOID GetInterface(UINT nIndex);
+
+	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
+
+public:
 	static LRESULT SendMessage(UINT nMsg, WPARAM wParam=0, LPARAM lParam=0);
 
 	static LRESULT SendMessage(UINT nMsg, LPVOID pPara)
@@ -216,17 +235,12 @@ public:
 
 	static void SendMessageEx(UINT nMsg, LPVOID pPara)
 	{
-		CMainApp::SendMessageEx(nMsg, (WPARAM)pPara);
+		SendMessageEx(nMsg, (WPARAM)pPara);
 	}
 
 	template <typename _T1, typename _T2>
 	static void SendMessageEx(UINT nMsg, _T1 para1, _T2 para2)
 	{
-		CMainApp::SendMessageEx(nMsg, (WPARAM)para1, (LPARAM)para2);
+		SendMessageEx(nMsg, (WPARAM)para1, (LPARAM)para2);
 	}
-
-	static BOOL RegisterInterface(UINT nIndex, LPVOID lpInterface);
-	static LPVOID GetInterface(UINT nIndex);
-
-	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
 };

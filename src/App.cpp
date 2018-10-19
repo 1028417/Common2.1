@@ -5,48 +5,13 @@
 
 #include "MainWnd.h"
 
-
-// IModuleApp
-IModuleApp::IModuleApp()
-{
-	CMainApp::AddModule(*this);
-}
-
-IModuleApp::~IModuleApp()
-{
-}
-
-HINSTANCE IModuleApp::GetHInstance()
-{
-	return m_hInstance;
-}
-
 // CMainApp
 
-CMainApp *CMainApp::_pMainApp = NULL;
-
-CMainWnd *CMainApp::_pMainWnd = NULL;
-
-ModuleVector CMainApp::m_vctModules;
-
-map<UINT, LPVOID> CMainApp::m_mapInterfaces;
-
-map<char, LPVOID> CMainApp::m_mapHotkeyInfos;
-
-vector<tagHotkeyInfo> CMainApp::m_vctHotkeyInfos;
-
-wstring CMainApp::GetAppPath()
+BOOL CModuleApp::InitInstance()
 {
-	static wstring strPath;
-	if (!strPath.empty())
-	{
-		return strPath;
-	}
+	CMainApp::GetMainApp()->AddModule(*this);
 
-	TCHAR pszPath[MAX_PATH];
-	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
-
-	return fsutil::GetParentPath(pszPath);
+	return __super::InitInstance();
 }
 
 BOOL CMainApp::InitInstance()
@@ -66,31 +31,35 @@ BOOL CMainApp::InitInstance()
 
 	srand(GetTickCount());
 
-	__AssertReturn(::SetCurrentDirectory(this->GetAppPath().c_str()), FALSE);
+	TCHAR pszPath[MAX_PATH];
+	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
+	m_strAppPath = fsutil::GetParentPath(pszPath);
+	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
-	tagMainWndInfo MainWndInfo;
-	_pMainWnd = OnInitMainWnd(MainWndInfo);
-	__EnsureReturn(NULL != _pMainWnd, FALSE);
-	__EnsureReturn(_pMainWnd->Create(MainWndInfo), FALSE);
-	m_pMainWnd = _pMainWnd;
+	CMainWnd *pMainWnd = getController().run();
+	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+	m_pMainWnd = pMainWnd;
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
 	{
-		if (!(*itModule)->OnReady(*_pMainWnd))
+		if (!(*itModule)->OnReady(*pMainWnd))
 		{
 			AfxPostQuitMessage(0);
 			return FALSE;
 		}
 	}
 
-	_pMainWnd->Show();
+	if (!pMainWnd->IsWindowVisible())
+	{
+		pMainWnd->Show();
+	}
 
 	return TRUE;
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->hwnd == _pMainWnd->GetSafeHwnd())
+	if (pMsg->hwnd == GetMainWnd()->GetSafeHwnd())
 	{
 		switch (pMsg->message)
 		{
@@ -107,7 +76,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 				if (CN_COMMAND == nCode && !hWndCtrl)
 				{
-					if (HandleCommand(nID))
+					if (OnCommand(nID))
 					{
 						return TRUE;
 					}
@@ -186,6 +155,11 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainApp::OnCommand(UINT nID)
 {
+	if (getController().handleCommand(nID))
+	{
+		return TRUE;
+	}
+
 	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
 	{
 		if ((*itModule)->HandleCommand(nID))
@@ -243,9 +217,14 @@ bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 	}
 	else
 	{
-		for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
+		if (getController().handleHotkey(HotkeyInfo))
 		{
-			if ((*itModule)->HandleHotkey(HotkeyInfo))
+			bResult = true;
+		}
+
+		for (auto pModule : m_vctModules)
+		{
+			if (pModule->HandleHotkey(HotkeyInfo))
 			{
 				bResult = true;
 			}
@@ -273,7 +252,13 @@ BOOL CMainApp::Quit()
 		}
 	}
 
-	(void)_pMainWnd->DestroyWindow();
+	getController().stop();
+
+	CMainWnd* pMainWnd = GetMainWnd();
+	if (NULL != pMainWnd)
+	{
+		(void)pMainWnd->DestroyWindow();
+	}
 
 	AfxPostQuitMessage(0);
 
@@ -285,23 +270,35 @@ void CMainApp::DoEvents(bool bOnce)
 	::DoEvents();
 }
 
-BOOL CMainApp::AddModule(IModuleApp& Module)
+BOOL CMainApp::AddModule(CModuleApp& Module)
 {
-	__AssertReturn(!util::ContainerFind(m_vctModules, &Module), FALSE);
+	CMainApp *pMainApp = GetMainApp();
+	__EnsureReturn(pMainApp, FALSE);
 
-	m_vctModules.push_back(&Module);
+	__AssertReturn(!util::ContainerFind(pMainApp->m_vctModules, &Module), FALSE);
+
+	pMainApp->m_vctModules.push_back(&Module);
 
 	return TRUE;
 }
 
 LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
+	CMainApp *pMainApp = GetMainApp();
+	__EnsureReturn(pMainApp, 0);
+
 	CWaitCursor WaitCursor;
 
-	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
+	LRESULT lResult = pMainApp->getController().handleMessage(nMsg, wParam, lParam);
+	if (0 != lResult)
 	{
-		LRESULT lResult = (*itModule)->HandleMessage(nMsg, wParam, lParam);
-		if (lResult)
+		return lResult;
+	}
+
+	for (auto pModule : pMainApp->m_vctModules)
+	{
+		lResult = pModule->HandleMessage(nMsg, wParam, lParam);
+		if (0 != lResult)
 		{
 			return lResult;
 		}
@@ -312,11 +309,16 @@ LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 
 void CMainApp::SendMessageEx(UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
+	CMainApp *pMainApp = GetMainApp();
+	__Ensure(pMainApp);
+
 	CWaitCursor WaitCursor;
 
-	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
+	(void)pMainApp->getController().handleMessage(nMsg, wParam, lParam);
+
+	for (auto pModule : pMainApp->m_vctModules)
 	{
-		(void)(*itModule)->HandleMessage(nMsg, wParam, lParam);
+		(void)pModule->HandleMessage(nMsg, wParam, lParam);
 	}
 }
 
@@ -346,7 +348,10 @@ LPVOID CMainApp::GetInterface(UINT nIndex)
 
 BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 {
-	if (!util::ContainerFind(m_vctHotkeyInfos, HotkeyInfo))
+	CMainApp *pMainApp = GetMainApp();
+	__EnsureReturn(pMainApp, FALSE);
+
+	if (!util::ContainerFind(pMainApp->m_vctHotkeyInfos, HotkeyInfo))
 	{
 		if (HotkeyInfo.bGlobal)
 		{
@@ -356,7 +361,7 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 			}
 		}
 
-		m_vctHotkeyInfos.push_back(HotkeyInfo);
+		pMainApp->m_vctHotkeyInfos.push_back(HotkeyInfo);
 	}
 
 	return TRUE;

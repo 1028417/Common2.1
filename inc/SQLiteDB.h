@@ -46,7 +46,7 @@ private:
 public:
 	int GetStatus();
 
-	BOOL Connect(const string& strPara);
+	BOOL Connect(const string& strPara="");
 
 	BOOL Disconnect();
 

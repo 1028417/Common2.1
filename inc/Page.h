@@ -6,7 +6,7 @@
 #include "App.h"
 
 
-class IModuleApp;
+class CModuleApp;
 
 class CMainWnd;
 

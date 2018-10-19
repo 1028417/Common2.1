@@ -18,7 +18,7 @@ interface IDB
 {
 	virtual int GetStatus() = 0;
 
-	virtual BOOL Connect(const string& strPara) = 0;
+	virtual BOOL Connect(const string& strPara="") = 0;
 	virtual BOOL Disconnect() = 0;
 
 	virtual BOOL Execute(const wstring& strSql, string& strError) = 0;

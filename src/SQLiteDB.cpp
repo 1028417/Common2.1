@@ -108,12 +108,8 @@ BOOL CSQLiteDB::Connect(const string& strPara)
 {
 	__AssertReturn(!m_hDB, FALSE);
 
-	string strDBPath = strPara;
-	if (strDBPath.empty())
-	{
-		strDBPath = m_strDBPath;
-	}
-
+	string strDBPath = !strPara.empty()?strPara:m_strDBPath;
+	
 	__AssertReturn(SQLITE_OK == sqlite3_open(strDBPath.c_str(), (sqlite3**)&m_hDB), FALSE);
 	__AssertReturn(m_hDB, FALSE);
 
