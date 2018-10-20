@@ -52,10 +52,15 @@ enum E_ResourceType
 	, RCT_Menu
 };
 
-class CResourceModule
+interface IResourceModule
+{
+	virtual HINSTANCE GetHInstance() = 0;
+};
+
+class CResourceModule : public IResourceModule
 {
 public:
-	CResourceModule(const string& strDllName="")
+	CResourceModule(const string& strDllName)
 		: m_strDllName(strDllName)
 	{
 	}
@@ -63,7 +68,7 @@ public:
 private:
 	string m_strDllName;
 
-	virtual HINSTANCE GetHInstance()
+	HINSTANCE GetHInstance() override
 	{
 		return GetModuleHandleA(__DllFile(m_strDllName).c_str());
 	}
@@ -93,7 +98,7 @@ public:
 };
 
 // CModuleApp
-class __CommonPrjExt CModuleApp: public CWinApp, public CResourceModule
+class __CommonPrjExt CModuleApp: public CWinApp, public IResourceModule
 {
 friend class CMainApp;
 
@@ -131,6 +136,15 @@ public:
 		resModule.ActivateResource();
 	}
 
+	CResourceLock(CResourceModule *pResModule)
+	{
+		if (NULL != pResModule)
+		{
+			m_hPreInstance = AfxGetResourceHandle();
+			pResModule->ActivateResource();
+		}
+	}
+
 	~CResourceLock()
 	{
 		if (NULL != m_hPreInstance)
@@ -148,17 +162,34 @@ struct tagMainWndInfo;
 //CMainApp
 typedef vector<CModuleApp*> ModuleVector;
 
-interface IController
+class IController
 {
+public:
+	IController() {}
+
+	virtual ~IController() {}
+
+public:
 	virtual CMainWnd* run() = 0;
 
-	virtual bool handleCommand(UINT nID) = 0;
+	virtual bool handleCommand(UINT nID)
+	{
+		return false;
+	}
 
-	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo) = 0;
+	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
+	{
+		return false;
+	}
 
-	virtual LRESULT handleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) = 0;
+	virtual LRESULT handleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
+	{
+		return 0;
+	}
 
-	virtual void stop() = 0;
+	virtual void stop()
+	{
+	}
 };
 
 class __CommonPrjExt CMainApp: public CModuleApp
