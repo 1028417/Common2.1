@@ -43,14 +43,20 @@ private:
 	
 	HANDLE m_hDB = NULL;
 
+	string m_strError;
+
 public:
-	int GetStatus();
+	int GetStatus() override;
 
-	BOOL Connect(const string& strPara="");
+	BOOL Connect(const string& strPara="") override;
 
-	BOOL Disconnect();
+	BOOL Disconnect() override;
 
-	BOOL Execute(const wstring& strSql, string& strError);
+	BOOL Execute(const wstring& strSql) override;
 
-	IDBResult* Query(const wstring& strSql, string& strError);
+	IDBResult* Query(const wstring& strSql) override;
+
+	bool BeginTrans() override;
+	bool RollbakTrans() override;
+	bool CommitTrans() override;
 };

@@ -127,21 +127,25 @@ BOOL CSQLiteDB::Disconnect()
 	return TRUE;
 }
 
-BOOL CSQLiteDB::Execute(const wstring& strSql, string& strError)
+BOOL CSQLiteDB::Execute(const wstring& strSql)
 {
 	__AssertReturn(m_hDB, FALSE);
 	
 	char *pszError = NULL;
 	if (SQLITE_OK != sqlite3_exec((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), 0, 0, &pszError))
 	{
-		strError = pszError;
+		if (NULL != pszError)
+		{
+			m_strError = pszError;
+		}
+		
 		return FALSE;
 	}
 
 	return TRUE;
 }
 
-IDBResult* CSQLiteDB::Query(const wstring& strSql, string& strError)
+IDBResult* CSQLiteDB::Query(const wstring& strSql)
 {
 	__AssertReturn(m_hDB, NULL);
 
@@ -156,7 +160,7 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql, string& strError)
 
 	if (pszError)
 	{
-		strError = pszError;
+		m_strError = pszError;
 	}
 
 	__AssertReturn(SQLITE_OK == nResult && pData, NULL);
@@ -169,4 +173,19 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql, string& strError)
 	pSQLiteDBResult->m_pData = pData;
 
 	return pSQLiteDBResult;
+}
+
+bool CSQLiteDB::BeginTrans()
+{
+	return Execute(L"begin Transaction");
+}
+
+bool CSQLiteDB::RollbakTrans()
+{
+	return Execute(L"commit Transaction");
+}
+
+bool CSQLiteDB::CommitTrans()
+{
+	return Execute(L"rollback Transaction");
 }
