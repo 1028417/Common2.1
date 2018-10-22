@@ -57,6 +57,6 @@ public:
 	IDBResult* Query(const wstring& strSql) override;
 
 	bool BeginTrans() override;
-	bool RollbakTrans() override;
 	bool CommitTrans() override;
+	bool RollbakTrans() override;
 };

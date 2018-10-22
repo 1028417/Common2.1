@@ -180,12 +180,12 @@ bool CSQLiteDB::BeginTrans()
 	return Execute(L"begin Transaction");
 }
 
-bool CSQLiteDB::RollbakTrans()
+bool CSQLiteDB::CommitTrans()
 {
 	return Execute(L"commit Transaction");
 }
 
-bool CSQLiteDB::CommitTrans()
+bool CSQLiteDB::RollbakTrans()
 {
 	return Execute(L"rollback Transaction");
 }
