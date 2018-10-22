@@ -159,8 +159,29 @@ private:
 
 struct tagMainWndInfo;
 
-//CMainApp
-typedef vector<CModuleApp*> ModuleVector;
+
+class IView
+{
+public:
+	IView() {}
+
+	virtual ~IView() {}
+
+public:
+	virtual bool init() = 0;
+
+	virtual CMainWnd* show() = 0;
+
+	virtual bool handleCommand(UINT nID)
+	{
+		return false;
+	}
+
+	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
+	{
+		return false;
+	}
+};
 
 class IController
 {
@@ -170,7 +191,9 @@ public:
 	virtual ~IController() {}
 
 public:
-	virtual CMainWnd* run() = 0;
+	virtual bool init() = 0;
+
+	virtual bool start() = 0;
 
 	virtual bool handleCommand(UINT nID)
 	{
@@ -194,6 +217,9 @@ public:
 
 class __CommonPrjExt CMainApp: public CModuleApp
 {
+private:
+	typedef vector<CModuleApp*> ModuleVector;
+
 public:
 	CMainApp() {}
 
@@ -215,6 +241,8 @@ public:
 	}
 
 private:
+	virtual IView& getView() = 0;
+	
 	virtual IController& getController() = 0;
 
 	wstring m_strAppPath;

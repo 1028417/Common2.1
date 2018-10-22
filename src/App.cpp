@@ -36,8 +36,15 @@ BOOL CMainApp::InitInstance()
 	m_strAppPath = fsutil::GetParentPath(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
-	CMainWnd *pMainWnd = getController().run();
+	__AssertReturn(getView().init(), FALSE);
+
+	__AssertReturn(getController().init(), FALSE);
+
+	CMainWnd *pMainWnd = getView().show();
 	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+
+	__AssertReturn(getController().start(), FALSE);
+
 	m_pMainWnd = pMainWnd;
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
@@ -155,9 +162,12 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainApp::OnCommand(UINT nID)
 {
-	if (getController().handleCommand(nID))
+	if (!getView().handleCommand(nID))
 	{
-		return TRUE;
+		if (getController().handleCommand(nID))
+		{
+			return TRUE;
+		}
 	}
 
 	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
@@ -217,9 +227,16 @@ bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 	}
 	else
 	{
-		if (getController().handleHotkey(HotkeyInfo))
+		if (getView().handleHotkey(HotkeyInfo))
 		{
 			bResult = true;
+		}
+		else
+		{
+			if (getController().handleHotkey(HotkeyInfo))
+			{
+				bResult = true;
+			}
 		}
 
 		for (auto pModule : m_vctModules)
