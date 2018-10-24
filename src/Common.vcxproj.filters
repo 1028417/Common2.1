@@ -1,170 +1,166 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{b181ccf4-5ac8-493a-8c07-c965f0646e99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\class">
-      <UniqueIdentifier>{046e91c2-a50f-44de-b1c8-89c22a2cf714}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\class\fs">
-      <UniqueIdentifier>{e907133a-d569-4588-b722-db8fbd570313}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\class\ctrl">
-      <UniqueIdentifier>{2eb6db22-bf61-4127-a54f-f4e4161d7346}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\app">
+    <Filter Include="app">
       <UniqueIdentifier>{b801be60-58f7-459e-a3fd-87f05456e824}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\class\db">
+    <Filter Include="class">
+      <UniqueIdentifier>{046e91c2-a50f-44de-b1c8-89c22a2cf714}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="class\fs">
+      <UniqueIdentifier>{e907133a-d569-4588-b722-db8fbd570313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="class\ctrl">
+      <UniqueIdentifier>{2eb6db22-bf61-4127-a54f-f4e4161d7346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="class\db">
       <UniqueIdentifier>{edac83cf-6ffd-4e9f-bf46-e1a15eb77e30}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\class\db\sqlite">
+    <Filter Include="class\db\sqlite">
       <UniqueIdentifier>{f62052dd-2d6b-473b-b7ea-014ee6d6e9ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DragDrop.cpp">
-      <Filter>src\class</Filter>
-    </ClCompile>
-    <ClCompile Include="LogList.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClCompile>
     <ClCompile Include="ProFile.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClCompile>
     <ClCompile Include="ProgressDlg.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="DockView.cpp">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="MainWnd.cpp">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="Page.cpp">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="WorkThread.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClCompile>
     <ClCompile Include="sqlite\shell.c">
-      <Filter>src\class\db\sqlite</Filter>
+      <Filter>class\db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="sqlite\sqlite3.c">
-      <Filter>src\class\db\sqlite</Filter>
+      <Filter>class\db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="fsdlg.cpp">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClCompile>
     <ClCompile Include="fsutil.cpp">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClCompile>
     <ClCompile Include="Path.cpp">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClCompile>
     <ClCompile Include="img.cpp">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClCompile>
     <ClCompile Include="ListCtrl.cpp">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClCompile>
     <ClCompile Include="PathCtrl.cpp">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClCompile>
     <ClCompile Include="TreeCtrl.cpp">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClCompile>
     <ClCompile Include="SQLiteDB.cpp">
-      <Filter>src\class\db</Filter>
+      <Filter>class\db</Filter>
     </ClCompile>
     <ClCompile Include="Guide.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="util.cpp">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="LogList.cpp">
+      <Filter>class\ctrl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
-      <Filter>src\class\db\sqlite</Filter>
+      <Filter>class\db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="sqlite\sqlite3ext.h">
-      <Filter>src\class\db\sqlite</Filter>
+      <Filter>class\db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\inc\CommonExt.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="..\inc\CDispatch.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\DragDrop.h">
-      <Filter>src\class</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\LogList.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\ProFile.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\ProgressDlg.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\WorkThread.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\App.h">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\DockView.h">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\MainWnd.h">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\Page.h">
-      <Filter>src\app</Filter>
+      <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\fsdlg.h">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\fsutil.h">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\Path.h">
-      <Filter>src\class\fs</Filter>
+      <Filter>class\fs</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\img.h">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\ListCtrl.h">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\PathCtrl.h">
-      <Filter>src\class\ctrl</Filter>
+      <Filter>class\ctrl</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\TreeCtrl.h">
-      <Filter>src\class\ctrl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\CommonDef.h">
-      <Filter>src</Filter>
+      <Filter>class\ctrl</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\IDB.h">
-      <Filter>src\class\db</Filter>
+      <Filter>class\db</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\SQLiteDB.h">
-      <Filter>src\class\db</Filter>
+      <Filter>class\db</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\Guide.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\util.h">
-      <Filter>src\class</Filter>
+      <Filter>class</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\LogList.h">
+      <Filter>class\ctrl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

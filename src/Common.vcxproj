@@ -170,7 +170,6 @@
     <ClInclude Include="..\inc\App.h" />
     <ClInclude Include="..\inc\CDispatch.h" />
     <ClInclude Include="..\inc\CommonExt.h" />
-    <ClInclude Include="..\inc\CommonDef.h" />
     <ClInclude Include="..\inc\DockView.h" />
     <ClInclude Include="..\inc\DragDrop.h" />
     <ClInclude Include="..\inc\fsdlg.h" />
