@@ -852,6 +852,11 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 UINT CObjectList::GetHeaderHeight()
 {
+	if (E_ListViewType::LVT_Report != this->GetView())
+	{
+		return 0;
+	}
+
 	CRect rcHeader;
 	CListCtrl::GetHeaderCtrl()->GetWindowRect(&rcHeader);
 
