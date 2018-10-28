@@ -36,15 +36,15 @@ BOOL CMainApp::InitInstance()
 	m_strAppPath = fsutil::GetParentPath(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
-	CMainWnd *pMainWnd = getView().init();
+	CMainWnd *pMainWnd = m_view.init();
 	__AssertReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
 	m_pMainWnd = pMainWnd;
 
-	__AssertReturn(getController().init(), FALSE);
+	__AssertReturn(m_Controller.init(), FALSE);
 
-	__AssertReturn(getView().show(), FALSE);
+	__AssertReturn(m_view.show(), FALSE);
 
-	__AssertReturn(getController().start(), FALSE);
+	__AssertReturn(m_Controller.start(), FALSE);
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
 	{
@@ -161,12 +161,12 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainApp::OnCommand(UINT nID)
 {
-	if (getView().handleCommand(nID))
+	if (m_view.handleCommand(nID))
 	{
 		return TRUE;
 	}
 
-	if (getController().handleCommand(nID))
+	if (m_Controller.handleCommand(nID))
 	{
 		return TRUE;
 	}
@@ -228,13 +228,13 @@ bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 	}
 	else
 	{
-		if (getView().handleHotkey(HotkeyInfo))
+		if (m_view.handleHotkey(HotkeyInfo))
 		{
 			bResult = true;
 		}
 		else
 		{
-			if (getController().handleHotkey(HotkeyInfo))
+			if (m_Controller.handleHotkey(HotkeyInfo))
 			{
 				bResult = true;
 			}
@@ -270,7 +270,7 @@ BOOL CMainApp::Quit()
 		}
 	}
 
-	getController().stop();
+	m_Controller.stop();
 
 	CMainWnd* pMainWnd = GetMainWnd();
 	if (NULL != pMainWnd)
@@ -307,7 +307,7 @@ LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 
 	CWaitCursor WaitCursor;
 
-	LRESULT lResult = pMainApp->getController().handleMessage(nMsg, wParam, lParam);
+	LRESULT lResult = pMainApp->m_Controller.handleMessage(nMsg, wParam, lParam);
 	if (0 != lResult)
 	{
 		return lResult;
@@ -332,7 +332,7 @@ void CMainApp::SendMessageEx(UINT nMsg, WPARAM wParam, LPARAM lParam)
 
 	CWaitCursor WaitCursor;
 
-	(void)pMainApp->getController().handleMessage(nMsg, wParam, lParam);
+	(void)pMainApp->m_Controller.handleMessage(nMsg, wParam, lParam);
 
 	for (auto pModule : pMainApp->m_vctModules)
 	{

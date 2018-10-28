@@ -160,29 +160,6 @@ private:
 struct tagMainWndInfo;
 
 
-class IView
-{
-public:
-	IView() {}
-
-	virtual ~IView() {}
-
-public:
-	virtual CMainWnd* init() = 0;
-
-	virtual bool show() = 0;
-
-	virtual bool handleCommand(UINT nID)
-	{
-		return false;
-	}
-
-	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
-	{
-		return false;
-	}
-};
-
 class IController
 {
 public:
@@ -215,21 +192,37 @@ public:
 	}
 };
 
-class __CommonPrjExt CMainApp: public CModuleApp
+class IView
 {
-private:
-	class __Init
-	{
-	public:
-		__Init()
-		{
-			afxCurrentInstanceHandle = _AtlBaseModule.GetModuleInstance();
-			afxCurrentResourceHandle = _AtlBaseModule.GetResourceInstance();
-		}
-	} __init;
+public:
+	IView() {}
+
+	virtual ~IView() {}
 
 public:
-	CMainApp() {}
+	virtual CMainWnd* init() = 0;
+
+	virtual bool show() = 0;
+
+	virtual bool handleCommand(UINT nID)
+	{
+		return false;
+	}
+
+	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
+	{
+		return false;
+	}
+};
+
+class __CommonPrjExt CMainApp: public CModuleApp
+{
+public:
+	CMainApp(IView& view, IController& Controller)
+		: m_view(view)
+		, m_Controller(Controller)
+	{
+	}
 
 	virtual ~CMainApp() {}
 
@@ -249,9 +242,8 @@ public:
 	}
 
 private:
-	virtual IView& getView() = 0;
-	
-	virtual IController& getController() = 0;
+	IView& m_view;
+	IController& m_Controller;
 
 	wstring m_strAppPath;
 
