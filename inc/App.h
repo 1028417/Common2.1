@@ -168,9 +168,9 @@ public:
 	virtual ~IView() {}
 
 public:
-	virtual bool init() = 0;
+	virtual CMainWnd* init() = 0;
 
-	virtual CMainWnd* show() = 0;
+	virtual bool show() = 0;
 
 	virtual bool handleCommand(UINT nID)
 	{
@@ -218,7 +218,15 @@ public:
 class __CommonPrjExt CMainApp: public CModuleApp
 {
 private:
-	typedef vector<CModuleApp*> ModuleVector;
+	class __Init
+	{
+	public:
+		__Init()
+		{
+			afxCurrentInstanceHandle = _AtlBaseModule.GetModuleInstance();
+			afxCurrentResourceHandle = _AtlBaseModule.GetResourceInstance();
+		}
+	} __init;
 
 public:
 	CMainApp() {}
@@ -247,6 +255,7 @@ private:
 
 	wstring m_strAppPath;
 
+	typedef vector<CModuleApp*> ModuleVector;
 	ModuleVector m_vctModules;
 
 	map<UINT, LPVOID> m_mapInterfaces;

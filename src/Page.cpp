@@ -9,8 +9,6 @@
 
 //CPage
 
-IMPLEMENT_DYNAMIC(CPage, CPropertyPage);
-
 CPage::CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitle, bool bAutoActive)
 	: m_resModule(resModule)
 	, m_cstrTitle(cstrTitle)
@@ -20,9 +18,6 @@ CPage::CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitl
 
 	CPropertyPage::CommonConstruct(MAKEINTRESOURCE(nIDDlgRes), 0);
 }
-
-BEGIN_MESSAGE_MAP(CPage, CPropertyPage)
-END_MESSAGE_MAP()
 
 void CPage::DoDataExchange(CDataExchange* pDX)
 {

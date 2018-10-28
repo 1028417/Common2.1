@@ -36,16 +36,15 @@ BOOL CMainApp::InitInstance()
 	m_strAppPath = fsutil::GetParentPath(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
-	__AssertReturn(getView().init(), FALSE);
+	CMainWnd *pMainWnd = getView().init();
+	__AssertReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+	m_pMainWnd = pMainWnd;
 
 	__AssertReturn(getController().init(), FALSE);
 
-	CMainWnd *pMainWnd = getView().show();
-	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+	__AssertReturn(getView().show(), FALSE);
 
 	__AssertReturn(getController().start(), FALSE);
-
-	m_pMainWnd = pMainWnd;
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
 	{
@@ -162,14 +161,16 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainApp::OnCommand(UINT nID)
 {
-	if (!getView().handleCommand(nID))
+	if (getView().handleCommand(nID))
 	{
-		if (getController().handleCommand(nID))
-		{
-			return TRUE;
-		}
+		return TRUE;
 	}
 
+	if (getController().handleCommand(nID))
+	{
+		return TRUE;
+	}
+	
 	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
 	{
 		if ((*itModule)->HandleCommand(nID))

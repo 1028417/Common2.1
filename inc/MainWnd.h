@@ -78,8 +78,12 @@ public:
 	BOOL ActivePage(CPage& Page);
 
 	BOOL SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage = -1);
-		
-	int MsgBox(const CString& cstrText, const CString& cstrTitle=L"", UINT uType=MB_OK);
+
+	int MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uType = MB_OK);
+	int MsgBox(const CString& cstrText, UINT uType = MB_OK)
+	{
+		return MsgBox(cstrText, L"", uType);
+	}
 	
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);

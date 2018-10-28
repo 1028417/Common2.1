@@ -17,10 +17,6 @@ class __CommonPrjExt CPage: public CPropertyPage
 {
 	friend class CDockView;
 
-	DECLARE_DYNAMIC(CPage);
-
-	DECLARE_MESSAGE_MAP();
-
 public:
 	CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
