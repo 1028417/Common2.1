@@ -168,9 +168,15 @@ public:
 	virtual ~IController() {}
 
 public:
-	virtual bool init() = 0;
+	virtual bool init()
+	{
+		return true;
+	}
 
-	virtual bool start() = 0;
+	virtual bool start()
+	{
+		return true;
+	}
 
 	virtual bool handleCommand(UINT nID)
 	{
@@ -213,6 +219,8 @@ public:
 	{
 		return false;
 	}
+
+	virtual void close() {}
 };
 
 class __CommonPrjExt CMainApp: public CModuleApp

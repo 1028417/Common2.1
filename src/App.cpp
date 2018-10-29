@@ -270,6 +270,8 @@ BOOL CMainApp::Quit()
 		}
 	}
 
+	m_view.close();
+
 	m_Controller.stop();
 
 	CMainWnd* pMainWnd = GetMainWnd();
