@@ -122,25 +122,55 @@ public:
 	}
 
 	template <typename _RefType>
-	ptrvector(const list<_RefType*>& container)
+	ptrvector(const vector<_RefType*>& container)
 	{
 		insert(container);
+	}
+
+	template <typename _RefType>
+	ptrvector(const vector<_RefType>& container)
+	{
+		Insert(container);
+	}
+
+	template <typename _RefType>
+	ptrvector(const list<_RefType*>& container)
+	{
+		Insert(container);
 	}
 
 	template <typename _RefType>
 	ptrvector(const list<_RefType>& container)
 	{
-		insert(container);
+		Insert(container);
 	}
 
 public:
-	void insert(_PtrType ptr)
+	void Insert(_PtrType ptr)
 	{
 		push_back(ptr);
 	}
 
 	template <typename _RefType>
-	void insert(const list<_RefType*>& container)
+	void Insert(const vector<_RefType*>& container)
+	{
+		for (vector<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
+		{
+			push_back((_PtrType)*it);
+		}
+	}
+
+	template <typename _RefType>
+	void Insert(const vector<_RefType>& container)
+	{
+		for (vector<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
+		{
+			push_back((_PtrType)(_RefType*)&*it);
+		}
+	}
+
+	template <typename _RefType>
+	void Insert(const list<_RefType*>& container)
 	{
 		for (list<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
 		{
@@ -149,7 +179,7 @@ public:
 	}
 
 	template <typename _RefType>
-	void insert(const list<_RefType>& container)
+	void Insert(const list<_RefType>& container)
 	{
 		for (list<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
 		{
