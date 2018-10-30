@@ -7,7 +7,7 @@ class CWorkThread;
 
 struct tagWorkThreadInfo
 {
-	UINT nIndex;
+	UINT uIndex;
 	HANDLE hHandle;
 	CWorkThread *pThread;
 };
@@ -25,7 +25,7 @@ private:
 	HANDLE m_hExitEvent;
 
 public:
-	BOOL RunWorkThread(UINT nThreadCount=1);
+	BOOL RunWorkThread(UINT uThreadCount=1);
 
 protected:
 	void Pause(BOOL bPause=TRUE);

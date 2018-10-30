@@ -23,20 +23,20 @@ void CRedrawLockGuide::Unlock()
 }
 
 
-CMenuGuide::CMenuGuide(CPage& Page, UINT nIDMenu)
+CMenuGuide::CMenuGuide(CPage& Page, UINT uIDMenu)
 	: m_Page(Page)
-	, m_uIDMenu(nIDMenu)
+	, m_uIDMenu(uIDMenu)
 {
 }
 
-void CMenuGuide::EnableItem(UINT nIDItem, BOOL bEnable)
+void CMenuGuide::EnableItem(UINT uIDItem, BOOL bEnable)
 {
-	m_mapMenuItemInfos[nIDItem].first = bEnable;
+	m_mapMenuItemInfos[uIDItem].first = bEnable;
 }
 
-void CMenuGuide::SetItemText(UINT nIDItem, const CString& cstrText)
+void CMenuGuide::SetItemText(UINT uIDItem, const CString& cstrText)
 {
-	m_mapMenuItemInfos[nIDItem].second = cstrText;
+	m_mapMenuItemInfos[uIDItem].second = cstrText;
 }
 
 BOOL CMenuGuide::Popup()
@@ -53,22 +53,22 @@ BOOL CMenuGuide::Popup()
 	CMenu *pSubMenu = __super::GetSubMenu(0);
 	__AssertReturn(pSubMenu, FALSE);
 
-	UINT nIDItem = 0;
+	UINT uIDItem = 0;
 	BOOL bEnable = FALSE;
 	CString *pcstrText = NULL;
 	for (map<UINT, pair<BOOL, CString>>::iterator itrMenuItemInfo = m_mapMenuItemInfos.begin()
 		; itrMenuItemInfo != m_mapMenuItemInfos.end(); ++itrMenuItemInfo)
 	{
-		nIDItem = itrMenuItemInfo->first;
+		uIDItem = itrMenuItemInfo->first;
 		bEnable = itrMenuItemInfo->second.first;
 		pcstrText = &itrMenuItemInfo->second.second;
 
 		if (!pcstrText->IsEmpty())
 		{
-			__AssertReturn(pSubMenu->ModifyMenu(nIDItem, MF_BYCOMMAND | MF_STRING, nIDItem, *pcstrText), FALSE);
+			__AssertReturn(pSubMenu->ModifyMenu(uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, *pcstrText), FALSE);
 		}
 
-		(void)pSubMenu->EnableMenuItem(nIDItem, bEnable ? MF_ENABLED : MF_GRAYED);
+		(void)pSubMenu->EnableMenuItem(uIDItem, bEnable ? MF_ENABLED : MF_GRAYED);
 	}
 
 	m_mapMenuItemInfos.clear();

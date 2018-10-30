@@ -255,9 +255,9 @@ BOOL CCheckObjectTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 		__super::ScreenToClient(&ptCursor);
 
-		UINT nFlag = 0;
-		hItem = __super::HitTest(ptCursor, &nFlag);
-		if (TVHT_ONITEMSTATEICON != nFlag)
+		UINT uFlag = 0;
+		hItem = __super::HitTest(ptCursor, &uFlag);
+		if (TVHT_ONITEMSTATEICON != uFlag)
 		{
 			hItem = NULL;
 		}
@@ -265,8 +265,8 @@ BOOL CCheckObjectTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 	if (hItem)
 	{
-		UINT nState = this->GetItemCheckState(hItem);
-		this->SetItemCheckState(hItem, nState!=CS_Checked? CS_Checked:CS_Unchecked);
+		UINT uState = this->GetItemCheckState(hItem);
+		this->SetItemCheckState(hItem, uState!=CS_Checked? CS_Checked:CS_Unchecked);
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
@@ -274,13 +274,13 @@ BOOL CCheckObjectTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 void CCheckObjectTree::SetChildItemsImageState(HTREEITEM hItem)
 {
-	UINT nState = __super::GetItemState(hItem, TVIS_STATEIMAGEMASK);
+	UINT uState = __super::GetItemState(hItem, TVIS_STATEIMAGEMASK);
 
 	HTREEITEM hChildItem = __super::GetChildItem(hItem);
 
 	while (hChildItem)
 	{
-		(void)__super::SetItemState(hChildItem, nState, TVIS_STATEIMAGEMASK);
+		(void)__super::SetItemState(hChildItem, uState, TVIS_STATEIMAGEMASK);
 
 		if (__super::GetChildItem(hChildItem))
 		{
@@ -297,9 +297,9 @@ void CCheckObjectTree::SetParentItemsImageState(HTREEITEM hItem)
 
 	HTREEITEM hChildItem = NULL;
 	
-	UINT nChildState = 0;
+	UINT uChildState = 0;
 
-	UINT nChildState2 = 0;
+	UINT uChildState2 = 0;
 
 	
 	while (hParentItem = __super::GetParentItem(hParentItem))
@@ -312,25 +312,25 @@ void CCheckObjectTree::SetParentItemsImageState(HTREEITEM hItem)
 		hChildItem = __super::GetChildItem(hParentItem);
 		ASSERT(hChildItem);
 
-		nChildState = this->GetItemCheckState(hChildItem);
+		uChildState = this->GetItemCheckState(hChildItem);
 
 		while (hChildItem = __super::GetNextItem(hChildItem, TVGN_NEXT))
 		{
-			nChildState2 = this->GetItemCheckState(hChildItem);
+			uChildState2 = this->GetItemCheckState(hChildItem);
 
-			if (CS_Nocheck == nChildState2)
+			if (CS_Nocheck == uChildState2)
 			{
 				continue;
 			}
 
-			if (nChildState != nChildState2)
+			if (uChildState != uChildState2)
 			{
-				nChildState = CS_Grayed;
+				uChildState = CS_Grayed;
 				break;
 			}
 		}
 
-		(void)__super::SetItemState(hParentItem, INDEXTOSTATEIMAGEMASK(nChildState), TVIS_STATEIMAGEMASK);
+		(void)__super::SetItemState(hParentItem, INDEXTOSTATEIMAGEMASK(uChildState), TVIS_STATEIMAGEMASK);
 	}
 }
 

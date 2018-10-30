@@ -114,7 +114,7 @@ private:
 
 	CHeader m_wndHeader;
 
-	UINT m_nColumnCount = 1;
+	UINT m_uColumnCount = 1;
 
 	CCompatableFont m_fontUnderline;
 	

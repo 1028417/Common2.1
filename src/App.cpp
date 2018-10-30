@@ -75,14 +75,14 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 			break;
 		case WM_COMMAND:
 			{				
-				UINT nCode = HIWORD(pMsg->wParam);
-				UINT nID = LOWORD(pMsg->wParam);
+				UINT uCode = HIWORD(pMsg->wParam);
+				UINT uID = LOWORD(pMsg->wParam);
 
 				HWND hWndCtrl = (HWND)pMsg->lParam;
 
-				if (CN_COMMAND == nCode && !hWndCtrl)
+				if (CN_COMMAND == uCode && !hWndCtrl)
 				{
-					if (OnCommand(nID))
+					if (OnCommand(uID))
 					{
 						return TRUE;
 					}
@@ -104,7 +104,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 		for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = m_vctHotkeyInfos.begin()
 			; itrHotkeyInfo != m_vctHotkeyInfos.end(); ++itrHotkeyInfo)
 		{
-			if (MOD_ALT == (UINT)itrHotkeyInfo->eFlag && ::GetKeyState(itrHotkeyInfo->nKey)&0x8000)
+			if (MOD_ALT == (UINT)itrHotkeyInfo->eFlag && ::GetKeyState(itrHotkeyInfo->uKey)&0x8000)
 			{
 				UINT uFlag = MOD_ALT;
 
@@ -118,7 +118,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 					uFlag |= MOD_SHIFT;
 				}
 
-				if (HandleHotkey(MAKELPARAM(uFlag, itrHotkeyInfo->nKey), FALSE))
+				if (HandleHotkey(MAKELPARAM(uFlag, itrHotkeyInfo->uKey), FALSE))
 				{
 					return TRUE;
 				}
@@ -128,28 +128,28 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 	if (WM_KEYDOWN == pMsg->message)
 	{
-		UINT nKey = pMsg->wParam;
+		UINT uKey = pMsg->wParam;
 				
-		if (VK_CONTROL != nKey && VK_SHIFT != nKey && VK_MENU != nKey)
+		if (VK_CONTROL != uKey && VK_SHIFT != uKey && VK_MENU != uKey)
 		{
-			UINT nFlag = 0;
+			UINT uFlag = 0;
 
 			if(::GetKeyState(VK_CONTROL)&0x8000)
 			{
-				nFlag = MOD_CONTROL;
+				uFlag = MOD_CONTROL;
 			}
 
 			if (::GetKeyState(VK_SHIFT) & 0x8000)
 			{
-				nFlag |= MOD_SHIFT;
+				uFlag |= MOD_SHIFT;
 			}
 
 			if (::GetKeyState(VK_MENU) & 0x8000)
 			{
-				nFlag |= MOD_ALT;
+				uFlag |= MOD_ALT;
 			}
 			
-			if (HandleHotkey(MAKELPARAM(nFlag, nKey), FALSE))
+			if (HandleHotkey(MAKELPARAM(uFlag, uKey), FALSE))
 			{
 				return TRUE;
 			}
@@ -159,21 +159,21 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	return __super::PreTranslateMessage(pMsg);
 }
 
-BOOL CMainApp::OnCommand(UINT nID)
+BOOL CMainApp::OnCommand(UINT uID)
 {
-	if (m_view.handleCommand(nID))
+	if (m_view.handleCommand(uID))
 	{
 		return TRUE;
 	}
 
-	if (m_Controller.handleCommand(nID))
+	if (m_Controller.handleCommand(uID))
 	{
 		return TRUE;
 	}
 	
 	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
 	{
-		if ((*itModule)->HandleCommand(nID))
+		if ((*itModule)->HandleCommand(uID))
 		{
 			return TRUE;
 		}
@@ -221,9 +221,9 @@ bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 
 	bool bResult = false;
 
-	if (0 != HotkeyInfo.nIDMenuItem)
+	if (0 != HotkeyInfo.uIDMenuItem)
 	{
-		OnCommand(HotkeyInfo.nIDMenuItem);
+		OnCommand(HotkeyInfo.uIDMenuItem);
 		bResult = true;
 	}
 	else
@@ -302,14 +302,14 @@ BOOL CMainApp::AddModule(CModuleApp& Module)
 	return TRUE;
 }
 
-LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CMainApp::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CMainApp *pMainApp = GetMainApp();
 	__EnsureReturn(pMainApp, 0);
 
 	CWaitCursor WaitCursor;
 
-	LRESULT lResult = pMainApp->m_Controller.handleMessage(nMsg, wParam, lParam);
+	LRESULT lResult = pMainApp->m_Controller.handleMessage(uMsg, wParam, lParam);
 	if (0 != lResult)
 	{
 		return lResult;
@@ -317,7 +317,7 @@ LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 
 	for (auto pModule : pMainApp->m_vctModules)
 	{
-		lResult = pModule->HandleMessage(nMsg, wParam, lParam);
+		lResult = pModule->HandleMessage(uMsg, wParam, lParam);
 		if (0 != lResult)
 		{
 			return lResult;
@@ -327,36 +327,36 @@ LRESULT CMainApp::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CMainApp::SendMessageEx(UINT nMsg, WPARAM wParam, LPARAM lParam)
+void CMainApp::SendMessageEx(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CMainApp *pMainApp = GetMainApp();
 	__Ensure(pMainApp);
 
 	CWaitCursor WaitCursor;
 
-	(void)pMainApp->m_Controller.handleMessage(nMsg, wParam, lParam);
+	(void)pMainApp->m_Controller.handleMessage(uMsg, wParam, lParam);
 
 	for (auto pModule : pMainApp->m_vctModules)
 	{
-		(void)pModule->HandleMessage(nMsg, wParam, lParam);
+		(void)pModule->HandleMessage(uMsg, wParam, lParam);
 	}
 }
 
-BOOL CMainApp::RegisterInterface(UINT nIndex, LPVOID lpInterface)
+BOOL CMainApp::RegisterInterface(UINT uIndex, LPVOID lpInterface)
 {
-	if (m_mapInterfaces.find(nIndex) != m_mapInterfaces.end())
+	if (m_mapInterfaces.find(uIndex) != m_mapInterfaces.end())
 	{
 		return FALSE;
 	}
 
-	m_mapInterfaces[nIndex] = lpInterface;
+	m_mapInterfaces[uIndex] = lpInterface;
 
 	return TRUE;
 }
 
-LPVOID CMainApp::GetInterface(UINT nIndex)
+LPVOID CMainApp::GetInterface(UINT uIndex)
 {
-	map<UINT, LPVOID>::iterator itInterface = m_mapInterfaces.find(nIndex);
+	map<UINT, LPVOID>::iterator itInterface = m_mapInterfaces.find(uIndex);
 
 	if (itInterface == m_mapInterfaces.end())
 	{
@@ -375,7 +375,7 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 	{
 		if (HotkeyInfo.bGlobal)
 		{
-			if (!::RegisterHotKey(CMainApp::GetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.nKey))
+			if (!::RegisterHotKey(CMainApp::GetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey))
 			{
 				return FALSE;
 			}

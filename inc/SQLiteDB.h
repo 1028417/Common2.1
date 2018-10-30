@@ -12,8 +12,8 @@ public:
 	virtual ~CSQLiteDBResult();
 
 private:
-	UINT m_nColumnCount;
-	UINT m_nRowCount;
+	UINT m_uColumnCount;
+	UINT m_uRowCount;
 
 	char ** m_pData;
 
@@ -22,12 +22,12 @@ public:
 
 	UINT GetRowCount();
 
-	BOOL GetData(UINT nRow, UINT nColumn, int& nValue);
+	BOOL GetData(UINT uRow, UINT uColumn, int& nValue);
 
-	BOOL GetData(UINT nRow, UINT nColumn, double& dbValue);
+	BOOL GetData(UINT uRow, UINT uColumn, double& dbValue);
 
-	BOOL GetData(UINT nRow, UINT nColumn, string& strValue);
-	BOOL GetData(UINT nRow, UINT nColumn, wstring& strValue);
+	BOOL GetData(UINT uRow, UINT uColumn, string& strValue);
+	BOOL GetData(UINT uRow, UINT uColumn, wstring& strValue);
 };
 
 

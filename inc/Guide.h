@@ -20,7 +20,7 @@ private:
 class __CommonPrjExt CMenuGuide : public CMenu
 {
 public:
-	CMenuGuide(CPage& Page, UINT nIDMenu);
+	CMenuGuide(CPage& Page, UINT uIDMenu);
 
 private:
 	CPage& m_Page;
@@ -29,9 +29,9 @@ private:
 	map<UINT, pair<BOOL, CString>> m_mapMenuItemInfos;
 
 public:
-	void EnableItem(UINT nIDItem, BOOL bEnable);
+	void EnableItem(UINT uIDItem, BOOL bEnable);
 
-	void SetItemText(UINT nIDItem, const CString& cstrText);
+	void SetItemText(UINT uIDItem, const CString& cstrText);
 
 	BOOL Popup();
 };

@@ -18,23 +18,23 @@ enum class E_HotkeyFlag
 
 struct tagHotkeyInfo
 {
-	tagHotkeyInfo(UINT t_nKey, E_HotkeyFlag eHotkeyFlag = E_HotkeyFlag::HKF_Null, bool t_bGlobal=FALSE, UINT t_nIDMenuItem = 0)
-		: nKey(t_nKey)
+	tagHotkeyInfo(UINT t_uKey, E_HotkeyFlag eHotkeyFlag = E_HotkeyFlag::HKF_Null, bool t_bGlobal=FALSE, UINT t_uIDMenuItem = 0)
+		: uKey(t_uKey)
 		, eFlag(eHotkeyFlag)
-		, lParam(MAKELPARAM(eHotkeyFlag, nKey))
+		, lParam(MAKELPARAM(eHotkeyFlag, uKey))
 		, bGlobal(t_bGlobal)
-		, nIDMenuItem(t_nIDMenuItem)
+		, uIDMenuItem(t_uIDMenuItem)
 	{
 		bHandling = false;
 	}
 
-	UINT nKey;
+	UINT uKey;
 	E_HotkeyFlag eFlag;
 	LPARAM lParam;
 
 	bool bGlobal;
 
-	UINT nIDMenuItem;
+	UINT uIDMenuItem;
 
 	bool bHandling;
 
@@ -79,16 +79,16 @@ public:
 		AfxSetResourceHandle(GetHInstance());
 	}
 
-	HANDLE GetResource(E_ResourceType eResourceType, UINT nID)
+	HANDLE GetResource(E_ResourceType eResourceType, UINT uID)
 	{
 		ActivateResource();
 
 		switch (eResourceType)
 		{
 		case RCT_Icon:
-			return ::LoadIcon(GetHInstance(), MAKEINTRESOURCE(nID));
+			return ::LoadIcon(GetHInstance(), MAKEINTRESOURCE(uID));
 		case RCT_Menu:
-			return ::LoadMenu(GetHInstance(), MAKEINTRESOURCE(nID));
+			return ::LoadMenu(GetHInstance(), MAKEINTRESOURCE(uID));
 		default:
 			;
 		}
@@ -118,11 +118,11 @@ protected:
 protected:
 	virtual BOOL OnReady(CMainWnd& MainWnd) { return TRUE; }
 
-	virtual BOOL HandleCommand(UINT nID) { return FALSE; }
+	virtual BOOL HandleCommand(UINT uID) { return FALSE; }
 
 	virtual BOOL HandleHotkey(const tagHotkeyInfo& HotkeyInfo) { return FALSE; }
 
-	virtual LRESULT HandleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam) { return 0; }
+	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) { return 0; }
 
 	virtual BOOL OnQuit() { return TRUE; }
 };
@@ -178,7 +178,7 @@ public:
 		return true;
 	}
 
-	virtual bool handleCommand(UINT nID)
+	virtual bool handleCommand(UINT uID)
 	{
 		return false;
 	}
@@ -188,7 +188,7 @@ public:
 		return false;
 	}
 
-	virtual LRESULT handleMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
+	virtual LRESULT handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		return 0;
 	}
@@ -210,7 +210,7 @@ public:
 
 	virtual bool show() = 0;
 
-	virtual bool handleCommand(UINT nID)
+	virtual bool handleCommand(UINT uID)
 	{
 		return false;
 	}
@@ -271,7 +271,7 @@ private:
 	bool HandleHotkey(LPARAM lParam, bool bGlobal);
 	bool HandleHotkey(tagHotkeyInfo &HotkeyInfo);
 
-	BOOL OnCommand(UINT nID);
+	BOOL OnCommand(UINT uID);
 
 public:
 	BOOL Quit();
@@ -280,35 +280,35 @@ public:
 
 	static BOOL AddModule(CModuleApp& Module);
 
-	BOOL RegisterInterface(UINT nIndex, LPVOID lpInterface);
-	LPVOID GetInterface(UINT nIndex);
+	BOOL RegisterInterface(UINT uIndex, LPVOID lpInterface);
+	LPVOID GetInterface(UINT uIndex);
 
 	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
 
 public:
-	static LRESULT SendMessage(UINT nMsg, WPARAM wParam=0, LPARAM lParam=0);
+	static LRESULT SendMessage(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 
-	static LRESULT SendMessage(UINT nMsg, LPVOID pPara)
+	static LRESULT SendMessage(UINT uMsg, LPVOID pPara)
 	{
-		return CMainApp::SendMessage(nMsg, (WPARAM)pPara);
+		return CMainApp::SendMessage(uMsg, (WPARAM)pPara);
 	}
 
 	template <typename _T1, typename _T2>
-	static LRESULT SendMessage(UINT nMsg, _T1 para1, _T2 para2)
+	static LRESULT SendMessage(UINT uMsg, _T1 para1, _T2 para2)
 	{
-		return CMainApp::SendMessage(nMsg, (WPARAM)para1, (LPARAM)para2);
+		return CMainApp::SendMessage(uMsg, (WPARAM)para1, (LPARAM)para2);
 	}
 
-	static void SendMessageEx(UINT nMsg, WPARAM wParam=0, LPARAM lParam=0);
+	static void SendMessageEx(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 
-	static void SendMessageEx(UINT nMsg, LPVOID pPara)
+	static void SendMessageEx(UINT uMsg, LPVOID pPara)
 	{
-		SendMessageEx(nMsg, (WPARAM)pPara);
+		SendMessageEx(uMsg, (WPARAM)pPara);
 	}
 
 	template <typename _T1, typename _T2>
-	static void SendMessageEx(UINT nMsg, _T1 para1, _T2 para2)
+	static void SendMessageEx(UINT uMsg, _T1 para1, _T2 para2)
 	{
-		SendMessageEx(nMsg, (WPARAM)para1, (LPARAM)para2);
+		SendMessageEx(uMsg, (WPARAM)para1, (LPARAM)para2);
 	}
 };

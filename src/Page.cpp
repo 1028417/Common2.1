@@ -9,14 +9,14 @@
 
 //CPage
 
-CPage::CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitle, bool bAutoActive)
+CPage::CPage(CResourceModule& resModule, UINT uIDDlgRes, const CString& cstrTitle, bool bAutoActive)
 	: m_resModule(resModule)
 	, m_cstrTitle(cstrTitle)
 	, m_bAutoActive(bAutoActive)
 {
 	m_resModule.ActivateResource();
 
-	CPropertyPage::CommonConstruct(MAKEINTRESOURCE(nIDDlgRes), 0);
+	CPropertyPage::CommonConstruct(MAKEINTRESOURCE(uIDDlgRes), 0);
 }
 
 void CPage::DoDataExchange(CDataExchange* pDX)

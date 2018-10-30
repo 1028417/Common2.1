@@ -12,7 +12,7 @@ class __CommonPrjExt CProgressDlg : public CDialog, public CWorkThread
 {
 public:
 	CProgressDlg(const CString& cstrTitle=_T(""), const CString& cstrStatusText=_T("")
-		, UINT nMaxProgress=100, UINT nWorkThreadCount=1);
+		, UINT uMaxProgress=100, UINT uWorkThreadCount=1);
 
 	virtual ~CProgressDlg();
 
@@ -29,11 +29,11 @@ protected:
 
 	CString m_cstrStatusText;
 
-	UINT m_nWorkThreadCount;
+	UINT m_uWorkThreadCount;
 
-	UINT m_nMaxProgress;
+	UINT m_uMaxProgress;
 
-	UINT m_nProgress;
+	UINT m_uProgress;
 
 	BOOL m_bFinished;
 
@@ -46,10 +46,10 @@ public:
 	void SetStatusText(const CString& cstrStatusText);
 	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
 
-	void SetProgress(UINT nProgress);
+	void SetProgress(UINT uProgress);
 	LRESULT OnSetProgress(WPARAM wParam, LPARAM lParam);
 
-	UINT ForwardProgress(UINT nOff=1);
+	UINT ForwardProgress(UINT uOffSet=1);
 
 	void EndProgress(BOOL bClose, const CString& cstrButton=_T("Íê³É"));
 

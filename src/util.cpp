@@ -147,8 +147,8 @@ bool util::IsUTF8Str(const string& strText)
 	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
 	unsigned char chr = *str;
 	bool bAllAscii = true;
-	for (UINT i = 0; str[i] != '\0'; ++i) {
-		chr = *(str + i);
+	for (UINT uIndex = 0; str[uIndex] != '\0'; ++uIndex) {
+		chr = *(str + uIndex);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
 		if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;

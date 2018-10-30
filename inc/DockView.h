@@ -60,22 +60,22 @@ protected:
 	typedef vector<CPage*> PageVector;
 
 public:
-	CDockView(CWnd& wndParent, ST_ViewStyle nStyle, UINT nDockSize
+	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT eDockSize
 		, UINT uOffset = 0, UINT uTabFontSize=0, UINT uTabHeight=0);
 
-	CDockView(CWnd& wndParent, ST_ViewStyle nStyle, UINT nDockSize
+	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT uDockSize
 		, UINT uOffset = 0, UINT uTabFontSize = 0, CImageList *pImglst=NULL);
 
-	CDockView(CWnd& wndParent, ST_ViewStyle nStyle, const CRect& rtPos);
+	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, const CRect& rtPos);
 
 	virtual ~CDockView() {}
 
 	DECLARE_MESSAGE_MAP()
 
 public:
-	ST_ViewStyle m_nStyle = 0;
+	ST_ViewStyle m_eStyle = 0;
 
-	UINT m_nDockSize = 0;
+	UINT m_uDockSize = 0;
 
 private:
 	UINT m_uOffset = 0;

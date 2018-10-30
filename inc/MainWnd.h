@@ -61,14 +61,14 @@ public:
 
 	virtual void Show();
 
-	BOOL CreateStatusBar(UINT nParts, ...);
+	BOOL CreateStatusBar(UINT uParts, ...);
 	
-	BOOL SetStatusText(UINT nPart, const CString& cstrText);
+	BOOL SetStatusText(UINT uPart, const CString& cstrText);
 
-	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT nDockSize
+	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
 		, UINT uOffset = 0, UINT uTabFontSize=0, UINT uTabHeight = 0);
 
-	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT nDockSize
+	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
 		, UINT uOffset, UINT uTabFontSize, CImageList *pImglst=NULL);
 
 	BOOL AddUndockView(CPage& Page, const CRect& rtPos);

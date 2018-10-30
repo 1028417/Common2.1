@@ -199,14 +199,14 @@ public:
 
 			m_Params.rgvarg[0]=*(m_pValue->GetRef());
 
-			for (UINT i=0; i<m_vctParams.size(); ++i)
+			for (UINT uIndex = 0; uIndex < m_vctParams.size(); ++uIndex)
 			{
-				m_Params.rgvarg[i+1] = *(m_vctParams[m_vctParams.size()-1-i].GetRef());
+				m_Params.rgvarg[uIndex +1] = *(m_vctParams[m_vctParams.size()-1- uIndex].GetRef());
 			}
 		}
 		else
 		{
-			for (UINT i=0; i<m_vctParams.size(); ++i)
+			for (UINT uIndex = 0; uIndex < m_vctParams.size(); ++uIndex)
 			{
 				m_Params.rgvarg[i] = *(m_vctParams[m_vctParams.size()-1-i].GetRef());
 			}

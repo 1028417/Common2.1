@@ -190,13 +190,13 @@ E_ListViewType CObjectList::GetView()
 
 BOOL CObjectList::InitColumn(const TD_ListColumn &lstColumns, const set<UINT>& setUnderlineColumns)
 {
-	m_nColumnCount = 0;
+	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
 	{
-		(void)__super::InsertColumn(m_nColumnCount, (0 == column.uFlag) ? L' ' + column.cstrText
+		(void)__super::InsertColumn(m_uColumnCount, (0 == column.uFlag) ? L' ' + column.cstrText
 			: column.cstrText, column.uFlag, column.uWidth);
 
-		m_nColumnCount++;
+		m_uColumnCount++;
 	}
 
 	if (!setUnderlineColumns.empty())
@@ -344,7 +344,7 @@ void CObjectList::SetItemObject(int nItem, CListObject& Object)
 		, iImage, 0, 0, (LPARAM)&Object));
 
 	auto itSubTitle = vecText.begin();
-	for (UINT nColumn = 0; nColumn < m_nColumnCount; ++nColumn)
+	for (UINT uColumn = 0; uColumn < m_uColumnCount; ++uColumn)
 	{
 		wstring strText;
 		if (itSubTitle != vecText.end())
@@ -354,7 +354,7 @@ void CObjectList::SetItemObject(int nItem, CListObject& Object)
 			itSubTitle++;
 		}
 
-		(void)__super::SetItemText(nItem, nColumn, strText.c_str());
+		(void)__super::SetItemText(nItem, uColumn, strText.c_str());
 	}
 }
 
@@ -541,13 +541,13 @@ BOOL CObjectList::SelectFirstItem()
 
 void CObjectList::SelectItem(int nItem, BOOL bSetFocus)
 {
-	UINT nState = LVIS_SELECTED;
+	UINT uState = LVIS_SELECTED;
 	if (bSetFocus)
 	{
-		nState |= LVIS_FOCUSED;
+		uState |= LVIS_FOCUSED;
 	}
 
-	(void)this->SetItemState(nItem, nState, nState);
+	(void)this->SetItemState(nItem, uState, uState);
 
 	(void)this->SetSelectionMark(nItem);
 	
@@ -763,8 +763,8 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 	{
 		if (m_bAutoChange)
 		{
-			UINT nFlag = GET_FLAGS_LPARAM(wParam);
-			if (nFlag & MK_CONTROL)
+			UINT uFlag = GET_FLAGS_LPARAM(wParam);
+			if (uFlag & MK_CONTROL)
 			{
 				static DWORD dwLastTime = 0;
 
@@ -826,18 +826,18 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 	E_ListViewType nPreViewType = this->GetView();
 
-	for (UINT nIndex = 0; nIndex < sizeof(lpViewType) / sizeof(E_ListViewType); ++nIndex)
+	for (UINT uIndex = 0; uIndex < sizeof(lpViewType) / sizeof(E_ListViewType); ++uIndex)
 	{
-		if (lpViewType[nIndex] == nPreViewType)
+		if (lpViewType[uIndex] == nPreViewType)
 		{
-			nIndex++;
+			uIndex++;
 
-			if (sizeof(lpViewType) / sizeof(E_ListViewType) <= nIndex)
+			if (sizeof(lpViewType) / sizeof(E_ListViewType) <= uIndex)
 			{
-				nIndex = 0;
+				uIndex = 0;
 			}
 			
-			m_para.eViewType = lpViewType[nIndex];
+			m_para.eViewType = lpViewType[uIndex];
 			this->SetView(m_para.eViewType);
 
 			if (m_para.cbViewChanged)

@@ -59,29 +59,29 @@ BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 
 
 //CDockView
-CDockView::CDockView(CWnd& wndParent, ST_ViewStyle nStyle, UINT nDockSize, UINT uOffset, UINT uTabFontSize, UINT uTabHeight)
+CDockView::CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT uDockSize, UINT uOffset, UINT uTabFontSize, UINT uTabHeight)
 	: CPropertySheet(L"", &wndParent)
-	, m_nStyle(nStyle)
-	, m_nDockSize(nDockSize)
+	, m_eStyle(eStyle)
+	, m_uDockSize(uDockSize)
 	, m_uOffset(uOffset)
 	, m_uTabFontSize(uTabFontSize)
 	, m_uTabHeight(uTabHeight)
 {
 }
 
-CDockView::CDockView(CWnd& wndParent, ST_ViewStyle nStyle, UINT nDockSize, UINT uOffset, UINT uTabFontSize, CImageList *pImglst)
+CDockView::CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT uDockSize, UINT uOffset, UINT uTabFontSize, CImageList *pImglst)
 	: CPropertySheet(L"", &wndParent)
-	, m_nStyle(nStyle)
-	, m_nDockSize(nDockSize)
+	, m_eStyle(eStyle)
+	, m_uDockSize(uDockSize)
 	, m_uOffset(uOffset)
 	, m_uTabFontSize(uTabFontSize)
 	, m_pImglst(pImglst)
 {
 }
 
-CDockView::CDockView(CWnd& wndParent, ST_ViewStyle nStyle, const CRect& rtPos)
+CDockView::CDockView(CWnd& wndParent, ST_ViewStyle eStyle, const CRect& rtPos)
 	: CPropertySheet(L"", &wndParent)
-	, m_nStyle(nStyle)
+	, m_eStyle(eStyle)
 	, m_rtPos(rtPos)
 {
 }
@@ -93,7 +93,7 @@ END_MESSAGE_MAP()
 BOOL CDockView::Create()
 {
 	DWORD dwStyle = WS_CHILD;
-	if (!__TabStyle(m_nStyle))
+	if (!__TabStyle(m_eStyle))
 	{
 		dwStyle |= WS_BORDER;
 	}
@@ -102,9 +102,9 @@ BOOL CDockView::Create()
 	
 	__AssertReturn(m_wndTabCtrl.SubclassWindow(this->GetTabControl()->GetSafeHwnd()), FALSE);
 
-	if (__TabStyle(m_nStyle))
+	if (__TabStyle(m_eStyle))
 	{
-		m_wndTabCtrl.ModifyStyle(TCS_MULTILINE, TCS_FOCUSNEVER| (VS_BottomTab == __TabStyle(m_nStyle)? TCS_BOTTOM:0));
+		m_wndTabCtrl.ModifyStyle(TCS_MULTILINE, TCS_FOCUSNEVER| (VS_BottomTab == __TabStyle(m_eStyle)? TCS_BOTTOM:0));
 
 		if (m_uTabFontSize > 0)
 		{
@@ -146,7 +146,7 @@ BOOL CDockView::AddPage(CPage& Page)
 
 	//pPage->MoveWindow(m_rtPos);
 
-	if (__TabStyle(m_nStyle) && !Page.m_cstrTitle.IsEmpty())
+	if (__TabStyle(m_eStyle) && !Page.m_cstrTitle.IsEmpty())
 	{
 		TCITEM tci = {0};
 		tci.mask = TCIF_TEXT;
@@ -219,43 +219,43 @@ BOOL CDockView::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 
 void CDockView::Resize(CRect& rcRestrict)
 {
-	if (!__DockStyle(m_nStyle))
+	if (!__DockStyle(m_eStyle))
 	{
-		m_nDockSize = 0;
+		m_uDockSize = 0;
 	}
 	//else
 	//{
-	//	if (0 == (m_nStyle & VS_FixSize))
+	//	if (0 == (m_eStyle & VS_FixSize))
 	//	{
-	//		m_nDockSize = max(m_nDockSize, m_nMinDockSize);
+	//		m_uDockSize = max(m_uDockSize, m_nMinDockSize);
 	//	}
 	//}
 
-	int nOffSize = m_nDockSize;
-	if (0 == (VS_FixSize & m_nStyle))
+	int nOffSize = m_uDockSize;
+	if (0 == (VS_FixSize & m_eStyle))
 	{
 		nOffSize += __DXView;
 	}
 
-	switch (__DockStyle(m_nStyle))
+	switch (__DockStyle(m_eStyle))
 	{
 	case VS_DockLeft:
-		m_rtPos.SetRect(0, rcRestrict.top + m_uOffset, m_nDockSize, rcRestrict.bottom);
+		m_rtPos.SetRect(0, rcRestrict.top + m_uOffset, m_uDockSize, rcRestrict.bottom);
 		rcRestrict.left += nOffSize;
 
 		break;
 	case VS_DockTop:
-		m_rtPos.SetRect(rcRestrict.left, 0, rcRestrict.Width(), m_nDockSize);
+		m_rtPos.SetRect(rcRestrict.left, 0, rcRestrict.Width(), m_uDockSize);
 		rcRestrict.top += nOffSize;
 
 		break;
 	case VS_DockRight:
-		m_rtPos.SetRect(rcRestrict.right - m_nDockSize, rcRestrict.top, rcRestrict.right, rcRestrict.bottom);
+		m_rtPos.SetRect(rcRestrict.right - m_uDockSize, rcRestrict.top, rcRestrict.right, rcRestrict.bottom);
 		rcRestrict.right -= nOffSize;
 
 		break;
 	case VS_DockBottom:
-		m_rtPos.SetRect(rcRestrict.left, rcRestrict.bottom - m_nDockSize, rcRestrict.right, rcRestrict.bottom);
+		m_rtPos.SetRect(rcRestrict.left, rcRestrict.bottom - m_uDockSize, rcRestrict.right, rcRestrict.bottom);
 		rcRestrict.bottom -= nOffSize;
 
 		break;
@@ -296,7 +296,7 @@ void CDockView::OnSize()
 	CPage* pPage = m_vctPages[nPage];
 	__Ensure(pPage->m_hWnd);
 
-	if (!__TabStyle(m_nStyle))
+	if (!__TabStyle(m_eStyle))
 	{
 		pPage->MoveWindow(&rcClient);
 	}
@@ -310,7 +310,7 @@ void CDockView::OnSize()
 		nItemHeight += 2;
 
 		CRect rcPage(1, 1, rcClient.Width()-3, rcClient.Height()-2);
-		if (VS_BottomTab == __TabStyle(m_nStyle))
+		if (VS_BottomTab == __TabStyle(m_eStyle))
 		{
 			rcPage.bottom -= nItemHeight;
 		}

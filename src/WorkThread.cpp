@@ -33,7 +33,7 @@ CWorkThread::~CWorkThread()
 	(void)::CloseHandle(m_hExitEvent);
 }
 
-BOOL CWorkThread::RunWorkThread(UINT nThreadCount)
+BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
 {
 	for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
 		; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
@@ -52,12 +52,12 @@ BOOL CWorkThread::RunWorkThread(UINT nThreadCount)
 
 	HANDLE hThread = NULL;
 
-	for (UINT nIndex = 0; nIndex < nThreadCount; ++nIndex)
+	for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
 	{
 		tagWorkThreadInfo ThreadInfo;
 		::ZeroMemory(&ThreadInfo, sizeof ThreadInfo);
 
-		ThreadInfo.nIndex = nIndex;
+		ThreadInfo.uIndex = uIndex;
 		ThreadInfo.pThread = this;
 
 		m_lstThreadInfos.push_back(ThreadInfo);

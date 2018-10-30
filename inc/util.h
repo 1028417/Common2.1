@@ -96,11 +96,29 @@ public:
 			push_back((_PtrType)*it);
 		}
 	}
-	
+
 	template <typename _RefType>
 	void Insert(const list<_RefType>& container)
 	{
 		for (list<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
+		{
+			push_back((_PtrType)(_RefType*)&*it);
+		}
+	}
+
+	template <typename _RefType>
+	void Insert(const vector<_RefType*>& container)
+	{
+		for (vector<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
+		{
+			push_back((_PtrType)*it);
+		}
+	}
+
+	template <typename _RefType>
+	void Insert(const vector<_RefType>& container)
+	{
+		for (vector<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
 		{
 			push_back((_PtrType)(_RefType*)&*it);
 		}

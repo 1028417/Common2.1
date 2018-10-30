@@ -30,11 +30,11 @@ void CLogList::InitCtrl(const vector<pair<CString, LONG>>& vctColumns)
 		, LVS_REPORT| LVS_ALIGNTOP| LVS_SINGLESEL| LVS_SHOWSELALWAYS);
 	CListCtrl::SetExtendedStyle(LVS_EX_GRIDLINES| LVS_EX_FULLROWSELECT);
 
-	UINT nColumn = 0;
+	UINT uColumn = 0;
 	for (vector<pair<CString, LONG>>::const_iterator itColumn=vctColumns.begin()
-		; itColumn!=vctColumns.end(); ++itColumn, ++nColumn)
+		; itColumn!=vctColumns.end(); ++itColumn, ++uColumn)
 	{
-		(void)CListCtrl::InsertColumn(nColumn, itColumn->first, LVCFMT_LEFT, itColumn->second);
+		(void)CListCtrl::InsertColumn(uColumn, itColumn->first, LVCFMT_LEFT, itColumn->second);
 	}
 }
 
@@ -44,11 +44,11 @@ void CLogList::AddLog(const vector<CString>& vctLogTexts)
 
 	(void)CListCtrl::InsertItem(nItem,NULL);
 
-	UINT nSubItem = 0;
+	UINT uSubItem = 0;
 	for (vector<CString>::const_iterator itLogText=vctLogTexts.begin()
-		; itLogText!=vctLogTexts.end(); ++itLogText, ++nSubItem)
+		; itLogText!=vctLogTexts.end(); ++itLogText, ++uSubItem)
 	{
-		(void)CListCtrl::SetItemText(nItem, nSubItem, *itLogText);
+		(void)CListCtrl::SetItemText(nItem, uSubItem, *itLogText);
 	}
 
 	CListCtrl::EnsureVisible(nItem, TRUE);

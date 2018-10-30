@@ -8,10 +8,10 @@ interface IDBResult
 	virtual UINT GetColumnCount() = 0;
 	virtual UINT GetRowCount() = 0;
 
-	virtual BOOL GetData(UINT nRow, UINT nColumn, int& nValue) = 0;
-	virtual BOOL GetData(UINT nRow, UINT nColumn, double& dbValue) = 0;
-	virtual BOOL GetData(UINT nRow, UINT nColumn, string& strValue) = 0;
-	virtual BOOL GetData(UINT nRow, UINT nColumn, wstring& strValue) = 0;
+	virtual BOOL GetData(UINT uRow, UINT uColumn, int& nValue) = 0;
+	virtual BOOL GetData(UINT uRow, UINT uColumn, double& dbValue) = 0;
+	virtual BOOL GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
+	virtual BOOL GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
 };
 
 interface IDB

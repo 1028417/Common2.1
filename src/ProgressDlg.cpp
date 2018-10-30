@@ -6,7 +6,7 @@
 #include "resource.h"
 
 
-CProgressDlg::CProgressDlg(const CString& cstrTitle, const CString& cstrStatusText, UINT nMaxProgress, UINT nWorkThreadCount)
+CProgressDlg::CProgressDlg(const CString& cstrTitle, const CString& cstrStatusText, UINT uMaxProgress, UINT uWorkThreadCount)
 {
 	m_hMutex = NULL;
 
@@ -14,13 +14,13 @@ CProgressDlg::CProgressDlg(const CString& cstrTitle, const CString& cstrStatusTe
 	m_cstrTitle = cstrTitle;
 	m_cstrStatusText = cstrStatusText;
 
-	__Assert(0 != nMaxProgress);
-	m_nMaxProgress = nMaxProgress;
+	__Assert(0 != uMaxProgress);
+	m_uMaxProgress = uMaxProgress;
 
-	__Assert(0 != nWorkThreadCount);
-	m_nWorkThreadCount = nWorkThreadCount;
+	__Assert(0 != uWorkThreadCount);
+	m_uWorkThreadCount = uWorkThreadCount;
 
-	m_nProgress = 0;
+	m_uProgress = 0;
 
 	m_bFinished = FALSE;
 }
@@ -85,12 +85,12 @@ BOOL CProgressDlg::OnInitDialog()
 		this->SetStatusText(m_cstrStatusText);
 	}
 
-	m_wndProgressCtrl.SetRange(0, m_nMaxProgress);
+	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
 	this->SetProgress(0);
 
 	m_bFinished = FALSE;
 
-	(void)this->RunWorkThread(m_nWorkThreadCount);
+	(void)this->RunWorkThread(m_uWorkThreadCount);
 
 	return TRUE;
 }
@@ -116,46 +116,46 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CProgressDlg::SetProgress(UINT nProgress)
+void CProgressDlg::SetProgress(UINT uProgress)
 {	
-	(void)this->PostMessage(WM_SetProgress, nProgress);
+	(void)this->PostMessage(WM_SetProgress, uProgress);
 }
 
 LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 {
-	UINT nProgress = (UINT)wParam;
+	UINT uProgress = (UINT)wParam;
 
 	CString cstrProgress;
-	cstrProgress.Format(_T("%d/%d"), nProgress, m_nMaxProgress);
+	cstrProgress.Format(_T("%d/%d"), uProgress, m_uMaxProgress);
 
 	//if (!this->GetExitSignal()) // ·ÀÖ¹ËÀËø
 	{
 		(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
-		(void)m_wndProgressCtrl.SetPos((int)nProgress);
+		(void)m_wndProgressCtrl.SetPos((int)uProgress);
 
-		m_nProgress = nProgress;
+		m_uProgress = uProgress;
 	}
 
 	return TRUE;
 }
 
-UINT CProgressDlg::ForwardProgress(UINT nOff)
+UINT CProgressDlg::ForwardProgress(UINT uOffSet)
 {
 	(void)::WaitForSingleObject(m_hMutex, INFINITE);
 
-	m_nProgress += nOff;
+	m_uProgress += uOffSet;
 
-	this->SetProgress(m_nProgress);
+	this->SetProgress(m_uProgress);
 
 	(void)::ReleaseMutex(m_hMutex);
 
-	return m_nProgress;
+	return m_uProgress;
 }
 
 void CProgressDlg::EndProgress(BOOL bClose, const CString& cstrButton)
 {
-	this->SetProgress(m_nMaxProgress);
+	this->SetProgress(m_uMaxProgress);
 
 	m_bFinished = TRUE;
 	

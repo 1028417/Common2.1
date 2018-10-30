@@ -10,8 +10,8 @@
 
 CSQLiteDBResult::CSQLiteDBResult()
 {
-	m_nColumnCount = 0;
-	m_nRowCount = 0;
+	m_uColumnCount = 0;
+	m_uRowCount = 0;
 
 	m_pData = NULL;
 }
@@ -32,44 +32,44 @@ UINT CSQLiteDBResult::GetColumnCount()
 {
 	__AssertReturn(this, 0);
 
-	return m_nColumnCount;
+	return m_uColumnCount;
 }
 
 UINT CSQLiteDBResult::GetRowCount()
 {
 	__AssertReturn(this, 0);
 
-	return m_nRowCount;
+	return m_uRowCount;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT nRow, UINT nColumn, int& nValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
 {
 	string strValue;
-	__EnsureReturn(GetData(nRow, nColumn, strValue), FALSE);
+	__EnsureReturn(GetData(uRow, uColumn, strValue), FALSE);
 
 	nValue = atoi(strValue.c_str());
 
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT nRow, UINT nColumn, double& dbValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
 {
 	string strValue;
-	__EnsureReturn(GetData(nRow, nColumn, strValue), FALSE);
+	__EnsureReturn(GetData(uRow, uColumn, strValue), FALSE);
 
 	dbValue = atof(strValue.c_str());
 
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT nRow, UINT nColumn, string& strValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strValue)
 {
 	__AssertReturn(this, NULL);
-	__AssertReturn(m_nRowCount && m_nColumnCount, NULL);
-	__AssertReturn(nRow < m_nRowCount && nColumn < m_nColumnCount, NULL);
+	__AssertReturn(m_uRowCount && m_uColumnCount, NULL);
+	__AssertReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, NULL);
 	__AssertReturn(m_pData, FALSE);
 
-	char* pszValue = m_pData[(nRow + 1) * m_nColumnCount + nColumn];
+	char* pszValue = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
 	if (NULL != pszValue)
 	{
 		strValue = pszValue;
@@ -78,10 +78,10 @@ BOOL CSQLiteDBResult::GetData(UINT nRow, UINT nColumn, string& strValue)
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT nRow, UINT nColumn, wstring& strValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strValue)
 {
 	string strData;
-	__EnsureReturn(GetData(nRow, nColumn, strData), FALSE);
+	__EnsureReturn(GetData(uRow, uColumn, strData), FALSE);
 	strValue = util::StrToWStr(strData, CP_UTF8);
 	return TRUE;
 }
@@ -167,8 +167,8 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql)
 	
 	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
 
-	pSQLiteDBResult->m_nColumnCount = (UINT)nColumnCount;
-	pSQLiteDBResult->m_nRowCount = (UINT)nRowCount;
+	pSQLiteDBResult->m_uColumnCount = (UINT)nColumnCount;
+	pSQLiteDBResult->m_uRowCount = (UINT)nRowCount;
 
 	pSQLiteDBResult->m_pData = pData;
 

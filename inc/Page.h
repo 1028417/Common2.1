@@ -18,7 +18,7 @@ class __CommonPrjExt CPage: public CPropertyPage
 	friend class CDockView;
 
 public:
-	CPage(CResourceModule& resModule, UINT nIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
+	CPage(CResourceModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
 	virtual ~CPage() {}
 

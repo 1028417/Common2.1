@@ -133,16 +133,16 @@ void fsutil::GetSysDrivers(list<wstring>& lstDrivers)
 
 	TCHAR pszBuffer[256] = {0};
 
-	UINT nCount = ::GetLogicalDriveStrings(0, NULL);
+	UINT uCount = ::GetLogicalDriveStrings(0, NULL);
 
-	(void)GetLogicalDriveStrings(nCount, pszBuffer);
+	(void)GetLogicalDriveStrings(uCount, pszBuffer);
 
 	wstring strDriver;
 	int nDriveType = 0;
 
-	for(UINT i=0; i<nCount/MAX_DRIVE; ++i)
+	for(UINT uIndex = 0; uIndex < uCount/MAX_DRIVE; ++uIndex)
 	{
-		strDriver = pszBuffer + i*MAX_DRIVE;
+		strDriver = pszBuffer + uIndex*MAX_DRIVE;
 
 		nDriveType = ::GetDriveType(strDriver.c_str());
 		if (DRIVE_FIXED == nDriveType || DRIVE_REMOVABLE == nDriveType)
