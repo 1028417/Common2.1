@@ -401,7 +401,7 @@ void CObjectList::UpdateItems()
 	}
 }
 
-void CObjectList::UpdateItems(const list<UINT>& lstColumn)
+void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 {
 	__Ensure(m_hWnd);
 

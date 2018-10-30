@@ -171,7 +171,7 @@ public:
 	void UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& lstColumn);
 
 	void UpdateItems();
-	void UpdateItems(const list<UINT>& lstColumn);
+	void UpdateColumns(const list<UINT>& lstColumn);
 
 	void DeleteObjects(const TD_ListObjectList& lstDeleteObjects);
 
