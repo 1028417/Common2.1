@@ -37,7 +37,7 @@ BOOL CMainApp::InitInstance()
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
 	CMainWnd *pMainWnd = m_view.init();
-	__AssertReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
 	m_pMainWnd = pMainWnd;
 
 	__AssertReturn(m_Controller.init(), FALSE);
