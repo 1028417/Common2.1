@@ -203,30 +203,30 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 	return 0;
 }
 
-
-CFileDlg::CFileDlg(const wstring& strTitle, const wstring& strFilter
-	, const wstring& strInitialDir, const wstring& strFileName, CWnd *pWndOwner)
-	: m_strTitle(strTitle)
-	, m_strInitialDir(strInitialDir)
+void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 {
 	::ZeroMemory(&m_ofn, sizeof(m_ofn));
 	m_ofn.lStructSize = sizeof(m_ofn);
 
-	m_ofn.hInstance = AfxGetInstanceHandle();
-	
+	m_strTitle = opt.strTitle;
 	m_ofn.lpstrTitle = m_strTitle.c_str();
 
-	if (NULL == pWndOwner)
+	m_strInitialDir = opt.strInitialDir;
+	m_ofn.lpstrInitialDir = m_strInitialDir.c_str();
+
+	::ZeroMemory(m_lpstrFileName, sizeof(m_lpstrFileName));
+	if (!opt.strFileName.empty())
 	{
-		pWndOwner = AfxGetMainWnd();
+		::lstrcat(m_lpstrFileName, opt.strFileName.c_str());
 	}
-	m_ofn.hwndOwner = pWndOwner->GetSafeHwnd();
-	
+	m_ofn.lpstrFile = m_lpstrFileName;
+	m_ofn.nMaxFile = sizeof(m_lpstrFileName) / sizeof(m_lpstrFileName[0]);
+
 	::ZeroMemory(m_lpstrFilter, sizeof m_lpstrFilter);
 	m_ofn.lpstrFilter = m_lpstrFilter;
-	if (!strFilter.empty())
+	if (!opt.strFilter.empty())
 	{
-		::lstrcat(m_lpstrFilter, strFilter.c_str());
+		::lstrcat(m_lpstrFilter, opt.strFilter.c_str());
 
 		LPTSTR pch = m_lpstrFilter;
 
@@ -244,44 +244,58 @@ CFileDlg::CFileDlg(const wstring& strTitle, const wstring& strFilter
 		}
 	}
 
-	::ZeroMemory(m_lpstrFileName, sizeof(m_lpstrFileName));
-	m_ofn.lpstrFile = m_lpstrFileName;
-	m_ofn.nMaxFile = sizeof(m_lpstrFileName)/sizeof(m_lpstrFileName[0]);
-	if (!strFileName.empty())
+	auto pWndOwner = opt.pWndOwner;
+	if (NULL == pWndOwner)
 	{
-		::wcscpy_s(m_lpstrFileName, m_ofn.nMaxFile, strFileName.c_str());
+		pWndOwner = AfxGetMainWnd();
+	}
+	m_ofn.hwndOwner = pWndOwner->GetSafeHwnd();
+
+	m_ofn.Flags = OFN_EXPLORER;
+
+	if (opt.bMultiSel)
+	{
+		m_ofn.Flags |= OFN_ALLOWMULTISELECT;
 	}
 
-	m_ofn.lpstrInitialDir = m_strInitialDir.c_str();
-	
-	m_ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER;//标志如果是多选要加上OFN_ALLOWMULTISELECT
+	if (opt.bMustExist)
+	{
+		m_ofn.Flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	}
 }
 
-wstring CFileDlg::Show()
+void CFileDlg::Show(list<wstring>& lstFiles)
 {
-	bool bResult = ::GetOpenFileName(&m_ofn);
+	BOOL bRet = ::GetOpenFileName(&m_ofn);
 
 	(void)::EnableWindow(m_ofn.hwndOwner, TRUE);
 
 	(void)::SetFocus(m_ofn.hwndOwner);
 
-	__EnsureReturn(bResult, L"");
-	
-	return m_lpstrFileName;
+	if (!bRet)
+	{
+		return;
+	}
+
+	if (m_ofn.Flags & OFN_ALLOWMULTISELECT)
+	{
+		_getMultSel(lstFiles);
+	}
+	else
+	{
+		lstFiles.push_back(m_lpstrFileName);
+	}
 }
 
-void CFileDlg::ShowMultiSel(list<wstring>& lstFiles)
+void CFileDlg::Show(const tagFileDlgOpt& opt, list<wstring>& lstFiles)
 {
-	m_ofn.Flags |= OFN_ALLOWMULTISELECT;
+	_setOpt(opt);
 
-	bool bResult = ::GetOpenFileName(&m_ofn);
+	Show(lstFiles);
+}
 
-	(void)::EnableWindow(m_ofn.hwndOwner, TRUE);
-
-	(void)::SetFocus(m_ofn.hwndOwner);
-
-	__Ensure(bResult);
-
+void CFileDlg::_getMultSel(list<wstring>& lstFiles)
+{
 	for (TCHAR *p = m_lpstrFileName; ; p++)
 	{
 		if ('\0' == *p)
@@ -291,7 +305,7 @@ void CFileDlg::ShowMultiSel(list<wstring>& lstFiles)
 				break;
 			}
 
-			lstFiles.push_back(p+1);
+			lstFiles.push_back(p + 1);
 		}
 	}
 	if (lstFiles.empty())
@@ -301,7 +315,7 @@ void CFileDlg::ShowMultiSel(list<wstring>& lstFiles)
 	else
 	{
 		wstring strDir = m_lpstrFileName;
-		for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile!=lstFiles.end(); itrFile++)
+		for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
 		{
 			*itrFile = strDir + __BackSlant + *itrFile;
 		}

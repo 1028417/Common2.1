@@ -39,12 +39,38 @@ public:
 };
 
 
+struct tagFileDlgOpt
+{
+	wstring strTitle;
+	
+	wstring strInitialDir;
+	
+	wstring strFileName;
+	
+	wstring strFilter;
+
+	bool bMultiSel = false;
+	
+	bool bMustExist = false;
+
+	CWnd *pWndOwner = NULL;
+};
+
 class __CommonPrjExt CFileDlg
 {
 public:
-	CFileDlg(const wstring& strTitle, const wstring& strFilter=L""
-		, const wstring& strInitialDir=L"", const wstring& strFileName=L"", CWnd *pWndOwner=NULL);
-	
+	CFileDlg() {}
+
+	CFileDlg(const tagFileDlgOpt& opt)
+	{
+		_setOpt(opt);
+	}
+
+private:
+	void _setOpt(const tagFileDlgOpt& opt);
+
+	void _getMultSel(list<wstring>& lstFiles);
+
 private:
 	OPENFILENAME m_ofn;
 
@@ -57,6 +83,7 @@ private:
 	TCHAR m_lpstrFileName[4096];
 
 public:
-	wstring Show();
-	void ShowMultiSel(list<wstring>& lstFiles);
+	void Show(list<wstring>& lstFiles);
+
+	void Show(const tagFileDlgOpt& opt, list<wstring>& lstFiles);
 };
