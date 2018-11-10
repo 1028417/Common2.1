@@ -1,6 +1,50 @@
 
 #include "stdafx.h"
 
+wstring util::trim(const wstring& strText, char chr)
+{
+	wstring strRet = strText;
+	strRet.erase(0, strRet.find_first_not_of(' '));
+	strRet.erase(strRet.find_last_not_of(' ') + 1);
+
+	return strRet;
+}
+
+void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim)
+{
+	wstring::size_type startPos = 0;
+	while (true)
+	{
+		wstring::size_type pos = strText.find(cSplitor, startPos);
+		if (wstring::npos == pos)
+		{
+			break;
+		}
+
+		if (pos > startPos)
+		{
+			wstring strSub = strText.substr(startPos, pos - startPos);
+			if (bTrim)
+			{
+				strSub = trim(strSub);
+			}
+
+			vecRet.push_back(strSub);
+		}
+		
+		startPos = pos + 1;
+	}
+
+	if (bTrim)
+	{
+		vecRet.push_back(trim(strText.substr(startPos)));
+	}
+	else
+	{
+		vecRet.push_back(strText.substr(startPos));
+	}
+}
+
 BOOL util::StrCompareIgnoreCase(const wstring& str1, const wstring& str2)
 {
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());

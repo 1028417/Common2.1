@@ -4,6 +4,10 @@
 class __CommonPrjExt util
 {
 public:
+	static wstring trim(const wstring& strText, char chr=' ');
+
+	static void SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim=false);
+
 	static BOOL StrCompareIgnoreCase(const wstring& str1, const wstring& str2);
 
 	static int StrFind(const wstring& str, const wstring& strToFind, bool bIgnoreCase=false);

@@ -534,7 +534,7 @@ BOOL CObjectList::SelectFirstItem()
 {
 	__EnsureReturn(0 < this->GetItemCount(), FALSE);
 	
-	this->SelectItem(0, TRUE);
+	this->SelectItem(0);
 
 	return TRUE;
 }
