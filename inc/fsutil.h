@@ -4,6 +4,8 @@
 class __CommonPrjExt fsutil
 {
 public:
+	static int GetFileSize(const wstring& strFilePath);
+
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
 
 	static wstring GetFileName(const wstring& strPath);

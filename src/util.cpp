@@ -35,13 +35,16 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 		startPos = pos + 1;
 	}
 
-	if (bTrim)
+	if (startPos < strText.size())
 	{
-		vecRet.push_back(trim(strText.substr(startPos)));
-	}
-	else
-	{
-		vecRet.push_back(strText.substr(startPos));
+		if (bTrim)
+		{
+			vecRet.push_back(trim(strText.substr(startPos)));
+		}
+		else
+		{
+			vecRet.push_back(strText.substr(startPos));
+		}
 	}
 }
 

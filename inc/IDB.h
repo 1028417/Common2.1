@@ -34,7 +34,7 @@ class __CommonPrjExt CDBTransGuide
 private:
 	IDB *m_pDB = NULL;
 
-	bool BeginTrans(IDB& db)
+	bool _BeginTrans(IDB& db)
 	{
 		try
 		{
@@ -49,7 +49,7 @@ private:
 public:
 	CDBTransGuide(IDB& db)
 	{
-		if (BeginTrans(db))
+		if (_BeginTrans(db))
 		{
 			m_pDB = &db;
 		}
@@ -59,7 +59,7 @@ public:
 	{
 		if (NULL != pDB)
 		{
-			if (BeginTrans(*pDB))
+			if (_BeginTrans(*pDB))
 			{
 				m_pDB = pDB;
 			}
@@ -68,10 +68,10 @@ public:
 
 	~CDBTransGuide()
 	{
-		(void)CommitTrans();
+		(void)Commit();
 	}
 
-	bool CommitTrans()
+	bool Commit()
 	{
 		if (NULL == m_pDB)
 		{
@@ -91,7 +91,7 @@ public:
 		}
 	}
 
-	bool RollbackTrans()
+	bool Rollback()
 	{
 		if (NULL == m_pDB)
 		{

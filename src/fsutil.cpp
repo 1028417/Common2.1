@@ -3,7 +3,16 @@
 
 #include <fsutil.h>
 
-// fsutil
+int fsutil::GetFileSize(const wstring& strFilePath)
+{
+	struct _stat fileStat;
+	if (0 == _wstat(strFilePath.c_str(), &fileStat))
+	{
+		return fileStat.st_size;
+	}
+	
+	return -1;
+}
 
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {

@@ -7,6 +7,8 @@ typedef ptrlist<CPath*> TD_PathList;
 
 class __CommonPrjExt CPath
 {
+	friend struct tagPathSortor;
+
 public:
 	CPath()
 	{
@@ -18,6 +20,14 @@ public:
 	{
 	}
 
+	CPath(const wstring& strDir, const TD_PathList& lstSubPath)
+		: m_bDir(true)
+		, m_strName(strDir)
+	{
+		m_plstSubPath = new TD_PathList();
+		m_plstSubPath->Insert(lstSubPath);
+	}
+	
 	CPath(CFileFind& fileFind, CPath *pParentPath)
 		: m_bDir(fileFind.IsDirectory())
 		, m_strName(fileFind.GetFileName())
@@ -28,14 +38,6 @@ public:
 		(void)fileFind.GetLastWriteTime(&m_modifyTime);
 	}
 
-	CPath(const wstring& strName, const TD_PathList & lstSubPath)
-		: m_strName(strName)
-		, m_bDir(TRUE)
-	{
-		m_plstSubPath = new TD_PathList();
-		m_plstSubPath->Insert(lstSubPath);
-	}
-
 	virtual ~CPath()
 	{
 		ClearSubPath();
@@ -44,8 +46,6 @@ public:
 public:
 	bool m_bDir = false;
 
-	wstring m_strName;
-
 	ULONGLONG m_uFileSize = 0;
 
 	FILETIME m_modifyTime = { 0,0 };
@@ -53,26 +53,24 @@ public:
 	CPath *m_pParentPath = NULL;
 
 protected:
+	wstring m_strName;
+
 	TD_PathList *m_plstSubPath = NULL;
 
 protected:
-	virtual CPath *NewSubPath(CFileFind &FindFile, CPath *pParentPath) = 0; 
-	//{
-	//	return new CPath(FindFile, pParentPath);
-	//}
-
-public:
-	UINT GetChildCount()
+	virtual CPath* NewSubPath(CFileFind &FindFile, CPath *pParentPath)
 	{
-		if (NULL == m_plstSubPath)
-		{
-			return 0;
-		}
-
-		return m_plstSubPath->size();
+		return new CPath(FindFile, pParentPath);
 	}
 
+public:
+	wstring GetName();
+
+	void SetName(const wstring& strNewName);
+
 	wstring GetPath();
+
+	UINT GetSubPathCount();
 
 	bool GetSubPath(TD_PathList& lstSubPath);
 	

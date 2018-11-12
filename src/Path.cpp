@@ -27,14 +27,41 @@ struct tagPathSortor
 	}
 };
 
+wstring CPath::GetName()
+{
+	if (NULL != m_pParentPath)
+	{
+		return m_strName;
+	}
+	else
+	{
+		return fsutil::GetFileName(m_strName);
+	}
+}
+
+void CPath::SetName(const wstring& strNewName)
+{
+	m_strName = strNewName;
+}
+
 wstring CPath::GetPath()
 {
-	if (m_pParentPath)
+	if (NULL != m_pParentPath)
 	{
 		return m_pParentPath->GetPath() + __BackSlant + m_strName;
 	}
 
 	return m_strName;
+}
+
+UINT CPath::GetSubPathCount()
+{
+	if (NULL == m_plstSubPath)
+	{
+		return 0;
+	}
+
+	return m_plstSubPath->size();
 }
 
 bool CPath::GetSubPath(TD_PathList& lstSubPath)

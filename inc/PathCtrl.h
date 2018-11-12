@@ -21,8 +21,8 @@ public:
 	{
 	}
 
-	CPathObject(const wstring& strName, const TD_PathObjectList& lstSubPathObjects)
-		: CPath(strName, TD_PathList(lstSubPathObjects))
+	CPathObject(const wstring& strDir, const TD_PathObjectList& lstSubPathObjects)
+		: CPath(strDir, TD_PathList(lstSubPathObjects))
 	{
 	}
 
