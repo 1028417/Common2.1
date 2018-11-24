@@ -16,7 +16,7 @@ enum class E_ImgFixMode
 	, IFM_Height
 };
 
-class __CommonPrjExt CImg : public CImage
+class __CommonExt CImg : public CImage
 {
 public:
 	CImg(COLORREF crBkgrd= __Color_White)
@@ -83,7 +83,7 @@ enum class E_ImglstType
 	, ILT_Small = LVSIL_SMALL
 };
 
-class __CommonPrjExt CImglst : public CImageList
+class __CommonExt CImglst : public CImageList
 {
 public:
 	CImglst()

@@ -26,9 +26,12 @@ void CPage::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPage::Active()
 {
+	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+	__EnsureReturn(pMainWnd, FALSE);
+
 	if (!::IsWindowVisible(this->m_hWnd))
 	{
-		__EnsureReturn(CMainApp::GetMainWnd()->ActivePage(*this), FALSE);
+		__EnsureReturn(pMainWnd->ActivePage(*this), FALSE);
 	}
 
 	(void)this->SetFocus();
@@ -38,12 +41,18 @@ BOOL CPage::Active()
 
 BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
-	return CMainApp::GetMainWnd()->SetPageTitle(*this, cstrTitle, iImage);
+	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+	__EnsureReturn(pMainWnd, FALSE);
+
+	return pMainWnd->SetPageTitle(*this, cstrTitle, iImage);
 }
 
 int CPage::MsgBox(const CString& cstrText, UINT uType)
 {
-	return CMainApp::GetMainWnd()->MsgBox(cstrText, m_cstrTitle, uType);
+	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+	__EnsureReturn(pMainWnd, FALSE);
+
+	return pMainWnd->MsgBox(cstrText, m_cstrTitle, uType);
 }
 
 BOOL CPage::OnSetActive()

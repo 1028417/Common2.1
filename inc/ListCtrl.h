@@ -33,7 +33,7 @@ enum class E_ListViewType
 	LVT_Report = LVS_REPORT
 };
 
-class __CommonPrjExt CListObject
+class __CommonExt CListObject
 {
 public:
 	virtual void GenListItem(class CObjectList& wndList, vector<wstring>& vecText, int& iImage)
@@ -55,7 +55,7 @@ typedef ptrlist<CListObject*> TD_ListObjectList;
 
 // CObjectList
 
-struct __CommonPrjExt tagListColumn
+struct __CommonExt tagListColumn
 {
 	CString cstrText;
 	UINT uWidth;
@@ -63,7 +63,7 @@ struct __CommonPrjExt tagListColumn
 };
 typedef list<tagListColumn> TD_ListColumn;
 
-class __CommonPrjExt CObjectList : public CListCtrl
+class __CommonExt CObjectList : public CListCtrl
 {
 public:
 	using CB_LVCostomDraw = function<void(class CObjectList& wndList, NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
@@ -119,7 +119,9 @@ private:
 	CCompatableFont m_fontUnderline;
 	
 	bool m_bCusomDrawNotify = false;
+
 	bool m_bAutoChange = false;
+	
 	int m_iTrackMouseFlag = -1;
 	
 	CString m_cstrRenameText;
@@ -173,7 +175,7 @@ public:
 	void UpdateItems();
 	void UpdateColumns(const list<UINT>& lstColumn);
 
-	void DeleteObjects(const TD_ListObjectList& lstDeleteObjects);
+	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
 
 	BOOL DeleteObject(const CListObject *pObject);
 

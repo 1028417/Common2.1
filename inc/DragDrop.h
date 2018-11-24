@@ -11,7 +11,7 @@ interface IDropTargetEx
 	virtual void OnDragLeave(CWnd *pWnd, LPVOID pDragData) = 0;
 };
 
-class __CommonPrjExt CDragDropMgr : public COleDropTarget
+class __CommonExt CDragDropMgr : public COleDropTarget
 {
 public:
 	CDragDropMgr()

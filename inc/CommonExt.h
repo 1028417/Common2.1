@@ -27,9 +27,9 @@
 using namespace std;
 
 #ifdef __CommonPrj
-#define __CommonPrjExt __declspec(dllexport)
+#define __CommonExt __declspec(dllexport)
 #else
-#define __CommonPrjExt __declspec(dllimport)
+#define __CommonExt __declspec(dllimport)
 #endif
 
 #ifdef _DEBUG

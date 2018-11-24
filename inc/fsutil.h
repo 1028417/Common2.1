@@ -1,7 +1,7 @@
 
 #pragma once
 
-class __CommonPrjExt fsutil
+class __CommonExt fsutil
 {
 public:
 	static int GetFileSize(const wstring& strFilePath);

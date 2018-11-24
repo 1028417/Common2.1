@@ -1,7 +1,7 @@
 
 #pragma once
 
-class __CommonPrjExt util
+class __CommonExt util
 {
 public:
 	static wstring trim(const wstring& strText, char chr=' ');

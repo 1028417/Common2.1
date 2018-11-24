@@ -65,7 +65,7 @@ BOOL CMainApp::InitInstance()
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->hwnd == GetMainWnd()->GetSafeHwnd())
+	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
 	{
 		switch (pMsg->message)
 		{
@@ -266,18 +266,17 @@ BOOL CMainApp::Quit()
 	{
 		if (itrHotkeyInfo->bGlobal)
 		{
-			(void)::UnregisterHotKey(CMainApp::GetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
+			(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
 		}
 	}
 
 	m_view.close();
 
 	m_Controller.stop();
-
-	CMainWnd* pMainWnd = GetMainWnd();
-	if (NULL != pMainWnd)
+	
+	if (NULL != m_pMainWnd)
 	{
-		(void)pMainWnd->DestroyWindow();
+		(void)m_pMainWnd->DestroyWindow();
 	}
 
 	AfxPostQuitMessage(0);
@@ -375,7 +374,7 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 	{
 		if (HotkeyInfo.bGlobal)
 		{
-			if (!::RegisterHotKey(CMainApp::GetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey))
+			if (!::RegisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey))
 			{
 				return FALSE;
 			}

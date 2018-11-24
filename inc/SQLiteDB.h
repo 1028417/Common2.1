@@ -3,7 +3,7 @@
 #include "IDB.h"
 
 class CSQLiteDB;
-class __CommonPrjExt CSQLiteDBResult : public IDBResult
+class __CommonExt CSQLiteDBResult : public IDBResult
 {
 friend CSQLiteDB;
 public:
@@ -31,7 +31,7 @@ public:
 };
 
 
-class __CommonPrjExt CSQLiteDB : public IDB
+class __CommonExt CSQLiteDB : public IDB
 {
 public:
 	CSQLiteDB(const string& strDBPath="");

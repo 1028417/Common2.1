@@ -5,7 +5,7 @@
 
 #include <Guide.h>
 
-class __CommonPrjExt CBaseTree: public CTreeCtrl
+class __CommonExt CBaseTree: public CTreeCtrl
 {
 public:
 	CBaseTree();
@@ -56,7 +56,7 @@ class CTreeObject;
 
 typedef ptrlist<CTreeObject*> TD_TreeObjectList;
 
-class __CommonPrjExt CTreeObject
+class __CommonExt CTreeObject
 {
 public:
 	CTreeObject()
@@ -84,7 +84,7 @@ public:
 };
 
 
-class __CommonPrjExt CObjectTree: public CBaseTree
+class __CommonExt CObjectTree: public CBaseTree
 {
 public:
 	CObjectTree();
@@ -121,7 +121,7 @@ enum E_CheckState
 };
 
 // CCheckObjectTree
-class __CommonPrjExt CCheckObjectTree: public CObjectTree
+class __CommonExt CCheckObjectTree: public CObjectTree
 {
 public:
 	CCheckObjectTree();

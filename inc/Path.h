@@ -5,7 +5,7 @@
 class CPath;
 typedef ptrlist<CPath*> TD_PathList;
 
-class __CommonPrjExt CPath
+class __CommonExt CPath
 {
 	friend struct tagPathSortor;
 

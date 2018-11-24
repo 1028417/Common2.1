@@ -27,7 +27,7 @@ struct tagMainWndInfo
 	ULONG uMinHeight = 0;
 };
 
-class __CommonPrjExt CMainWnd: public CWnd
+class __CommonExt CMainWnd: public CWnd
 {
 protected:
 	typedef vector<CDockView*> TD_DockViewVector;

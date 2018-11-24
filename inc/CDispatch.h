@@ -20,7 +20,7 @@ typedef DOUBLE OLEDouble;
 typedef LPWSTR OLEString;
 typedef LPDISPATCH OLEObject;
 
-class __CommonPrjExt CVariant
+class __CommonExt CVariant
 {
 public:
 	CVariant()
@@ -126,7 +126,7 @@ public:
 	}
 };
 
-class __CommonPrjExt CParams
+class __CommonExt CParams
 {
 typedef vector<CVariant> ParamVector;
 
@@ -216,7 +216,7 @@ public:
 	}
 };
 
-class __CommonPrjExt CDispatch
+class __CommonExt CDispatch
 {
 	typedef map<string, DISPID> DispIDMap;
 

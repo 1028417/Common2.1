@@ -29,7 +29,7 @@ interface IDB
 	virtual bool CommitTrans() = 0;
 };
 
-class __CommonPrjExt CDBTransGuide
+class __CommonExt CDBTransGuide
 {
 private:
 	IDB *m_pDB = NULL;

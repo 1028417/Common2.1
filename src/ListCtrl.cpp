@@ -215,7 +215,7 @@ BOOL CObjectList::SetUnderlineColumn(const set<UINT>& setUnderlineColumns)
 		logFont.lfUnderline = 1;
 	}), FALSE);
 
-	SetCusomDrawNotify();
+	m_bCusomDrawNotify = true;
 
 	return TRUE;
 }
@@ -413,7 +413,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 	}
 }
 
-void CObjectList::DeleteObjects(const TD_ListObjectList& lstDeleteObjects)
+void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 {
 	__Ensure(m_hWnd);
 
@@ -424,7 +424,7 @@ void CObjectList::DeleteObjects(const TD_ListObjectList& lstDeleteObjects)
 	{
 		pObject = this->GetItemObject(nItem);
 		
-		if (util::ContainerFind(lstDeleteObjects, pObject))
+		if (setDeleteObjects.find(pObject) != setDeleteObjects.end())
 		{
 			this->DeleteItem(nItem);
 
@@ -727,15 +727,6 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 {
-	if (m_para.cbCustomDraw)
-	{
-		m_para.cbCustomDraw(*this, lvcd, bSkipDefault);
-		if (bSkipDefault)
-		{
-			return;
-		}
-	}
-
 	if (!m_para.setUnderlineColumns.empty())
 	{
 		if (m_para.setUnderlineColumns.find(lvcd.iSubItem) != m_para.setUnderlineColumns.end())
@@ -746,6 +737,11 @@ void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 		{
 			::SelectObject(lvcd.nmcd.hdc, *this->GetFont());
 		}
+	}
+
+	if (m_para.cbCustomDraw)
+	{
+		m_para.cbCustomDraw(*this, lvcd, bSkipDefault);
 	}
 }
 

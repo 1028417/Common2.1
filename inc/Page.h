@@ -13,7 +13,7 @@ class CMainWnd;
 using CB_Async = function<void()>;
 using CB_AsyncLoop = function<bool()>;
 
-class __CommonPrjExt CPage: public CPropertyPage
+class __CommonExt CPage: public CPropertyPage
 {
 	friend class CDockView;
 

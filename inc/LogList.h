@@ -3,7 +3,7 @@
 
 // CLogList
 
-class __CommonPrjExt CLogList : public CListCtrl
+class __CommonExt CLogList : public CListCtrl
 {
 	DECLARE_DYNAMIC(CLogList)
 

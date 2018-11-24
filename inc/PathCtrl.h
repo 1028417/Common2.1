@@ -9,7 +9,7 @@
 class CPathObject;
 typedef ptrlist<CPathObject*> TD_PathObjectList;
 
-class __CommonPrjExt CPathObject: public CPath, public CListObject
+class __CommonExt CPathObject: public CPath, public CListObject
 {
 public:
 	CPathObject()
@@ -208,7 +208,7 @@ private:
 };
 
 
-class __CommonPrjExt CPathList: public CObjectList
+class __CommonExt CPathList: public CObjectList
 {
 public:
 	CPathList(){}

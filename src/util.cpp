@@ -27,9 +27,15 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 			if (bTrim)
 			{
 				strSub = trim(strSub);
+				if (!strSub.empty())
+				{
+					vecRet.push_back(strSub);
+				}
 			}
-
-			vecRet.push_back(strSub);
+			else
+			{
+				vecRet.push_back(strSub);
+			}
 		}
 		
 		startPos = pos + 1;
@@ -39,7 +45,11 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 	{
 		if (bTrim)
 		{
-			vecRet.push_back(trim(strText.substr(startPos)));
+			wstring strTail = trim(strText.substr(startPos));
+			if (!strTail.empty())
+			{
+				vecRet.push_back(strTail);
+			}
 		}
 		else
 		{

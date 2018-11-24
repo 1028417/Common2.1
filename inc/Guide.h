@@ -4,7 +4,7 @@
 
 // CWndRedrawGuide
 
-class __CommonPrjExt CRedrawLockGuide
+class __CommonExt CRedrawLockGuide
 {
 public:
 	CRedrawLockGuide(CWnd& wndCtrl);
@@ -17,7 +17,7 @@ private:
 	CWnd& m_wndCtrl;
 };
 
-class __CommonPrjExt CMenuGuide : public CMenu
+class __CommonExt CMenuGuide : public CMenu
 {
 public:
 	CMenuGuide(CPage& Page, UINT uIDMenu);
@@ -68,7 +68,7 @@ public:
 	}
 };
 
-class __CommonPrjExt CFontGuide
+class __CommonExt CFontGuide
 {
 public:
 	CFontGuide() {};

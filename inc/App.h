@@ -98,7 +98,7 @@ public:
 };
 
 // CModuleApp
-class __CommonPrjExt CModuleApp: public CWinApp, public IResourceModule
+class __CommonExt CModuleApp: public CWinApp, public IResourceModule
 {
 friend class CMainApp;
 
@@ -223,7 +223,7 @@ public:
 	virtual void close() {}
 };
 
-class __CommonPrjExt CMainApp: public CModuleApp
+class __CommonExt CMainApp: public CModuleApp
 {
 public:
 	CMainApp(IView& view, IController& Controller)
@@ -237,11 +237,6 @@ public:
 	static CMainApp* GetMainApp()
 	{
 		return (CMainApp*)AfxGetApp();
-	}
-
-	static CMainWnd* GetMainWnd()
-	{
-		return (CMainWnd*)AfxGetMainWnd();
 	}
 
 	wstring GetAppPath(const wstring& strPath)

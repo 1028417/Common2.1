@@ -3,7 +3,7 @@
 
 //CCFolderDlg
 
-class __CommonPrjExt CFolderDlg
+class __CommonExt CFolderDlg
 {
 public:
 	CFolderDlg(LPCTSTR lpszInitDir=NULL, LPCTSTR lpszTitle=NULL, LPCTSTR lpszMessage=NULL
@@ -56,7 +56,7 @@ struct tagFileDlgOpt
 	CWnd *pWndOwner = NULL;
 };
 
-class __CommonPrjExt CFileDlg
+class __CommonExt CFileDlg
 {
 public:
 	CFileDlg() {}
@@ -80,7 +80,7 @@ private:
 
 	wstring m_strTitle;
 
-	TCHAR m_lpstrFileName[4096];
+	TCHAR m_lpstrFileName[10240];
 
 public:
 	void Show(list<wstring>& lstFiles);

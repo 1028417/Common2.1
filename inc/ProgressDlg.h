@@ -8,7 +8,7 @@
 #define WM_EndProgress WM_USER+3
 
 
-class __CommonPrjExt CProgressDlg : public CDialog, public CWorkThread
+class __CommonExt CProgressDlg : public CDialog, public CWorkThread
 {
 public:
 	CProgressDlg(const CString& cstrTitle=_T(""), const CString& cstrStatusText=_T("")
