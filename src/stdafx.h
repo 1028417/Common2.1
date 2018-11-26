@@ -53,7 +53,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 
-extern HINSTANCE g_hInstance;
+extern class CResModule g_ResModule;
 
 extern void DoEvents(bool bOnce = false);
 

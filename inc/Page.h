@@ -18,13 +18,13 @@ class __CommonExt CPage: public CPropertyPage
 	friend class CDockView;
 
 public:
-	CPage(CResourceModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
+	CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
 	virtual ~CPage() {}
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 
-	CResourceModule& m_resModule;
+	CResModule& m_resModule;
 
 private:
 	CString m_cstrTitle;

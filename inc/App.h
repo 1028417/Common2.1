@@ -44,61 +44,121 @@ struct tagHotkeyInfo
 	}
 };
 
-class CMainWnd;
-
-enum E_ResourceType
-{
-	RCT_Icon
-	, RCT_Menu
-};
-
-interface IResourceModule
-{
-	virtual HINSTANCE GetHInstance() = 0;
-};
-
-class CResourceModule : public IResourceModule
+class CResModule
 {
 public:
-	CResourceModule(const string& strDllName)
-		: m_strDllName(strDllName)
+	CResModule(HINSTANCE hInstance=NULL)
 	{
+		_hInstance = hInstance;
+	}
+
+	CResModule(const string& strDllName)
+	{
+		_hInstance = GetModuleHandleA(__DllFile(strDllName).c_str());
 	}
 
 private:
-	string m_strDllName;
+	HINSTANCE _hInstance = NULL;
 
-	HINSTANCE GetHInstance() override
+	virtual HINSTANCE GetHInstance()
 	{
-		return GetModuleHandleA(__DllFile(m_strDllName).c_str());
+		return _hInstance;
 	}
 
 public:
 	void ActivateResource()
 	{
-		AfxSetResourceHandle(GetHInstance());
+		HINSTANCE hInstance = GetHInstance();
+		__Assert(hInstance);
+
+		AfxSetResourceHandle(hInstance);
 	}
 
-	HANDLE GetResource(E_ResourceType eResourceType, UINT uID)
+	HICON loadIcon(UINT uID)
 	{
-		ActivateResource();
+		HINSTANCE hInstance = GetHInstance();
+		__AssertReturn(hInstance, NULL);
 
-		switch (eResourceType)
-		{
-		case RCT_Icon:
-			return ::LoadIcon(GetHInstance(), MAKEINTRESOURCE(uID));
-		case RCT_Menu:
-			return ::LoadMenu(GetHInstance(), MAKEINTRESOURCE(uID));
-		default:
-			;
-		}
+		HICON hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(uID));
+		__AssertReturn(hIcon, NULL);
 
-		return NULL;
+		return hIcon;
+	}
+
+	HBITMAP loadBitmap(UINT uID)
+	{
+		HINSTANCE hInstance = GetHInstance();
+		__AssertReturn(hInstance, NULL);
+
+		HBITMAP hBitmap = ::LoadBitmap(hInstance, MAKEINTRESOURCE(uID));
+		__AssertReturn(hBitmap, NULL);
+		
+		return hBitmap;
+	}
+
+	HMENU loadMenu(UINT uID)
+	{
+		HINSTANCE hInstance = GetHInstance();
+		__AssertReturn(hInstance, NULL);
+
+		HMENU hMenu = ::LoadMenu(hInstance, MAKEINTRESOURCE(uID));
+		__AssertReturn(hMenu, NULL);
+
+		return hMenu;
+	}
+
+	LPCDLGTEMPLATE loadDialog(UINT uID)
+	{
+		HINSTANCE hInstance = GetHInstance();
+		__AssertReturn(hInstance, NULL);
+
+		HRSRC hRes = ::FindResource(hInstance, MAKEINTRESOURCE(uID), RT_DIALOG);
+		__AssertReturn(hRes, NULL);
+		
+		HGLOBAL hGlobal = ::LoadResource(hInstance, hRes);
+		__AssertReturn(hGlobal, NULL);
+		
+		LPCDLGTEMPLATE lpRes = (LPCDLGTEMPLATE)LockResource(hGlobal);
+		__AssertReturn(lpRes, NULL);
+
+		return lpRes;
 	}
 };
 
+class CResGuide
+{
+public:
+	CResGuide(CResModule& resModule)
+	{
+		m_hPreInstance = AfxGetResourceHandle();
+		resModule.ActivateResource();
+	}
+
+	CResGuide(CResModule *pResModule)
+	{
+		if (NULL != pResModule)
+		{
+			m_hPreInstance = AfxGetResourceHandle();
+			pResModule->ActivateResource();
+		}
+	}
+
+	~CResGuide()
+	{
+		if (NULL != m_hPreInstance)
+		{
+			AfxSetResourceHandle(m_hPreInstance);
+		}
+	}
+
+private:
+	HINSTANCE m_hPreInstance = NULL;
+};
+
+class CMainWnd;
+
 // CModuleApp
-class __CommonExt CModuleApp: public CWinApp, public IResourceModule
+class __CommonExt CModuleApp: public CWinApp, public CResModule
 {
 friend class CMainApp;
 
@@ -125,36 +185,6 @@ protected:
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) { return 0; }
 
 	virtual BOOL OnQuit() { return TRUE; }
-};
-
-class CResourceLock
-{
-public:
-	CResourceLock(CResourceModule& resModule)
-	{
-		m_hPreInstance = AfxGetResourceHandle();
-		resModule.ActivateResource();
-	}
-
-	CResourceLock(CResourceModule *pResModule)
-	{
-		if (NULL != pResModule)
-		{
-			m_hPreInstance = AfxGetResourceHandle();
-			pResModule->ActivateResource();
-		}
-	}
-
-	~CResourceLock()
-	{
-		if (NULL != m_hPreInstance)
-		{
-			AfxSetResourceHandle(m_hPreInstance);
-		}
-	}
-
-private:
-	HINSTANCE m_hPreInstance = NULL;
 };
 
 struct tagMainWndInfo;

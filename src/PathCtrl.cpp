@@ -33,9 +33,10 @@ BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
 {
 	__EnsureReturn(this->InitCtrl(crText, uFontSize, m_lstColumns), FALSE);
 
-	CBitmap Bitmap;
-	HBITMAP hBitmap = ::LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_PATHCTRL_NORMAL));
+	HBITMAP hBitmap = g_ResModule.loadBitmap(IDB_PATHCTRL_NORMAL);
 	__AssertReturn(hBitmap, FALSE);
+
+	CBitmap Bitmap;
 	Bitmap.Attach(hBitmap);
 
 	__EnsureReturn(__super::InitImglst(Bitmap, &Bitmap), FALSE);

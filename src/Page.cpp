@@ -9,7 +9,7 @@
 
 //CPage
 
-CPage::CPage(CResourceModule& resModule, UINT uIDDlgRes, const CString& cstrTitle, bool bAutoActive)
+CPage::CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle, bool bAutoActive)
 	: m_resModule(resModule)
 	, m_cstrTitle(cstrTitle)
 	, m_bAutoActive(bAutoActive)

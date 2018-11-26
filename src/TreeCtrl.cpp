@@ -147,7 +147,7 @@ END_MESSAGE_MAP()
 
 BOOL CCheckObjectTree::InitCtrl()
 {
-	HBITMAP hStateBitmap = ::LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_CHECKTREE_STATE));
+	HBITMAP hStateBitmap = g_ResModule.loadBitmap(IDB_CHECKTREE_STATE);
 	__AssertReturn(hStateBitmap, FALSE);
 
 	CBitmap StateBitmap;

@@ -10,7 +10,7 @@ public:
 
 	static BOOL StrCompareIgnoreCase(const wstring& str1, const wstring& str2);
 
-	static int StrFind(const wstring& str, const wstring& strToFind, bool bIgnoreCase=false);
+	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
 
 	static wstring StrLowerCase(const wstring& str);
 	static wstring StrUpperCase(const wstring& str);

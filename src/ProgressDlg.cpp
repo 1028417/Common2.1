@@ -5,30 +5,6 @@
 
 #include "resource.h"
 
-
-CProgressDlg::CProgressDlg(const CString& cstrTitle, const CString& cstrStatusText, UINT uMaxProgress, UINT uWorkThreadCount)
-{
-	m_hMutex = NULL;
-
-
-	m_cstrTitle = cstrTitle;
-	m_cstrStatusText = cstrStatusText;
-
-	__Assert(0 != uMaxProgress);
-	m_uMaxProgress = uMaxProgress;
-
-	__Assert(0 != uWorkThreadCount);
-	m_uWorkThreadCount = uWorkThreadCount;
-
-	m_uProgress = 0;
-
-	m_bFinished = FALSE;
-}
-
-CProgressDlg::~CProgressDlg()
-{
-}
-
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -49,7 +25,12 @@ END_MESSAGE_MAP()
 
 void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
 {
-	ASSERT(FALSE);
+	if (m_fnWork)
+	{
+		m_fnWork(*this);
+	}
+
+	this->EndProgress(FALSE);
 }
 
 INT_PTR CProgressDlg::DoModal()
@@ -57,11 +38,7 @@ INT_PTR CProgressDlg::DoModal()
 	m_hMutex = ::CreateMutex(NULL, FALSE, NULL);
 	__AssertReturn(m_hMutex, -1);
 
-	HRSRC hResource = ::FindResource(g_hInstance, MAKEINTRESOURCE(IDD_DLG_PROGRESS), RT_DIALOG);
-	
-	HGLOBAL hDialogTemplate = LoadResource(g_hInstance, hResource);
-	
-	LPCDLGTEMPLATE lpDialogTemplate = (LPCDLGTEMPLATE)LockResource(hDialogTemplate);
+	LPCDLGTEMPLATE lpDialogTemplate = g_ResModule.loadDialog(IDD_DLG_PROGRESS);
 	__AssertReturn(lpDialogTemplate, -1);
 
 	__AssertReturn(this->InitModalIndirect(lpDialogTemplate), -1);
@@ -80,17 +57,12 @@ BOOL CProgressDlg::OnInitDialog()
 
 	(void)this->SetWindowText(m_cstrTitle);
 
-	if (!m_cstrStatusText.IsEmpty())
-	{
-		this->SetStatusText(m_cstrStatusText);
-	}
-
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
 	this->SetProgress(0);
 
 	m_bFinished = FALSE;
 
-	(void)this->RunWorkThread(m_uWorkThreadCount);
+	(void)this->RunWorkThread(1);
 
 	return TRUE;
 }

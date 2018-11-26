@@ -27,11 +27,12 @@ private:
 public:
 	BOOL RunWorkThread(UINT uThreadCount=1);
 
+	BOOL GetExitSignal();
+
 protected:
 	void Pause(BOOL bPause=TRUE);
 
 	void SetExitSignal();
-	BOOL GetExitSignal();
 
 	void WaitForExit();
 

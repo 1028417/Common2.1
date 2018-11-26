@@ -8,13 +8,17 @@
 #define WM_EndProgress WM_USER+3
 
 
+using FN_Work = function<void(class CProgressDlg& ProgressDlg)>;
+
 class __CommonExt CProgressDlg : public CDialog, public CWorkThread
 {
 public:
-	CProgressDlg(const CString& cstrTitle=_T(""), const CString& cstrStatusText=_T("")
-		, UINT uMaxProgress=100, UINT uWorkThreadCount=1);
-
-	virtual ~CProgressDlg();
+	CProgressDlg(const CString& cstrTitle, UINT uMaxProgress, const FN_Work& fnWork=NULL)
+		: m_cstrTitle(cstrTitle)
+		, m_fnWork(fnWork)
+	{
+		m_uMaxProgress = uMaxProgress;
+	}
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
@@ -22,22 +26,20 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	HANDLE m_hMutex;
+	FN_Work m_fnWork;
 
-protected:
 	CString m_cstrTitle;
+
+	UINT m_uMaxProgress = 0;
+
+	UINT m_uProgress = 0;
+
+	HANDLE m_hMutex = NULL;
+
+	BOOL m_bFinished = false;
 
 	CString m_cstrStatusText;
 
-	UINT m_uWorkThreadCount;
-
-	UINT m_uMaxProgress;
-
-	UINT m_uProgress;
-
-	BOOL m_bFinished;
-
-private:
 	CProgressCtrl m_wndProgressCtrl;
 
 public:
@@ -55,10 +57,9 @@ public:
 
 	LRESULT OnEndProgress(WPARAM wParam, LPARAM lParam);
 
-public:
+private:
 	virtual void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) override;
 
-public:
 	virtual BOOL OnInitDialog();
 
 	virtual void OnCancel();

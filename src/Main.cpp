@@ -19,12 +19,12 @@ static AFX_EXTENSION_MODULE ControlDLL = { NULL, NULL };
 #pragma managed(push, off)
 #endif
 
-HINSTANCE g_hInstance = NULL;
+ CResModule g_ResModule;
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
-	g_hInstance = hInstance;
+	g_ResModule = CResModule(hInstance);
 
 	// 如果使用 lpReserved，请将此移除
 	UNREFERENCED_PARAMETER(lpReserved);
