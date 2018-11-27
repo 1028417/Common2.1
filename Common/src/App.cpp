@@ -121,8 +121,47 @@ BOOL CMainApp::InitInstance()
 	return TRUE;
 }
 
+#define WM_Async WM_USER
+
+static CB_Async g_cbAsync;
+
+void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
+{
+	if (!cb)
+	{
+		return;
+	}
+
+	g_cbAsync = cb;
+
+	if (0 == uDelayTime)
+	{
+		this->PostThreadMessage(WM_Async, 0, 0);
+	}
+	else
+	{
+		thread thr([=]() {
+			::Sleep(uDelayTime);
+			this->PostThreadMessage(WM_Async, 0, 0);
+		});
+		thr.detach();
+	}
+}
+
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
+	if (WM_Async == pMsg->message && NULL == pMsg->hwnd)
+	{
+		if (g_cbAsync)
+		{
+			CB_Async cb = g_cbAsync;
+			g_cbAsync = NULL;
+			cb();
+		}
+
+		return TRUE;
+	}
+
 	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
 	{
 		switch (pMsg->message)

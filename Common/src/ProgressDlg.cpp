@@ -65,7 +65,7 @@ BOOL CProgressDlg::OnInitDialog()
 	return TRUE;
 }
 
-void CProgressDlg::SetStatusText(const CString& cstrStatusText)
+void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)
 {
 	(void)::WaitForSingleObject(m_hMutex, INFINITE);
 
@@ -73,6 +73,12 @@ void CProgressDlg::SetStatusText(const CString& cstrStatusText)
 	
 	(void)this->PostMessage(WM_SetStatusText);
 	
+	if (0 != uOffsetProgress)
+	{
+		m_uProgress += uOffsetProgress;
+		this->SetProgress(m_uProgress);
+	}
+
 	(void)::ReleaseMutex(m_hMutex);
 }
 
@@ -115,7 +121,6 @@ UINT CProgressDlg::ForwardProgress(UINT uOffSet)
 	(void)::WaitForSingleObject(m_hMutex, INFINITE);
 
 	m_uProgress += uOffSet;
-
 	this->SetProgress(m_uProgress);
 
 	(void)::ReleaseMutex(m_hMutex);

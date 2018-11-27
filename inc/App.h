@@ -184,6 +184,8 @@ public:
 	}
 };
 
+using CB_Async = function<void()>;
+
 class __CommonExt CMainApp: public CModuleApp
 {
 public:
@@ -222,6 +224,8 @@ private:
 	BOOL OnCommand(UINT uID);
 
 public:
+	void Async(const CB_Async& cb, UINT uDelayTime=0);
+
 	BOOL Quit();
 
 	static void DoEvents(bool bOnce=false);

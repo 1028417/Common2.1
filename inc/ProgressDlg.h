@@ -42,7 +42,7 @@ private:
 public:
 	virtual INT_PTR DoModal();
 
-	void SetStatusText(const CString& cstrStatusText);
+	void SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress=0);
 	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
 
 	void SetProgress(UINT uProgress);

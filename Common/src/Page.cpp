@@ -197,9 +197,9 @@ BOOL CPage::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResul
 	{
 		if (m_cbAsync)
 		{
-			CB_Async cbAsync = m_cbAsync;
+			CB_Async cb = m_cbAsync;
 			m_cbAsync = NULL;
-			cbAsync();
+			cb();
 		}
 
 		return TRUE;
