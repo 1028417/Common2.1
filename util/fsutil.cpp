@@ -1,7 +1,35 @@
 ﻿
-#include "stdafx.h"
+#include <util.h>
 
 #include <fsutil.h>
+
+void fsutil::FindFile(const wstring& strFindPath, const function<bool(const tagFindData& findData)>& cb)
+{
+	const char chrDot = '.';
+
+	WIN32_FIND_DATAW FindFileData;
+	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindFileData);
+	if (INVALID_HANDLE_VALUE != hFindFile)
+	{
+		do
+		{
+			if (chrDot == FindFileData.cFileName[0])
+			{
+				continue;
+			}
+
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
+			{
+				continue;
+			}
+				
+			if (!cb(tagFindData(FindFileData)))
+			{
+				break;
+			}
+		} while (::FindNextFileW(hFindFile, &FindFileData));
+	}
+}
 
 int fsutil::GetFileSize(const wstring& strFilePath)
 {
@@ -78,7 +106,7 @@ void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 	}
 }
 
-wstring fsutil::GetFileTitle(const wstring& strPath)
+wstring fsutil::getFileTitle(const wstring& strPath)
 {
 	wstring strTitle;
 	GetFileName(strPath, &strTitle, NULL);
@@ -94,7 +122,7 @@ wstring fsutil::GetFileExtName(const wstring& strPath)
 
 wstring fsutil::GetParentPath(const wstring& strPath)
 {
-	__AssertReturn(!strPath.empty(), L"");
+	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
 	if ('\\' == strNewPath.back() || '/' == strNewPath.back())
@@ -111,14 +139,14 @@ wstring fsutil::GetParentPath(const wstring& strPath)
 bool fsutil::CheckSubPath(const wstring& strPath, const wstring& strSubPath)
 {
 	auto size = strPath.size();
-	__EnsureReturn(size > 0, FALSE);
-	__EnsureReturn(size < strSubPath.size(), FALSE);
+	__EnsureReturn(size > 0, false);
+	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(0 == _wcsnicmp(strPath.c_str(), strSubPath.c_str(), size), FALSE);
+	__EnsureReturn(0 == _wcsnicmp(strPath.c_str(), strSubPath.c_str(), size), false);
 
-	__EnsureReturn(__BackSlant == *strPath.rbegin() || __BackSlant == strSubPath[size], FALSE);
+	__EnsureReturn(__BackSlant == *strPath.rbegin() || __BackSlant == strSubPath[size], false);
 
-	return TRUE;
+	return true;
 }
 
 wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBasePath)
@@ -136,7 +164,7 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBasePath)
 	return strPath.substr(strBasePath.size());
 }
 
-void fsutil::GetSysDrivers(list<wstring>& lstDrivers)
+void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
 {
 	#define MAX_DRIVE (_MAX_DRIVE + 1)
 
@@ -161,14 +189,14 @@ void fsutil::GetSysDrivers(list<wstring>& lstDrivers)
 	}
 }
 
-bool fsutil::DeletePath(const wstring& strPath, CWnd *pwndParent, const wstring& strTitle)
+bool fsutil_win::DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle)
 {
 	SHFILEOPSTRUCT FileOp;
 	ZeroMemory(&FileOp, sizeof(FileOp));
 		
 	FileOp.fFlags = FOF_NOCONFIRMATION;
 
-	FileOp.hwnd = pwndParent->GetSafeHwnd();
+	FileOp.hwnd = hwndParent;
 
 	if (!strTitle.empty())
 	{
@@ -182,18 +210,18 @@ bool fsutil::DeletePath(const wstring& strPath, CWnd *pwndParent, const wstring&
 	int nResult = SHFileOperation(&FileOp);
 	if (ERROR_SUCCESS == nResult)
 	{
-		return TRUE;
+		return true;
 	}
 
 	if (ERROR_FILE_NOT_FOUND == nResult || ERROR_FILE_NOT_FOUND == ::GetLastError())
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-bool fsutil::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
+bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 {
 #define MAX_BUFFER 1024
 	char lpBuffer[MAX_BUFFER];
@@ -208,7 +236,7 @@ bool fsutil::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	catch (...)
 	{
 	}	
-	__EnsureReturn(srcStream, FALSE);
+	__EnsureReturn(srcStream, false);
 
 	ofstream snkStream;
 	try
@@ -224,10 +252,10 @@ bool fsutil::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 		srcStream.close();
 		//(void)fclose(pfSrc);
 		//srcfile.Close();
-		return FALSE;
+		return false;
 	}
 
-	bool bResult = TRUE;
+	bool bResult = true;
 	try
 	{
 		while (true)
@@ -252,7 +280,7 @@ bool fsutil::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	}
 	catch (...)
 	{
-		bResult = FALSE;
+		bResult = false;
 	}
 
 	srcStream.close();
@@ -266,7 +294,7 @@ bool fsutil::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	return bResult;
 }
 
-void fsutil::ExplorePath(const list<wstring>& lstPath)
+void fsutil_win::ExplorePath(const list<wstring>& lstPath)
 {
 	wstring strExplore;
 	for (auto& strPath : lstPath)
@@ -291,45 +319,28 @@ void fsutil::ExplorePath(const list<wstring>& lstPath)
 	(void)::ShellExecute(NULL, L"open", L"explorer.exe", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
 }
 
-bool fsutil::CreateDir(const wstring& strDir)
+bool fsutil_win::CreateDir(const wstring& strDir)
 {
 	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
 	{
-		return TRUE;
+		return true;
 	}
 	
-	if (!CreateDir(GetParentPath(strDir)))
+	if (!CreateDir(fsutil::GetParentPath(strDir)))
 	{
-		return FALSE;
+		return false;
 	}
 
 	return CreateDir(strDir);
 }
 
-void fsutil::FindFile(const wstring& strPath, map<wstring, wstring>& mapFiles)
-{
-	CFileFind fileFind;
-	bool bExists = fileFind.FindFile(strPath.c_str());
-	while (bExists)
-	{
-		bExists = fileFind.FindNextFile();
-
-		if (fileFind.IsDots() || fileFind.IsSystem())
-		{
-			continue;
-		}
-		
-		mapFiles[(LPCTSTR)fileFind.GetFileName()] = (LPCTSTR)fileFind.GetFilePath();
-	}
-}
-
-bool fsutil::ExistsFile(const wstring& strFile)
+bool fsutil_win::ExistsFile(const wstring& strFile)
 {
 	WIN32_FIND_DATA ffd;
 	return (INVALID_HANDLE_VALUE != FindFirstFile(strFile.c_str(), &ffd));
 }
 
-bool fsutil::ExistsPath(const wstring& strDir)
+bool fsutil_win::ExistsPath(const wstring& strDir)
 {
 	return (-1 != ::GetFileAttributes(strDir.c_str()));
 }
@@ -370,7 +381,7 @@ static wstring getFileType(const wstring& extention)
 }
 
 // 获取文件夹图标
-HICON fsutil::getFolderIcon()
+HICON fsutil_win::getFolderIcon()
 {
 	SHFILEINFO info;
 	if (SHGetFileInfo(L"folder",
@@ -386,7 +397,7 @@ HICON fsutil::getFolderIcon()
 }
 
 // 获取文件图标
-HICON fsutil::getFileIcon(const wstring& extention)
+HICON fsutil_win::getFileIcon(const wstring& extention)
 {
 	if (!extention.empty())
 	{

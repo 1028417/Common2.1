@@ -1,120 +1,11 @@
 
 #pragma once
 
-#include <fsutil.h>
-
 #include <TreeCtrl.h>
 #include <ListCtrl.h>
 
-class CPathObject;
-typedef ptrlist<CPathObject*> TD_PathObjectList;
-
-class __CommonExt CPathObject: public CPath, public CListObject
-{
-public:
-	CPathObject()
-	{
-	}
-
-	CPathObject(const wstring& strDir)
-		: CPath(strDir)
-	{
-	}
-
-	CPathObject(const wstring& strDir, const TD_PathObjectList& lstSubPathObjects)
-		: CPath(strDir, TD_PathList(lstSubPathObjects))
-	{
-	}
-
-	CPathObject(CFileFind &FindFile, CPath *pParentPath)
-		: CPath(FindFile, pParentPath)
-	{
-	}
-
-	virtual ~CPathObject()
-	{
-	}
-
-protected:
-	virtual CPath *NewSubPath(CFileFind &FindFile, CPath *pParentPath)
-	{
-		return new CPathObject(FindFile, pParentPath);
-	}
-
-public:
-	CString GetFileModifyTime()
-	{
-		if (m_bDir)
-		{
-			return L"";
-		}
-
-		return CTime(m_modifyTime).Format(_T("%y-%m-%d %H:%M"));
-	}
-
-	void GenListItem(CObjectList& wndList, vector<wstring>& vecText, int& iImage) override
-	{
-		vecText.push_back(m_strName);
-		
-		vecText.push_back(to_wstring(m_uFileSize));
-		
-		vecText.push_back((LPCTSTR)GetFileModifyTime());
-	}
-};
-
-
-class CDirObject;
-
-typedef ptrlist<CDirObject*> TD_DirObjectList;
-
-class CDirObject : public CPathObject, public CTreeObject
-{
-public:
-	CDirObject(const wstring& strDir=L"")
-		: CPathObject(strDir)
-	{
-	}
-	
-	CDirObject(const wstring& strName, const TD_DirObjectList& lstSubDirObjects)
-		: CPathObject(strName, TD_PathList(lstSubDirObjects))
-	{
-	}
-
-	CDirObject(CFileFind &FindFile, CPath *pParentPath)
-		: CPathObject(FindFile, pParentPath)
-	{
-	}
-
-	virtual ~CDirObject()
-	{
-	}
-
-protected:
-	virtual CPath *NewSubPath(CFileFind &FindFile, CPath *pParentPath)
-	{
-		__EnsureReturn(FindFile.IsDirectory(), NULL);
-
-		return new CDirObject(FindFile, pParentPath);
-	}
-
-public:
-	CString GetTreeText()
-	{
-		return m_strName.c_str();
-	}
-
-	void GetTreeChilds(TD_TreeObjectList& lstChilds)
-	{
-		TD_PathList lstSubPaths;
-		this->GetSubPath(lstSubPaths);
-		
-		TD_DirObjectList lstDirObjects(lstSubPaths);
-		lstChilds.Insert(lstDirObjects);
-	}
-};
-
 template <typename T>
-class CDirTree: public T
+class CDirTreeT : public T
 {
 	struct tagDirSortor
 	{
@@ -125,12 +16,12 @@ class CDirTree: public T
 	};
 	
 public:
-	CDirTree()
+	CDirTreeT()
 		: m_pRootDir(NULL)
 	{
 	}
 
-	virtual	~CDirTree(void)
+	virtual	~CDirTreeT(void)
 	{
 	}
 
@@ -150,8 +41,8 @@ public:
 			(void)InsertObject(*m_pRootDir);
 			InsertChilds(m_pRootDir);
 
-			(void)__super::SelectItem(m_pRootDir->m_hTreeItem);
-			(void)__super::Expand(m_pRootDir->m_hTreeItem, TVE_EXPAND);
+			(void)__super::SelectItem(getTreeItem(m_pRootDir));
+			(void)ExpandObject(*m_pRootDir);
 		}
 		else
 		{
@@ -206,6 +97,9 @@ private:
 		}
 	}
 };
+
+using CDirTree = CDirTreeT<CObjectTree>;
+using CDirCheckTree = CDirTreeT<CObjectCheckTree>;
 
 
 class __CommonExt CPathList: public CObjectList

@@ -1,29 +1,20 @@
 ﻿  stdafx.cpp
-  fsdlg.cpp
   Guide.cpp
   img.cpp
   Main.cpp
-  Path.cpp
-  SQLiteDB.cpp
   DragDrop.cpp
-  fsutil.cpp
   LogList.cpp
   ListCtrl.cpp
   PathCtrl.cpp
-  ProFile.cpp
   ProgressDlg.cpp
   TreeCtrl.cpp
-  util.cpp
-  WorkThread.cpp
   App.cpp
   DockView.cpp
   MainWnd.cpp
   Page.cpp
-  shell.c
-  sqlite3.c
     正在创建库 ../lib/Common.lib 和对象 ../lib/Common.exp
   正在生成代码
-  All 6159 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 3328 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
-  Common.vcxproj -> D:\dev\c++\Common2.1\src\../bin/Common.dll
+  Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Common.dll
   Common.vcxproj -> ../build/Common.pdb (Full PDB)

@@ -3,8 +3,6 @@
 
 #include <TreeCtrl.h>
 
-#include "Resource.h"
-
 // CBaseTree
 
 CBaseTree::CBaseTree()
@@ -129,23 +127,23 @@ BOOL CBaseTree::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESUL
 }
 
 
-// CCheckObjectTree
+// CObjectCheckTree
 
-CCheckObjectTree::CCheckObjectTree()
+CObjectCheckTree::CObjectCheckTree()
 {
 }
 
-CCheckObjectTree::~CCheckObjectTree()
+CObjectCheckTree::~CObjectCheckTree()
 {
 	(void)m_StateImageList.DeleteImageList();
 }
 
-BEGIN_MESSAGE_MAP(CCheckObjectTree, CObjectTree)
+BEGIN_MESSAGE_MAP(CObjectCheckTree, CObjectTree)
 END_MESSAGE_MAP()
 
-// CCheckObjectTree 消息处理程序
+// CObjectCheckTree 消息处理程序
 
-BOOL CCheckObjectTree::InitCtrl()
+BOOL CObjectCheckTree::InitCtrl()
 {
 	HBITMAP hStateBitmap = g_ResModule.loadBitmap(IDB_CHECKTREE_STATE);
 	__AssertReturn(hStateBitmap, FALSE);
@@ -168,7 +166,7 @@ BOOL CCheckObjectTree::InitCtrl()
 	return TRUE;
 }
 
-HTREEITEM CCheckObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObject)
+HTREEITEM CObjectCheckTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObject)
 {
 	HTREEITEM hItem = __super::InsertObject(Object, pParentObject);
 
@@ -177,7 +175,7 @@ HTREEITEM CCheckObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pPare
 	return hItem;
 }
 
-void CCheckObjectTree::SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState)
+void CObjectCheckTree::SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState)
 {
 	(void)__super::SetItemState(hItem, INDEXTOSTATEIMAGEMASK(eCheckState), TVIS_STATEIMAGEMASK);
 
@@ -186,12 +184,12 @@ void CCheckObjectTree::SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckSta
 	this->SetParentItemsImageState(hItem);
 }
 
-E_CheckState CCheckObjectTree::GetItemCheckState(HTREEITEM hItem)
+E_CheckState CObjectCheckTree::GetItemCheckState(HTREEITEM hItem)
 {
 	return (E_CheckState)(__super::GetItemState(hItem, TVIS_STATEIMAGEMASK) >>12);
 }
 
-void CCheckObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects)
+void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 {
 	list<HTREEITEM> lstItems;
 	__super::GetAllItems(lstItems);
@@ -203,7 +201,7 @@ void CCheckObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 	}
 }
 
-void CCheckObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
+void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
 {
 	TD_TreeObjectList lstItemObjects;
 	__super::GetAllObjects(lstItemObjects);
@@ -211,14 +209,14 @@ void CCheckObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState
 	for (TD_TreeObjectList::iterator itObject = lstItemObjects.begin()
 		; itObject != lstItemObjects.end(); ++itObject)
 	{
-		if (eCheckState == this->GetItemCheckState((*itObject)->m_hTreeItem))
+		if (eCheckState == this->GetItemCheckState(getTreeItem(*itObject)))
 		{
 			lstObjects.push_back(*itObject);
 		}
 	}
 }
 
-void CCheckObjectTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
+void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 {
 	TD_TreeObjectList lstChekedObjects;
 	this->GetAllObjects(lstChekedObjects, CS_Checked);
@@ -227,7 +225,7 @@ void CCheckObjectTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	for (TD_TreeObjectList::iterator itObject = lstChekedObjects.begin()
 		; itObject != lstChekedObjects.end(); ++itObject)
 	{
-		hParentItem = this->GetParentItem((*itObject)->m_hTreeItem);
+		hParentItem = this->GetParentItem(getTreeItem(*itObject));
 
 		if (!util::ContainerFind(lstChekedObjects, this->GetItemObject(hParentItem)))
 		{
@@ -236,7 +234,7 @@ void CCheckObjectTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	}
 }
 
-BOOL CCheckObjectTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	HTREEITEM hItem = NULL;
 
@@ -272,7 +270,7 @@ BOOL CCheckObjectTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
-void CCheckObjectTree::SetChildItemsImageState(HTREEITEM hItem)
+void CObjectCheckTree::SetChildItemsImageState(HTREEITEM hItem)
 {
 	UINT uState = __super::GetItemState(hItem, TVIS_STATEIMAGEMASK);
 
@@ -291,7 +289,7 @@ void CCheckObjectTree::SetChildItemsImageState(HTREEITEM hItem)
 	}
 }
 
-void CCheckObjectTree::SetParentItemsImageState(HTREEITEM hItem)
+void CObjectCheckTree::SetParentItemsImageState(HTREEITEM hItem)
 {
 	HTREEITEM hParentItem = hItem;
 
@@ -350,9 +348,9 @@ void CObjectTree::SetRootObject(CTreeObject& Object)
 
 	(void)InsertObjectEx(Object);
 
-	(void)__super::SelectItem(Object.m_hTreeItem);
-	(void)__super::EnsureVisible(Object.m_hTreeItem);
-	(void)__super::Expand(Object.m_hTreeItem, TVE_EXPAND);
+	(void)__super::SelectItem(getTreeItem(Object));
+	(void)__super::EnsureVisible(getTreeItem(Object));
+	(void)ExpandObject(Object);
 }
 
 HTREEITEM CObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObject)
@@ -362,24 +360,27 @@ HTREEITEM CObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObj
 	{
 		TVITEM item;
 		ZeroMemory(&item, sizeof(item));
-		item.hItem = pParentObject->m_hTreeItem;
+		item.hItem = getTreeItem(pParentObject);
 		item.mask = TVIF_PARAM;
 		(void)::SendMessage(m_hWnd, TVM_GETITEM, 0, (LPARAM)&item);
 		
 		if ((CTreeObject*)item.lParam == pParentObject)
 		{
-			hParentItem = pParentObject->m_hTreeItem;
+			hParentItem = getTreeItem(pParentObject);
 		}
 	}
 	
-	return Object.m_hTreeItem = __super::InsertItem(hParentItem, Object.GetTreeText()
-		, (DWORD_PTR)&Object, Object.GetTreeImage());
+	HTREEITEM hTreeItem = __super::InsertItem(hParentItem
+		, Object.GetTreeText().c_str(), (DWORD_PTR)&Object, Object.GetTreeImage());
+	Object.m_hTreeItem = hTreeItem;
+	
+	return hTreeItem;
 }
 
 HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentObject)
 {
 	Object.m_hTreeItem = InsertObject(Object, pParentObject);
-	__EnsureReturn(Object.m_hTreeItem, NULL);
+	__EnsureReturn(getTreeItem(Object), NULL);
 
 	TD_TreeObjectList lstSubObjects;
 	Object.GetTreeChilds(lstSubObjects);
@@ -390,13 +391,13 @@ HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentO
 		(void)InsertObjectEx(**itSubObject, &Object);
 	}
 
-	return Object.m_hTreeItem;
+	return getTreeItem(Object);
 }
 
 void CObjectTree::UpdateImage(CTreeObject& Object)
 {
 	int iImage = Object.GetTreeImage();
-	SetItemImage(Object.m_hTreeItem, iImage, iImage);
+	SetItemImage(getTreeItem(Object), iImage, iImage);
 	this->Invalidate(FALSE);
 }
 
@@ -418,9 +419,9 @@ CTreeObject *CObjectTree::GetItemObject(HTREEITEM hItem)
 
 CTreeObject *CObjectTree::GetParentObject(CTreeObject& Object)
 {
-	__AssertReturn(Object.m_hTreeItem, NULL);
+	__AssertReturn(getTreeItem(Object), NULL);
 	
-	HTREEITEM hItemParent = __super::GetParentItem(Object.m_hTreeItem);
+	HTREEITEM hItemParent = __super::GetParentItem(getTreeItem(Object));
 	__EnsureReturn(hItemParent, NULL);
 
 	return this->GetItemObject(hItemParent);
@@ -451,7 +452,7 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR)
 		CTreeObject *pObject = GetItemObject(pTVDispInfo->item.hItem);
 		__AssertReturn(pObject, TRUE);
 
-		__EnsureReturn(cstrNewName != pObject->GetTreeText(), TRUE);
+		__EnsureReturn(cstrNewName != pObject->GetTreeText().c_str(), TRUE);
 	}
 
 	return __super::handleNMNotify(NMHDR);

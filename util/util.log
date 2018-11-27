@@ -1,0 +1,15 @@
+﻿  WorkThread.cpp
+  fsdlg.cpp
+  Path.cpp
+  ProFile.cpp
+  fsutil.cpp
+  SQLiteDB.cpp
+  util.cpp
+  shell.c
+  sqlite3.c
+    正在创建库 ../lib/util.lib 和对象 ../lib/util.exp
+  正在生成代码
+  All 3285 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/util.dll
+  util.vcxproj -> ../build\util/util.pdb (Full PDB)

@@ -33,26 +33,6 @@ enum class E_ListViewType
 	LVT_Report = LVS_REPORT
 };
 
-class __CommonExt CListObject
-{
-public:
-	virtual void GenListItem(class CObjectList& wndList, vector<wstring>& vecText, int& iImage)
-	{
-	}
-
-	virtual CString GetRenameText()
-	{
-		return L"";
-	}
-
-	virtual bool OnListItemRename(const wstring& strNewName)
-	{
-		return false;
-	}
-};
-
-typedef ptrlist<CListObject*> TD_ListObjectList;
-
 // CObjectList
 
 struct __CommonExt tagListColumn

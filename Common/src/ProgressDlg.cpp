@@ -3,8 +3,6 @@
 
 #include <ProgressDlg.h>
 
-#include "resource.h"
-
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);

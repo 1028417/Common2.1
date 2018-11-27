@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "fsutil.h"
+
 //CPath
 class CPath;
 typedef ptrlist<CPath*> TD_PathList;
 
-class __CommonExt CPath
+class __UtilExt CPath
 {
 	friend struct tagPathSortor;
 
@@ -28,16 +30,15 @@ public:
 		m_plstSubPath->Insert(lstSubPath);
 	}
 	
-	CPath(CFileFind& fileFind, CPath *pParentPath)
-		: m_bDir(fileFind.IsDirectory())
-		, m_strName(fileFind.GetFileName())
-		, m_uFileSize(fileFind.GetLength())
+	CPath(const tagFindData& findData, CPath *pParentPath)
+		: m_bDir(findData.isDir())
+		, m_strName(findData.getFileName())
+		, m_uFileSize(findData.data.nFileSizeLow)
+		, m_modifyTime(findData.data.ftLastWriteTime)
 		, m_pParentPath(pParentPath)
 	{
-		//(void)fileFind.GetCreationTime(&m_createTime);
-		(void)fileFind.GetLastWriteTime(&m_modifyTime);
 	}
-
+	
 	virtual ~CPath()
 	{
 		ClearSubPath();
@@ -58,11 +59,11 @@ protected:
 	TD_PathList *m_plstSubPath = NULL;
 
 protected:
-	virtual CPath* NewSubPath(CFileFind &FindFile, CPath *pParentPath)
+	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentPath)
 	{
-		return new CPath(FindFile, pParentPath);
+		return new CPath(findData, pParentPath);
 	}
-
+	
 public:
 	wstring GetName();
 

@@ -44,7 +44,7 @@ struct tagHotkeyInfo
 	}
 };
 
-class CResModule
+class __CommonExt CResModule
 {
 public:
 	CResModule(HINSTANCE hInstance=NULL)
@@ -66,93 +66,15 @@ private:
 	}
 
 public:
-	void ActivateResource()
-	{
-		HINSTANCE hInstance = GetHInstance();
-		__Assert(hInstance);
+	void ActivateResource();
 
-		AfxSetResourceHandle(hInstance);
-	}
+	HICON loadIcon(UINT uID);
 
-	HICON loadIcon(UINT uID)
-	{
-		HINSTANCE hInstance = GetHInstance();
-		__AssertReturn(hInstance, NULL);
+	HBITMAP loadBitmap(UINT uID);
 
-		HICON hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(uID));
-		__AssertReturn(hIcon, NULL);
+	HMENU loadMenu(UINT uID);
 
-		return hIcon;
-	}
-
-	HBITMAP loadBitmap(UINT uID)
-	{
-		HINSTANCE hInstance = GetHInstance();
-		__AssertReturn(hInstance, NULL);
-
-		HBITMAP hBitmap = ::LoadBitmap(hInstance, MAKEINTRESOURCE(uID));
-		__AssertReturn(hBitmap, NULL);
-		
-		return hBitmap;
-	}
-
-	HMENU loadMenu(UINT uID)
-	{
-		HINSTANCE hInstance = GetHInstance();
-		__AssertReturn(hInstance, NULL);
-
-		HMENU hMenu = ::LoadMenu(hInstance, MAKEINTRESOURCE(uID));
-		__AssertReturn(hMenu, NULL);
-
-		return hMenu;
-	}
-
-	LPCDLGTEMPLATE loadDialog(UINT uID)
-	{
-		HINSTANCE hInstance = GetHInstance();
-		__AssertReturn(hInstance, NULL);
-
-		HRSRC hRes = ::FindResource(hInstance, MAKEINTRESOURCE(uID), RT_DIALOG);
-		__AssertReturn(hRes, NULL);
-		
-		HGLOBAL hGlobal = ::LoadResource(hInstance, hRes);
-		__AssertReturn(hGlobal, NULL);
-		
-		LPCDLGTEMPLATE lpRes = (LPCDLGTEMPLATE)LockResource(hGlobal);
-		__AssertReturn(lpRes, NULL);
-
-		return lpRes;
-	}
-};
-
-class CResGuide
-{
-public:
-	CResGuide(CResModule& resModule)
-	{
-		m_hPreInstance = AfxGetResourceHandle();
-		resModule.ActivateResource();
-	}
-
-	CResGuide(CResModule *pResModule)
-	{
-		if (NULL != pResModule)
-		{
-			m_hPreInstance = AfxGetResourceHandle();
-			pResModule->ActivateResource();
-		}
-	}
-
-	~CResGuide()
-	{
-		if (NULL != m_hPreInstance)
-		{
-			AfxSetResourceHandle(m_hPreInstance);
-		}
-	}
-
-private:
-	HINSTANCE m_hPreInstance = NULL;
+	LPCDLGTEMPLATE loadDialog(UINT uID);
 };
 
 class CMainWnd;
@@ -190,14 +112,48 @@ protected:
 struct tagMainWndInfo;
 
 
+class IView
+{
+public:
+	IView() {}
+
+	virtual ~IView() {}
+
+public:
+	virtual CMainWnd* init() = 0;
+
+	virtual bool show() = 0;
+
+	virtual bool handleCommand(UINT uID)
+	{
+		return false;
+	}
+
+	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
+	{
+		return false;
+	}
+
+	virtual void close() {}
+};
+
 class IController
 {
 public:
-	IController() {}
+	IController(IView& view)
+		: m_view(view)
+	{
+	}
 
-	virtual ~IController() {}
+private:
+	IView& m_view;
 
 public:
+	IView& getView()
+	{
+		return m_view;
+	}
+
 	virtual bool init()
 	{
 		return true;
@@ -228,46 +184,16 @@ public:
 	}
 };
 
-class IView
-{
-public:
-	IView() {}
-
-	virtual ~IView() {}
-
-public:
-	virtual CMainWnd* init() = 0;
-
-	virtual bool show() = 0;
-
-	virtual bool handleCommand(UINT uID)
-	{
-		return false;
-	}
-
-	virtual bool handleHotkey(const tagHotkeyInfo& HotkeyInfo)
-	{
-		return false;
-	}
-
-	virtual void close() {}
-};
-
 class __CommonExt CMainApp: public CModuleApp
 {
 public:
-	CMainApp(IView& view, IController& Controller)
-		: m_view(view)
-		, m_Controller(Controller)
-	{
-	}
-
-	virtual ~CMainApp() {}
-
 	static CMainApp* GetMainApp()
 	{
 		return (CMainApp*)AfxGetApp();
 	}
+
+	virtual IView& getView() = 0;
+	virtual IController& getController() = 0;
 
 	wstring GetAppPath(const wstring& strPath)
 	{
@@ -275,9 +201,6 @@ public:
 	}
 
 private:
-	IView& m_view;
-	IController& m_Controller;
-
 	wstring m_strAppPath;
 
 	typedef vector<CModuleApp*> ModuleVector;

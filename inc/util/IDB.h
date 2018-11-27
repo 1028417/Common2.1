@@ -3,6 +3,9 @@
 #include <string>
 using namespace std;
 
+typedef unsigned int UINT;
+typedef int BOOL;
+
 interface IDBResult
 {
 	virtual UINT GetColumnCount() = 0;
@@ -29,7 +32,7 @@ interface IDB
 	virtual bool CommitTrans() = 0;
 };
 
-class __CommonExt CDBTransGuide
+class __UtilExt CDBTransGuide
 {
 private:
 	IDB *m_pDB = NULL;

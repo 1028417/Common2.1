@@ -52,38 +52,6 @@ protected:
 
 //CObjectTree
 
-class CTreeObject;
-
-typedef ptrlist<CTreeObject*> TD_TreeObjectList;
-
-class __CommonExt CTreeObject
-{
-public:
-	CTreeObject()
-	{
-		m_hTreeItem = NULL;
-	}
-
-public:
-	HTREEITEM m_hTreeItem;
-
-	virtual CString GetTreeText()
-	{
-		return _T("");
-	};
-
-	virtual int GetTreeImage()
-	{
-		return 0;
-	}
-
-	virtual void GetTreeChilds(TD_TreeObjectList& lstChilds)
-	{
-		//do nothing
-	}
-};
-
-
 class __CommonExt CObjectTree: public CBaseTree
 {
 public:
@@ -92,6 +60,16 @@ public:
 	virtual ~CObjectTree();
 
 public:
+	static HTREEITEM getTreeItem(const CTreeObject& Object)
+	{
+		return (HTREEITEM)Object.m_hTreeItem;
+	}
+
+	static HTREEITEM getTreeItem(const CTreeObject *pObject)
+	{
+		return pObject ? (HTREEITEM)pObject->m_hTreeItem : NULL;
+	}
+
 	void SetRootObject(CTreeObject& Object);
 
 	virtual HTREEITEM InsertObject(CTreeObject& Object, CTreeObject *pParentObject=NULL);
@@ -107,6 +85,26 @@ public:
 	
 	void GetAllObjects(TD_TreeObjectList& lstObjects);
 
+	BOOL EnsureVisible(const CTreeObject& Object)
+	{
+		return __super::EnsureVisible(getTreeItem(Object));
+	}
+
+	BOOL SelectObject(const CTreeObject& Object)
+	{
+		return __super::SelectItem(getTreeItem(Object));
+	}
+
+	BOOL ExpandObject(const CTreeObject& Object)
+	{
+		return __super::Expand(getTreeItem(Object), TVE_EXPAND);
+	}
+
+	CEdit* EditObject(const CTreeObject& Object)
+	{
+		return __super::EditLabel(getTreeItem(Object));
+	}
+	
 private:
 	virtual BOOL handleNMNotify(NMHDR& NMHDR) override;
 };
@@ -120,12 +118,12 @@ enum E_CheckState
 	, CS_Grayed
 };
 
-// CCheckObjectTree
-class __CommonExt CCheckObjectTree: public CObjectTree
+// CObjectCheckTree
+class __CommonExt CObjectCheckTree : public CObjectTree
 {
 public:
-	CCheckObjectTree();
-	virtual ~CCheckObjectTree();
+	CObjectCheckTree();
+	virtual ~CObjectCheckTree();
 
 	DECLARE_MESSAGE_MAP()
 

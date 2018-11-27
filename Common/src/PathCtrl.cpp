@@ -3,8 +3,6 @@
 
 #include <PathCtrl.h>
 
-#include "Resource.h"
-
 //CPathList
 
 void CPathList::PreSubclassWindow()

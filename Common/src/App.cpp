@@ -5,6 +5,64 @@
 
 #include "MainWnd.h"
 
+void CResModule::ActivateResource()
+{
+	HINSTANCE hInstance = GetHInstance();
+	__Assert(hInstance);
+
+	AfxSetResourceHandle(hInstance);
+}
+
+HICON CResModule::loadIcon(UINT uID)
+{
+	HINSTANCE hInstance = GetHInstance();
+	__AssertReturn(hInstance, NULL);
+
+	HICON hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(uID));
+	__AssertReturn(hIcon, NULL);
+
+	return hIcon;
+}
+
+HBITMAP CResModule::loadBitmap(UINT uID)
+{
+	HINSTANCE hInstance = GetHInstance();
+	__AssertReturn(hInstance, NULL);
+
+	HBITMAP hBitmap = ::LoadBitmap(hInstance, MAKEINTRESOURCE(uID));
+	__AssertReturn(hBitmap, NULL);
+
+	return hBitmap;
+}
+
+HMENU CResModule::loadMenu(UINT uID)
+{
+	HINSTANCE hInstance = GetHInstance();
+	__AssertReturn(hInstance, NULL);
+
+	HMENU hMenu = ::LoadMenu(hInstance, MAKEINTRESOURCE(uID));
+	__AssertReturn(hMenu, NULL);
+
+	return hMenu;
+}
+
+LPCDLGTEMPLATE CResModule::loadDialog(UINT uID)
+{
+	HINSTANCE hInstance = GetHInstance();
+	__AssertReturn(hInstance, NULL);
+
+	HRSRC hRes = ::FindResource(hInstance, MAKEINTRESOURCE(uID), RT_DIALOG);
+	__AssertReturn(hRes, NULL);
+
+	HGLOBAL hGlobal = ::LoadResource(hInstance, hRes);
+	__AssertReturn(hGlobal, NULL);
+
+	LPCDLGTEMPLATE lpRes = (LPCDLGTEMPLATE)LockResource(hGlobal);
+	__AssertReturn(lpRes, NULL);
+
+	return lpRes;
+}
+
 // CMainApp
 
 BOOL CModuleApp::InitInstance()
@@ -36,15 +94,15 @@ BOOL CMainApp::InitInstance()
 	m_strAppPath = fsutil::GetParentPath(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
-	CMainWnd *pMainWnd = m_view.init();
+	CMainWnd *pMainWnd = getView().init();
 	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
 	m_pMainWnd = pMainWnd;
 
-	__AssertReturn(m_Controller.init(), FALSE);
+	__AssertReturn(getController().init(), FALSE);
 
-	__AssertReturn(m_view.show(), FALSE);
+	__AssertReturn(getView().show(), FALSE);
 
-	__AssertReturn(m_Controller.start(), FALSE);
+	__AssertReturn(getController().start(), FALSE);
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
 	{
@@ -161,12 +219,12 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainApp::OnCommand(UINT uID)
 {
-	if (m_view.handleCommand(uID))
+	if (getView().handleCommand(uID))
 	{
 		return TRUE;
 	}
 
-	if (m_Controller.handleCommand(uID))
+	if (getController().handleCommand(uID))
 	{
 		return TRUE;
 	}
@@ -228,13 +286,13 @@ bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 	}
 	else
 	{
-		if (m_view.handleHotkey(HotkeyInfo))
+		if (getView().handleHotkey(HotkeyInfo))
 		{
 			bResult = true;
 		}
 		else
 		{
-			if (m_Controller.handleHotkey(HotkeyInfo))
+			if (getController().handleHotkey(HotkeyInfo))
 			{
 				bResult = true;
 			}
@@ -270,9 +328,9 @@ BOOL CMainApp::Quit()
 		}
 	}
 
-	m_view.close();
+	getView().close();
 
-	m_Controller.stop();
+	getController().stop();
 	
 	if (NULL != m_pMainWnd)
 	{
@@ -308,7 +366,7 @@ LRESULT CMainApp::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	CWaitCursor WaitCursor;
 
-	LRESULT lResult = pMainApp->m_Controller.handleMessage(uMsg, wParam, lParam);
+	LRESULT lResult = pMainApp->getController().handleMessage(uMsg, wParam, lParam);
 	if (0 != lResult)
 	{
 		return lResult;
@@ -333,7 +391,7 @@ void CMainApp::SendMessageEx(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	CWaitCursor WaitCursor;
 
-	(void)pMainApp->m_Controller.handleMessage(uMsg, wParam, lParam);
+	(void)pMainApp->getController().handleMessage(uMsg, wParam, lParam);
 
 	for (auto pModule : pMainApp->m_vctModules)
 	{

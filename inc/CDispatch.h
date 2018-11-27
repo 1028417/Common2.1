@@ -530,7 +530,7 @@ public:
 			pRet = Obj.GetPropEx("Properties", &params);
 			LPWSTR s=0;
 			pRet->GetValue(OLEVT_String, &s);
-			AfxMessageBox(CString(s));
+			//AfxMessageBox(CString(s));
 			ASSERT(pRet);
 		}
 	}

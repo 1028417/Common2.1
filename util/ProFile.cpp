@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include <util.h>
 
 #include <ProFile.h>
 
@@ -17,7 +17,7 @@ CProFile::~CProFile()
 BOOL CProFile::ReadString(const string& strSection, const string& strKey, string& strValue)
 {
 	CHAR pszValue[MAX_BUFFER];
-	__AssertReturn(0 != ::GetPrivateProfileStringA(strSection.c_str(), strKey.c_str(), strValue.c_str()
+	__EnsureReturn(0 != ::GetPrivateProfileStringA(strSection.c_str(), strKey.c_str(), strValue.c_str()
 		, pszValue, MAX_BUFFER, m_strIniPath.c_str())
 	, FALSE);
 	

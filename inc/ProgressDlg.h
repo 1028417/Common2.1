@@ -1,8 +1,5 @@
 #pragma once
 
-#include <WorkThread.h>
-
-
 #define WM_SetProgress WM_USER+1
 #define WM_SetStatusText WM_USER+2
 #define WM_EndProgress WM_USER+3

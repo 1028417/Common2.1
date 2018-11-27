@@ -1,7 +1,7 @@
 
 #pragma once
 
-class __CommonExt CProFile
+class __UtilExt CProFile
 {
 public:
 	CProFile(const string& strIniPath);

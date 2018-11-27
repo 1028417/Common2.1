@@ -1,10 +1,7 @@
 
-#include "stdafx.h"
+#include <util.h>
 
 #include <WorkThread.h>
-
-#include <App.h>
-
 
 // CWorkThread
 
@@ -13,7 +10,7 @@ DWORD WINAPI CWorkThread::ThreadProc(LPVOID lpThreadParam)
 	::Sleep(10);
 
 	tagWorkThreadInfo* pThreadInfo = (tagWorkThreadInfo*)lpThreadParam;
-	__AssertReturn(pThreadInfo, 0);
+	__EnsureReturn(pThreadInfo, 0);
 
 	pThreadInfo->pThread->WorkThreadProc(*pThreadInfo);
 
@@ -25,7 +22,6 @@ DWORD WINAPI CWorkThread::ThreadProc(LPVOID lpThreadParam)
 CWorkThread::CWorkThread()
 {
 	m_hExitEvent = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-	ASSERT(m_hExitEvent);
 }
 
 CWorkThread::~CWorkThread()
@@ -105,7 +101,7 @@ void CWorkThread::WaitForExit()
 	while (TRUE)
 	{
 		//∑¿÷πÀ¿À¯
-		CMainApp::DoEvents();
+		//CMainApp::DoEvents();
 
 		::Sleep(100);
 

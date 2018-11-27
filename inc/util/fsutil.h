@@ -1,9 +1,31 @@
 
 #pragma once
 
-class __CommonExt fsutil
+struct __UtilExt tagFindData : WIN32_FIND_DATAW
+{
+	tagFindData(const WIN32_FIND_DATAW& t_data)
+		: data(t_data)
+	{
+	}
+
+	wstring getFileName() const
+	{
+		return data.cFileName;
+	}
+
+	bool isDir() const
+	{
+		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+	}
+
+	const WIN32_FIND_DATAW& data;
+};
+
+class __UtilExt fsutil
 {
 public:
+	static void FindFile(const wstring& strFindPath, const function<bool(const tagFindData& findData)>& cb);
+
 	static int GetFileSize(const wstring& strFilePath);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
@@ -12,7 +34,7 @@ public:
 
 	static void GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName);
 
-	static wstring GetFileTitle(const wstring& strPath);
+	static wstring getFileTitle(const wstring& strPath);
 
 	static wstring GetFileExtName(const wstring& strPath);
 
@@ -21,18 +43,20 @@ public:
 	static bool CheckSubPath(const wstring& strPath, const wstring& strSubPath);
 
 	static wstring GetOppPath(const wstring& strPath, const wstring strBasePath);
+};
 
+class __UtilExt fsutil_win
+{
+public:
 	static void GetSysDrivers(list<wstring>& lstDrivers);
 	
-	static bool DeletePath(const wstring& strPath, CWnd *pwndParent=NULL, const wstring& strTitle=L"");
+	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
 	static bool CopyFile(const wstring& strSrcFile, const wstring& strSnkFile);
 
 	static void ExplorePath(const list<wstring>& lstPath);
 
 	static bool CreateDir(const wstring& strDir);
-
-	static void FindFile(const wstring& strPath, map<wstring, wstring>& mapFiles);
 
 	static bool ExistsFile(const wstring& strFile);
 	static bool ExistsPath(const wstring& strDir);
@@ -42,7 +66,3 @@ public:
 	// 获取文件图标
 	static HICON getFileIcon(const wstring& extention);
 };
-
-#include <Path.h>
-
-#include <fsdlg.h>

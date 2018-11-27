@@ -2,7 +2,35 @@
 
 #include <Page.h>
 
-// CWndRedrawGuide
+class __CommonExt CResGuide
+{
+public:
+	CResGuide(CResModule& resModule)
+	{
+		m_hPreInstance = AfxGetResourceHandle();
+		resModule.ActivateResource();
+	}
+
+	CResGuide(CResModule *pResModule)
+	{
+		if (NULL != pResModule)
+		{
+			m_hPreInstance = AfxGetResourceHandle();
+			pResModule->ActivateResource();
+		}
+	}
+
+	~CResGuide()
+	{
+		if (NULL != m_hPreInstance)
+		{
+			AfxSetResourceHandle(m_hPreInstance);
+		}
+	}
+
+private:
+	HINSTANCE m_hPreInstance = NULL;
+};
 
 class __CommonExt CRedrawLockGuide
 {

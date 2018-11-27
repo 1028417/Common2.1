@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include <util.h>
 
 #include <Path.h>
 
@@ -200,39 +200,23 @@ bool CPath::FindFile()
 		return true;
 	}
 
-	CString cstrFind = this->GetPath().c_str();
-	cstrFind.Append(L"\\*");
-	CFileFind fileFind;
-	bool bExists = fileFind.FindFile(cstrFind);
-	if (!bExists)
-	{
-		return false;
-	}
-	
-	m_plstSubPath = new TD_PathList();
-	
 	CPath *pSubPath = NULL;
 
 	TD_PathList lstSubPath;
-	while (bExists)
-	{
-		bExists = fileFind.FindNextFile();
-
-		if (fileFind.IsDots() || fileFind.IsSystem())
-		{
-			continue;
-		}
-
-		pSubPath = NewSubPath(fileFind, this);
+	fsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
+		pSubPath = NewSubPath(findData, this);
 		if (pSubPath)
 		{
 			lstSubPath.push_back(pSubPath);
 		}
-	}
+		return true;
+	});
 
 	lstSubPath.sort(tagPathSortor());
-	
+
+	m_plstSubPath = new TD_PathList();
 	m_plstSubPath->swap(lstSubPath);
+
 	return true;
 }
 

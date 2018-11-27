@@ -3,8 +3,6 @@
 
 #include <ListCtrl.h>
 
-#include "Resource.h"
-
 BEGIN_MESSAGE_MAP(CHeader, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 END_MESSAGE_MAP()
@@ -447,7 +445,7 @@ BOOL CObjectList::DeleteObject(const CListObject *pObject)
 
 void CObjectList::GenListItem(CListObject& Object, vector<wstring>& vecText, int& iImage)
 {
-	Object.GenListItem(*this, vecText, iImage);
+	Object.GenListItem(E_ListViewType::LVT_Report == this->GetView(), vecText, iImage);
 }
 
 void CObjectList::SetItemImage(int nItem, int iImage)
@@ -661,7 +659,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		CEdit *pwndEdit = this->GetEditControl();
 		__AssertBreak(pwndEdit);
 
-		m_cstrRenameText = pObject->GetRenameText();
+		m_cstrRenameText = pObject->GetRenameText().c_str();
 		if (m_cstrRenameText.IsEmpty())
 		{
 			m_cstrRenameText = pLVDispInfo->item.pszText;

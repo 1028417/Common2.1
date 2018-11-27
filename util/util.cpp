@@ -1,5 +1,65 @@
 
-#include "stdafx.h"
+#include <util.h>
+
+void util::getCurrentTime(int& nHour, int& nMinute)
+{
+	tm atm;
+	getCurrentTime(atm);
+
+	nHour = atm.tm_hour;
+	nMinute = atm.tm_min;
+}
+
+void util::getCurrentTime(tm& atm)
+{
+	time_t time(NULL);
+	(void)_localtime64_s(&atm, &time);
+}
+
+wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
+{
+	SYSTEMTIME sysTime;
+	SYSTEMTIME localTime;
+	if (!FileTimeToSystemTime(&fileTime, &sysTime)
+		|| !SystemTimeToTzSpecificLocalTime(nullptr, &sysTime, &localTime))
+	{
+		return L"";
+	}
+
+	tm atm;
+	atm.tm_year = localTime.wYear - 1900;     // tm_year is 1900 based
+	atm.tm_mon = localTime.wMonth - 1;        // tm_mon is 0 based
+	atm.tm_mday = localTime.wDay;
+	atm.tm_hour = localTime.wHour;
+	atm.tm_min = localTime.wMinute;
+	atm.tm_sec = 0;
+	atm.tm_isdst = -1;
+
+	return FormatTime(atm, strFormat);
+}
+
+wstring util::FormatTime(time_t time, const wstring& strFormat)
+{
+	tm atm;
+	if (_localtime64_s(&atm, &time) != 0)
+	{
+		return L"";
+	}
+
+	return FormatTime(atm, strFormat);
+}
+
+wstring util::FormatTime(const tm& atm, const wstring& strFormat)
+{
+	wchar_t lpBuff[24];
+	memset(lpBuff, 0, sizeof lpBuff);
+	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
+	{
+		return L"";
+	}
+
+	return lpBuff;
+}
 
 wstring util::trim(const wstring& strText, char chr)
 {
@@ -58,14 +118,17 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 	}
 }
 
-BOOL util::StrCompareIgnoreCase(const wstring& str1, const wstring& str2)
+bool util::StrCompareIgnoreCase(const wstring& str1, const wstring& str2)
 {
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 }
 
 int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
 {
-	__EnsureReturn(str.size() >= strToFind.size(), -1);
+	if (str.size() < strToFind.size())
+	{
+		return -1;
+	}
 
 	wstring::size_type pos = StrLowerCase(str).find(StrLowerCase(strToFind));
 	if (wstring::npos == pos)

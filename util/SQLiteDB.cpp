@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include <util.h>
 
 #include <SQLiteDB.h>
 
@@ -30,14 +30,14 @@ CSQLiteDBResult::~CSQLiteDBResult()
 
 UINT CSQLiteDBResult::GetColumnCount()
 {
-	__AssertReturn(this, 0);
+	__EnsureReturn(this, 0);
 
 	return m_uColumnCount;
 }
 
 UINT CSQLiteDBResult::GetRowCount()
 {
-	__AssertReturn(this, 0);
+	__EnsureReturn(this, 0);
 
 	return m_uRowCount;
 }
@@ -64,10 +64,10 @@ BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
 
 BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strValue)
 {
-	__AssertReturn(this, NULL);
-	__AssertReturn(m_uRowCount && m_uColumnCount, NULL);
-	__AssertReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, NULL);
-	__AssertReturn(m_pData, FALSE);
+	__EnsureReturn(this, NULL);
+	__EnsureReturn(m_uRowCount && m_uColumnCount, NULL);
+	__EnsureReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, NULL);
+	__EnsureReturn(m_pData, FALSE);
 
 	char* pszValue = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
 	if (NULL != pszValue)
@@ -106,12 +106,12 @@ int CSQLiteDB::GetStatus()
 
 BOOL CSQLiteDB::Connect(const string& strPara)
 {
-	__AssertReturn(!m_hDB, FALSE);
+	__EnsureReturn(!m_hDB, FALSE);
 
 	string strDBPath = !strPara.empty()?strPara:m_strDBPath;
 	
-	__AssertReturn(SQLITE_OK == sqlite3_open(strDBPath.c_str(), (sqlite3**)&m_hDB), FALSE);
-	__AssertReturn(m_hDB, FALSE);
+	__EnsureReturn(SQLITE_OK == sqlite3_open(strDBPath.c_str(), (sqlite3**)&m_hDB), FALSE);
+	__EnsureReturn(m_hDB, FALSE);
 
 	return TRUE;
 }
@@ -129,7 +129,7 @@ BOOL CSQLiteDB::Disconnect()
 
 BOOL CSQLiteDB::Execute(const wstring& strSql)
 {
-	__AssertReturn(m_hDB, FALSE);
+	__EnsureReturn(m_hDB, FALSE);
 	
 	char *pszError = NULL;
 	if (SQLITE_OK != sqlite3_exec((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), 0, 0, &pszError))
@@ -147,7 +147,7 @@ BOOL CSQLiteDB::Execute(const wstring& strSql)
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)
 {
-	__AssertReturn(m_hDB, NULL);
+	__EnsureReturn(m_hDB, NULL);
 
 	char ** pData = NULL;
 
@@ -163,7 +163,7 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql)
 		m_strError = pszError;
 	}
 
-	__AssertReturn(SQLITE_OK == nResult && pData, NULL);
+	__EnsureReturn(SQLITE_OK == nResult && pData, NULL);
 	
 	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
 

@@ -12,7 +12,7 @@ struct tagWorkThreadInfo
 	CWorkThread *pThread;
 };
 
-class __CommonExt CWorkThread
+class __UtilExt CWorkThread
 {
 public:
 	CWorkThread();

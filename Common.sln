@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{D01A8155-3656-449D-B4DB-DC012BE2259E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8} = {12FAB075-6B11-4796-AB2F-4ECAAEF532A8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "util", "util\util.vcxproj", "{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+		Template|x86 = Template|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Debug|x86.ActiveCfg = Debug|Win32
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Debug|x86.Build.0 = Debug|Win32
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Release|x86.ActiveCfg = Release|Win32
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Release|x86.Build.0 = Release|Win32
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Template|x86.ActiveCfg = Template|Win32
+		{D01A8155-3656-449D-B4DB-DC012BE2259E}.Template|x86.Build.0 = Template|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Debug|x86.ActiveCfg = Debug|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Debug|x86.Build.0 = Debug|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Release|x86.ActiveCfg = Release|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Release|x86.Build.0 = Release|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Template|x86.ActiveCfg = Template|Win32
+		{12FAB075-6B11-4796-AB2F-4ECAAEF532A8}.Template|x86.Build.0 = Template|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{36d43836-b61f-4f01-9c8a-546fbb266e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\app">
+      <UniqueIdentifier>{b801be60-58f7-459e-a3fd-87f05456e824}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ctrl">
+      <UniqueIdentifier>{2eb6db22-bf61-4127-a54f-f4e4161d7346}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="src\App.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DockView.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainWnd.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Page.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\img.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ListCtrl.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogList.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PathCtrl.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TreeCtrl.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DragDrop.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Guide.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProgressDlg.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="..\inc\App.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\DockView.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\MainWnd.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\Page.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\img.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\ListCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\PathCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\TreeCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\LogList.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\CDispatch.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\DragDrop.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\Guide.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\ProgressDlg.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\Common.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Common.rc" />
+  </ItemGroup>
+</Project>
