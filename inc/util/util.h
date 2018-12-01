@@ -37,6 +37,8 @@
 		break; \
 	}
 
+using namespace std;
+
 #include <string>
 #include <string>
 #include <sstream>
@@ -49,13 +51,15 @@
 #include <algorithm>
 
 #include <functional>
+using fn_voidvoid = function<void()>;
 
 #include <thread>
 #include <future>
 
 #include <fstream>
 
-using namespace std;
+#include <jstl/jstl.h>
+using namespace NS_JSTL;
 
 class __UtilExt util
 {
@@ -71,6 +75,7 @@ public:
 
 	static void SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim=false);
 
+	static int StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs);
 	static bool StrCompareIgnoreCase(const wstring& str1, const wstring& str2);
 
 	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
@@ -107,168 +112,26 @@ public:
 	template <class _C>
 	static wstring ContainerToStr(const _C& container, const wstring& strSplitor)
 	{
-		wstringstream strmResult;
-
+		wstringstream ssResult;
 		for (_C::const_iterator it = container.begin(); ; )
 		{
-			strmResult << *it;
+			ssResult << *it;
 			
 			it++;
 			__EnsureBreak(it != container.end());
 
-			strmResult << strSplitor;
+			ssResult << strSplitor;
 		}
 
-		return strmResult.str();
+		return ssResult.str();
 	}
 };
 
-template <class _PtrType>
-class ptrlist : public list<_PtrType>
+struct __UtilExt tagCNSortor
 {
-public:
-	ptrlist()
+	bool operator()(const wstring& lhs, const wstring& rhs) const
 	{
-	}
-	
-	ptrlist(_PtrType ptr)
-	{
-		Insert(ptr);
-	}
-
-	template <typename _RefType>
-	ptrlist(const list<_RefType*>& container)
-	{
-		Insert(container);
-	}
-
-	template <typename _RefType>
-	ptrlist(const list<_RefType>& container)
-	{
-		Insert(container);
-	}
-	
-public:
-	void Insert(_PtrType ptr)
-	{
-		push_back(ptr);
-	}
-
-	template <typename _RefType>
-	void Insert(const list<_RefType*>& container)
-	{
-		for (list<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const list<_RefType>& container)
-	{
-		for (list<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)(_RefType*)&*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const vector<_RefType*>& container)
-	{
-		for (vector<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const vector<_RefType>& container)
-	{
-		for (vector<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)(_RefType*)&*it);
-		}
-	}
-};
-
-
-template <class _PtrType>
-class ptrvector : public vector<_PtrType>
-{
-public:
-	ptrvector()
-	{
-	}
-
-	ptrvector(_PtrType ptr)
-	{
-		insert(ptr);
-	}
-
-	template <typename _RefType>
-	ptrvector(const vector<_RefType*>& container)
-	{
-		insert(container);
-	}
-
-	template <typename _RefType>
-	ptrvector(const vector<_RefType>& container)
-	{
-		Insert(container);
-	}
-
-	template <typename _RefType>
-	ptrvector(const list<_RefType*>& container)
-	{
-		Insert(container);
-	}
-
-	template <typename _RefType>
-	ptrvector(const list<_RefType>& container)
-	{
-		Insert(container);
-	}
-
-public:
-	void Insert(_PtrType ptr)
-	{
-		push_back(ptr);
-	}
-
-	template <typename _RefType>
-	void Insert(const vector<_RefType*>& container)
-	{
-		for (vector<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const vector<_RefType>& container)
-	{
-		for (vector<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)(_RefType*)&*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const list<_RefType*>& container)
-	{
-		for (list<_RefType*>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)*it);
-		}
-	}
-
-	template <typename _RefType>
-	void Insert(const list<_RefType>& container)
-	{
-		for (list<_RefType>::const_iterator it = container.begin(); it != container.end(); ++it)
-		{
-			push_back((_PtrType)(_RefType*)&*it);
-		}
+		return util::StrCompareUseCNCollate(lhs, rhs)<0;
 	}
 };
 
@@ -302,11 +165,11 @@ public:
 	}
 };
 
-typedef ptrlist<CListObject*> TD_ListObjectList;
+typedef ptrlist<CListObject> TD_ListObjectList;
 
 class CTreeObject;
 
-typedef ptrlist<CTreeObject*> TD_TreeObjectList;
+typedef ptrlist<CTreeObject> TD_TreeObjectList;
 
 class __UtilExt CTreeObject
 {
@@ -336,7 +199,7 @@ public:
 };
 
 class CPathObject;
-typedef ptrlist<CPathObject*> TD_PathObjectList;
+typedef ptrlist<CPathObject> TD_PathObjectList;
 
 class __UtilExt CPathObject : public CPath, public CListObject
 {
@@ -393,7 +256,7 @@ public:
 
 class CDirObject;
 
-typedef ptrlist<CDirObject*> TD_DirObjectList;
+typedef ptrlist<CDirObject> TD_DirObjectList;
 
 class __UtilExt CDirObject : public CPathObject, public CTreeObject
 {
@@ -404,7 +267,7 @@ public:
 	}
 
 	CDirObject(const wstring& strName, const TD_DirObjectList& lstSubDirObjects)
-		: CPathObject(strName, TD_PathList(lstSubDirObjects))
+		: CPathObject(strName, TD_PathObjectList(lstSubDirObjects))
 	{
 	}
 
@@ -436,7 +299,7 @@ public:
 		TD_PathList lstSubPaths;
 		this->GetSubPath(lstSubPaths);
 
-		TD_DirObjectList lstDirObjects(lstSubPaths);
-		lstChilds.Insert(lstDirObjects);
+		TD_DirObjectList lstDirObjects(lstSubPaths, false);
+		lstChilds.add(lstDirObjects);
 	}
 };

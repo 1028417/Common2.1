@@ -251,7 +251,7 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 
 	(void)this->SetFocus();
 
-	CMainApp::DoEvents();
+	(void)::DoEvents();
 
 	return nResult;
 }
@@ -339,7 +339,7 @@ void CMainWnd::ResizeView(CDockView &wndTargetView, CPoint &ptPos)
 		break;
 	}
 			
-	CMainApp::DoEvents();
+	(void)::DoEvents();
 	OnSize(0, 0, 0);
 }
 

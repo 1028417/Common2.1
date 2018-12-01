@@ -5,7 +5,7 @@
 
 //CPath
 class CPath;
-typedef ptrlist<CPath*> TD_PathList;
+typedef ptrlist<CPath> TD_PathList;
 
 class __UtilExt CPath
 {
@@ -27,7 +27,7 @@ public:
 		, m_strName(strDir)
 	{
 		m_plstSubPath = new TD_PathList();
-		m_plstSubPath->Insert(lstSubPath);
+		m_plstSubPath->add(lstSubPath);
 	}
 	
 	CPath(const tagFindData& findData, CPath *pParentPath)
@@ -69,7 +69,7 @@ public:
 
 	void SetName(const wstring& strNewName);
 
-	wstring GetPath();
+	wstring GetPath() const;
 
 	UINT GetSubPathCount();
 

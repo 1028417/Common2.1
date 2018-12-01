@@ -31,7 +31,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		TRACE0("Control.DLL 正在初始化!\n");
+ 		TRACE0("Control.DLL 正在初始化!\n");
 		
 		// 扩展 DLL 一次性初始化
 		if (!AfxInitExtensionModule(ControlDLL, hInstance))

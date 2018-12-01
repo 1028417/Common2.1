@@ -274,7 +274,7 @@ wstring CFileDlg::Show(list<wstring>& lstFiles)
 	{
 		lstFiles.push_back(m_lpstrFileName);
 
-		return fsutil::GetParentPath(m_lpstrFileName);
+		return fsutil::GetParentDir(m_lpstrFileName);
 	}
 }
 
@@ -303,7 +303,7 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 	{
 		lstFiles.push_back(m_lpstrFileName);
 	
-		return fsutil::GetParentPath(m_lpstrFileName);
+		return fsutil::GetParentDir(m_lpstrFileName);
 	}
 	else
 	{

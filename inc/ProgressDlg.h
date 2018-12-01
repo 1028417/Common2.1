@@ -5,7 +5,7 @@
 #define WM_EndProgress WM_USER+3
 
 
-using FN_Work = function<void(class CProgressDlg& ProgressDlg)>;
+using FN_Work = function<void(class CProgressDlg&)>;
 
 class __CommonExt CProgressDlg : public CDialog, public CWorkThread
 {
@@ -40,7 +40,7 @@ private:
 	CProgressCtrl m_wndProgressCtrl;
 
 public:
-	virtual INT_PTR DoModal();
+	virtual INT_PTR DoModal(CWnd *pWndParent=NULL);
 
 	void SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress=0);
 	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);

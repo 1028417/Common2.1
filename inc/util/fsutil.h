@@ -24,7 +24,7 @@ struct __UtilExt tagFindData : WIN32_FIND_DATAW
 class __UtilExt fsutil
 {
 public:
-	static void FindFile(const wstring& strFindPath, const function<bool(const tagFindData& findData)>& cb);
+	static void FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb);
 
 	static int GetFileSize(const wstring& strFilePath);
 
@@ -38,11 +38,11 @@ public:
 
 	static wstring GetFileExtName(const wstring& strPath);
 
-	static wstring GetParentPath(const wstring& strPath);
+	static wstring GetParentDir(const wstring& strPath);
 
-	static bool CheckSubPath(const wstring& strPath, const wstring& strSubPath);
+	static bool CheckSubPath(const wstring& strDir, const wstring& strSubPath);
 
-	static wstring GetOppPath(const wstring& strPath, const wstring strBasePath);
+	static wstring GetOppPath(const wstring& strPath, const wstring strBaseDir);
 };
 
 class __UtilExt fsutil_win

@@ -91,7 +91,7 @@ BOOL CMainApp::InitInstance()
 
 	TCHAR pszPath[MAX_PATH];
 	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
-	m_strAppPath = fsutil::GetParentPath(pszPath);
+	m_strAppPath = fsutil::GetParentDir(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
 	CMainWnd *pMainWnd = getView().init();
@@ -284,7 +284,6 @@ bool CMainApp::HandleHotkey(LPARAM lParam, bool bGlobal)
 	static DWORD dwLastTime = 0;
 	if (100 > ::GetTickCount() - dwLastTime)
 	{
-		DoEvents();
 		return FALSE;		
 	}
 	dwLastTime = ::GetTickCount();
@@ -381,9 +380,15 @@ BOOL CMainApp::Quit()
 	return TRUE;
 }
 
-void CMainApp::DoEvents(bool bOnce)
+E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 {
-	::DoEvents();
+	int iRet = ::DoEvents(bOnce);
+	if (-1 == iRet)
+	{
+		return E_DoEventsResult::DER_Quit;
+	}
+
+	return iRet ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
 BOOL CMainApp::AddModule(CModuleApp& Module)

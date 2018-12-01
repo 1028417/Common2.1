@@ -7,26 +7,28 @@
 
 DWORD WINAPI CWorkThread::ThreadProc(LPVOID lpThreadParam)
 {
-	::Sleep(10);
-
 	tagWorkThreadInfo* pThreadInfo = (tagWorkThreadInfo*)lpThreadParam;
 	__EnsureReturn(pThreadInfo, 0);
 
+	pThreadInfo->bActive = true;
+
+	::Sleep(10);
+
 	pThreadInfo->pThread->WorkThreadProc(*pThreadInfo);
 
-	pThreadInfo->hHandle = NULL;
+	pThreadInfo->bActive = true;
 
 	return 0;
 }
 
 CWorkThread::CWorkThread()
 {
-	m_hExitEvent = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hEventCancel = ::CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 CWorkThread::~CWorkThread()
 {
-	(void)::CloseHandle(m_hExitEvent);
+	(void)::CloseHandle(m_hEventCancel);
 }
 
 BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
@@ -43,7 +45,7 @@ BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
 	m_lstThreadInfos.clear();
 
 
-	(void)::ResetEvent(m_hExitEvent);
+	(void)::ResetEvent(m_hEventCancel);
 
 
 	HANDLE hThread = NULL;
@@ -86,60 +88,27 @@ void CWorkThread::Pause(BOOL bPause)
 	}
 }
 
-void CWorkThread::SetExitSignal()
+void CWorkThread::Cancel()
 {
-	(void)::SetEvent(m_hExitEvent);
+	(void)::SetEvent(m_hEventCancel);
 }
 
-BOOL CWorkThread::GetExitSignal()
+BOOL CWorkThread::CheckCancelSignal()
 {
-	return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hExitEvent, 0);
+	return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEventCancel, 0);
 }
 
-void CWorkThread::WaitForExit()
+UINT CWorkThread::GetActiveCount()
 {
-	while (TRUE)
-	{
-		//∑¿÷πÀ¿À¯
-		//CMainApp::DoEvents();
-
-		::Sleep(100);
-
-		BOOL bExit = TRUE;
-
-		for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
-			; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
-		{
-			if (itThreadInfo->hHandle)
-			{
-				bExit = FALSE;
-
-				break;
-
-				//DWORD nResult = ::WaitForSingleObject(itThreadInfo->hHandle, 100);
-				//if (WAIT_OBJECT_0 == nResult || WAIT_FAILED == nResult)
-			}
-		}
-
-		if (bExit)
-		{
-			break;
-		}
-	}
-}
-
-int CWorkThread::GetWorkThreadCount()
-{
-	int nResult = 0;
-
+	UINT uCount = 0;
 	for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
 		; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
 	{
-		if (itThreadInfo->hHandle)
+		if (!itThreadInfo->bActive)
 		{
-			nResult++;
+			uCount++;
 		}
 	}
 
-	return nResult;
+	return uCount;
 }

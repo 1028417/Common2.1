@@ -181,9 +181,10 @@ void CPage::_AsyncLoop(UINT uDelayTime)
 		{
 			return;
 		}
-
+;
 		if (!m_cbAsyncLoop())
 		{
+			//m_cbAsyncLoop = NULL;
 			return;
 		}
 

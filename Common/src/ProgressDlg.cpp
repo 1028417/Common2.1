@@ -31,7 +31,7 @@ void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
 	this->EndProgress(FALSE);
 }
 
-INT_PTR CProgressDlg::DoModal()
+INT_PTR CProgressDlg::DoModal(CWnd *pWndParent)
 {
 	m_hMutex = ::CreateMutex(NULL, FALSE, NULL);
 	__AssertReturn(m_hMutex, -1);
@@ -39,7 +39,7 @@ INT_PTR CProgressDlg::DoModal()
 	LPCDLGTEMPLATE lpDialogTemplate = g_ResModule.loadDialog(IDD_DLG_PROGRESS);
 	__AssertReturn(lpDialogTemplate, -1);
 
-	__AssertReturn(this->InitModalIndirect(lpDialogTemplate), -1);
+	__AssertReturn(this->InitModalIndirect(lpDialogTemplate, pWndParent), -1);
 
 	INT_PTR nResult = __super::DoModal();
 
@@ -104,14 +104,9 @@ LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 	CString cstrProgress;
 	cstrProgress.Format(_T("%d/%d"), uProgress, m_uMaxProgress);
 
-	//if (!this->GetExitSignal()) // ·ÀÖ¹ËÀËø
-	{
-		(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
+	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
-		(void)m_wndProgressCtrl.SetPos((int)uProgress);
-
-		m_uProgress = uProgress;
-	}
+	(void)m_wndProgressCtrl.SetPos((int)uProgress);
 
 	return TRUE;
 }
@@ -171,13 +166,16 @@ void CProgressDlg::OnCancel()
 		return;
 	}
 
-	this->SetExitSignal();
+	this->Cancel();
 
 	this->Pause(FALSE);
 
-	CWaitCursor WaitCursor;
+	//CWaitCursor WaitCursor;
 
-	this->WaitForExit();
+	while (0 != this->GetActiveCount())
+	{
+		(void)::DoEvents(); // ±ØÐëµÄ
+	}
 
 	__super::OnCancel();
 }

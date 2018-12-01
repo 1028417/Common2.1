@@ -65,7 +65,7 @@ enum class E_TrackMouseEvent
 	, LME_MouseLeave
 };
 
-using CB_TrackMouseEvent = function<void(E_TrackMouseEvent eMouseEvent, const CPoint& point)>;
+using CB_TrackMouseEvent = function<void(E_TrackMouseEvent, const CPoint&)>;
 
 #include <App.h>
 

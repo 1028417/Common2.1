@@ -184,7 +184,14 @@ public:
 	}
 };
 
-using CB_Async = function<void()>;
+using CB_Async = fn_voidvoid;
+
+enum class E_DoEventsResult
+{
+	DER_None
+	, DER_OK
+	, DER_Quit
+};
 
 class __CommonExt CMainApp: public CModuleApp
 {
@@ -228,7 +235,7 @@ public:
 
 	BOOL Quit();
 
-	static void DoEvents(bool bOnce=false);
+	static E_DoEventsResult DoEvents(bool bOnce=false);
 
 	static BOOL AddModule(CModuleApp& Module);
 

@@ -1,6 +1,11 @@
 
 #include <util.h>
 
+#include <locale>
+static const char *g_lplocaleName_CN = "Chinese_china";
+static const locale g_locale_CN = locale(g_lplocaleName_CN);
+static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
+
 void util::getCurrentTime(int& nHour, int& nMinute)
 {
 	tm atm;
@@ -12,7 +17,7 @@ void util::getCurrentTime(int& nHour, int& nMinute)
 
 void util::getCurrentTime(tm& atm)
 {
-	time_t time(NULL);
+	time_t time(0);
 	(void)_localtime64_s(&atm, &time);
 }
 
@@ -40,6 +45,11 @@ wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
 
 wstring util::FormatTime(time_t time, const wstring& strFormat)
 {
+	if (0 == time)
+	{
+		return L"";
+	}
+
 	tm atm;
 	if (_localtime64_s(&atm, &time) != 0)
 	{
@@ -116,6 +126,12 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 			vecRet.push_back(strText.substr(startPos));
 		}
 	}
+}
+
+int util::StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs)
+{
+	return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
+		, rhs.c_str(), rhs.c_str() + rhs.size());
 }
 
 bool util::StrCompareIgnoreCase(const wstring& str1, const wstring& str2)

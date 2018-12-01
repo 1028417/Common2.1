@@ -141,12 +141,21 @@ public:
 
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent=NULL);
 
-	void SetColumnText(UINT uColumn, const wstring& strText);
+private:
+	template <bool _clear_other>
+	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
+
+public:
+	int InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix = L"");
+	int InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText);
+
+	void SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
+	void SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText);
 
 	void SetObjects(const TD_ListObjectList& lstObjects, int nPos=0);
 
 	int InsertObject(CListObject& Object, int nItem=-1);
-	
+
 	void UpdateObject(CListObject& Object);
 
 	void UpdateItem(UINT uItem);
@@ -155,15 +164,18 @@ public:
 	void UpdateItems();
 	void UpdateColumns(const list<UINT>& lstColumn);
 
+	void SetColumnText(UINT uColumn, const wstring& strText);
+
 	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
 
 	BOOL DeleteObject(const CListObject *pObject);
 
-	void SetItemObject(int nItem, CListObject& Object);
+	void SetItemObject(UINT uItem, CListObject& Object);
 
-	void SetItemImage(int nItem, int iImage);
+	void SetItemImage(UINT uItem, int iImage);
 
-	CListObject *GetItemObject(int nItem);
+public:
+	CListObject *GetItemObject(int iItem);
 	int GetObjectItem(const CListObject *pObject);
 	void GetAllObjects(TD_ListObjectList& lstListObjects);
 
@@ -171,13 +183,13 @@ public:
 	CListObject *GetSingleSelectedObject();
 
 	void GetMultiSelectedItems(list<UINT>& lstItems);
-	void GetMultiSelectedObjects(map<int, CListObject*>& mapObjects);
+	void GetMultiSelectedObjects(map<UINT, CListObject*>& mapObjects);
 	void GetMultiSelectedObjects(TD_ListObjectList& lstObjects);
 
 	BOOL SelectFirstItem();
-	void SelectItem(int nItem, BOOL bSetFocus=TRUE);
+	void SelectItem(UINT uItem, BOOL bSetFocus=TRUE);
 	void SelectObject(const CListObject *pObject, BOOL bSetFocus=TRUE);
-	void SelectItems(int nItem, int nSelectCount);
+	void SelectItems(UINT uItem, UINT uSelectCount);
 	void SelectAllItems();
 	void DeselectAllItems();
 

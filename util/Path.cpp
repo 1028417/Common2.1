@@ -3,24 +3,18 @@
 
 #include <Path.h>
 
-#include <locale>
-static const char *ZH_CN_LOCALE_STRING = "Chinese_china";
-static const locale zh_CN_locale = locale(ZH_CN_LOCALE_STRING);
-static const collate<wchar_t>& zh_CN_collate = use_facet<collate<wchar_t> >(zh_CN_locale);
-
 struct tagPathSortor
 {
-	bool operator () (CPath *pPath1, CPath *pPath2)
+	bool operator () (CPath *lhs, CPath *rhs) const
 	{
-		if (pPath1->m_bDir && !pPath2->m_bDir)
+		if (lhs->m_bDir && !rhs->m_bDir)
 		{
 			return true;
 		}
 
-		if (pPath1->m_bDir == pPath2->m_bDir)
+		if (lhs->m_bDir == rhs->m_bDir)
 		{
-			return zh_CN_collate.compare(pPath1->m_strName.c_str(), pPath1->m_strName.c_str() + pPath1->m_strName.size()
-				, pPath2->m_strName.c_str(), pPath2->m_strName.c_str() + pPath2->m_strName.size()) < 0;
+			return util::StrCompareUseCNCollate(lhs->m_strName, rhs->m_strName) < 0;
 		}
 
 		return false;
@@ -44,7 +38,7 @@ void CPath::SetName(const wstring& strNewName)
 	m_strName = strNewName;
 }
 
-wstring CPath::GetPath()
+wstring CPath::GetPath() const
 {
 	if (NULL != m_pParentPath)
 	{
@@ -68,7 +62,7 @@ bool CPath::GetSubPath(TD_PathList& lstSubPath)
 {
 	__EnsureReturn(FindFile() && m_plstSubPath, false);
 	
-	lstSubPath.Insert(*m_plstSubPath);
+	lstSubPath.add(*m_plstSubPath);
 
 	return true;
 }
@@ -115,7 +109,7 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir)
 		
 		lstSubDirs.push_back(strName);
 
-		strSubPath = fsutil::GetParentPath(strSubPath);
+		strSubPath = fsutil::GetParentDir(strSubPath);
 	}
 	
 	CPath *pPath = this;

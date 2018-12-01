@@ -3,7 +3,7 @@
 
 #include <fsutil.h>
 
-void fsutil::FindFile(const wstring& strFindPath, const function<bool(const tagFindData& findData)>& cb)
+void fsutil::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
 {
 	const char chrDot = '.';
 
@@ -120,7 +120,7 @@ wstring fsutil::GetFileExtName(const wstring& strPath)
 	return strExtName;
 }
 
-wstring fsutil::GetParentPath(const wstring& strPath)
+wstring fsutil::GetParentDir(const wstring& strPath)
 {
 	__EnsureReturn(!strPath.empty(), L"");
 
@@ -136,32 +136,32 @@ wstring fsutil::GetParentPath(const wstring& strPath)
 	return strNewPath.substr(0, nPos);
 }
 
-bool fsutil::CheckSubPath(const wstring& strPath, const wstring& strSubPath)
+bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
-	auto size = strPath.size();
+	auto size = strDir.size();
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(0 == _wcsnicmp(strPath.c_str(), strSubPath.c_str(), size), false);
+	__EnsureReturn(0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size), false);
 
-	__EnsureReturn(__BackSlant == *strPath.rbegin() || __BackSlant == strSubPath[size], false);
+	__EnsureReturn(__BackSlant == *strDir.rbegin() || __BackSlant == strSubPath[size], false);
 
 	return true;
 }
 
-wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBasePath)
+wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 {
-	if (strBasePath.empty())
+	if (strBaseDir.empty())
 	{
 		return strPath;
 	}
 	
-	if (!CheckSubPath(strBasePath, strPath))
+	if (!CheckSubPath(strBaseDir, strPath))
 	{
 		return L"";
 	}
 
-	return strPath.substr(strBasePath.size());
+	return strPath.substr(strBaseDir.size());
 }
 
 void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
@@ -326,7 +326,7 @@ bool fsutil_win::CreateDir(const wstring& strDir)
 		return true;
 	}
 	
-	if (!CreateDir(fsutil::GetParentPath(strDir)))
+	if (!CreateDir(fsutil::GetParentDir(strDir)))
 	{
 		return false;
 	}

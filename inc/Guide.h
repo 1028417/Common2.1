@@ -64,7 +64,7 @@ public:
 	BOOL Popup();
 };
 
-using CB_CompatableFont = function<void(LOGFONT& logFont)>;
+using CB_CompatableFont = function<void(LOGFONT&)>;
 
 class CCompatableFont : public CFont
 {

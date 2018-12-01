@@ -55,7 +55,7 @@
 
 extern class CResModule g_ResModule;
 
-extern void DoEvents(bool bOnce = false);
+extern int DoEvents(bool bOnce = false);
 
 #include "Common.h"
 

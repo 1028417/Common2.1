@@ -41,8 +41,6 @@ void CMenuGuide::SetItemText(UINT uIDItem, const CString& cstrText)
 
 BOOL CMenuGuide::Popup()
 {
-	CMainApp::DoEvents();
-
 	if (!*this)
 	{
 		CResGuide ResGuide (m_Page.m_resModule);

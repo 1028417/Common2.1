@@ -7,8 +7,9 @@ class CWorkThread;
 
 struct tagWorkThreadInfo
 {
-	UINT uIndex;
-	HANDLE hHandle;
+	UINT uIndex = 0;
+	HANDLE hHandle = INVALID_HANDLE_VALUE;
+	bool bActive = false;
 	CWorkThread *pThread;
 };
 
@@ -22,21 +23,19 @@ public:
 	list<tagWorkThreadInfo> m_lstThreadInfos;
 
 private:
-	HANDLE m_hExitEvent;
+	HANDLE m_hEventCancel;
 
 public:
 	BOOL RunWorkThread(UINT uThreadCount=1);
 
-	BOOL GetExitSignal();
+	BOOL CheckCancelSignal();
 
 protected:
 	void Pause(BOOL bPause=TRUE);
 
-	void SetExitSignal();
+	void Cancel();
 
-	void WaitForExit();
-
-	int GetWorkThreadCount();
+	UINT GetActiveCount();
 
 private:
 	virtual void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) = 0;

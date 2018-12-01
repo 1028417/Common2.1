@@ -55,7 +55,7 @@ void CPathList::SetPath(CPathObject* pPath)
 		DeleteAllItems();
 
 		TD_ListObjectList lstObjects;
-		lstObjects.Insert(TD_PathObjectList(lstSubPaths));
+		lstObjects.add(lstSubPaths, false);
 		__super::SetObjects(lstObjects);
 
 		this->SetRedraw(TRUE);
@@ -81,7 +81,7 @@ void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects)
 	TD_ListObjectList lstListObjects;
 	__super::GetAllObjects(lstListObjects);
 
-	lstPathObjects.Insert(lstListObjects);
+	lstPathObjects.add(lstListObjects, 1);
 }
 
 void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir)

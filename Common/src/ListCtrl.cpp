@@ -257,6 +257,81 @@ void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 	m_iTrackMouseFlag = 0;
 }
 
+template <bool _clear_other>
+void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
+{
+	UINT uIndex = 0;
+	for (; uIndex < vecText.size() && uIndex < m_uColumnCount; ++uIndex)
+	{
+		wstring strText(strPrefix);
+		strText.append(vecText[uIndex]);
+
+		(void)__super::SetItemText(uItem, uIndex, strText.c_str());
+	}
+
+	if (_clear_other)
+	{
+		for (; uIndex < m_uColumnCount; uIndex++)
+		{
+			(void)__super::SetItemText(uItem, uIndex, NULL);
+		}
+	}
+}
+
+int CObjectList::InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix)
+{
+	wstring strText(strPrefix);
+
+	auto itr = vecText.begin();
+	if (itr != vecText.end())
+	{
+		strText = *itr;
+		
+		itr = vecText.erase(itr);
+	}
+
+	int iItem = InsertItem(uItem, strText.c_str());
+	if (iItem >= 0)
+	{
+		for (UINT uIndex = 1; uIndex < m_uColumnCount && itr != vecText.end(); ++uIndex, ++itr)
+		{
+			wstring strText(strPrefix);
+			strText.append(*itr);
+
+			(void)__super::SetItemText(uItem, uIndex, strText.c_str());
+		}
+	}
+
+	return iItem;
+}
+
+int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText)
+{
+	int iItem = InsertItem(uItem, L"");
+	if (iItem >= 0)
+	{
+		SetItemTexts(iItem, lstText);
+	}
+
+	return iItem;
+}
+
+void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
+{
+	_SetItemTexts<false>(uItem, vecText, strPrefix);
+}
+
+void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText)
+{
+	for (auto& pr : lstText)
+	{
+		if (pr.first < m_uColumnCount)
+		{
+			(void)__super::SetItemText(uItem, pr.first, pr.second.c_str());
+		}
+	}
+}
+
 void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 {
 	if (lstObjects.empty())
@@ -332,28 +407,16 @@ void CObjectList::UpdateObject(CListObject& Object)
 	}
 }
 
-void CObjectList::SetItemObject(int nItem, CListObject& Object)
+void CObjectList::SetItemObject(UINT uItem, CListObject& Object)
 {
 	int iImage = 0;
 	vector<wstring> vecText;
 	GenListItem(Object, vecText, iImage);
 
-	__Assert(SetItem(nItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
+	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
 		, iImage, 0, 0, (LPARAM)&Object));
 
-	auto itSubTitle = vecText.begin();
-	for (UINT uColumn = 0; uColumn < m_uColumnCount; ++uColumn)
-	{
-		wstring strText;
-		if (itSubTitle != vecText.end())
-		{
-			strText = *itSubTitle;
-
-			itSubTitle++;
-		}
-
-		(void)__super::SetItemText(nItem, uColumn, strText.c_str());
-	}
+	_SetItemTexts<true>(uItem, vecText);
 }
 
 void CObjectList::UpdateItem(UINT uItem)
@@ -448,16 +511,16 @@ void CObjectList::GenListItem(CListObject& Object, vector<wstring>& vecText, int
 	Object.GenListItem(E_ListViewType::LVT_Report == this->GetView(), vecText, iImage);
 }
 
-void CObjectList::SetItemImage(int nItem, int iImage)
+void CObjectList::SetItemImage(UINT uItem, int iImage)
 {
-	(void)SetItem(nItem, 0, LVIF_IMAGE, NULL, iImage, 0, 0, 0);
-	Update(nItem);
+	(void)SetItem(uItem, 0, LVIF_IMAGE, NULL, iImage, 0, 0, 0);
+	__super::Update(uItem);
 }
 
-CListObject *CObjectList::GetItemObject(int nItem)
+CListObject *CObjectList::GetItemObject(int iItem)
 {
-	__EnsureReturn(0 <= nItem && nItem < GetItemCount(), NULL);
-	return (CListObject*)__super::GetItemData(nItem);
+	__EnsureReturn(iItem >= 0 && iItem < GetItemCount(), NULL);
+	return (CListObject*)__super::GetItemData(iItem);
 }
 
 int CObjectList::GetObjectItem(const CListObject *pObject)
@@ -506,7 +569,7 @@ void CObjectList::GetMultiSelectedItems(list<UINT>& lstItems)
 	}
 }
 
-void CObjectList::GetMultiSelectedObjects(map<int, CListObject*>& mapObjects)
+void CObjectList::GetMultiSelectedObjects(map<UINT, CListObject*>& mapObjects)
 {
 	list<UINT> lstItems;
 	this->GetMultiSelectedItems(lstItems);
@@ -537,7 +600,7 @@ BOOL CObjectList::SelectFirstItem()
 	return TRUE;
 }
 
-void CObjectList::SelectItem(int nItem, BOOL bSetFocus)
+void CObjectList::SelectItem(UINT uItem, BOOL bSetFocus)
 {
 	UINT uState = LVIS_SELECTED;
 	if (bSetFocus)
@@ -545,11 +608,11 @@ void CObjectList::SelectItem(int nItem, BOOL bSetFocus)
 		uState |= LVIS_FOCUSED;
 	}
 
-	(void)this->SetItemState(nItem, uState, uState);
+	(void)this->SetItemState(uItem, uState, uState);
 
-	(void)this->SetSelectionMark(nItem);
+	(void)this->SetSelectionMark(uItem);
 	
-	(void)this->EnsureVisible(nItem, FALSE);
+	(void)this->EnsureVisible(uItem, FALSE);
 }
 
 void CObjectList::SelectObject(const CListObject *pObject, BOOL bSetFocus)
@@ -561,13 +624,13 @@ void CObjectList::SelectObject(const CListObject *pObject, BOOL bSetFocus)
 	}
 }
 
-void CObjectList::SelectItems(int nItem, int nSelectCount)
+void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 {
 	DeselectAllItems();
 
-	for (int nIndex = 0; nIndex < nSelectCount; ++nIndex)
+	for (UINT uIndex = 0; uIndex < uSelectCount; ++uIndex)
 	{
-		SelectItem(nItem + nIndex, 0==nIndex);
+		SelectItem(uItem + uIndex, 0==uIndex);
 	}
 }
 
@@ -790,18 +853,21 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 			}
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseMove, CPoint(lParam));
+			return TRUE;
 		}
 		else if (WM_MOUSELEAVE == message)
 		{
 			m_iTrackMouseFlag = 0;
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
+			return TRUE;
 		}
 		else if (WM_MOUSEHOVER == message)
 		{
 			//m_iTrackMouseFlag = 0;
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
+			return TRUE;
 		}
 	}
 
