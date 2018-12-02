@@ -25,7 +25,7 @@ public:
 
 public:
 	wstring Show(HWND hWndOwner, LPCWSTR lpszInitDir=NULL, LPCWSTR lpszTitle=NULL, LPCWSTR lpszMessage=NULL
-		, LPCWSTR lpszOKButton=NULL, LPCWSTR lpszCancelButton=NULL, int nWidth=0, int nHeight=0);
+		, LPCWSTR lpszOKButton=NULL, LPCWSTR lpszCancelButton=NULL, UINT uWidth=0, UINT uHeight=0);
 
 	static int __stdcall BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpParam);
 };

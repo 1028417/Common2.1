@@ -4,9 +4,9 @@
 
 #include "Container.h"
 
-#include <algorithm>
-
 #include "JSMap.h"
+
+#include <deque>
 
 namespace NS_JSTL
 {
@@ -108,7 +108,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		static JSArrayT init(TD_SizeType size, __DataConstRef data)
+		static JSArrayT init(size_t size, __DataConstRef data)
 		{
 			JSArrayT arr;
 			arr.m_data.assign(size, data);
@@ -184,15 +184,15 @@ namespace NS_JSTL
 		}
 
 	protected:
-		TD_SizeType _add(__DataConstRef data) override
+		size_t _add(__DataConstRef data) override
 		{
 			_data().push_back(data);
 			return _data().size();
 		}
 
-		TD_SizeType _del(__DataConstRef data) override
+		size_t _del(__DataConstRef data) override
 		{
-			TD_SizeType uRet = 0;
+			size_t uRet = 0;
 
 			auto itr = _data().begin();
 			while (itr != _data().end())
@@ -331,18 +331,18 @@ namespace NS_JSTL
 		}
 		
 		template<typename... args>
-		TD_SizeType push(__DataConstRef data, const args&... others)
+		size_t push(__DataConstRef data, const args&... others)
 		{
 			return __Super::add(data, others...);
 		}
 
 		template<typename T>
-		TD_SizeType push(const T& container)
+		size_t push(const T& container)
 		{
 			return __Super::add(container);
 		}
 
-		TD_SizeType push(__InitList initList)
+		size_t push(__InitList initList)
 		{
 			return __Super::add(initList);
 		}
@@ -467,7 +467,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(__DataConstRef data, const args&... others)
+		size_t unshift(__DataConstRef data, const args&... others)
 		{
 			return tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
 				_data().insert(_data().begin(), data);
@@ -478,7 +478,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		TD_SizeType unshift(const T& container)
+		size_t unshift(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -488,7 +488,7 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType unshift(__InitList initList)
+		size_t unshift(__InitList initList)
 		{
 			return unshift<__InitList>(initList);
 		}
@@ -508,17 +508,17 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		void forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		void forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, size_t count = 0)
 		{
 			getArrayOperator().forEach(cb, startPos, count);
 		}
 
-		void forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			getArrayOperator().forEach(cb, startPos, count);
 		}
 
-		void forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		void forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, size_t count = 0)
 		{
 			if (!cb)
 			{
@@ -530,7 +530,7 @@ namespace NS_JSTL
 			}, startPos, count);
 		}
 
-		void forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			if (!cb)
 			{
@@ -613,14 +613,14 @@ namespace NS_JSTL
 				forEach([&](__DataConstRef data) {
 					arr.push(data);
 					return true;
-				}, (TD_PosType)startPos, TD_SizeType(endPos - startPos + 1));
+				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
 			}
 
 			return arr;
 		}
 
 		template<typename... args>
-		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove, __DataConstRef data, const args&... others)
+		JSArrayT& splice(TD_PosType pos, size_t nRemove, __DataConstRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
 			extractDataTypeArgs(vecData, data, others...);
@@ -628,7 +628,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove = 0, const T& container = {})
+		JSArrayT& splice(TD_PosType pos, size_t nRemove = 0, const T& container = {})
 		{
 			if (__Super::checkIsSelf(container))
 			{
@@ -652,15 +652,15 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove, __InitList initList)
+		JSArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
 		{
 			return splice(pos, nRemove, initList);
 		}
 
 		JSArrayT& sort(__CB_Sort_T<__DataType> cb = NULL)
 		{
-			std::sort(_data().begin(), _data().end(), tagTrySort<__DataType>(cb));
-
+			QSort(_data(), cb);
+			
 			return *this;
 		}
 
@@ -717,9 +717,9 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMap<__DataType, TD_SizeType> itemSum() const
+		JSMap<__DataType, size_t> itemSum() const
 		{
-			JSMap<__DataType, TD_SizeType> mapItemSum;
+			JSMap<__DataType, size_t> mapItemSum;
 
 			for (auto&data : _data())
 			{
@@ -729,7 +729,7 @@ namespace NS_JSTL
 			return mapItemSum;
 		}
 
-		void sum(JSMap<__DataType, TD_SizeType>& mapItemSum, JSMap<TD_SizeType, JSArrayT>& mapSumItem) const
+		void sum(JSMap<__DataType, size_t>& mapItemSum, JSMap<size_t, JSArrayT>& mapSumItem) const
 		{
 			mapItemSum = itemSum();
 
@@ -739,14 +739,20 @@ namespace NS_JSTL
 			}
 		}
 
-		JSMap<TD_SizeType, JSArrayT> sumItem() const
+		JSMap<size_t, JSArrayT> sumItem() const
 		{
-			JSMap<__DataType, TD_SizeType> mapItemSum;
-			JSMap<TD_SizeType, JSArrayT> mapSumItem;
+			JSMap<__DataType, size_t> mapItemSum;
+			JSMap<size_t, JSArrayT> mapSumItem;
 			sum(mapItemSum, mapSumItem);
 			return mapSumItem;
 		}
 	};
+
+	template <typename __DataType>
+	using VectorT = JSArrayT<__DataType, vector>;
+
+	template <typename __DataType>
+	using DequeT = JSArrayT<__DataType, deque>;
 }
 
 #endif // __JSArray_H

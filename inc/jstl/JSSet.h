@@ -98,14 +98,14 @@ namespace NS_JSTL
 		}
 
 	protected:
-		TD_SizeType _add(__DataConstRef data) override
+		size_t _add(__DataConstRef data) override
 		{
 			_data().insert(data);
 
 			return _data().size();
 		}
 
-		TD_SizeType _del(__DataConstRef data) override
+		size_t _del(__DataConstRef data) override
 		{
 			auto itr = _data().find(data);
 			if (itr == _data().end())
@@ -182,18 +182,18 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType add(__DataConstRef data, const args&... others)
+		size_t add(__DataConstRef data, const args&... others)
 		{
 			return __Super::add(data, others...);
 		}
 
 		template<typename T>
-		TD_SizeType add(const T& container)
+		size_t add(const T& container)
 		{
 			return __Super::add(container);
 		}
 
-		TD_SizeType add(__InitList initList)
+		size_t add(__InitList initList)
 		{
 			return add<__InitList>(initList);
 		}

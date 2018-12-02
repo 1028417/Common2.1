@@ -5,7 +5,19 @@
 
 //CPath
 class CPath;
-typedef ptrlist<CPath> TD_PathList;
+using TD_PathList = ptrvector<CPath>;
+
+class CListObject;
+using TD_ListObjectList = ptrvector<CListObject>;
+
+class CTreeObject;
+using TD_TreeObjectList = ptrvector<CTreeObject>;
+
+class CPathObject;
+using TD_PathObjectList = ptrvector<CPathObject>;
+
+class CDirObject;
+using TD_DirObjectList = ptrvector<CDirObject>;
 
 class __UtilExt CPath
 {
@@ -86,4 +98,148 @@ public:
 	bool FindFile();
 
 	bool HasFile();
+};
+
+class __UtilExt CListObject
+{
+public:
+	virtual void GenListItem(bool bReport, vector<wstring>& vecText, int& iImage)
+	{
+	}
+
+	virtual wstring GetRenameText()
+	{
+		return L"";
+	}
+
+	virtual bool OnListItemRename(const wstring& strNewName)
+	{
+		return false;
+	}
+};
+
+class __UtilExt CTreeObject
+{
+public:
+	CTreeObject()
+	{
+		m_hTreeItem = NULL;
+	}
+
+public:
+	void *m_hTreeItem;
+
+	virtual wstring GetTreeText()
+	{
+		return L"";
+	};
+
+	virtual int GetTreeImage()
+	{
+		return 0;
+	}
+
+	virtual void GetTreeChilds(TD_TreeObjectList& lstChilds)
+	{
+		//do nothing
+	}
+};
+
+class __UtilExt CPathObject : public CPath, public CListObject
+{
+public:
+	CPathObject()
+	{
+	}
+
+	CPathObject(const wstring& strDir)
+		: CPath(strDir)
+	{
+	}
+
+	CPathObject(const wstring& strDir, const TD_PathObjectList& lstSubPathObjects)
+		: CPath(strDir, TD_PathList(lstSubPathObjects))
+	{
+	}
+
+	CPathObject(const tagFindData& findData, CPath *pParentPath)
+		: CPath(findData, pParentPath)
+	{
+	}
+
+	virtual ~CPathObject()
+	{
+	}
+
+protected:
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath)
+	{
+		return new CPathObject(findData, pParentPath);
+	}
+
+public:
+	void GenListItem(bool bReport, vector<wstring>& vecText, int& iImage) override
+	{
+		vecText.push_back(m_strName);
+
+		vecText.push_back(to_wstring(m_uFileSize));
+
+		//vecText.push_back((LPCTSTR)GetFileModifyTime());
+	}
+
+	//wstring GetFileModifyTime()
+	//{
+	//	if (m_bDir)
+	//	{
+	//		return L"";
+	//	}
+
+	//	return CTime(m_modifyTime).Format(_T("%y-%m-%d %H:%M"));
+	//}
+};
+
+class __UtilExt CDirObject : public CPathObject, public CTreeObject
+{
+public:
+	CDirObject(const wstring& strDir = L"")
+		: CPathObject(strDir)
+	{
+	}
+
+	CDirObject(const wstring& strName, const TD_DirObjectList& lstSubDirObjects)
+		: CPathObject(strName, TD_PathObjectList(lstSubDirObjects))
+	{
+	}
+
+	CDirObject(const tagFindData& findData, CPath *pParentPath)
+		: CPathObject(findData, pParentPath)
+	{
+	}
+
+	virtual ~CDirObject()
+	{
+	}
+
+protected:
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath)
+	{
+		__EnsureReturn(findData.isDir(), NULL);
+
+		return new CDirObject(findData, pParentPath);
+	}
+
+public:
+	wstring GetTreeText() override
+	{
+		return m_strName;
+	}
+
+	void GetTreeChilds(TD_TreeObjectList& lstChilds)
+	{
+		TD_PathList lstSubPaths;
+		this->GetSubPath(lstSubPaths);
+
+		TD_DirObjectList lstDirObjects(lstSubPaths, false);
+		lstChilds.add(lstDirObjects);
+	}
 };

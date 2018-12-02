@@ -3,24 +3,6 @@
 
 #include <Path.h>
 
-struct tagPathSortor
-{
-	bool operator () (CPath *lhs, CPath *rhs) const
-	{
-		if (lhs->m_bDir && !rhs->m_bDir)
-		{
-			return true;
-		}
-
-		if (lhs->m_bDir == rhs->m_bDir)
-		{
-			return util::StrCompareUseCNCollate(lhs->m_strName, rhs->m_strName) < 0;
-		}
-
-		return false;
-	}
-};
-
 wstring CPath::GetName()
 {
 	if (NULL != m_pParentPath)
@@ -206,7 +188,19 @@ bool CPath::FindFile()
 		return true;
 	});
 
-	lstSubPath.sort(tagPathSortor());
+	QSort<CPath*>(lstSubPath, [](CPath *lhs, CPath *rhs) {
+		if (lhs->m_bDir && !rhs->m_bDir)
+		{
+			return true;
+		}
+
+		if (lhs->m_bDir == rhs->m_bDir)
+		{
+			return util::StrCompareUseCNCollate(lhs->m_strName, rhs->m_strName) < 0;
+		}
+
+		return false;
+	});
 
 	m_plstSubPath = new TD_PathList();
 	m_plstSubPath->swap(lstSubPath);

@@ -38,10 +38,61 @@ enum class E_ListViewType
 struct __CommonExt tagListColumn
 {
 	CString cstrText;
-	UINT uWidth;
-	UINT uFlag = LVCFMT_LEFT;
+	UINT uWidth = 0;
+	UINT uFormat = LVCFMT_LEFT;
 };
 typedef list<tagListColumn> TD_ListColumn;
+
+class __CommonExt CListColumnGuide
+{
+public:
+	CListColumnGuide(UINT uMaxWidth)
+	{
+		m_uMaxWidth = uMaxWidth;
+	}
+
+private:
+	UINT m_uMaxWidth = 0;
+
+	TD_ListColumn m_lstColumn;
+
+	map<tagListColumn*, double> m_mapPercentWidth;
+
+	UINT m_uSumWidth = 0;
+
+public:
+	CListColumnGuide& add(const CString& cstrText, UINT uWidth, UINT uFormat=LVCFMT_LEFT)
+	{
+		m_lstColumn.push_back({ cstrText, uWidth, uFormat });
+		
+		m_uSumWidth += uWidth;
+
+		return *this;
+	}
+
+	CListColumnGuide& add(const CString& cstrText, double fPercentWidth, UINT uFormat = LVCFMT_LEFT)
+	{
+		m_lstColumn.push_back({ cstrText, 0, uFormat });
+
+		m_mapPercentWidth[&m_lstColumn.back()] = fPercentWidth;
+		
+		return *this;
+	}
+
+	operator const TD_ListColumn&()
+	{
+		if (m_uSumWidth < m_uMaxWidth)
+		{
+			UINT uRamainWidth = m_uMaxWidth - m_uSumWidth;
+			for (auto& pr : m_mapPercentWidth)
+			{
+				pr.first->uWidth = UINT(uRamainWidth*pr.second);
+			}
+		}
+
+		return m_lstColumn;
+	}
+};
 
 class __CommonExt CObjectList : public CListCtrl
 {

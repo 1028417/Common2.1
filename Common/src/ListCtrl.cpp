@@ -191,8 +191,8 @@ BOOL CObjectList::InitColumn(const TD_ListColumn &lstColumns, const set<UINT>& s
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
 	{
-		(void)__super::InsertColumn(m_uColumnCount, (0 == column.uFlag) ? L' ' + column.cstrText
-			: column.cstrText, column.uFlag, column.uWidth);
+		(void)__super::InsertColumn(m_uColumnCount, (0 == column.uFormat) ? L' ' + column.cstrText
+			: column.cstrText, column.uFormat, column.uWidth);
 
 		m_uColumnCount++;
 	}

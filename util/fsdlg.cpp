@@ -8,7 +8,7 @@
 //CFolderDlg
 
 wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle, LPCWSTR lpszMessage
-							, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, int nWidth, int nHeight)
+	, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, UINT uWidth, UINT uHeight)
 {
 	if (lpszInitDir)
 	{
@@ -34,16 +34,9 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 	{
 		m_strCancelButton = lpszCancelButton;
 	}
-
-	if (nWidth)
-	{
-		m_nWidth = nWidth;
-	}
-
-	if (nHeight)
-	{
-		m_nHeight = nHeight;
-	}
+	
+	m_nWidth = uWidth;
+	m_nHeight = uHeight;
 
 	//(void)::EnableWindow(WndOwner.m_hWnd, FALSE);
 

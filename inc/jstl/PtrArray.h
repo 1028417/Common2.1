@@ -4,11 +4,13 @@
 
 #include "JSArray.h"
 
+#include "ptrcontainer.h"
+
 namespace NS_JSTL
 {
-#define __PtrArraySuper JSArray<__Type*>
+#define __PtrArraySuper JSArrayT<__Type*, __BaseType>
 
-	template<typename __Type>
+	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
 	class PtrArray : public __PtrArraySuper
 	{
 	private:
@@ -26,9 +28,7 @@ namespace NS_JSTL
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
 
 		using __CB_RefType_Pos = CB_T_Pos<__RefType>;
-
-		using __CB_Sort_RefType = __CB_Sort_T<__Type>;
-
+		
 	public:
 		PtrArray()
 		{
@@ -106,12 +106,12 @@ namespace NS_JSTL
 		}
 
 	protected:
-		TD_SizeType _add(__PtrType ptr)
+		size_t _add(__PtrType ptr)
 		{
 			return __Super::_add(ptr);
 		}
 
-		TD_SizeType _add(__RefType ref)
+		size_t _add(__RefType ref)
 		{
 			return __Super::_add(&ref);
 		}
@@ -258,13 +258,13 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType push(__ConstPtrRef ptr, const args&... others)
+		size_t push(__ConstPtrRef ptr, const args&... others)
 		{
 			return __Super::push(ptr, others...);
 		}
 
 		template<typename... args>
-		TD_SizeType push(__RefType ref, args&... others)
+		size_t push(__RefType ref, args&... others)
 		{
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
 				_add(ref);
@@ -276,7 +276,7 @@ namespace NS_JSTL
 
 
 		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) push(T& container)
+		decltype(checkContainer<T, size_t>()) push(T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -290,7 +290,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) push(const T& container)
+		decltype(checkContainer<T, size_t>()) push(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -303,7 +303,7 @@ namespace NS_JSTL
 			return __Super::size();
 		}
 
-		TD_SizeType push(__InitList_Ptr initList)
+		size_t push(__InitList_Ptr initList)
 		{
 			return __Super::push(initList);
 		}
@@ -348,13 +348,13 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(__ConstPtrRef ptr, const args&... others)
+		size_t unshift(__ConstPtrRef ptr, const args&... others)
 		{
 			return __Super::unshift(ptr, others...);
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(__RefType ref, args&... others)
+		size_t unshift(__RefType ref, args&... others)
 		{
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
 				_unshift(ref);
@@ -365,7 +365,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) unshift(T& container)
+		decltype(checkContainer<T, size_t>()) unshift(T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -379,7 +379,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) unshift(const T& container)
+		decltype(checkContainer<T, size_t>()) unshift(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -392,7 +392,7 @@ namespace NS_JSTL
 			return __Super::size();
 		}
 
-		TD_SizeType unshift(__InitList_Ptr initList)
+		size_t unshift(__InitList_Ptr initList)
 		{
 			return __Super::unshift(initList);
 		}
@@ -424,14 +424,14 @@ namespace NS_JSTL
 				forEach([&](__RefType data) {
 					arr.push(&data);
 					return true;
-				}, (TD_PosType)startPos, TD_SizeType(endPos - startPos + 1));
+				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
 			}
 
 			return arr;
 		}
 
 		template<typename... args>
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __ConstPtrRef v, const args&... others)
+		PtrArray& splice(TD_PosType pos, size_t nRemove, __ConstPtrRef v, const args&... others)
 		{
 			__Super::splice(pos, nRemove, v, others...);
 
@@ -439,7 +439,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __RefType ref, args&... others)
+		PtrArray& splice(TD_PosType pos, size_t nRemove, __RefType ref, args&... others)
 		{
 			vector<__PtrType> vec;
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
@@ -453,7 +453,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, T& container)
+		PtrArray& splice(TD_PosType pos, size_t nRemove, T& container)
 		{
 			__Super::splice(pos, nRemove, container);
 
@@ -461,21 +461,21 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, const T& container)
+		PtrArray& splice(TD_PosType pos, size_t nRemove, const T& container)
 		{
 			__Super::splice(pos, nRemove, container);
 
 			return *this;
 		}
 
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __InitList_Ptr initList)
+		PtrArray& splice(TD_PosType pos, size_t nRemove, __InitList_Ptr initList)
 		{
 			__Super::splice(pos, nRemove, initList);
 
 			return *this;
 		}
 
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove)
+		PtrArray& splice(TD_PosType pos, size_t nRemove)
 		{
 			__Super::splice(pos, nRemove, ((__InitList_Ptr) {}));
 
@@ -483,7 +483,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		void forEach(__CB_RefType_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_RefType_Pos cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			if (!cb)
 			{
@@ -514,7 +514,7 @@ namespace NS_JSTL
 			}
 		}
 
-		void forEach(__CB_RefType_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_RefType_bool cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			if (!cb)
 			{
@@ -602,7 +602,7 @@ namespace NS_JSTL
 			});
 		}
 
-		PtrArray& sort(__CB_Sort_RefType cb)
+		PtrArray& sort(__CB_Sort_T<__Type> cb)
 		{
             if (cb)
             {

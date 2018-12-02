@@ -3,17 +3,6 @@
 
 #include <TreeCtrl.h>
 
-// CBaseTree
-
-CBaseTree::CBaseTree()
-{
-}
-
-CBaseTree::~CBaseTree()
-{
-	(void)m_Imglst.DeleteImageList();
-}
-
 BEGIN_MESSAGE_MAP(CBaseTree, CTreeCtrl)
 END_MESSAGE_MAP()
 
@@ -128,15 +117,6 @@ BOOL CBaseTree::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESUL
 
 
 // CObjectCheckTree
-
-CObjectCheckTree::CObjectCheckTree()
-{
-}
-
-CObjectCheckTree::~CObjectCheckTree()
-{
-	(void)m_StateImageList.DeleteImageList();
-}
 
 BEGIN_MESSAGE_MAP(CObjectCheckTree, CObjectTree)
 END_MESSAGE_MAP()
@@ -332,15 +312,6 @@ void CObjectCheckTree::SetParentItemsImageState(HTREEITEM hItem)
 	}
 }
 
-
-// CObjectTree
-CObjectTree::CObjectTree()
-{
-}
-
-CObjectTree::~CObjectTree()
-{
-}
 
 void CObjectTree::SetRootObject(CTreeObject& Object)
 {

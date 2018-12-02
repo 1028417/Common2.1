@@ -5,16 +5,16 @@
 #include <initializer_list>
 
 #include <vector>
-#include <deque>
 
 #include <functional>
+
+#include <algorithm>
 
 using namespace std;
 
 namespace NS_JSTL
 {
 	typedef size_t TD_PosType;
-	typedef size_t TD_SizeType;
 
 	template <typename T>
 	using InitList_T = const initializer_list<T>&;
@@ -31,15 +31,12 @@ namespace NS_JSTL
 	template <typename T>
 	using CB_T_Pos = const function<bool(T, TD_PosType)>&;
 
+	template <typename T>
+	using __CB_Sort_T = const function<bool(const T&lhs, const T&rhs)>&;
+
 	template<typename __DataType, template<typename...> class __BaseType> class JSArrayT;
 	template <typename __DataType, template<typename...> class __BaseType = vector>
 	using JSArray = JSArrayT<__DataType, __BaseType>;
-	
-	template <typename __DataType>
-	using Vector = JSArray<__DataType, vector>;
-
-	template <typename __DataType>
-	using Deque = JSArray<__DataType, deque>;
 }
 
 #define __SuperType(T) typename __Super::T

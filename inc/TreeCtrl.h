@@ -8,16 +8,17 @@
 class __CommonExt CBaseTree: public CTreeCtrl
 {
 public:
-	CBaseTree();
-
-	virtual ~CBaseTree();
-
-	CImglst m_Imglst;
+	~CBaseTree()
+	{
+		(void)m_Imglst.DeleteImageList();
+	}
 
 	DECLARE_MESSAGE_MAP()
 
 private:
 	CFontGuide m_fontGuide;
+
+	CImglst m_Imglst;
 
 public:
 	BOOL InitImglst(const CSize& size, const TD_IconVec& vecIcons = {});
@@ -54,11 +55,6 @@ protected:
 
 class __CommonExt CObjectTree: public CBaseTree
 {
-public:
-	CObjectTree();
-
-	virtual ~CObjectTree();
-
 public:
 	static HTREEITEM getTreeItem(const CTreeObject& Object)
 	{
@@ -122,8 +118,10 @@ enum E_CheckState
 class __CommonExt CObjectCheckTree : public CObjectTree
 {
 public:
-	CObjectCheckTree();
-	virtual ~CObjectCheckTree();
+	~CObjectCheckTree()
+	{
+		(void)m_StateImageList.DeleteImageList();
+	}
 
 	DECLARE_MESSAGE_MAP()
 

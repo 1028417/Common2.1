@@ -51,7 +51,7 @@ namespace NS_JSTL
 		using __CB_ValueR_bool = const function<bool(__ValueRef)>&;
 		using __CB_ValueCR_bool = const function<bool(__ValueConstRef)>&;
 
-		using __CB_ValueCR_KeyCR_bool = const function<bool(__ValueConstRef, __KeyConstRef)>&;
+		using __CB_ValueR_DelConfirm = const function<E_DelConfirm(__ValueRef)>&;
 
 	protected:
 		__ContainerType& _data()
@@ -127,14 +127,14 @@ namespace NS_JSTL
 		}
 
 	protected:
-		TD_SizeType _add(const __DataType& pr) override
+		size_t _add(const __DataType& pr) override
 		{
 			_data().insert(pr);
 
 			return _data().size();
 		}
 
-		TD_SizeType _del(__KeyConstRef key) override
+		size_t _del(__KeyConstRef key) override
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -200,6 +200,11 @@ namespace NS_JSTL
 			return map;
 		}
 
+		__ValueType& get(__KeyConstRef key)
+		{
+			return _data()[key];
+		}
+
 		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
 			auto itr = _data().find(key);
@@ -232,20 +237,34 @@ namespace NS_JSTL
 			return true;
 		}
 
-		void forEach(__CB_ValueCR_KeyCR_bool cb) const
+		bool del_one(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		{
+			auto itr = _data().find(key);
+			if (itr == _data().end())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(itr->second);
+			}
+
+			_data().erase(itr);
+
+			return true;
+		}
+
+		size_t del_some(__CB_ValueR_DelConfirm cb)
 		{
 			if (!cb)
 			{
-				return;
+				return 0;
 			}
 
-			for (auto& pr : _data())
-			{
-				if (!cb(pr.second, pr.first))
-				{
-					break;
-				}
-			}
+			return __Super::del([&](__DataType& data) {
+				return cb(data.second);
+			});
 		}
 
 		void forEachValue(__CB_ValueR_bool cb)
@@ -318,14 +337,13 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMapT& set(__KeyConstRef key, __ValueConstRef value)
+		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
-			_data()[key] = value;
-			return *this;
+			return _data()[key] = value;
 		}
 
 		template<typename T>
-		TD_SizeType set(const T& container)
+		size_t set(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -335,13 +353,13 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__InitList initList)
+		size_t set(__InitList initList)
 		{
 			return set<__InitList>(initList);
 		}
 
 		template <typename T>
-		TD_SizeType set(const T& container, const function<__ValueType(__KeyType)>& cb)
+		size_t set(const T& container, const function<__ValueType(__KeyType)>& cb)
 		{
 			if (cb)
 			{
@@ -354,7 +372,7 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
+		size_t set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
 			return set<__InitList_Key>(keys, cb);
 		}
