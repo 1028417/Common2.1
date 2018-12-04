@@ -186,7 +186,7 @@ E_ListViewType CObjectList::GetView()
 	return m_para.eViewType;
 }
 
-BOOL CObjectList::InitColumn(const TD_ListColumn &lstColumns, const set<UINT>& setUnderlineColumns)
+BOOL CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns)
 {
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
@@ -334,7 +334,7 @@ void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstT
 
 void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 {
-	if (lstObjects.empty())
+	if (!lstObjects)
 	{
 		if (0 == nPos)
 		{
@@ -353,17 +353,18 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 	this->SetRedraw(FALSE);
 	
 	int nItem = nPos;
-	for (TD_ListObjectList::const_iterator itObject = lstObjects.begin()
-		; itObject != lstObjects.end(); ++itObject, ++nItem)
+	for (auto pObject : lstObjects)
 	{
 		if (nItem <= nMaxItem)
 		{
-			SetItemObject(nItem, **itObject);
+			SetItemObject(nItem, *pObject);
 		}
 		else
 		{
-			(void)InsertObject(**itObject, nItem);
+			(void)InsertObject(*pObject, nItem);
 		}
+
+		nItem++;
 	}
 	
 	for (; nMaxItem >= nItem; --nMaxItem)
@@ -540,7 +541,7 @@ void CObjectList::GetAllObjects(TD_ListObjectList& lstListObjects)
 {
 	for (int nItem = 0; nItem < __super::GetItemCount(); ++nItem)
 	{
-		lstListObjects.push_back((CListObject*)__super::GetItemData(nItem));
+		lstListObjects.add((CListObject*)__super::GetItemData(nItem));
 	}
 }
 
@@ -587,7 +588,7 @@ void CObjectList::GetMultiSelectedObjects(TD_ListObjectList& lstObjects)
 
 	for (auto uItem : lstItems)
 	{
-		lstObjects.push_back(this->GetItemObject(uItem));
+		lstObjects.add(this->GetItemObject(uItem));
 	}
 }
 

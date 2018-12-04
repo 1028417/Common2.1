@@ -14,6 +14,41 @@ using namespace std;
 
 namespace NS_JSTL
 {
+	template<class _Iter>
+#ifdef _MSC_VER
+	using checkIter_t = typename enable_if<_Is_iterator<_Iter>::value, void>::type;
+#else
+	using checkIter_t = _RequireInputIter<_Iter>;
+#endif
+
+	template<class T>
+	using checkContainer_t = checkIter_t<decltype(declval<T>().begin())>;
+	// = typename enable_if<_Is_iterator<decltype(declval<T>().begin())>::value, void>::type;
+
+	//template <typename T>
+	//struct tagCheckNotContainerT
+	//{
+	//	template <typename = checkContainer_t<T>>
+	//	static void test(T t);
+
+	//	static T test(...);
+
+	//	enum { value = is_same<decltype(test(T())), T>::value };
+	//};
+	//template<typename T>
+	//using checkNotContainer_t = typename enable_if<tagCheckNotContainerT<T>::value, void>::type;
+
+
+	template <typename T1, typename T2>
+	using checkClass_t = typename enable_if<is_class<T1>::value && is_class<T2>::value, bool>::type;
+
+	template <typename T1, typename T2>
+	using checkNotSameType_t = typename enable_if<!is_same<T1, T2>::value, bool>::type;
+
+	template <typename T>
+	using checkNotConstType_t = typename enable_if<!is_same<typename remove_const<T>::type, T>::value, bool>::type;
+
+
 	typedef size_t TD_PosType;
 
 	template <typename T>
@@ -32,12 +67,14 @@ namespace NS_JSTL
 	using CB_T_Pos = const function<bool(T, TD_PosType)>&;
 
 	template <typename T>
-	using __CB_Sort_T = const function<bool(const T&lhs, const T&rhs)>&;
+	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
+
 
 	template<typename __DataType, template<typename...> class __BaseType> class JSArrayT;
+
 	template <typename __DataType, template<typename...> class __BaseType = vector>
 	using JSArray = JSArrayT<__DataType, __BaseType>;
-}
+};
 
 #define __SuperType(T) typename __Super::T
 #define __UsingSuperType(T) using T = __SuperType(T)

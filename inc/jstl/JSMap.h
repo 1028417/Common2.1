@@ -53,16 +53,8 @@ namespace NS_JSTL
 
 		using __CB_ValueR_DelConfirm = const function<E_DelConfirm(__ValueRef)>&;
 
-	protected:
-		__ContainerType& _data()
-		{
-			return __Super::m_data;
-		}
-
-		const __ContainerType& _data() const
-		{
-			return __Super::m_data;
-		}
+	private:
+		__ContainerType& m_data = __Super::m_data;
 
 	public:
 		JSMapT()
@@ -80,9 +72,9 @@ namespace NS_JSTL
 			set(keys, cb);
 		}
 
-		explicit JSMapT(const JSMapT& map)
-			: __Super(map)
+		explicit JSMapT(__ContainerType&& container)
 		{
+			__Super::swap(container);
 		}
 
 		JSMapT(JSMapT&& map)
@@ -90,26 +82,43 @@ namespace NS_JSTL
 			__Super::swap(map);
 		}
 
-		JSMapT(__InitList initList)
+		JSMapT(const JSMapT& map)
+			: __Super(map)
+		{
+		}
+
+		explicit JSMapT(__InitList initList)
 			: __Super(initList)
 		{
 		}
 
-		template<typename T>
+		template<typename T, typename = checkContainer_t<T>>
 		explicit JSMapT(const T& container)
 			: __Super(container)
 		{
 		}
 
-		JSMapT& operator=(const JSMapT& map)
+		template<typename T, typename = checkContainer_t<T>>
+		explicit JSMapT(T& container)
+			: __Super(container)
 		{
-			__Super::assign(map);
+		}
+
+		JSMapT& operator=(__ContainerType&& container)
+		{
+			__Super::swap(container);
 			return *this;
 		}
 
 		JSMapT& operator=(JSMapT&& map)
 		{
 			__Super::swap(map);
+			return *this;
+		}
+
+		JSMapT& operator=(const JSMapT& map)
+		{
+			__Super::assign(map);
 			return *this;
 		}
 
@@ -126,30 +135,35 @@ namespace NS_JSTL
 			return *this;
 		}
 
-	protected:
-		size_t _add(const __DataType& pr) override
+		template<typename T>
+		JSMapT& operator=(T&t)
 		{
-			_data().insert(pr);
+			__Super::assign(t);
+			return *this;
+		}
 
-			return _data().size();
+	protected:
+		void _add(const __DataType& pr) override
+		{
+			m_data.insert(pr);
 		}
 
 		size_t _del(__KeyConstRef key) override
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return 0;
 			}
 
-			_data().erase(itr);
+			m_data.erase(itr);
 
 			return 1;
 		}
 
 		bool _includes(__KeyConstRef key) const override
 		{
-			return _data().find(key) != _data().end();
+			return m_data.find(key) != m_data.end();
 		}
 
 		virtual void _toString(stringstream& ss, const __DataType& pr) const override
@@ -202,13 +216,13 @@ namespace NS_JSTL
 
 		__ValueType& get(__KeyConstRef key)
 		{
-			return _data()[key];
+			return m_data[key];
 		}
 
 		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -223,8 +237,8 @@ namespace NS_JSTL
 
 		bool get(__KeyConstRef key, __CB_ValueCR_void cb) const
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -237,10 +251,10 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool del_one(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		bool del_if(__KeyConstRef key, __CB_ValueR_void cb=NULL)
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -250,19 +264,19 @@ namespace NS_JSTL
 				cb(itr->second);
 			}
 
-			_data().erase(itr);
+			m_data.erase(itr);
 
 			return true;
 		}
 
-		size_t del_some(__CB_ValueR_DelConfirm cb)
+		size_t del_if(__CB_ValueR_DelConfirm cb)
 		{
 			if (!cb)
 			{
 				return 0;
 			}
 
-			return __Super::del([&](__DataType& data) {
+			return __Super::del_if([&](__DataType& data) {
 				return cb(data.second);
 			});
 		}
@@ -274,7 +288,7 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (!cb(pr.second))
 				{
@@ -290,7 +304,7 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (!cb(pr.second))
 				{
@@ -302,7 +316,7 @@ namespace NS_JSTL
 		JSArray<__KeyType> keys(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__KeyType> arr;
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (cb)
 				{
@@ -312,7 +326,7 @@ namespace NS_JSTL
 					}
 				}
 
-				arr.push(pr.first);
+				arr.add(pr.first);
 			}
 
 			return arr;
@@ -321,7 +335,7 @@ namespace NS_JSTL
 		JSArray<__ValueType> values(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__ValueType> arr;
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (cb)
 				{
@@ -331,7 +345,7 @@ namespace NS_JSTL
 					}
 				}
 
-				arr.push(pr.second);
+				arr.add(pr.second);
 			}
 
 			return arr;
@@ -339,27 +353,25 @@ namespace NS_JSTL
 
 		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
-			return _data()[key] = value;
+			return m_data[key] = value;
 		}
 
 		template<typename T>
-		size_t set(const T& container)
+		void set(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
-				_data().insert(container.begin(), container.end());
+				m_data.insert(container.begin(), container.end());
 			}
-
-			return _data().size();
 		}
 
-		size_t set(__InitList initList)
+		void set(__InitList initList)
 		{
-			return set<__InitList>(initList);
+			set<__InitList>(initList);
 		}
 
 		template <typename T>
-		size_t set(const T& container, const function<__ValueType(__KeyType)>& cb)
+		void set(const T& container, const function<__ValueType(__KeyType)>& cb)
 		{
 			if (cb)
 			{
@@ -368,13 +380,11 @@ namespace NS_JSTL
 					this->set(key, cb(key));
 				}
 			}
-
-			return _data().size();
 		}
 
-		size_t set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
+		void set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			return set<__InitList_Key>(keys, cb);
+			set<__InitList_Key>(keys, cb);
 		}
 
 	public:
@@ -385,7 +395,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto& pr : _data())
+				for (auto& pr : m_data)
 				{
 					map.set(pr.first, cb(pr.first, pr.second));
 				}
@@ -406,7 +416,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto& pr : _data())
+				for (auto& pr : m_data)
 				{
 					if (cb(pr.first, pr.second))
 					{

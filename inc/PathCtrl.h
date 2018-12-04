@@ -56,10 +56,9 @@ public:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 	
-		for (TD_PathList::iterator itSubDir = lstSubDirs.begin()
-			; itSubDir != lstSubDirs.end(); ++itSubDir)
+		for (auto pSubDir : lstSubDirs)
 		{
-			(void)InsertObject(*(CDirObject*)*itSubDir, pDirObject);
+			(void)InsertObject(*(CDirObject*)pSubDir, pDirObject);
 		}
 	}
 	
@@ -90,10 +89,9 @@ private:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 
-		for (TD_PathList::iterator itSubDir = lstSubDirs.begin()
-			; itSubDir != lstSubDirs.end(); ++itSubDir)
+		for (auto pSubDir : lstSubDirs)
 		{
-			InsertChilds((CDirObject*)*itSubDir);
+			InsertChilds((CDirObject*)pSubDir);
 		}
 	}
 };
@@ -118,7 +116,7 @@ private:
 	virtual void PreSubclassWindow() override;
 
 public:
-	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn &lstColumns = TD_ListColumn());
+	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns = TD_ListColumn());
 
 	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});
 

@@ -6,14 +6,30 @@
 
 namespace NS_JSTL
 {
-	template <typename T, typename U>
-	struct decay_is_same :
-		std::is_same<typename std::decay<T>::type, U>::type
-	{};
+	template <typename T> struct tagGetTypeT {
+		typedef T type;
+		typedef T& type_ref;
+		typedef T* type_pointer;
+	};
 
-	template <typename T>
-	struct tagTryCompare
+	template<typename T> struct tagGetTypeT<T&> {
+		typedef typename remove_reference<T>::type type;
+		typedef typename remove_reference<T>::type_ref type_ref;
+		typedef typename remove_reference<T>::type_pointer type_pointer;
+	};
+
+	template<typename T> struct tagGetTypeT<T*> {
+		typedef typename remove_reference<T>::type type;
+		typedef typename remove_reference<T>::type_ref type_ref;
+		typedef typename remove_reference<T>::type_pointer type_pointer;
+	};
+
+	template <typename T, typename U> struct decay_is_same
+		: is_same<typename decay<T>::type, U>::type
 	{
+	};
+	
+	template <typename T> struct tagTryCompare {
 		static bool compare(const T&t1, const T&t2)
 		{
 			return _compare(t1, t2);
@@ -31,11 +47,8 @@ namespace NS_JSTL
 		}
 	};
 
-	template <typename T>
-	struct tagSortT
-	{
-		tagSortT(__CB_Sort_T<T> cb)
-			: m_cb(cb)
+	template <typename T> struct tagSortT {
+		tagSortT(__CB_Sort_T<T> cb) : m_cb(cb)
 		{
 		}
 
@@ -47,17 +60,14 @@ namespace NS_JSTL
 		}
 	};
 
-	template <typename T>
-	struct tagTrySort
-	{
-		tagTrySort(__CB_Sort_T<T> cb = NULL)
-			: m_cb(cb)
+	template <typename T> struct tagTrySort {
+		tagTrySort(__CB_Sort_T<T> cb = NULL) : m_cb(cb)
 		{
 		}
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&lhs, const T&rhs) const
+		bool operator()(T&lhs, T&rhs) const
 		{
 			if (m_cb)
 			{
@@ -68,7 +78,7 @@ namespace NS_JSTL
 		}
 
 		template <typename U>
-		static auto _compare(const U&lhs, const U&rhs) -> decltype(declval<U>() < declval<U>())
+		static auto _compare(U&lhs, U&rhs) -> decltype(declval<U>() < declval<U>())
 		{
 			return lhs < rhs;
 		}
@@ -79,9 +89,7 @@ namespace NS_JSTL
 		}
 	};
 
-	template <typename T, typename U>
-	struct tagTryLMove
-	{
+	template <typename T, typename U> struct tagTryLMove {
 		static void lmove(T&t, const U&u)
 		{
 			_lmove(&t, &u);
@@ -98,14 +106,11 @@ namespace NS_JSTL
 			return false;
 		}
 
-		enum { value = std::is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
+		enum { value = is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
 	};
 
-	template <typename T, typename U = int>
-	struct tagLMove
-	{
-		tagLMove(T&t)
-			: m_t(t)
+	template <typename T, typename U = int>	struct tagLMove {
+		tagLMove(T&t) : m_t(t)
 		{
 		}
 
@@ -127,8 +132,7 @@ namespace NS_JSTL
 
 	using tagSSTryLMove = tagLMove<stringstream>;
 
-	template<typename __DataType>
-	class tagDynamicArgsExtractor
+	template<typename __DataType> class tagDynamicArgsExtractor
 	{
 	public:
 		using FN_ExtractCB = const function<bool(__DataType&v)>&;
@@ -190,11 +194,7 @@ namespace NS_JSTL
 			return cb(v);
 		}
 	};
-
-	template <typename T, typename _RetType
-		, typename _ITR = decltype(declval<T>().begin())>
-	_RetType checkContainer();
-
+	
 	template <typename T, typename C>
 	T reduce(const C& container, const function<T(const T& t1, const T& t2)>& cb)
 	{
@@ -239,8 +239,14 @@ namespace NS_JSTL
 	}
 
 	template <typename T>
-	void QSort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
+	void qsort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
 	{
+		if (size < 2)
+		{
+			return;
+		}
+		int end = (int)size - 1;
+
 		tagTrySort<T> trySort;
 		auto fnCompare = [&](T& lhs, T& rhs) {
 			if (cb) {
@@ -285,16 +291,17 @@ namespace NS_JSTL
 			fnSort(begin, i - 1);
 			fnSort(i + 1, end);
 		};
-		fnSort(0, size - 1);
+		
+		fnSort(0, end);
 	}
 
 	template <typename T>
-	void QSort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
+	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
 	{
 		size_t size = vecData.size();
 		if (size > 1)
 		{
-			QSort<T>(&vecData.front(), size, cb);
+			qsort<T>(&vecData.front(), size, cb);
 		}
 	}
 }

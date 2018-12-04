@@ -5,19 +5,19 @@
 
 //CPath
 class CPath;
-using TD_PathList = ptrvector<CPath>;
+using TD_PathList = PtrArray<CPath>;
 
 class CListObject;
-using TD_ListObjectList = ptrvector<CListObject>;
+using TD_ListObjectList = PtrArray<CListObject>;
 
 class CTreeObject;
-using TD_TreeObjectList = ptrvector<CTreeObject>;
+using TD_TreeObjectList = PtrArray<CTreeObject>;
 
 class CPathObject;
-using TD_PathObjectList = ptrvector<CPathObject>;
+using TD_PathObjectList = PtrArray<CPathObject>;
 
 class CDirObject;
-using TD_DirObjectList = ptrvector<CDirObject>;
+using TD_DirObjectList = PtrArray<CDirObject>;
 
 class __UtilExt CPath
 {
@@ -239,7 +239,7 @@ public:
 		TD_PathList lstSubPaths;
 		this->GetSubPath(lstSubPaths);
 
-		TD_DirObjectList lstDirObjects(lstSubPaths, false);
+		TD_DirObjectList lstDirObjects(lstSubPaths);
 		lstChilds.add(lstDirObjects);
 	}
 };

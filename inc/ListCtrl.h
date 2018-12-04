@@ -169,7 +169,7 @@ public:
 	void SetView(E_ListViewType eViewType, bool bArrange = false);
 	E_ListViewType GetView();
 
-	BOOL InitColumn(const TD_ListColumn &lstColumns, const set<UINT>& setUnderlineColumns = {});
+	BOOL InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
 	BOOL SetUnderlineColumn(const set<UINT>& setUnderlineColumns);
 
 	BOOL InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize = 0);

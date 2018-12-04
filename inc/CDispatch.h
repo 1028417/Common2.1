@@ -221,7 +221,7 @@ class __CommonExt CDispatch
 	typedef map<string, DISPID> DispIDMap;
 
 public:
-	CDispatch(const string &strProgID)
+	CDispatch(const string& strProgID)
 		:m_strProgID(strProgID)
 	{
 		m_dwCreateFlag = CLSCTX_INPROC_SERVER;
@@ -258,7 +258,7 @@ private:
 	EXCEPINFO m_errInfo;
 
 private:
-	DISPID GetDispID(const string &strName)
+	DISPID GetDispID(const string& strName)
 	{
 		DispIDMap::iterator itDispID = m_mapDispIDs.find(strName);
 		if (itDispID != m_mapDispIDs.end())
@@ -279,7 +279,7 @@ private:
 		return nDispID;
 	}
 
-	BOOL Dispatch(const int &nFlag, const string &strName, CParams *pParams, CVariant* pRet=NULL)
+	BOOL Dispatch(const int &nFlag, const string& strName, CParams *pParams, CVariant* pRet=NULL)
 	{
 		ASSERT(m_pObj);
 
@@ -309,7 +309,7 @@ private:
 	}
 
 public:
-	CVariant* GetPropEx(const string &strName, CParams *pParams)
+	CVariant* GetPropEx(const string& strName, CParams *pParams)
 	{
 		ASSERT(pParams);
 
@@ -355,7 +355,7 @@ public:
 		return SubObj.GetProp("");
 	}
 
-	BOOL SetPropEx(const string &strName, CVariant* pValue, CParams *pParams)
+	BOOL SetPropEx(const string& strName, CVariant* pValue, CParams *pParams)
 	{
 		ASSERT(pValue);
 		ASSERT(pParams);
@@ -402,7 +402,7 @@ public:
 		return SubObj.SetProp("", pValue);
 	}
 
-	CVariant* GetProp(const string &strName, CParams *pParams=NULL)
+	CVariant* GetProp(const string& strName, CParams *pParams=NULL)
 	{
 		m_varRet = CVariant();
 
@@ -414,7 +414,7 @@ public:
 		return &m_varRet;
 	}
 
-	BOOL SetProp(const string &strName, CVariant* pValue, CParams *pParams=NULL)
+	BOOL SetProp(const string& strName, CVariant* pValue, CParams *pParams=NULL)
 	{
 		ASSERT(pValue);
 
@@ -428,12 +428,12 @@ public:
 		return Dispatch(DISPATCH_PROPERTYPUT, strName, pParams);
 	}
 
-	BOOL CallProc(const string &strName, CParams *pParams=NULL)
+	BOOL CallProc(const string& strName, CParams *pParams=NULL)
 	{
 		return Dispatch(DISPATCH_METHOD, strName, pParams);
 	}
 
-	CVariant* CallFunc(const string &strName, CParams *pParams=NULL)
+	CVariant* CallFunc(const string& strName, CParams *pParams=NULL)
 	{
 		m_varRet = CVariant();
 

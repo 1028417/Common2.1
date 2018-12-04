@@ -59,14 +59,14 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 		{
 			if (plstSubDir)
 			{
-				plstSubDir->push_back(pSubPath);
+				plstSubDir->add(pSubPath);
 			}
 		}
 		else
 		{
 			if (plstSubFile)
 			{
-				plstSubFile->push_back(pSubPath);
+				plstSubFile->add(pSubPath);
 			}
 		}
 	}
@@ -106,27 +106,26 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir)
 		
 		pPath = NULL;
 
-		for (TD_PathList::iterator itSubPath = lstSubPath.begin()
-			; itSubPath != lstSubPath.end(); ++itSubPath)
+		for (auto pSubPath : lstSubPath)
 		{
 			if (lstSubDirs.empty())
 			{
-				if ((*itSubPath)->m_bDir != bDir)
+				if (pSubPath->m_bDir != bDir)
 				{
 					continue;
 				}
 			}
 			else
 			{
-				if (!(*itSubPath)->m_bDir)
+				if (!pSubPath->m_bDir)
 				{
 					continue;
 				}
 			}
 
-			if (util::StrCompareIgnoreCase((*itSubPath)->m_strName, strName))
+			if (util::StrCompareIgnoreCase(pSubPath->m_strName, strName))
 			{
-				pPath = *itSubPath;
+				pPath = pSubPath;
 				break;
 			}
 		}
@@ -139,10 +138,9 @@ void CPath::ClearSubPath()
 {
 	if (NULL != m_plstSubPath)
 	{
-		for (TD_PathList::iterator itSubPath = m_plstSubPath->begin()
-			; itSubPath != m_plstSubPath->end(); ++itSubPath)
+		for (auto pSubPath : *m_plstSubPath)
 		{
-			delete *itSubPath;
+			delete pSubPath;
 		}
 
 		m_plstSubPath->clear();
@@ -155,7 +153,7 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
-	for (TD_PathList::iterator itSubPath = m_plstSubPath->begin()
+	for (auto itSubPath = m_plstSubPath->begin()
 		; itSubPath != m_plstSubPath->end(); )
 	{
 		if (util::ContainerFind(lstDeletePaths, *itSubPath))
@@ -183,20 +181,20 @@ bool CPath::FindFile()
 		pSubPath = NewSubPath(findData, this);
 		if (pSubPath)
 		{
-			lstSubPath.push_back(pSubPath);
+			lstSubPath.add(pSubPath);
 		}
 		return true;
 	});
 
-	QSort<CPath*>(lstSubPath, [](CPath *lhs, CPath *rhs) {
-		if (lhs->m_bDir && !rhs->m_bDir)
+	lstSubPath.qsort([](CPath& lhs, CPath& rhs) {
+		if (lhs.m_bDir && !rhs.m_bDir)
 		{
 			return true;
 		}
 
-		if (lhs->m_bDir == rhs->m_bDir)
+		if (lhs.m_bDir == rhs.m_bDir)
 		{
-			return util::StrCompareUseCNCollate(lhs->m_strName, rhs->m_strName) < 0;
+			return util::StrCompareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
 		}
 
 		return false;

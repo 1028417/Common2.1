@@ -12,7 +12,7 @@ void CPathList::PreSubclassWindow()
 	(void)ModifyStyle(LVS_ALIGNLEFT, LVS_AUTOARRANGE);
 }
 
-BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn &lstColumns)
+BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns)
 {
 	__EnsureReturn(__super::InitFont(crText, uFontSize), FALSE);
 	return __super::InitColumn(lstColumns.empty() ? m_lstColumns : lstColumns);
@@ -54,8 +54,7 @@ void CPathList::SetPath(CPathObject* pPath)
 		this->SetRedraw(FALSE);
 		DeleteAllItems();
 
-		TD_ListObjectList lstObjects;
-		lstObjects.add(lstSubPaths, false);
+		TD_ListObjectList lstObjects(lstSubPaths);
 		__super::SetObjects(lstObjects);
 
 		this->SetRedraw(TRUE);
@@ -81,20 +80,19 @@ void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects)
 	TD_ListObjectList lstListObjects;
 	__super::GetAllObjects(lstListObjects);
 
-	lstPathObjects.add(lstListObjects, 1);
+	lstPathObjects.add(lstListObjects);
 }
 
 void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir)
 {
-	TD_PathObjectList result;
-	GetAllPathObjects(result);
+	TD_PathObjectList lstAllObjects;
+	GetAllPathObjects(lstAllObjects);
 
-	for (TD_PathObjectList::iterator itrPathObject = result.begin()
-		; itrPathObject != result.end(); ++itrPathObject)
+	for (auto pPathObject : lstAllObjects)
 	{
-		if ((*itrPathObject)->m_bDir == bDir)
+		if (pPathObject->m_bDir == bDir)
 		{
-			lstPathObjects.push_back(*itrPathObject);
+			lstPathObjects.add(pPathObject);
 		}
 	}
 }

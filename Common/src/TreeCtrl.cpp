@@ -177,21 +177,20 @@ void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 	for (list<HTREEITEM>::iterator itItem = lstItems.begin()
 		; itItem != lstItems.end(); ++itItem)
 	{
-		lstObjects.push_back(__super::GetItemObject(*itItem));
+		lstObjects.add(__super::GetItemObject(*itItem));
 	}
 }
 
 void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
 {
-	TD_TreeObjectList lstItemObjects;
-	__super::GetAllObjects(lstItemObjects);
+	TD_TreeObjectList lstTreeObjects;
+	__super::GetAllObjects(lstTreeObjects);
 
-	for (TD_TreeObjectList::iterator itObject = lstItemObjects.begin()
-		; itObject != lstItemObjects.end(); ++itObject)
+	for (auto pTreeObject : lstTreeObjects)
 	{
-		if (eCheckState == this->GetItemCheckState(getTreeItem(*itObject)))
+		if (eCheckState == this->GetItemCheckState(getTreeItem(pTreeObject)))
 		{
-			lstObjects.push_back(*itObject);
+			lstObjects.add(pTreeObject);
 		}
 	}
 }
@@ -202,14 +201,13 @@ void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	this->GetAllObjects(lstChekedObjects, CS_Checked);
 
 	HTREEITEM hParentItem = NULL;
-	for (TD_TreeObjectList::iterator itObject = lstChekedObjects.begin()
-		; itObject != lstChekedObjects.end(); ++itObject)
+	for (auto pCheckedObject : lstChekedObjects)
 	{
-		hParentItem = this->GetParentItem(getTreeItem(*itObject));
+		hParentItem = this->GetParentItem(getTreeItem(pCheckedObject));
 
 		if (!util::ContainerFind(lstChekedObjects, this->GetItemObject(hParentItem)))
 		{
-			lstObjects.push_back(*itObject);
+			lstObjects.add(pCheckedObject);
 		}
 	}
 }
@@ -356,10 +354,9 @@ HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentO
 	TD_TreeObjectList lstSubObjects;
 	Object.GetTreeChilds(lstSubObjects);
 
-	for (TD_TreeObjectList::iterator itSubObject=lstSubObjects.begin()
-		; itSubObject!=lstSubObjects.end(); ++itSubObject)
+	for (auto pSubObject : lstSubObjects)
 	{
-		(void)InsertObjectEx(**itSubObject, &Object);
+		(void)InsertObjectEx(*pSubObject, &Object);
 	}
 
 	return getTreeItem(Object);
@@ -406,7 +403,7 @@ void CObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 	for (list<HTREEITEM>::iterator itItem = lstItems.begin()
 		; itItem != lstItems.end(); ++itItem)
 	{
-		lstObjects.push_back(this->GetItemObject(*itItem));
+		lstObjects.add(this->GetItemObject(*itItem));
 	}
 }
 
