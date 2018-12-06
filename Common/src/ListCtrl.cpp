@@ -233,7 +233,7 @@ BOOL CObjectList::InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize)
 
 BOOL CObjectList::SetItemHeight(UINT uItemHeight)
 {
-	__AssertReturn(m_ImglstSmall.Create(1, uItemHeight, ILC_COLOR8, 1, 0), FALSE);
+	__AssertReturn(m_ImglstSmall.Create(1, uItemHeight, ILC_COLOR, 0, 0), FALSE);
 
 	SetImageList(NULL, &m_ImglstSmall);
 	

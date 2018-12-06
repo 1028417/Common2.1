@@ -8,18 +8,8 @@
 
 //CSQLiteDBResult
 
-CSQLiteDBResult::CSQLiteDBResult()
-{
-	m_uColumnCount = 0;
-	m_uRowCount = 0;
-
-	m_pData = NULL;
-}
-
 CSQLiteDBResult::~CSQLiteDBResult()
 {
-	__Ensure(this);
-
 	if (m_pData)
 	{
 		sqlite3_free_table(m_pData);
@@ -28,62 +18,97 @@ CSQLiteDBResult::~CSQLiteDBResult()
 	delete this;
 }
 
-UINT CSQLiteDBResult::GetColumnCount()
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
 {
-	__EnsureReturn(this, 0);
+	__EnsureReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, FALSE);
+	__EnsureReturn(m_pData, FALSE);
 
-	return m_uColumnCount;
+	char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
+	if (NULL != lpData)
+	{
+		strData = lpData;
+	}
+
+	return TRUE;
 }
 
-UINT CSQLiteDBResult::GetRowCount()
+BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 {
-	__EnsureReturn(this, 0);
-
-	return m_uRowCount;
+	string t_strData;
+	__EnsureReturn(GetData(uRow, uColumn, t_strData), FALSE);
+	
+	strData = util::StrToWStr(t_strData, CP_UTF8);
+	
+	return TRUE;
 }
 
 BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
 {
-	string strValue;
-	__EnsureReturn(GetData(uRow, uColumn, strValue), FALSE);
+	string strData;
+	__EnsureReturn(GetData(uRow, uColumn, strData), FALSE);
 
-	nValue = atoi(strValue.c_str());
+	nValue = atoi(strData.c_str());
 
 	return TRUE;
 }
 
 BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
 {
-	string strValue;
-	__EnsureReturn(GetData(uRow, uColumn, strValue), FALSE);
+	string strData;
+	__EnsureReturn(GetData(uRow, uColumn, strData), FALSE);
 
-	dbValue = atof(strValue.c_str());
+	dbValue = atof(strData.c_str());
 
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strValue)
+BOOL CSQLiteDBResult::_getData(UINT uRow, const function<void(const string&)>& cb)
 {
-	__EnsureReturn(this, NULL);
-	__EnsureReturn(m_uRowCount && m_uColumnCount, NULL);
-	__EnsureReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, NULL);
+	__EnsureReturn(uRow < m_uRowCount, FALSE);
 	__EnsureReturn(m_pData, FALSE);
 
-	char* pszValue = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
-	if (NULL != pszValue)
+	for (UINT uColumn = 0; uColumn < m_uColumnCount; uColumn++)
 	{
-		strValue = pszValue;
+		char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
+		if (NULL != lpData)
+		{
+			cb(lpData);
+		}
+		else
+		{
+			cb("");
+		}
 	}
 
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<string>& arrData)
 {
-	string strData;
-	__EnsureReturn(GetData(uRow, uColumn, strData), FALSE);
-	strValue = util::StrToWStr(strData, CP_UTF8);
-	return TRUE;
+	return _getData(uRow, [&](const string& strData) {
+		arrData.add(strData);
+	});
+}
+
+BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<wstring>& arrData)
+{
+	return _getData(uRow, [&](const string& strData) {
+		arrData.add(util::StrToWStr(strData, CP_UTF8));
+	});
+}
+
+BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<int>& arrValue)
+{
+	return _getData(uRow, [&](const string& strData) {
+		arrValue.add(atoi(strData.c_str()));
+	});
+}
+
+BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<double>& arrValue)
+{
+	return _getData(uRow, [&](const string& strData) {
+		arrValue.add(atof(strData.c_str()));
+	});
 }
 
 
@@ -132,17 +157,17 @@ BOOL CSQLiteDB::Execute(const wstring& strSql)
 	__EnsureReturn(m_hDB, FALSE);
 	
 	char *pszError = NULL;
-	if (SQLITE_OK != sqlite3_exec((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), 0, 0, &pszError))
+	int iRet = sqlite3_exec((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), 0, 0, &pszError);
+	if (NULL != pszError)
 	{
-		if (NULL != pszError)
-		{
-			m_strError = pszError;
-		}
-		
-		return FALSE;
+		m_strError = pszError;
+	}
+	else
+	{
+		m_strError.clear();
 	}
 
-	return TRUE;
+	return SQLITE_OK == iRet;
 }
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)
@@ -155,15 +180,18 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql)
 	int nRowCount = 0;
 
 	char *pszError = NULL;
-	int nResult = sqlite3_get_table((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), &pData
+	int iRet = sqlite3_get_table((sqlite3*)m_hDB, util::WStrToStr(strSql, CP_UTF8).c_str(), &pData
 		, &nRowCount, &nColumnCount, &pszError);
-
 	if (pszError)
 	{
 		m_strError = pszError;
 	}
+	else
+	{
+		m_strError.clear();
+	}
 
-	__EnsureReturn(SQLITE_OK == nResult && pData, NULL);
+	__EnsureReturn(SQLITE_OK == iRet && pData, NULL);
 	
 	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
 

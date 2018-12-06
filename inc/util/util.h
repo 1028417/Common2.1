@@ -11,8 +11,6 @@
 #define __UtilExt __declspec(dllimport)
 #endif
 
-#define	__BackSlant L'\\'
-
 #define __Ensure(x) \
 	if (!(x)) \
 	{ \
@@ -71,7 +69,13 @@ public:
 	static wstring FormatTime(time_t time, const wstring& strFormat);
 	static wstring FormatTime(const tm& atm, const wstring& strFormat);
 
-	static wstring trim(const wstring& strText, char chr=' ');
+	static void trim(wstring& strText, wchar_t chr = ' ');
+	static void ltrim(wstring& strText, wchar_t chr = ' ');
+	static void rtrim(wstring& strText, wchar_t chr = ' ');
+
+	static wstring trim(const wstring& strText, wchar_t chr = ' ');
+	static wstring ltrim(const wstring& strText, wchar_t chr = ' ');
+	static wstring rtrim(const wstring& strText, wchar_t chr = ' ');
 
 	static void SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim=false);
 

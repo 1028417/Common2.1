@@ -15,7 +15,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\inc\util\WorkThread.cpp" />
     <ClCompile Include="fsdlg.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="ProFile.cpp" />
@@ -24,6 +23,7 @@
     <ClCompile Include="sqlite\shell.c" />
     <ClCompile Include="sqlite\sqlite3.c" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="WorkThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\util\fsdlg.h" />

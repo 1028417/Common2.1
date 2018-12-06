@@ -44,25 +44,23 @@ BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
 	return TRUE;
 }
 
-void CPathList::SetPath(CPathObject* pPath)
+bool CPathList::SetPath(CPathObject* pPath)
 {
-	if (pPath)
-	{
-		TD_PathList lstSubPaths;
-		pPath->GetSubPath(lstSubPaths);
-
-		this->SetRedraw(FALSE);
-		DeleteAllItems();
-
-		TD_ListObjectList lstObjects(lstSubPaths);
-		__super::SetObjects(lstObjects);
-
-		this->SetRedraw(TRUE);
-	}
-	else
+	TD_PathList lstSubPaths;
+	if (NULL == pPath || !pPath->GetSubPath(lstSubPaths))
 	{
 		DeleteAllItems();
+		return false;
 	}
+		
+	TD_ListObjectList lstObjects(lstSubPaths);
+
+	this->SetRedraw(FALSE);
+	DeleteAllItems();
+	__super::SetObjects(lstObjects);
+	this->SetRedraw(TRUE);
+
+	return true;
 }
 
 BOOL CPathList::IsFileItem(int nItem)

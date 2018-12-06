@@ -47,7 +47,7 @@ public:
 	virtual int MsgBox(const CString& cstrText, UINT uType=MB_OK);
 
 	void Async(const CB_Async& cb, UINT uDelayTime=0);
-	void AsyncLoop(const CB_AsyncLoop& cb, UINT uDelayTime);
+	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb);
 
 protected:
 	BOOL OnSetActive();

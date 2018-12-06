@@ -3,21 +3,6 @@
 
 #include <MainWnd.h>
 
-
-#define __CursorName(_Style) ( \
-		VS_DockLeft == __DockStyle(_Style) || VS_DockRight == __DockStyle(_Style) \
-	) \
-	? \
-		IDC_SIZEWE \
-	: \
-		(\
-			(VS_DockTop == __DockStyle(_Style) || VS_DockBottom == __DockStyle(_Style)) \
-			? \
-				IDC_SIZENS \
-			: \
-				IDC_ARROW \
-		)
-
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -104,7 +89,7 @@ void CMainWnd::OnSize()
 	CDockView *pCenterView = NULL;
 	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
 	{
-		if (VS_DockCenter == __DockStyle((*itView)->m_eStyle))
+		if (E_ViewDockStyle::VDS_DockCenter == __DockStyle((*itView)->m_eStyle))
 		{
 			pCenterView = *itView;
 
@@ -188,7 +173,7 @@ BOOL CMainWnd::AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
 
 BOOL CMainWnd::AddUndockView(CPage& Page, const CRect& rtPos)
 {
-	CDockView *pView = new CDockView(*this, VS_Undock, rtPos);
+	CDockView *pView = new CDockView(*this, VS_FixSize, rtPos);
 
 	return _AddView(*pView, Page);
 }
@@ -284,8 +269,8 @@ CDockView* CMainWnd::GetDockView(const CPoint& ptPos)
 	{
 		pView = *itView;
 
-		uDockStyle = __DockStyle(pView->m_eStyle);
-		if (uDockStyle && VS_DockCenter != uDockStyle)
+		E_ViewDockStyle eDockStyle = __DockStyle(pView->m_eStyle);
+		if (E_ViewDockStyle::VDS_NoDock == eDockStyle || E_ViewDockStyle::VDS_DockCenter == eDockStyle)
 		{
 			continue;
 		}
@@ -293,12 +278,10 @@ CDockView* CMainWnd::GetDockView(const CPoint& ptPos)
 		pView->GetWindowRect(&rcPos);
 		this->ScreenToClient(&rcPos);
 		
-		if (
-			(VS_DockLeft == uDockStyle && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
+		if ((VS_DockLeft == uDockStyle && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
 			|| (VS_DockTop == uDockStyle && PtInRect(&CRect(rcPos.left, rcPos.bottom, rcPos.right, rcPos.bottom+__DXView), ptPos))
 			|| (VS_DockRight == uDockStyle && PtInRect(&CRect(rcPos.left-__DXView, rcPos.top, rcPos.left, rcPos.bottom), ptPos))
-			|| (VS_DockBottom == uDockStyle && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos))
-			)
+			|| (VS_DockBottom == uDockStyle && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos)))
 		{
 			return pView;
 		}
@@ -359,33 +342,48 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 		break;
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONDOWN:
+	{
+		CPoint ptPos(lParam);
+
+		if (WM_MOUSEMOVE == message && pTargetView)
 		{
-			CPoint ptPos(lParam);
-
-			if (WM_MOUSEMOVE == message && pTargetView)
-			{
-				ResizeView(*pTargetView, ptPos);
-				break;
-			}
-
-			CDockView* pView = GetDockView(ptPos);
-			__EnsureBreak(pView);
-						
-			if (pView->m_eStyle & VS_FixSize)
-			{
-				break;
-			}
-
-			::SetCursor(::LoadCursor(NULL, __CursorName(pView->m_eStyle)));
-			if (WM_LBUTTONDOWN == message)
-			{
-				pTargetView = pView;
-
-				this->SetCapture();
-			}
+			ResizeView(*pTargetView, ptPos);
+			break;
 		}
 
-		break;
+		CDockView* pView = GetDockView(ptPos);
+		__EnsureBreak(pView);
+
+		if (pView->m_eStyle & VS_FixSize)
+		{
+			break;
+		}
+
+		LPCWSTR pszCursorName = NULL;
+		E_ViewDockStyle eDockStyle = __DockStyle(pView->m_eStyle);
+		if (E_ViewDockStyle::VDS_DockLeft == eDockStyle || E_ViewDockStyle::VDS_DockRight == eDockStyle)
+		{
+			pszCursorName = IDC_SIZEWE;
+		}
+		else if (E_ViewDockStyle::VDS_DockTop == eDockStyle || E_ViewDockStyle::VDS_DockBottom == eDockStyle)
+		{
+			pszCursorName = IDC_SIZENS;
+		}
+		else
+		{
+			pszCursorName = IDC_ARROW;
+		}
+
+		::SetCursor(::LoadCursor(NULL, pszCursorName));
+		if (WM_LBUTTONDOWN == message)
+		{
+			pTargetView = pView;
+
+			this->SetCapture();
+		}
+	}
+	
+	break;
 	default:
 		return FALSE;
 	}

@@ -30,30 +30,58 @@ wstring CPath::GetPath() const
 	return m_strName;
 }
 
-UINT CPath::GetSubPathCount()
+TD_PathList& CPath::_findFile(const wstring& strFind)
 {
-	if (NULL == m_plstSubPath)
+	if (NULL != m_plstSubPath)
 	{
-		return 0;
+		return *m_plstSubPath;
 	}
 
-	return m_plstSubPath->size();
-}
+	m_plstSubPath = new TD_PathList();
 
-bool CPath::GetSubPath(TD_PathList& lstSubPath)
-{
-	__EnsureReturn(FindFile() && m_plstSubPath, false);
+	m_bExists = fsutil_win::FindFile(this->GetPath() + L"\\" + (strFind.empty() ? L"*" : strFind)
+		, [&](const tagFindData& findData) {
+		CPath *pSubPath = NewSubPath(findData, this);
+		if (pSubPath)
+		{
+			m_plstSubPath->add(pSubPath);
+		}
+		return true;
+	});
 	
-	lstSubPath.add(*m_plstSubPath);
+	m_plstSubPath->qsort([](CPath& lhs, CPath& rhs) {
+		if (lhs.m_bDir && !rhs.m_bDir)
+		{
+			return true;
+		}
 
-	return true;
+		if (lhs.m_bDir == rhs.m_bDir)
+		{
+			return util::StrCompareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
+		}
+
+		return false;
+	});
+	
+	return *m_plstSubPath;
 }
 
-bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
+bool CPath::GetSubPath(TD_PathList& lstSubPath, const wstring& strFind)
 {
-	__EnsureReturn(FindFile() && m_plstSubPath, false);
+	__EnsureReturn(m_bDir, false);
+	
+	lstSubPath.add(_findFile(strFind));
 
-	for (auto& pSubPath : *m_plstSubPath)
+	return m_bExists;
+}
+
+bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const wstring& strFind)
+{
+	__EnsureReturn(m_bDir, false);
+
+	TD_PathList& lstSubPath = _findFile(strFind);
+
+	for (auto& pSubPath : lstSubPath)
 	{
 		if (pSubPath->m_bDir)
 		{
@@ -70,12 +98,14 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 			}
 		}
 	}
-
-	return true;
+	
+	return m_bExists;;
 }
 
-CPath *CPath::GetSubPath(wstring strSubPath, bool bDir)
+CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
 {
+	__EnsureReturn(m_bDir, NULL);
+
 	list<wstring> lstSubDirs;
 	while (!strSubPath.empty())
 	{
@@ -101,9 +131,8 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir)
 		wstring strName = lstSubDirs.back();
 		lstSubDirs.pop_back();
 
-		TD_PathList lstSubPath;
-		pPath->GetSubPath(lstSubPath);
-		
+		TD_PathList& lstSubPath = pPath->_findFile(strFind);
+
 		pPath = NULL;
 
 		for (auto pSubPath : lstSubPath)
@@ -167,43 +196,14 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 	}
 }
 
-bool CPath::FindFile()
+UINT CPath::GetSubPathCount()
 {
-	if (!m_bDir || NULL != m_plstSubPath)
+	if (NULL == m_plstSubPath)
 	{
-		return true;
+		return 0;
 	}
 
-	CPath *pSubPath = NULL;
-
-	TD_PathList lstSubPath;
-	fsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
-		pSubPath = NewSubPath(findData, this);
-		if (pSubPath)
-		{
-			lstSubPath.add(pSubPath);
-		}
-		return true;
-	});
-
-	lstSubPath.qsort([](CPath& lhs, CPath& rhs) {
-		if (lhs.m_bDir && !rhs.m_bDir)
-		{
-			return true;
-		}
-
-		if (lhs.m_bDir == rhs.m_bDir)
-		{
-			return util::StrCompareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
-		}
-
-		return false;
-	});
-
-	m_plstSubPath = new TD_PathList();
-	m_plstSubPath->swap(lstSubPath);
-
-	return true;
+	return m_plstSubPath->size();
 }
 
 bool CPath::HasFile()

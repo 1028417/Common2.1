@@ -34,7 +34,6 @@ public:
 		(void)DeleteAllItems();
 
 		m_pRootDir = pRootDir;
-		m_pRootDir->FindFile();
 	
 		if (bShowRoot)
 		{
@@ -122,7 +121,7 @@ public:
 
 	BOOL InitCtrlEx(COLORREF crText, UINT uFontSize = 0);
 
-	void SetPath(CPathObject* pPath);
+	bool SetPath(CPathObject* pPath);
 
 	BOOL IsFileItem(int nItem);
 	

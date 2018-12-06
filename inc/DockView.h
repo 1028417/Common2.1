@@ -9,30 +9,43 @@
 
 enum ViewStyle
 {
-	VS_Undock = 0,
+	VS_FixSize		= 0x1000,
+	VS_DockCenter	= 0x2000,
 
 	VS_DockLeft		= 0x0001,
 	VS_DockTop		= 0x0002,
 	VS_DockBottom	= 0x0004,
 	VS_DockRight	= 0x0008,
-	VS_DockCenter	= 0x0010,
 	
-	VS_FixSize		= 0x0020, 
-
-	VS_TopTab		= 0x0040,
-	VS_BottomTab	= 0x0080,
+	VS_TabTop		= 0x0010,
+	VS_TabBottom	= 0x0020,
+	VS_TabLeft		= 0x0040,
+	VS_TabRight		= 0x0080,
 };
-
 typedef UINT ST_ViewStyle;
 
-#define __DockStyle(_Style) (_Style & (VS_DockLeft | VS_DockTop | VS_DockBottom | VS_DockRight | VS_DockCenter))
+enum class E_ViewDockStyle
+{
+	VDS_NoDock = 0,
+	VDS_DockCenter = VS_DockCenter,
+	VDS_DockLeft = VS_DockLeft,
+	VDS_DockTop = VS_DockTop,
+	VDS_DockBottom = VS_DockBottom,
+	VDS_DockRight = VS_DockRight,
+};
 
-#define VS_Tab (VS_TopTab|VS_BottomTab)
-#define __TabStyle(_Style) (_Style & VS_Tab)
+enum class E_ViewTabStyle
+{
+	VTS_HideTab = 0,
+	VTS_TabTop = VS_TabTop,
+	VTS_TabBottom = VS_TabBottom,
+	VTS_TabLeft = VS_TabLeft,
+	VTS_TabRight = VS_TabRight
+};
 
-//CDockView
+#define __DockStyle(_Style) E_ViewDockStyle(_Style & (VS_DockCenter | VS_DockLeft | VS_DockTop | VS_DockBottom | VS_DockRight))
 
-class CPage;
+#define __TabStyle(_Style) E_ViewTabStyle(_Style & (VS_TabTop | VS_TabBottom | VS_TabLeft | VS_TabRight))
 
 class CTabCtrlEx : public CTabCtrl
 {
@@ -42,6 +55,12 @@ public:
 	}
 
 private:
+	CFontGuide m_fontGuide;
+	
+	E_ViewTabStyle m_eTabStyle = (E_ViewTabStyle)0;
+
+	CImageList m_Imglst;
+
 	int m_iTrackMouseFlag = -1;
 
 	CB_TrackMouseEvent m_cbMouseEvent;
@@ -49,18 +68,27 @@ private:
 	void OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point);
 
 public:
+	void SetTabStyle(E_ViewTabStyle eTabStyle, UINT cx=0, UINT cy=0);
+
+	BOOL SetFontSize(UINT uFontSize);
+
+	BOOL SetTabHeight(UINT uTabHeight);
+
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent);
 
+private:
 	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 };
 
-class CDockView: public CPropertySheet
+class CPage;
+
+class __CommonExt CDockView: public CPropertySheet
 {
 protected:
 	typedef vector<CPage*> PageVector;
 
 public:
-	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT eDockSize
+	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT eDockSize = 0
 		, UINT uOffset = 0, UINT uTabFontSize=0, UINT uTabHeight=0);
 
 	CDockView(CWnd& wndParent, ST_ViewStyle eStyle, UINT uDockSize
@@ -89,11 +117,7 @@ private:
 
 	CImageList *m_pImglst = NULL;
 
-	CImageList m_InnerImglst;
-
 	PageVector m_vctPages;
-
-	CFontGuide m_fontGuide;
 
 public:
 	BOOL AddPage(CPage& Page);

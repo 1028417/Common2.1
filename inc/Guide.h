@@ -35,14 +35,14 @@ private:
 class __CommonExt CRedrawLockGuide
 {
 public:
-	CRedrawLockGuide(CWnd& wndCtrl);
+	CRedrawLockGuide(CWnd& wnd);
 
 	~CRedrawLockGuide();
 
 	void Unlock();
 
 private:
-	CWnd& m_wndCtrl;
+	CWnd& m_wnd;
 };
 
 class __CommonExt CMenuGuide : public CMenu

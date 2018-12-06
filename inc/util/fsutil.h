@@ -1,6 +1,12 @@
 
 #pragma once
 
+#define __Dot L'.'
+
+#define	__Slant L'/'
+
+#define	__BackSlant L'\\'
+
 struct __UtilExt tagFindData : WIN32_FIND_DATAW
 {
 	tagFindData(const WIN32_FIND_DATAW& t_data)
@@ -24,8 +30,6 @@ struct __UtilExt tagFindData : WIN32_FIND_DATAW
 class __UtilExt fsutil
 {
 public:
-	static void FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb);
-
 	static int GetFileSize(const wstring& strFilePath);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
@@ -48,6 +52,11 @@ public:
 class __UtilExt fsutil_win
 {
 public:
+	static bool ExistsFile(const wstring& strFile);
+	static bool ExistsPath(const wstring& strDir);
+
+	static bool FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb);
+
 	static void GetSysDrivers(list<wstring>& lstDrivers);
 	
 	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
@@ -57,9 +66,6 @@ public:
 	static void ExplorePath(const list<wstring>& lstPath);
 
 	static bool CreateDir(const wstring& strDir);
-
-	static bool ExistsFile(const wstring& strFile);
-	static bool ExistsPath(const wstring& strDir);
 
 	// 获取文件夹图标
 	static HICON getFolderIcon();

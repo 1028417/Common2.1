@@ -6,10 +6,10 @@
 
 // CRedrawLockGuide
 
-CRedrawLockGuide::CRedrawLockGuide(CWnd& wndCtrl)
-	: m_wndCtrl(wndCtrl)
+CRedrawLockGuide::CRedrawLockGuide(CWnd& wnd)
+	: m_wnd(wnd)
 {
-	m_wndCtrl.SetRedraw(FALSE);
+	m_wnd.SetRedraw(FALSE);
 }
 
 CRedrawLockGuide::~CRedrawLockGuide()
@@ -19,7 +19,8 @@ CRedrawLockGuide::~CRedrawLockGuide()
 
 void CRedrawLockGuide::Unlock()
 {
-	m_wndCtrl.SetRedraw(TRUE);
+	m_wnd.SetRedraw(TRUE);
+	m_wnd.RedrawWindow();
 }
 
 

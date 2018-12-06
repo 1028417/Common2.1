@@ -1,17 +1,18 @@
 ﻿  stdafx.cpp
-  img.cpp
+  Page.cpp
+  MainWnd.cpp
+  DockView.cpp
+  App.cpp
   TreeCtrl.cpp
   ProgressDlg.cpp
   PathCtrl.cpp
-  Page.cpp
-  MainWnd.cpp
-  LogList.cpp
   ListCtrl.cpp
-  Guide.cpp
+  LogList.cpp
   DragDrop.cpp
-  DockView.cpp
-  App.cpp
   Main.cpp
+  img.cpp
+  Guide.cpp
   正在生成代码...
+    正在创建库 ../lib/Commond.lib 和对象 ../lib/Commond.exp
   Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Commond.dll
   Common.vcxproj -> ../build/Commond.pdb (Full PDB)

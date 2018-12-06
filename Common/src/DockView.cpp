@@ -3,6 +3,80 @@
 
 #include <DockView.h>
 
+void CTabCtrlEx::SetTabStyle(E_ViewTabStyle eTabStyle, UINT cx, UINT cy)
+{
+	DWORD dwTabStyle = TCS_FOCUSNEVER;
+
+	switch (m_eTabStyle = eTabStyle)
+	{
+	case E_ViewTabStyle::VTS_HideTab:
+		ShowWindow(SW_HIDE);
+		break;
+	case E_ViewTabStyle::VTS_TabBottom:
+		dwTabStyle |= TCS_BOTTOM;
+		break;
+	case E_ViewTabStyle::VTS_TabLeft:
+		dwTabStyle |= TCS_VERTICAL | TCS_MULTILINE | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT;
+		break;
+	case E_ViewTabStyle::VTS_TabRight:
+		dwTabStyle |= TCS_RIGHT | TCS_VERTICAL | TCS_MULTILINE | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT;
+		break;
+	}
+	
+	if (0 != cx && 0 != cy)
+	{
+		SetItemSize(CSize(cx, cy));
+	}
+
+	ModifyStyle(0, dwTabStyle);
+}
+
+BOOL CTabCtrlEx::SetFontSize(UINT uFontSize)
+{
+	__EnsureReturn(0 != uFontSize, FALSE);
+	
+	return m_fontGuide.setFontSize(*this, uFontSize);
+}
+
+BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
+{
+	__EnsureReturn(0 != uTabHeight, FALSE);
+
+	auto pImglst = GetImageList();
+	if (NULL != pImglst)
+	{
+		if (pImglst != &m_Imglst)
+		{
+			return FALSE;
+		}
+	}
+
+	if (m_Imglst)
+	{
+		__EnsureReturn(m_Imglst.DeleteImageList(), FALSE);
+	}
+
+	UINT cx = 1;
+	UINT cy = 1;
+	if (E_ViewTabStyle::VTS_TabTop == m_eTabStyle || E_ViewTabStyle::VTS_TabBottom == m_eTabStyle)
+	{
+		cy = uTabHeight;
+	}
+	else if (E_ViewTabStyle::VTS_TabLeft == m_eTabStyle || E_ViewTabStyle::VTS_TabRight == m_eTabStyle)
+	{
+		cx = uTabHeight;
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	__EnsureReturn(m_Imglst.Create(cx, cy, ILC_COLOR, 0, 0), FALSE);
+	SetImageList(&m_Imglst);
+	
+	return TRUE;
+}
+
 void CTabCtrlEx::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
 {
 	m_iTrackMouseFlag = 0;
@@ -93,41 +167,33 @@ END_MESSAGE_MAP()
 BOOL CDockView::Create()
 {
 	DWORD dwStyle = WS_CHILD;
-	if (!__TabStyle(m_eStyle))
+
+	E_ViewTabStyle eTabStyle = __TabStyle(m_eStyle);
+	if (E_ViewTabStyle::VTS_HideTab == eTabStyle)
 	{
 		dwStyle |= WS_BORDER;
 	}
 
 	__AssertReturn(__super::Create(m_pParentWnd, dwStyle, WS_EX_CONTROLPARENT), FALSE);
-	
+
 	__AssertReturn(m_wndTabCtrl.SubclassWindow(this->GetTabControl()->GetSafeHwnd()), FALSE);
+	
+	m_wndTabCtrl.SetTabStyle(eTabStyle);
 
-	if (__TabStyle(m_eStyle))
+	if (0 != m_uTabFontSize)
 	{
-		m_wndTabCtrl.ModifyStyle(TCS_MULTILINE, TCS_FOCUSNEVER| (VS_BottomTab == __TabStyle(m_eStyle)? TCS_BOTTOM:0));
-
-		if (m_uTabFontSize > 0)
-		{
-			(void)m_fontGuide.setFontSize(m_wndTabCtrl, m_uTabFontSize);
-		}
-
-		if (NULL != m_pImglst)
-		{
-			m_wndTabCtrl.SetImageList(m_pImglst);
-		}
-		else if (m_uTabHeight > 0)
-		{
-			if (m_InnerImglst.Create(m_uTabHeight, m_uTabHeight, ILC_COLOR8, 1, 0))
-			{
-				m_wndTabCtrl.SetImageList(&m_InnerImglst);
-			}
-		}
-	}
-	else
-	{
-		m_wndTabCtrl.ShowWindow(SW_HIDE);
+		__EnsureReturn(m_wndTabCtrl.SetFontSize(m_uTabFontSize), FALSE);
 	}
 
+	if (NULL != m_pImglst)
+	{
+		m_wndTabCtrl.SetImageList(m_pImglst);
+	}
+	else if (0 != m_uTabHeight)
+	{
+		__EnsureReturn(m_wndTabCtrl.SetTabHeight(m_uTabHeight), FALSE);
+	}
+	
 	return TRUE;
 }
 
@@ -146,7 +212,7 @@ BOOL CDockView::AddPage(CPage& Page)
 
 	//pPage->MoveWindow(m_rtPos);
 
-	if (__TabStyle(m_eStyle) && !Page.m_cstrTitle.IsEmpty())
+	if (E_ViewTabStyle::VTS_HideTab != __TabStyle(m_eStyle) && !Page.m_cstrTitle.IsEmpty())
 	{
 		TCITEM tci = {0};
 		tci.mask = TCIF_TEXT;
@@ -219,7 +285,7 @@ BOOL CDockView::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 
 void CDockView::Resize(CRect& rcRestrict)
 {
-	if (!__DockStyle(m_eStyle))
+	if (E_ViewDockStyle::VDS_NoDock ==__DockStyle(m_eStyle))
 	{
 		m_uDockSize = 0;
 	}
@@ -279,6 +345,8 @@ void CDockView::OnSize(UINT nType, int, int)
 {
 	__Ensure(SIZE_MINIMIZED != nType);
 
+	__Ensure(m_wndTabCtrl);
+
 	this->OnSize();
 }
 
@@ -287,36 +355,39 @@ void CDockView::OnSize()
 	CRect rcClient;
 	this->GetClientRect(&rcClient);
 
-	CTabCtrl* pTabCtrl = this->GetTabControl();
-	__Ensure(pTabCtrl);
-	
 	int nPage = __super::GetActiveIndex();
 	__Assert(nPage < (int)m_vctPages.size());
 
 	CPage* pPage = m_vctPages[nPage];
 	__Ensure(pPage->m_hWnd);
 
-	if (!__TabStyle(m_eStyle))
+	E_ViewTabStyle eTabStyle = __TabStyle(m_eStyle);
+	if (E_ViewTabStyle::VTS_HideTab == eTabStyle)
 	{
 		pPage->MoveWindow(&rcClient);
 	}
 	else
 	{
-		pTabCtrl->MoveWindow(0, 0, rcClient.Width(), rcClient.Height());
+		m_wndTabCtrl.MoveWindow(0, 0, rcClient.Width(), rcClient.Height());
 
-		CRect rcItem(0, 0, 0, 0);
-		(void)pTabCtrl->GetItemRect(0, &rcItem);
-		int nItemHeight = rcItem.Height();
-		nItemHeight += 2;
+		CRect rcTabItem;
+		(void)m_wndTabCtrl.GetItemRect(0, &rcTabItem);
 
-		CRect rcPage(1, 1, rcClient.Width()-3, rcClient.Height()-2);
-		if (VS_BottomTab == __TabStyle(m_eStyle))
+		CRect rcPage(1, 1, rcClient.Width()-2, rcClient.Height()-2);
+		switch (eTabStyle)
 		{
-			rcPage.bottom -= nItemHeight;
-		}
-		else
-		{
-			rcPage.top += nItemHeight;
+		case E_ViewTabStyle::VTS_TabTop:
+			rcPage.top += rcTabItem.Height() + 2;
+			break;
+		case E_ViewTabStyle::VTS_TabBottom:
+			rcPage.bottom -= rcTabItem.Height() + 2;
+			break;
+		case E_ViewTabStyle::VTS_TabLeft:
+			rcPage.left += rcTabItem.Width() + 2;
+			break;
+		case E_ViewTabStyle::VTS_TabRight:
+			rcPage.right -= rcTabItem.Width() + 2;
+			break;
 		}
 
 		pPage->MoveWindow(&rcPage);

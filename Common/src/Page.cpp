@@ -132,7 +132,7 @@ void CPage::Async(const CB_Async& cb, UINT uDelayTime)
 		return;
 	}
 
-	CB_Async cbPrev = m_cbAsync;
+	/*CB_Async cbPrev = m_cbAsync;
 	m_cbAsync = [=]()
 	{
 		if (cbPrev)
@@ -141,7 +141,9 @@ void CPage::Async(const CB_Async& cb, UINT uDelayTime)
 		}
 
 		cb();
-	};
+	};*/
+	
+	m_cbAsync = cb;
 
 	if (0 == uDelayTime)
 	{
@@ -157,7 +159,7 @@ void CPage::Async(const CB_Async& cb, UINT uDelayTime)
 	}
 }
 
-void CPage::AsyncLoop(const CB_AsyncLoop& cb, UINT uDelayTime)
+void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 {
 	if (0 == uDelayTime)
 	{

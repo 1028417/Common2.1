@@ -1,9 +1,13 @@
-﻿  util.cpp
-  fsutil.cpp
-  fsdlg.cpp
+﻿  WorkThread.cpp
+  util.cpp
   SQLiteDB.cpp
+  fsutil.cpp
   ProFile.cpp
-  WorkThread.cpp
+  Path.cpp
+  fsdlg.cpp
+  正在生成代码...
+  sqlite3.c
+  shell.c
   正在生成代码...
     正在创建库 ../lib/utild.lib 和对象 ../lib/utild.exp
   util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/utild.dll

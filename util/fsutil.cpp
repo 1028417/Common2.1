@@ -3,34 +3,6 @@
 
 #include <fsutil.h>
 
-void fsutil::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
-{
-	const char chrDot = '.';
-
-	WIN32_FIND_DATAW FindFileData;
-	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindFileData);
-	if (INVALID_HANDLE_VALUE != hFindFile)
-	{
-		do
-		{
-			if (chrDot == FindFileData.cFileName[0])
-			{
-				continue;
-			}
-
-			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
-			{
-				continue;
-			}
-				
-			if (!cb(tagFindData(FindFileData)))
-			{
-				break;
-			}
-		} while (::FindNextFileW(hFindFile, &FindFileData));
-	}
-}
-
 int fsutil::GetFileSize(const wstring& strFilePath)
 {
 	struct _stat fileStat;
@@ -45,12 +17,12 @@ int fsutil::GetFileSize(const wstring& strFilePath)
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int iPos = -1;
-	auto pos = strPath.find_last_of('/');
+	auto pos = strPath.find_last_of(__Slant);
 	if (wstring::npos != pos)
 	{
 		iPos = pos;
 	}
-	pos = strPath.find_last_of('\\');
+	pos = strPath.find_last_of(__BackSlant);
 	if (wstring::npos != pos && (int)pos > iPos)
 	{
 		iPos = pos;
@@ -89,7 +61,7 @@ void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 {
 	wstring strName = GetFileName(strPath);
 
-	auto pos = strName.find_last_of(L'.');
+	auto pos = strName.find_last_of(__Dot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
@@ -125,12 +97,12 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
-	if ('\\' == strNewPath.back() || '/' == strNewPath.back())
+	if (__BackSlant == strNewPath.back() || __Slant == strNewPath.back())
 	{
 		strNewPath.pop_back();
 	}
 
-	int nPos = (int)strNewPath.rfind('\\');
+	int nPos = (int)strNewPath.rfind(__BackSlant);
 	__EnsureReturn(0 <= nPos, L"");
 
 	return strNewPath.substr(0, nPos);
@@ -162,6 +134,47 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 	}
 
 	return strPath.substr(strBaseDir.size());
+}
+
+bool fsutil_win::ExistsFile(const wstring& strFile)
+{
+	WIN32_FIND_DATA ffd;
+	return (INVALID_HANDLE_VALUE != FindFirstFileW(strFile.c_str(), &ffd));
+}
+
+bool fsutil_win::ExistsPath(const wstring& strDir)
+{
+	return (-1 != ::GetFileAttributesW(strDir.c_str()));
+}
+
+bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
+{
+	WIN32_FIND_DATAW FindFileData;
+	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindFileData);
+	if (INVALID_HANDLE_VALUE == hFindFile)
+	{
+		return false;
+	}
+
+	do
+	{
+		if (__Dot == FindFileData.cFileName[0])
+		{
+			continue;
+		}
+
+		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
+		{
+			continue;
+		}
+
+		if (!cb(tagFindData(FindFileData)))
+		{
+			break;
+		}
+	} while (::FindNextFileW(hFindFile, &FindFileData));
+
+	return true;
 }
 
 void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
@@ -332,17 +345,6 @@ bool fsutil_win::CreateDir(const wstring& strDir)
 	}
 
 	return CreateDir(strDir);
-}
-
-bool fsutil_win::ExistsFile(const wstring& strFile)
-{
-	WIN32_FIND_DATA ffd;
-	return (INVALID_HANDLE_VALUE != FindFirstFile(strFile.c_str(), &ffd));
-}
-
-bool fsutil_win::ExistsPath(const wstring& strDir)
-{
-	return (-1 != ::GetFileAttributes(strDir.c_str()));
 }
 
 // 获取文件夹类型

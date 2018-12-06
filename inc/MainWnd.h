@@ -65,11 +65,11 @@ public:
 	
 	BOOL SetStatusText(UINT uPart, const CString& cstrText);
 
-	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
+	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize = 0
 		, UINT uOffset = 0, UINT uTabFontSize=0, UINT uTabHeight = 0);
 
 	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
-		, UINT uOffset, UINT uTabFontSize, CImageList *pImglst=NULL);
+		, UINT uOffset=0, UINT uTabFontSize=0, CImageList *pImglst=NULL);
 
 	BOOL AddUndockView(CPage& Page, const CRect& rtPos);
 

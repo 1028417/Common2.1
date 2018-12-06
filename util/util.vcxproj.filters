@@ -2,37 +2,46 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="sqlite\shell.c">
-      <Filter>sqlite</Filter>
+      <Filter>db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="sqlite\sqlite3.c">
-      <Filter>sqlite</Filter>
+      <Filter>db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="fsutil.cpp" />
-    <ClCompile Include="SQLiteDB.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="ProFile.cpp" />
-    <ClCompile Include="..\inc\util\WorkThread.cpp" />
     <ClCompile Include="fsdlg.cpp" />
     <ClCompile Include="Path.cpp" />
+    <ClCompile Include="WorkThread.cpp" />
+    <ClCompile Include="SQLiteDB.cpp">
+      <Filter>db</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
-      <Filter>sqlite</Filter>
+      <Filter>db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="sqlite\sqlite3ext.h">
-      <Filter>sqlite</Filter>
+      <Filter>db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\util\fsutil.h" />
-    <ClInclude Include="..\inc\util\IDB.h" />
-    <ClInclude Include="..\inc\util\SQLiteDB.h" />
     <ClInclude Include="..\inc\util\util.h" />
     <ClInclude Include="..\inc\util\ProFile.h" />
     <ClInclude Include="..\inc\util\WorkThread.h" />
     <ClInclude Include="..\inc\util\fsdlg.h" />
     <ClInclude Include="..\inc\util\Path.h" />
+    <ClInclude Include="..\inc\util\SQLiteDB.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\util\IDB.h">
+      <Filter>db</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="sqlite">
+    <Filter Include="db">
+      <UniqueIdentifier>{a2a1a09e-7b50-44c1-b95e-c06d1392c098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="db\sqlite">
       <UniqueIdentifier>{306da33b-f8ab-4908-8815-34bdc8709607}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

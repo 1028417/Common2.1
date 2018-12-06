@@ -32,12 +32,17 @@ public:
 		: m_bDir(true)
 		, m_strName(strDir)
 	{
+		util::rtrim(m_strName, __Slant);
+		util::rtrim(m_strName, __BackSlant);
 	}
 
 	CPath(const wstring& strDir, const TD_PathList& lstSubPath)
 		: m_bDir(true)
 		, m_strName(strDir)
 	{
+		util::rtrim(m_strName, __Slant);
+		util::rtrim(m_strName, __BackSlant);
+
 		m_plstSubPath = new TD_PathList();
 		m_plstSubPath->add(lstSubPath);
 	}
@@ -69,6 +74,8 @@ protected:
 	wstring m_strName;
 
 	TD_PathList *m_plstSubPath = NULL;
+	
+	bool m_bExists = false;
 
 protected:
 	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentPath)
@@ -76,6 +83,9 @@ protected:
 		return new CPath(findData, pParentPath);
 	}
 	
+private:
+	TD_PathList& _findFile(const wstring& strFind = L"");
+
 public:
 	wstring GetName();
 
@@ -83,19 +93,17 @@ public:
 
 	wstring GetPath() const;
 
-	UINT GetSubPathCount();
-
-	bool GetSubPath(TD_PathList& lstSubPath);
+	bool GetSubPath(TD_PathList& lstSubPath, const wstring& strFind=L"");
 	
-	bool GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile=NULL);
+	bool GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile=NULL, const wstring& strFind = L"");
 	
-	CPath *GetSubPath(wstring strSubPath, bool bDir);
+	CPath *GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind = L"");
 	
 	void ClearSubPath();
 
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
 
-	bool FindFile();
+	UINT GetSubPathCount();
 
 	bool HasFile();
 };

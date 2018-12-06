@@ -13,6 +13,7 @@ namespace NS_JSTL
 		DC_Yes
 		, DC_No
 		, DC_Abort
+		, DC_YesAbort
 	};
 
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
@@ -267,14 +268,14 @@ namespace NS_JSTL
 			});
 		}
 
-		void getBack(__CB_Ref_void cb)
+		bool getBack(__CB_Ref_void cb)
 		{
-			_getOperator().getBack(cb);
+			return _getOperator().getBack(cb);
 		}
 
-		void getBack(__CB_ConstRef_void cb) const
+		bool getBack(__CB_ConstRef_void cb) const
 		{
-			_getOperator().getBack(cb);
+			return _getOperator().getBack(cb);
 		}
 
 		bool getBack(__DataRef data) const
@@ -487,10 +488,13 @@ namespace NS_JSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
-					uRet++;
-					
-					if (E_DelConfirm::DC_Abort == eRet)
+					if (E_DelConfirm::DC_Yes == eRet || E_DelConfirm::DC_YesAbort == eRet)
+					{
+						itr = m_data.erase(itr);
+						uRet++;
+					}
+
+					if (E_DelConfirm::DC_Abort == eRet || E_DelConfirm::DC_YesAbort == eRet)
 					{
 						break;
 					}

@@ -71,12 +71,40 @@ wstring util::FormatTime(const tm& atm, const wstring& strFormat)
 	return lpBuff;
 }
 
-wstring util::trim(const wstring& strText, char chr)
+void util::trim(wstring& strText, wchar_t chr)
 {
-	wstring strRet = strText;
-	strRet.erase(0, strRet.find_first_not_of(' '));
-	strRet.erase(strRet.find_last_not_of(' ') + 1);
+	strText.erase(0, strText.find_first_not_of(chr));
+	strText.erase(strText.find_last_not_of(chr) + 1);
+}
 
+void util::ltrim(wstring& strText, wchar_t chr)
+{
+	strText.erase(0, strText.find_first_not_of(chr));
+}
+
+void util::rtrim(wstring& strText, wchar_t chr)
+{
+	strText.erase(strText.find_last_not_of(chr) + 1);
+}
+
+wstring util::trim(const wstring& strText, wchar_t chr)
+{
+	wstring strRet(strText);
+	trim(strRet, chr);
+	return strRet;
+}
+
+wstring util::ltrim(const wstring& strText, wchar_t chr)
+{
+	wstring strRet(strText);
+	ltrim(strRet, chr);
+	return strRet;
+}
+
+wstring util::rtrim(const wstring& strText, wchar_t chr)
+{
+	wstring strRet(strText);
+	rtrim(strRet, chr);
 	return strRet;
 }
 
@@ -96,7 +124,7 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 			wstring strSub = strText.substr(startPos, pos - startPos);
 			if (bTrim)
 			{
-				strSub = trim(strSub);
+				trim(strSub);
 				if (!strSub.empty())
 				{
 					vecRet.push_back(strSub);
@@ -115,7 +143,9 @@ void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& v
 	{
 		if (bTrim)
 		{
-			wstring strTail = trim(strText.substr(startPos));
+			wstring strTail = strText.substr(startPos);
+			trim(strTail);
+
 			if (!strTail.empty())
 			{
 				vecRet.push_back(strTail);
