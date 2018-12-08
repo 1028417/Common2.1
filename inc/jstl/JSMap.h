@@ -214,11 +214,6 @@ namespace NS_JSTL
 			return map;
 		}
 
-		__ValueType& get(__KeyConstRef key)
-		{
-			return m_data[key];
-		}
-
 		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
 			auto itr = m_data.find(key);
@@ -251,7 +246,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool del_if(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		bool del_key(__KeyConstRef key, __CB_ValueR_void cb=NULL)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -354,6 +349,11 @@ namespace NS_JSTL
 		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
 			return m_data[key] = value;
+		}
+
+		__ValueType& set(__KeyConstRef key)
+		{
+			return m_data[key];
 		}
 
 		template<typename T>

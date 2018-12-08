@@ -41,6 +41,12 @@ BOOL CPage::Active()
 
 BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
+	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
+	if (NULL != pDockView)
+	{
+		return pDockView->SetPageTitle(*this, cstrTitle, iImage);
+	}
+
 	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
 	__EnsureReturn(pMainWnd, FALSE);
 

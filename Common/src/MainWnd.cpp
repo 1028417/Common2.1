@@ -70,38 +70,25 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		}
 	}
 
-	OnSize();
+	resizeView();
 }
 
-void CMainWnd::OnSize()
+void CMainWnd::resizeView(bool bManual)
 {
-	this->GetClientRect(&m_rtBlankArea);
-	if (m_ctlStatusBar.m_hWnd)
+	this->GetClientRect(&m_rcViewArea);
+	if (m_ctlStatusBar)
 	{
 		CRect rcStatusBar;
 		m_ctlStatusBar.GetWindowRect(&rcStatusBar);
 
-		m_rtBlankArea.bottom -= rcStatusBar.Height();
+		m_rcViewArea.bottom -= rcStatusBar.Height();
 
-		m_ctlStatusBar.MoveWindow(0, m_rtBlankArea.bottom, m_rtBlankArea.Width(), rcStatusBar.Height());
+		m_ctlStatusBar.MoveWindow(0, m_rcViewArea.bottom, m_rcViewArea.Width(), rcStatusBar.Height());
 	}
 
-	CDockView *pCenterView = NULL;
-	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
+	for (auto& pr : m_mapDockViews)
 	{
-		if (E_ViewDockStyle::VDS_DockCenter == __DockStyle((*itView)->m_eStyle))
-		{
-			pCenterView = *itView;
-
-			continue;
-		}
-
-		(*itView)->Resize(m_rtBlankArea);
-	}
-
-	if (pCenterView)
-	{
-		pCenterView->Resize(m_rtBlankArea);
+		pr.second->Resize(m_rcViewArea, bManual);
 	}
 }
 
@@ -148,74 +135,47 @@ BOOL CMainWnd::_AddView(CDockView& View, CPage& Page)
 {
 	__AssertReturn(View.AddPage(Page), FALSE);
 
-	m_vctDockViews.push_back(&View);
+	m_mapDockViews.set(View.getViewStyle().eViewType, &View);
 
-	this->OnSize();
+	this->resizeView();
 
 	return TRUE;
 }
 
-BOOL CMainWnd::AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
-	, UINT uOffset, UINT uTabFontSize, UINT uTabHeight)
+BOOL CMainWnd::AddView(CPage& Page, const tagViewStyle& ViewStyle)
 {
-	CDockView *pView = new CDockView(*this, nStyle, uDockSize, uOffset, uTabFontSize, uTabHeight);
+	__AssertReturn(!m_mapDockViews.includes(ViewStyle.eViewType), FALSE);
 
-	return _AddView(*pView, Page);
-}
+	CDockView *pView = new CDockView(*this, ViewStyle);
 
-BOOL CMainWnd::AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
-	, UINT uOffset, UINT uTabFontSize, CImageList *pImglst)
-{
-	CDockView *pView = new CDockView(*this, nStyle, uDockSize, uOffset, uTabFontSize, pImglst);
-
-	return _AddView(*pView, Page);
-}
-
-BOOL CMainWnd::AddUndockView(CPage& Page, const CRect& rtPos)
-{
-	CDockView *pView = new CDockView(*this, VS_FixSize, rtPos);
-
-	return _AddView(*pView, Page);
-}
-
-BOOL CMainWnd::AddPage(CPage& Page, ST_ViewStyle nStyle)
-{
-	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
+	if (!_AddView(*pView, Page))
 	{
-		if ((*itView)->m_eStyle & nStyle)
-		{
-			return (*itView)->AddPage(Page);
-		}
+		delete pView;
+		return FALSE;
 	}
 
-	ASSERT(FALSE);
-	return FALSE;
+	return TRUE;
+}
+
+BOOL CMainWnd::AddPage(CPage& Page, E_ViewType eViewType)
+{
+	return m_mapDockViews.get(eViewType, [&](CDockView *pDockView) {
+		pDockView->AddPage(Page);
+	});
 }
 
 BOOL CMainWnd::ActivePage(CPage& Page)
 {
-	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
-	{
-		if ((*itView)->ActivePage(Page))
-		{
-			return TRUE;
-		}
-	}
-
-	return FALSE;
+	return m_mapDockViews.some([&](auto& pr) {
+		return pr.second->ActivePage(Page);
+	});
 }
 
 BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 {
-	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
-	{
-		if ((*itView)->SetPageTitle(Page, cstrTitle, iImage))
-		{
-			return TRUE;
-		}
-	}
-
-	return FALSE;
+	return m_mapDockViews.some([&](auto& pr) {
+		return pr.second->SetPageTitle(Page, cstrTitle, iImage);
+	});
 }
 
 int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uType)
@@ -259,18 +219,20 @@ void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	}
 }
 
-CDockView* CMainWnd::GetDockView(const CPoint& ptPos)
+CDockView* CMainWnd::hittestView(const CPoint& ptPos)
 {
-	CDockView* pView = NULL;
 	CRect rcPos;
-	UINT uDockStyle = 0;
-
-	for (TD_DockViewVector::iterator itView=m_vctDockViews.begin(); itView!=m_vctDockViews.end(); ++itView)
+	for (auto& pr : m_mapDockViews)
 	{
-		pView = *itView;
+		CDockView* pView = pr.second;
 
-		E_ViewDockStyle eDockStyle = __DockStyle(pView->m_eStyle);
-		if (E_ViewDockStyle::VDS_NoDock == eDockStyle || E_ViewDockStyle::VDS_DockCenter == eDockStyle)
+		E_ViewType eViewType = pView->getViewStyle().eViewType;
+		if (E_ViewType::VT_DockCenter == eViewType)
+		{
+			continue;
+		}
+
+		if (!pView->getViewStyle().sizeable())
 		{
 			continue;
 		}
@@ -278,10 +240,10 @@ CDockView* CMainWnd::GetDockView(const CPoint& ptPos)
 		pView->GetWindowRect(&rcPos);
 		this->ScreenToClient(&rcPos);
 		
-		if ((VS_DockLeft == uDockStyle && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
-			|| (VS_DockTop == uDockStyle && PtInRect(&CRect(rcPos.left, rcPos.bottom, rcPos.right, rcPos.bottom+__DXView), ptPos))
-			|| (VS_DockRight == uDockStyle && PtInRect(&CRect(rcPos.left-__DXView, rcPos.top, rcPos.left, rcPos.bottom), ptPos))
-			|| (VS_DockBottom == uDockStyle && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos)))
+		if ((E_ViewType::VT_DockLeft == eViewType && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
+			|| (E_ViewType::VT_DockTop == eViewType && PtInRect(&CRect(rcPos.left, rcPos.bottom, rcPos.right, rcPos.bottom+__DXView), ptPos))
+			|| (E_ViewType::VT_DockRight == eViewType && PtInRect(&CRect(rcPos.left-__DXView, rcPos.top, rcPos.left, rcPos.bottom), ptPos))
+			|| (E_ViewType::VT_DockBottom == eViewType && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos)))
 		{
 			return pView;
 		}
@@ -300,30 +262,30 @@ void CMainWnd::ResizeView(CDockView &wndTargetView, CPoint &ptPos)
 		return;
 	}
 
-	switch (__DockStyle(wndTargetView.m_eStyle))
+	switch (wndTargetView.getViewStyle().eViewType)
 	{
-	case VS_DockLeft:
-		wndTargetView.m_uDockSize = ptPos.x;
+	case E_ViewType::VT_DockLeft:
+		wndTargetView.setDockSize(ptPos.x);
 
 		break;
-	case VS_DockTop:
-		wndTargetView.m_uDockSize = ptPos.y;
+	case E_ViewType::VT_DockTop:
+		wndTargetView.setDockSize(ptPos.y);
 		
 		break;
-	case VS_DockRight:
-		wndTargetView.m_uDockSize = rcPos.right - ptPos.x;
+	case E_ViewType::VT_DockRight:
+		wndTargetView.setDockSize(rcPos.right - ptPos.x);
 		
 		break;
-	case VS_DockBottom:
-		wndTargetView.m_uDockSize = rcPos.bottom - ptPos.y;
+	case E_ViewType::VT_DockBottom:
+		wndTargetView.setDockSize(rcPos.bottom - ptPos.y);
 		
 		break;
 	default:
 		break;
 	}
-			
+	
 	(void)::DoEvents();
-	OnSize(0, 0, 0);
+	resizeView(true);
 }
 
 BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam)
@@ -351,27 +313,23 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 			break;
 		}
 
-		CDockView* pView = GetDockView(ptPos);
+		CDockView* pView = hittestView(ptPos);
 		__EnsureBreak(pView);
 
-		if (pView->m_eStyle & VS_FixSize)
-		{
-			break;
-		}
-
 		LPCWSTR pszCursorName = NULL;
-		E_ViewDockStyle eDockStyle = __DockStyle(pView->m_eStyle);
-		if (E_ViewDockStyle::VDS_DockLeft == eDockStyle || E_ViewDockStyle::VDS_DockRight == eDockStyle)
+		
+		E_ViewType eViewType = pView->getViewStyle().eViewType;
+		if (E_ViewType::VT_DockLeft == eViewType || E_ViewType::VT_DockRight == eViewType)
 		{
 			pszCursorName = IDC_SIZEWE;
 		}
-		else if (E_ViewDockStyle::VDS_DockTop == eDockStyle || E_ViewDockStyle::VDS_DockBottom == eDockStyle)
+		else if (E_ViewType::VT_DockTop == eViewType || E_ViewType::VT_DockBottom == eViewType)
 		{
 			pszCursorName = IDC_SIZENS;
 		}
 		else
 		{
-			pszCursorName = IDC_ARROW;
+			break;
 		}
 
 		::SetCursor(::LoadCursor(NULL, pszCursorName));

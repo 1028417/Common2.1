@@ -186,13 +186,12 @@ void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState
 	TD_TreeObjectList lstTreeObjects;
 	__super::GetAllObjects(lstTreeObjects);
 
-	for (auto pTreeObject : lstTreeObjects)
-	{
-		if (eCheckState == this->GetItemCheckState(getTreeItem(pTreeObject)))
+	lstTreeObjects.forEach([&](CTreeObject& TreeObject) {
+		if (eCheckState == this->GetItemCheckState(getTreeItem(&TreeObject)))
 		{
-			lstObjects.add(pTreeObject);
+			lstObjects.add(TreeObject);
 		}
-	}
+	});
 }
 
 void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
@@ -201,15 +200,12 @@ void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	this->GetAllObjects(lstChekedObjects, CS_Checked);
 
 	HTREEITEM hParentItem = NULL;
-	for (auto pCheckedObject : lstChekedObjects)
-	{
-		hParentItem = this->GetParentItem(getTreeItem(pCheckedObject));
-
-		if (!util::ContainerFind(lstChekedObjects, this->GetItemObject(hParentItem)))
+	lstChekedObjects.forEach([&](CTreeObject& CheckedObject) {
+		if (!lstChekedObjects.includes(GetParentObject(CheckedObject)))
 		{
-			lstObjects.add(pCheckedObject);
+			lstObjects.add(CheckedObject);
 		}
-	}
+	});
 }
 
 BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
@@ -354,10 +350,9 @@ HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentO
 	TD_TreeObjectList lstSubObjects;
 	Object.GetTreeChilds(lstSubObjects);
 
-	for (auto pSubObject : lstSubObjects)
-	{
-		(void)InsertObjectEx(*pSubObject, &Object);
-	}
+	lstSubObjects.forEach([&](CTreeObject& SubObject) {
+		(void)InsertObjectEx(SubObject, &Object);
+	});
 
 	return getTreeItem(Object);
 }

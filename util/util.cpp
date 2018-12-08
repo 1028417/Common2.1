@@ -6,19 +6,60 @@ static const char *g_lplocaleName_CN = "Chinese_china";
 static const locale g_locale_CN = locale(g_lplocaleName_CN);
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
+void util::sys2tm(const SYSTEMTIME& sysTime, tm& atm)
+{
+	atm.tm_year = sysTime.wYear - 1900;     // tm_year is 1900 based
+	atm.tm_mon = sysTime.wMonth - 1;        // tm_mon is 0 based
+	atm.tm_mday = sysTime.wDay;
+	atm.tm_hour = sysTime.wHour;
+	atm.tm_min = sysTime.wMinute;
+	atm.tm_sec = sysTime.wSecond;
+	atm.tm_isdst = -1;
+}
+
+void util::tm2sys(const tm& atm, SYSTEMTIME& sysTime)
+{
+	sysTime.wYear = atm.tm_year + 1900;     // tm_year is 1900 based
+	sysTime.wMonth = atm.tm_mon + 1;        // tm_mon is 0 based
+	sysTime.wDay = atm.tm_mday;
+	sysTime.wHour = atm.tm_hour;
+	sysTime.wMinute = atm.tm_min;
+	sysTime.wSecond = atm.tm_sec;
+}
+
+static void _getCurrentTime(tm& atm)
+{
+	time_t time(time(0));
+	(void)_localtime64_s(&atm, &time);
+}
+
 void util::getCurrentTime(int& nHour, int& nMinute)
 {
 	tm atm;
-	getCurrentTime(atm);
+	_getCurrentTime(atm);
 
 	nHour = atm.tm_hour;
 	nMinute = atm.tm_min;
 }
 
-void util::getCurrentTime(tm& atm)
+void util::getCurrentTime(SYSTEMTIME& sysTime)
 {
-	time_t time(0);
-	(void)_localtime64_s(&atm, &time);
+	tm atm;
+	_getCurrentTime(atm);
+
+	tm2sys(atm, sysTime);
+}
+
+static wstring _FormatTime(const tm& atm, const wstring& strFormat)
+{
+	wchar_t lpBuff[24];
+	memset(lpBuff, 0, sizeof lpBuff);
+	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
+	{
+		return L"";
+	}
+
+	return lpBuff;
 }
 
 wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
@@ -40,7 +81,7 @@ wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
 	atm.tm_sec = 0;
 	atm.tm_isdst = -1;
 
-	return FormatTime(atm, strFormat);
+	return _FormatTime(atm, strFormat);
 }
 
 wstring util::FormatTime(time_t time, const wstring& strFormat)
@@ -56,19 +97,7 @@ wstring util::FormatTime(time_t time, const wstring& strFormat)
 		return L"";
 	}
 
-	return FormatTime(atm, strFormat);
-}
-
-wstring util::FormatTime(const tm& atm, const wstring& strFormat)
-{
-	wchar_t lpBuff[24];
-	memset(lpBuff, 0, sizeof lpBuff);
-	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
-	{
-		return L"";
-	}
-
-	return lpBuff;
+	return _FormatTime(atm, strFormat);
 }
 
 void util::trim(wstring& strText, wchar_t chr)

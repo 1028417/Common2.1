@@ -29,12 +29,15 @@ namespace NS_JSTL
 
 		__UsingSuperType(__CB_Ref_void);
 		__UsingSuperType(__CB_Ref_bool);
-		__UsingSuperType(__CB_Ref_Pos);
 
 		__UsingSuperType(__CB_ConstRef_void);
 		__UsingSuperType(__CB_ConstRef_bool);
-		__UsingSuperType(__CB_ConstRef_Pos);
 #endif
+
+		using __CB_Ref_Pos_void = CB_T_Pos_RET<__DataRef, void>;
+		using __CB_Ref_Pos_bool = CB_T_Pos_RET<__DataRef, bool>;
+		using __CB_ConstRef_Pos_void = CB_T_Pos_RET<__DataConstRef, void>;
+		using __CB_ConstRef_Pos_bool = CB_T_Pos_RET<__DataConstRef, bool>;
 
 	protected:
 		__ContainerType& m_data = __Super::m_data;
@@ -366,6 +369,18 @@ namespace NS_JSTL
 			});
 		}
 
+		bool del_pos(TD_PosType pos)
+		{
+			if (pos >= m_data.size())
+			{
+				return false;
+			}
+
+			m_data.erase(m_data.begin() + pos);
+	
+			return true;
+		}
+
 		int indexOf(__DataConstRef data) const
 		{
 			int uIdx = 0;
@@ -483,59 +498,77 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		void forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, size_t count = 0)
+		void forEach_if(__CB_Ref_Pos_bool cb, TD_PosType startPos = 0, size_t count = 0)
 		{
 			_getOperator().forEach(cb, startPos, count);
 		}
 
-		void forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, size_t count = 0) const
+		void forEach_if(__CB_ConstRef_Pos_bool cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			_getOperator().forEach(cb, startPos, count);
 		}
 
-		void forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, size_t count = 0)
+		void forEach(__CB_Ref_Pos_void cb, TD_PosType startPos = 0, size_t count = 0)
 		{
-			if (!cb)
-			{
-				return;
-			}
+			_getOperator().forEach([&](__DataRef data, TD_PosType pos) {
+				cb(data, pos);
+				return true;
+			}, startPos, count);
+		}
 
-			forEach([&](__DataRef data, TD_PosType pos) {
+		void forEach(__CB_ConstRef_Pos_void cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			_getOperator().forEach([&](__DataConstRef data, TD_PosType pos) {
+				cb(data, pos);
+				return true;
+			}, startPos, count);
+		}
+
+		void forEach_if(__CB_Ref_bool cb, TD_PosType startPos = 0, size_t count = 0)
+		{
+			_getOperator().forEach([&](__DataRef data, TD_PosType pos) {
 				return cb(data);
 			}, startPos, count);
 		}
 
-		void forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, size_t count = 0) const
+		void forEach_if(__CB_ConstRef_bool cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
-			if (!cb)
-			{
-				return;
-			}
-
-			forEach([&](__DataConstRef data, TD_PosType pos) {
+			_getOperator().forEach([&](__DataConstRef data, TD_PosType pos) {
 				return cb(data);
 			}, startPos, count);
 		}
-
-		int find(__CB_ConstRef_Pos cb, TD_PosType stratPos = 0) const
+		
+		void forEach(__CB_Ref_void cb, TD_PosType startPos = 0, size_t count = 0)
 		{
-			if (!cb)
-			{
-				return -1;
-			}
+			_getOperator().forEach([&](__DataRef data, TD_PosType pos) {
+				cb(data);
+				return true;
+			}, startPos, count);
+		}
 
-			int iRet = -1;
-			forEach([&](__DataConstRef data, TD_PosType pos) {
+		void forEach(__CB_ConstRef_void cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			_getOperator().forEach([&](__DataConstRef data, TD_PosType pos) {
+				cb(data);
+				return true;
+			}, startPos, count);
+		}
+
+		int find(__CB_ConstRef_Pos_bool cb, TD_PosType stratPos = 0) const
+		{
+			int iRetPos = -1;
+
+			forEach_if([&](__DataConstRef data, TD_PosType pos) {
 				if (cb(data, pos))
 				{
-					iRet = pos;
+					iRetPos = pos;
 					return false;
 				}
 
 				return true;
 			});
 
-			return iRet;
+			return iRetPos;
 		}
 
 		template<typename... args>
@@ -587,7 +620,6 @@ namespace NS_JSTL
 			{
 				forEach([&](__DataConstRef data) {
 					arr.add(data);
-					return true;
 				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
 			}
 

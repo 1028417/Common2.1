@@ -134,7 +134,8 @@ namespace NS_JSTL
 		{
 			size_t uRet = 0;
 
-			for (auto&data : container)
+			CContainVisitor<T> Visitor(container);
+			for (auto&data : Visitor)
 			{
 				if (_add(data))
 				{
@@ -184,7 +185,8 @@ namespace NS_JSTL
 		{
 			size_t uRet = 0;
 
-			for (auto&data : container)
+			CContainVisitor<T> Visitor(container);
+			for (auto&data : Visitor)
 			{
 				if (_del(data))
 				{
@@ -195,7 +197,52 @@ namespace NS_JSTL
 			return uRet;
 		}
 
+		bool _set(TD_PosType pos, __PtrType ptr)
+		{
+			if (pos >= __Super::size())
+			{
+				return false;
+			}
+
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			__Super::at(pos) = ptr;
+
+			return true;
+		}
+
+		template<typename T>
+		bool _set(TD_PosType pos, T* ptr)
+		{
+			return _set(pos, dynamic_cast<__PtrType>(ptr));
+		}
+
 	public:
+		bool set(TD_PosType pos, __PtrType ptr)
+		{
+			return _set(pos, ptr);
+		}
+
+		bool set(TD_PosType pos, __RefType ref)
+		{
+			return _set(pos, &ref);
+		}
+
+		template<typename T>
+		bool set(TD_PosType pos, T* ptr)
+		{
+			return _set(pos, ptr);
+		}
+
+		template<typename T>
+		bool set(TD_PosType pos, T& ref)
+		{
+			return _set(pos, &ref);
+		}
+
 		ptrcontainerT& add(__RefType ref)
 		{
 			__Super::push_back(&ref);
@@ -203,6 +250,12 @@ namespace NS_JSTL
 		}
 
 		bool add(__PtrType ptr)
+		{
+			return _add(ptr);
+		}
+
+		template<typename T>
+		bool add(T* ptr)
 		{
 			return _add(ptr);
 		}
@@ -239,7 +292,7 @@ namespace NS_JSTL
 		template <typename T>
 		size_t del(T* ptr)
 		{
-			return del((__ConstPtr)ptr);
+			return _del((__ConstPtr)ptr);
 		}
 
 		size_t del(__InitList initLst)

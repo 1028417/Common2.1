@@ -86,11 +86,10 @@ void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir)
 	TD_PathObjectList lstAllObjects;
 	GetAllPathObjects(lstAllObjects);
 
-	for (auto pPathObject : lstAllObjects)
-	{
-		if (pPathObject->m_bDir == bDir)
+	lstAllObjects.forEach([&](CPathObject& PathObject) {
+		if (PathObject.m_bDir == bDir)
 		{
-			lstPathObjects.add(pPathObject);
+			lstPathObjects.add(PathObject);
 		}
-	}
+	});
 }

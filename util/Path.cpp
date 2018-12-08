@@ -81,23 +81,22 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const 
 
 	TD_PathList& lstSubPath = _findFile(strFind);
 
-	for (auto& pSubPath : lstSubPath)
-	{
-		if (pSubPath->m_bDir)
+	lstSubPath.forEach([&](CPath& SubPath) {
+		if (SubPath.m_bDir)
 		{
 			if (plstSubDir)
 			{
-				plstSubDir->add(pSubPath);
+				plstSubDir->add(SubPath);
 			}
 		}
 		else
 		{
 			if (plstSubFile)
 			{
-				plstSubFile->add(pSubPath);
+				plstSubFile->add(SubPath);
 			}
 		}
-	}
+	});
 	
 	return m_bExists;;
 }
@@ -135,31 +134,32 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
 
 		pPath = NULL;
 
-		for (auto pSubPath : lstSubPath)
-		{
+		lstSubPath.forEach([&](CPath& SubPath) {
 			if (lstSubDirs.empty())
 			{
-				if (pSubPath->m_bDir != bDir)
+				if (SubPath.m_bDir != bDir)
 				{
-					continue;
+					return true;
 				}
 			}
 			else
 			{
-				if (!pSubPath->m_bDir)
+				if (!SubPath.m_bDir)
 				{
-					continue;
+					return true;
 				}
 			}
 
-			if (util::StrCompareIgnoreCase(pSubPath->m_strName, strName))
+			if (util::StrCompareIgnoreCase(SubPath.m_strName, strName))
 			{
-				pPath = pSubPath;
-				break;
+				pPath = &SubPath;
+				return false;
 			}
-		}
-	}
 
+			return true;
+		});
+	}
+	
 	return pPath;
 }
 
@@ -167,10 +167,9 @@ void CPath::ClearSubPath()
 {
 	if (NULL != m_plstSubPath)
 	{
-		for (auto pSubPath : *m_plstSubPath)
-		{
-			delete pSubPath;
-		}
+		m_plstSubPath->forEach([](CPath& SubPath) {
+			delete &SubPath;
+		});
 
 		m_plstSubPath->clear();
 		delete m_plstSubPath;
@@ -182,18 +181,15 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
-	for (auto itSubPath = m_plstSubPath->begin()
-		; itSubPath != m_plstSubPath->end(); )
-	{
-		if (util::ContainerFind(lstDeletePaths, *itSubPath))
+	m_plstSubPath->del_if([&](CPath& SubPath) {
+		if (lstDeletePaths.includes(&SubPath))
 		{
-			delete *itSubPath;
-			itSubPath = m_plstSubPath->erase(itSubPath);
-			continue;
-		}			
+			delete &SubPath;
+			return E_DelConfirm::DC_Yes;
+		}
 
-		itSubPath++;
-	}
+		return E_DelConfirm::DC_No;
+	});
 }
 
 UINT CPath::GetSubPathCount()
@@ -209,14 +205,7 @@ UINT CPath::GetSubPathCount()
 bool CPath::HasFile()
 {
 	__EnsureReturn(m_plstSubPath, FALSE);
-
-	for (auto pSubPath : *m_plstSubPath)
-	{
-		if (!pSubPath->m_bDir)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return m_plstSubPath->some([](CPath& SubPath) {
+		return !SubPath.m_bDir;
+	});
 }

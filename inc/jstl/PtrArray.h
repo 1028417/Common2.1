@@ -13,6 +13,8 @@ namespace NS_JSTL
 	template<typename __Type, template<typename...> class __BaseType>
 	class PtrArrayT : public __PtrArraySuper
 	{
+		friend class CItrVisitor;
+
 	private:
 		using __Super = __PtrArraySuper;
 
@@ -31,9 +33,12 @@ namespace NS_JSTL
 		using __CB_RefType_void = CB_T_void<__RefType>;
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
 
-		using __CB_RefType_Pos = CB_T_Pos<__RefType>;
+		using __CB_RefType_Pos_void = CB_T_Pos_RET<__RefType, void>;
+		using __CB_RefType_Pos_bool = CB_T_Pos_RET<__RefType, bool>;
 
 		__ContainerType& m_data = __Super::m_data;
+
+		using __CB_Ref_DelConfirm = CB_T_Ret<__RefType, E_DelConfirm>;
 
 	public:
 		PtrArrayT()
@@ -129,6 +134,30 @@ namespace NS_JSTL
 		}
 
 	private:
+		decltype(m_data.begin()) begin()
+		{
+			return m_data.begin();
+		}
+		decltype(m_data.end()) end()
+		{
+			return m_data.end();
+		}
+
+		decltype(m_data.cbegin()) begin() const
+		{
+			return m_data.cbegin();
+		}
+		decltype(m_data.cbegin()) end() const
+		{
+			return m_data.cend();
+		}
+
+		template <typename T, typename = checkIter_t<T>>
+		T erase(const T& itr)
+		{
+			return m_data.erase(itr);
+		}
+
 		void _add(const __PtrType& ptr) override
 		{
 			m_data.add((__PtrType)ptr);
@@ -280,6 +309,18 @@ namespace NS_JSTL
 			return m_data.del(initList);
 		}
 
+		size_t del_if(__CB_Ref_DelConfirm cb)
+		{
+			return __Super::del_if([&](__PtrType ptr) {
+				if (NULL != ptr)
+				{
+					return cb(*ptr);
+				}
+
+				return E_DelConfirm::DC_No;
+			});
+		}
+
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>>
 		size_t add(T* ptr, args... others)
 		{
@@ -413,14 +454,12 @@ namespace NS_JSTL
 
 		bool get(TD_PosType pos, __CB_RefType_void cb) const
 		{
-			__PtrType ptr = NULL;
-			if (!__Super::get(pos, [&](__PtrType t_ptr) {
-				ptr = t_ptr;
-			}))
+			if (pos >= m_data.size())
 			{
 				return false;
 			}
 
+			__PtrType ptr = m_data[pos];
 			if (NULL == ptr)
 			{
 				return false;
@@ -436,12 +475,12 @@ namespace NS_JSTL
 
 		bool set(TD_PosType pos, __PtrType ptr)
 		{
-			return __Super::set(pos, ptr);
+			return m_data.set(pos, ptr);
 		}
 
 		bool set(TD_PosType pos, __RefType ref)
 		{
-			return __Super::set(pos, &ref);
+			return m_data.set(pos, &ref);
 		}
 
 		template<typename... args>
@@ -505,7 +544,8 @@ namespace NS_JSTL
 		{
 			if (!__Super::checkIsSelf(container))
 			{
-				for (auto&data : container)
+				CContainVisitor<T> Visitor(container);
+				for (auto&data : Visitor)
 				{
 					_unshift(data);
 				}
@@ -559,7 +599,6 @@ namespace NS_JSTL
 			{
 				forEach([&](__RefType ref) {
 					arr.add(&ref);
-					return true;
 				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
 			}
 
@@ -619,9 +658,45 @@ namespace NS_JSTL
 		}
 
 	public:
-		void forEach(__CB_RefType_bool cb, TD_PosType startPos = 0, size_t count = 0) const
+		void forEach(__CB_RefType_Pos_void cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
 			__Super::forEach([&](__PtrType ptr, TD_PosType pos) {
+				if (NULL != ptr)
+				{
+					cb(*ptr, pos);
+				}
+
+				return true;
+			}, startPos, count);
+		}
+
+		void forEach(__CB_RefType_void cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			__Super::forEach([&](__PtrType ptr, TD_PosType pos) {
+				if (NULL != ptr)
+				{
+					cb(*ptr);
+				}
+
+				return true;
+			}, startPos, count);
+		}
+
+		void forEach_if(__CB_RefType_Pos_bool cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			__Super::forEach_if([&](__PtrType ptr, TD_PosType pos) {
+				if (NULL != ptr)
+				{
+					return cb(*ptr, pos);
+				}
+
+				return true;
+			}, startPos, count);
+		}
+
+		void forEach_if(__CB_RefType_bool cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			__Super::forEach_if([&](__PtrType ptr, TD_PosType pos) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr);
@@ -631,28 +706,32 @@ namespace NS_JSTL
 			}, startPos, count);
 		}
 
-		int find(__CB_RefType_Pos cb, TD_PosType stratPos = 0) const
+		template<typename CB, typename = typename enable_if<is_same<decltype(declval<CB>()(declval<__RefType>())), void>::value, void>::type>
+		void operator ()(const CB& cb) const
 		{
-			if (!cb)
-			{
-				return -1;
-			}
+			forEach(cb);
+		}
 
-			int iRet = -1;
+		void operator ()(__CB_RefType_bool cb) const
+		{
+			forEach_if(cb);
+		}
+
+		int find(__CB_RefType_Pos_bool cb, TD_PosType stratPos = 0) const
+		{
+			int iRetPos = -1;
 			
-			__Super::forEach([&](__PtrType ptr, TD_PosType pos) {
-				if (NULL != ptr)
+			forEach_if([&](__RefType ref, TD_PosType pos) {
+				if (cb(ref, pos))
 				{
-					if (cb(*ptr, pos))
-					{
-						iRet = pos;
-					}
+					iRetPos = pos;
+					return false;
 				}
 
 				return true;
 			});
 
-			return iRet;
+			return iRetPos;
 		}
 
 		bool getFront(__CB_RefType_void cb = NULL) const
@@ -734,7 +813,6 @@ namespace NS_JSTL
 			{
 				forEach([&](__RefType ref) {
 					arr.add(cb(ref));
-					return true;
 				});
 			}
 

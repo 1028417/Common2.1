@@ -28,7 +28,7 @@ public:
 private:
 	CString m_cstrTitle;
 
-	bool m_bAutoActive;
+	bool m_bAutoActive = false;
 
 private:
 	set<HWND> m_setDragableCtrls;
@@ -40,6 +40,11 @@ private:
 	void _AsyncLoop(UINT uDelayTime);
 
 public:
+	virtual void resize(CRect& rcPos, bool bManual)
+	{
+		MoveWindow(&rcPos);
+	}
+	
 	BOOL Active();
 
 	BOOL SetTitle(const CString& cstrTitle, int iImage = -1);

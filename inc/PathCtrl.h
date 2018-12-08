@@ -55,10 +55,9 @@ public:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 	
-		for (auto pSubDir : lstSubDirs)
-		{
-			(void)InsertObject(*(CDirObject*)pSubDir, pDirObject);
-		}
+		lstSubDirs.forEach([&](CPath& SubDir){
+			(void)InsertObject((CDirObject&)SubDir, pDirObject);
+		});
 	}
 	
 	virtual BOOL handleNMNotify(NMHDR& NMHDR) override
@@ -88,10 +87,9 @@ private:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 
-		for (auto pSubDir : lstSubDirs)
-		{
-			InsertChilds((CDirObject*)pSubDir);
-		}
+		lstSubDirs.forEach([&](CPath& SubDir){
+			InsertChilds((CDirObject*)&SubDir);
+		});
 	}
 };
 

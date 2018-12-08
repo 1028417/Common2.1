@@ -353,19 +353,18 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 	this->SetRedraw(FALSE);
 	
 	int nItem = nPos;
-	for (auto pObject : lstObjects)
-	{
+	lstObjects.forEach([&](CListObject& object) {
 		if (nItem <= nMaxItem)
 		{
-			SetItemObject(nItem, *pObject);
+			SetItemObject(nItem, object);
 		}
 		else
 		{
-			(void)InsertObject(*pObject, nItem);
+			(void)InsertObject(object, nItem);
 		}
 
 		nItem++;
-	}
+	});
 	
 	for (; nMaxItem >= nItem; --nMaxItem)
 	{
@@ -475,6 +474,14 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 	}
 }
 
+BOOL CObjectList::DeleteObject(const CListObject *pObject)
+{
+	int nItem = this->GetObjectItem(pObject);
+	__EnsureReturn(0 <= nItem, FALSE);
+
+	return this->DeleteItem(nItem);
+}
+
 void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 {
 	__Ensure(m_hWnd);
@@ -499,12 +506,16 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 	}
 }
 
-BOOL CObjectList::DeleteObject(const CListObject *pObject)
+void CObjectList::DeleteItems(const set<UINT>& setItems)
 {
-	int nItem = this->GetObjectItem(pObject);
-	__EnsureReturn(0 <= nItem, FALSE);
-
-	return this->DeleteItem(nItem);
+	UINT uItemCount = GetItemCount();
+	for(auto itr = setItems.rbegin(); itr != setItems.rend(); itr++)
+	{
+		if (*itr < uItemCount)
+		{
+			DeleteItem(*itr);
+		}
+	}
 }
 
 void CObjectList::GenListItem(CListObject& Object, vector<wstring>& vecText, int& iImage)

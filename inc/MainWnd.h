@@ -29,17 +29,14 @@ struct tagMainWndInfo
 
 class __CommonExt CMainWnd: public CWnd
 {
-protected:
-	typedef vector<CDockView*> TD_DockViewVector;
-
 public:
 	CMainWnd(){}
 
 	virtual ~CMainWnd()
 	{
-		for (auto pView : m_vctDockViews)
+		for (auto& pr : m_mapDockViews)
 		{
-			delete pView;
+			delete pr.second;
 		}
 	}
 	
@@ -50,10 +47,10 @@ protected:
 
 	CStatusBarCtrl m_ctlStatusBar;
 
-	CRect m_rtBlankArea;
+	CRect m_rcViewArea;
 
-	TD_DockViewVector m_vctDockViews;
-	
+	JSMap<E_ViewType, CDockView*> m_mapDockViews;
+
 	tagMainWndInfo m_WndInfo;
 
 public:
@@ -65,15 +62,9 @@ public:
 	
 	BOOL SetStatusText(UINT uPart, const CString& cstrText);
 
-	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize = 0
-		, UINT uOffset = 0, UINT uTabFontSize=0, UINT uTabHeight = 0);
+	BOOL AddView(CPage& Page, const tagViewStyle& ViewStyle);
 
-	BOOL AddDockView(CPage& Page, ST_ViewStyle nStyle, UINT uDockSize
-		, UINT uOffset=0, UINT uTabFontSize=0, CImageList *pImglst=NULL);
-
-	BOOL AddUndockView(CPage& Page, const CRect& rtPos);
-
-	BOOL AddPage(CPage& Page, ST_ViewStyle nStyle);
+	BOOL AddPage(CPage& Page, E_ViewType eViewType);
 
 	BOOL ActivePage(CPage& Page);
 
@@ -88,9 +79,9 @@ public:
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);
 
-	void OnSize();
+	void resizeView(bool bManual=false);
 
-	CDockView* GetDockView(const CPoint& ptPos);
+	CDockView* hittestView(const CPoint& ptPos);
 
 	BOOL HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam);
 	void ResizeView(CDockView &wndTargetView, CPoint &ptPos);

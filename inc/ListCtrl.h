@@ -46,26 +46,42 @@ typedef list<tagListColumn> TD_ListColumn;
 class __CommonExt CListColumnGuide
 {
 public:
-	CListColumnGuide(UINT uMaxWidth)
+	CListColumnGuide()
 	{
-		m_uMaxWidth = uMaxWidth;
+
+	}
+
+	CListColumnGuide(const TD_ListColumn& lstColumn, UINT uTotalWidth=0)
+		: m_lstColumn(lstColumn)
+	{
+		m_uTotalWidth = uTotalWidth;
+
+		for (auto& column : m_lstColumn)
+		{
+			m_uFixWidth += column.uWidth;
+		}
+	}
+
+	CListColumnGuide(UINT uTotalWidth)
+	{
+		m_uTotalWidth = uTotalWidth;
 	}
 
 private:
-	UINT m_uMaxWidth = 0;
+	UINT m_uTotalWidth = 0;
 
 	TD_ListColumn m_lstColumn;
 
-	map<tagListColumn*, double> m_mapPercentWidth;
+	list<pair<tagListColumn*, double>> m_lstPercentWidth;
 
-	UINT m_uSumWidth = 0;
+	UINT m_uFixWidth = 0;
 
 public:
 	CListColumnGuide& add(const CString& cstrText, UINT uWidth, UINT uFormat=LVCFMT_LEFT)
 	{
 		m_lstColumn.push_back({ cstrText, uWidth, uFormat });
 		
-		m_uSumWidth += uWidth;
+		m_uFixWidth += uWidth;
 
 		return *this;
 	}
@@ -74,23 +90,51 @@ public:
 	{
 		m_lstColumn.push_back({ cstrText, 0, uFormat });
 
-		m_mapPercentWidth[&m_lstColumn.back()] = fPercentWidth;
+		m_lstPercentWidth.push_back({ &m_lstColumn.back(), fPercentWidth });
 		
 		return *this;
 	}
 
-	operator const TD_ListColumn&()
+	const TD_ListColumn& getListColumn()
 	{
-		if (m_uSumWidth < m_uMaxWidth)
+		return getListColumn(m_uTotalWidth);
+	}
+
+	const TD_ListColumn& getListColumn(UINT uTotalWidth)
+	{
+		if (!m_lstPercentWidth.empty())
 		{
-			UINT uRamainWidth = m_uMaxWidth - m_uSumWidth;
-			for (auto& pr : m_mapPercentWidth)
+			if (m_uFixWidth < uTotalWidth)
 			{
-				pr.first->uWidth = UINT(uRamainWidth*pr.second);
+				UINT uRamainWidth = uTotalWidth - m_uFixWidth;
+				for (auto& pr : m_lstPercentWidth)
+				{
+					pr.first->uWidth = UINT(uRamainWidth*pr.second);
+				}
+			}
+		}
+		else
+		{
+			if (0 != uTotalWidth)
+			{
+				if (m_uFixWidth != uTotalWidth)
+				{
+					for (auto& column : m_lstColumn)
+					{
+						column.uWidth = uTotalWidth * column.uWidth / m_uFixWidth;
+					}
+
+					m_uFixWidth = uTotalWidth;
+				}
 			}
 		}
 
 		return m_lstColumn;
+	}
+
+	operator const TD_ListColumn&()
+	{
+		return getListColumn(m_uTotalWidth);
 	}
 };
 
@@ -217,9 +261,9 @@ public:
 
 	void SetColumnText(UINT uColumn, const wstring& strText);
 
-	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
-
 	BOOL DeleteObject(const CListObject *pObject);
+	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
+	void DeleteItems(const set<UINT>& setItems);
 
 	void SetItemObject(UINT uItem, CListObject& Object);
 

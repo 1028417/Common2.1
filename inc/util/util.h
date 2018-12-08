@@ -62,12 +62,15 @@ using namespace NS_JSTL;
 class __UtilExt util
 {
 public:
+	static void sys2tm(const SYSTEMTIME& sysTime, tm& atm);
+	static void tm2sys(const tm& atm, SYSTEMTIME& sysTime);
+	
 	static void getCurrentTime(int& nHour, int& nMinute);
-	static void getCurrentTime(tm& atm);
+	static void getCurrentTime(SYSTEMTIME& sysTime);
 
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
 	static wstring FormatTime(time_t time, const wstring& strFormat);
-	static wstring FormatTime(const tm& atm, const wstring& strFormat);
+	//static wstring FormatTime(const tm& atm, const wstring& strFormat);
 
 	static void trim(wstring& strText, wchar_t chr = ' ');
 	static void ltrim(wstring& strText, wchar_t chr = ' ');
@@ -96,21 +99,6 @@ public:
 	static bool ContainerFind(_C& container, _V value)
 	{
 		return std::find(container.begin(), container.end(), value) != container.end();
-	}
-
-	template <class _C, class _V>
-	static auto ContainerFindRef(_C& container, _V& value)
-	{
-		auto itr = container.begin();
-		for (; itr != container.end(); itr++)
-		{
-			if ((void*)&*itr == &value)
-			{
-				break;
-			}
-		}
-	
-		return itr;
 	}
 
 	template <class _C>

@@ -21,8 +21,43 @@ namespace NS_JSTL
 	using checkIter_t = _RequireInputIter<_Iter>;
 #endif
 
+	class CItrVisitor
+	{
+	public:
+		template <class __C>
+		static decltype(declval<const __C>().begin()) begin(const __C& container)
+		{
+			return container.begin();
+		}
+
+		template <class __C>
+		static decltype(declval<const __C>().end()) end(const __C& container)
+		{
+			return container.end();
+		}
+
+
+		template <class __C>
+		static decltype(declval<__C>().begin()) begin(__C& container)
+		{
+			return container.begin();
+		}
+
+		template <class __C>
+		static decltype(declval<__C>().end()) end(__C& container)
+		{
+			return container.end();
+		}
+
+		template <class __C>
+		static void erase(__C& container, decltype(declval<__C>().begin())& itr)
+		{
+			itr = container.erase(itr);
+		}
+	};
+
 	template<class T>
-	using checkContainer_t = checkIter_t<decltype(declval<T>().begin())>;
+	using checkContainer_t = checkIter_t<decltype(CItrVisitor::begin(declval<T>()))>;
 	// = typename enable_if<_Is_iterator<decltype(declval<T>().begin())>::value, void>::type;
 
 	//template <typename T>
@@ -63,8 +98,8 @@ namespace NS_JSTL
 	template <typename T>
 	using CB_T_bool = CB_T_Ret<T, bool>;
 
-	template <typename T>
-	using CB_T_Pos = const function<bool(T, TD_PosType)>&;
+	template <typename T, typename RET>
+	using CB_T_Pos_RET = const function<RET(T, TD_PosType)>&;
 
 	template <typename T>
 	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
