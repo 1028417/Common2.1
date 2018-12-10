@@ -1,8 +1,11 @@
-﻿    正在创建库 ../lib/util.lib 和对象 ../lib/util.exp
-  正在生成代码
-  8 of 4757 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    5 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  已完成代码的生成
-  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/util.dll
-  util.vcxproj -> ../build\util/util.pdb (Full PDB)
+﻿  fsutil.cpp
+  fsdlg.cpp
+  ProFile.cpp
+  Path.cpp
+  正在生成代码...
+  sqlite3.c
+  shell.c
+  正在生成代码...
+    正在创建库 ../lib/utild.lib 和对象 ../lib/utild.exp
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/utild.dll
+  util.vcxproj -> ../build\util/utild.pdb (Full PDB)

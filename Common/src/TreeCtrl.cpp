@@ -186,7 +186,7 @@ void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState
 	TD_TreeObjectList lstTreeObjects;
 	__super::GetAllObjects(lstTreeObjects);
 
-	lstTreeObjects.forEach([&](CTreeObject& TreeObject) {
+	lstTreeObjects([&](CTreeObject& TreeObject) {
 		if (eCheckState == this->GetItemCheckState(getTreeItem(&TreeObject)))
 		{
 			lstObjects.add(TreeObject);
@@ -200,7 +200,7 @@ void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	this->GetAllObjects(lstChekedObjects, CS_Checked);
 
 	HTREEITEM hParentItem = NULL;
-	lstChekedObjects.forEach([&](CTreeObject& CheckedObject) {
+	lstChekedObjects([&](CTreeObject& CheckedObject) {
 		if (!lstChekedObjects.includes(GetParentObject(CheckedObject)))
 		{
 			lstObjects.add(CheckedObject);
@@ -350,7 +350,7 @@ HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentO
 	TD_TreeObjectList lstSubObjects;
 	Object.GetTreeChilds(lstSubObjects);
 
-	lstSubObjects.forEach([&](CTreeObject& SubObject) {
+	lstSubObjects([&](CTreeObject& SubObject) {
 		(void)InsertObjectEx(SubObject, &Object);
 	});
 

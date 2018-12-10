@@ -43,15 +43,16 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	vector<int> m_vctStatusPartWidth;
-
-	CStatusBarCtrl m_ctlStatusBar;
-
-	CRect m_rcViewArea;
-
-	JSMap<E_ViewType, CDockView*> m_mapDockViews;
-
 	tagMainWndInfo m_WndInfo;
+	
+	vector<int> m_vctStatusPartWidth;
+	CStatusBarCtrl m_ctlStatusBar;
+	UINT m_uStatusBarHeight = 0;
+
+	int m_cx = 0;
+	int m_cy = 0;
+
+	SMap<E_DockViewType, CDockView*> m_mapDockViews;
 
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
@@ -64,7 +65,7 @@ public:
 
 	BOOL AddView(CPage& Page, const tagViewStyle& ViewStyle);
 
-	BOOL AddPage(CPage& Page, E_ViewType eViewType);
+	BOOL AddPage(CPage& Page, E_DockViewType eViewType);
 
 	BOOL ActivePage(CPage& Page);
 
@@ -81,10 +82,12 @@ private:
 
 	void resizeView(bool bManual=false);
 
+	virtual void onViewResize(CDockView& view) {}
+
 	CDockView* hittestView(const CPoint& ptPos);
 
 	BOOL HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam);
-	void ResizeView(CDockView &wndTargetView, CPoint &ptPos);
+	void setDockSize(CDockView &wndTargetView, UINT x, UINT y);
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);

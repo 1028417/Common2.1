@@ -2,18 +2,18 @@
 #ifndef __PtrArray_H
 #define __PtrArray_H
 
-#include "JSArray.h"
+#include "SArray.h"
 
 #include "ptrcontainer.h"
 
-namespace NS_JSTL
+namespace NS_SSTL
 {
-#define __PtrArraySuper JSArrayT<__Type*, __BaseType>
+#define __PtrArraySuper SArrayT<__Type*, __BaseType>
 
 	template<typename __Type, template<typename...> class __BaseType>
 	class PtrArrayT : public __PtrArraySuper
 	{
-		friend class CItrVisitor;
+		friend tagItrVisitor;
 
 	private:
 		using __Super = __PtrArraySuper;
@@ -26,6 +26,8 @@ namespace NS_JSTL
 
 #ifndef _MSC_VER
 		__UsingSuperType(__ContainerType);
+		__UsingSuperType(__ItrType);
+		__UsingSuperType(__ItrConstType);
 
 		__UsingSuperType(__InitList);
 #endif
@@ -49,6 +51,13 @@ namespace NS_JSTL
 		explicit PtrArrayT(T* ptr, args... others)
 		{
 			add(ptr, others...);
+		}
+		
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		explicit PtrArrayT(T& ref, args&... others)
+		{
+			add(ref, others...);
 		}
 
 		template<typename... args>
@@ -134,30 +143,6 @@ namespace NS_JSTL
 		}
 
 	private:
-		decltype(m_data.begin()) begin()
-		{
-			return m_data.begin();
-		}
-		decltype(m_data.end()) end()
-		{
-			return m_data.end();
-		}
-
-		decltype(m_data.cbegin()) begin() const
-		{
-			return m_data.cbegin();
-		}
-		decltype(m_data.cbegin()) end() const
-		{
-			return m_data.cend();
-		}
-
-		template <typename T, typename = checkIter_t<T>>
-		T erase(const T& itr)
-		{
-			return m_data.erase(itr);
-		}
-
 		void _add(const __PtrType& ptr) override
 		{
 			m_data.add((__PtrType)ptr);
@@ -167,6 +152,30 @@ namespace NS_JSTL
 		{
 			return m_data.del((__PtrType)ptr);
 		}
+
+		__ItrType begin()
+		{
+			return m_data.begin();
+		}
+		__ItrType end()
+		{
+			return m_data.end();
+		}
+
+		__ItrConstType begin() const
+		{
+			return m_data.cbegin();
+		}
+		__ItrConstType end() const
+		{
+			return m_data.cend();
+		}
+
+		//template <typename T, typename = checkIter_t<T>>
+		//T erase(const T& itr)
+		//{
+		//	return m_data.erase(itr);
+		//}
 
 		void _unshift(__PtrType ptr)
 		{
@@ -230,6 +239,50 @@ namespace NS_JSTL
 		}
 
 	public:
+		int indexOf(__ConstPtr ptr) const
+		{
+			return m_data.indexOf(ptr);
+		}
+
+		int indexOf(__ConstRef ref) const
+		{
+			return m_data.indexOf(ref);
+		}
+
+		template <typename T>
+		int indexOf(T* ptr) const
+		{
+			return m_data.indexOf(ptr);
+		}
+
+		template <typename T>
+		int indexOf(T& ref) const
+		{
+			return m_data.indexOf(ref);
+		}
+
+		bool includes(__ConstPtr ptr) const
+		{
+			return indexOf(ptr) >= 0;
+		}
+
+		bool includes(__ConstRef ref) const
+		{
+			return indexOf(ref) >= 0;
+		}
+
+		template <typename T>
+		bool includes(T* ptr) const
+		{
+			return indexOf(ptr) >= 0;
+		}
+
+		template <typename T>
+		bool includes(T& ref) const
+		{
+			return indexOf(ref) >= 0;
+		}
+
 		size_t del(__ConstRef ref)
 		{
 			return m_data.del(ref);
@@ -251,6 +304,21 @@ namespace NS_JSTL
 				}
 				return true;
 			}, ptr, others...);
+			return uRet;
+		}
+
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		size_t del(T& ref, args... others)
+		{
+			size_t uRet = 0;
+			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
+				if (m_data.del(ref))
+				{
+					uRet++;
+				}
+				return true;
+			}, ref, others...);
 			return uRet;
 		}
 
@@ -338,6 +406,24 @@ namespace NS_JSTL
 			return uRet;
 		}
 		
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		size_t add(T& ref, args&... others)
+		{
+			size_t uRet = 0;
+
+			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
+				if (m_data.add(ref))
+				{
+					uRet++;
+				}
+
+				return true;
+			}, ref, others...);
+
+			return uRet;
+		}
+
 		template<typename... args>
 		size_t add(__PtrType ptr, args... others)
 		{
@@ -408,6 +494,17 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		PtrArrayT& assign(T& ref, args&... others)
+		{
+			m_data.clear();
+
+			add(ref, others...);
+
+			return *this;
+		}
+			
 		PtrArrayT& assign(__ContainerType&& container)
 		{
 			__Super::swap(container);
@@ -464,12 +561,9 @@ namespace NS_JSTL
 			{
 				return false;
 			}
-
-			if (cb)
-			{
-				cb(*ptr);
-			}
-
+			
+			cb(*ptr);
+			
 			return true;
 		}
 
@@ -484,7 +578,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArrayT concat(__PtrType ptr, const args&... others) const
+		PtrArrayT concat(__PtrType ptr, args... others) const
 		{
 			PtrArrayT arr(*this);
 			arr.add(ptr, others...);
@@ -493,6 +587,15 @@ namespace NS_JSTL
 
 		template<typename... args>
 		PtrArrayT concat(__RefType ref, args&... others) const
+		{
+			PtrArrayT arr(*this);
+			arr.add(ref, others...);
+			return arr;
+		}
+
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		PtrArrayT concat(T& ref, args&... others) const
 		{
 			PtrArrayT arr(*this);
 			arr.add(ref, others...);
@@ -523,7 +626,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		size_t unshift(__PtrType ptr, const args&... others)
+		size_t unshift(__PtrType ptr, args... others)
 		{
 			return __Super::unshift(ptr, others...);
 		}
@@ -539,12 +642,25 @@ namespace NS_JSTL
 			return __Super::size();
 		}
 
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		size_t unshift(T& ref, args&... others)
+		{
+			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
+				_unshift(ref);
+				return true;
+			}, ref, others...);
+
+			return __Super::size();
+		}
+
+
 		template<typename T, typename = checkContainer_t<T>>
 		size_t unshift(T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
-				CContainVisitor<T> Visitor(container);
+				CItrVisitor<T> Visitor(container);
 				for (auto&data : Visitor)
 				{
 					_unshift(data);
@@ -606,7 +722,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, __PtrType v, const args&... others)
+		PtrArrayT& splice(TD_PosType pos, size_t nRemove, __PtrType v, args... others)
 		{
 			__Super::splice(pos, nRemove, v, others...);
 
@@ -706,7 +822,7 @@ namespace NS_JSTL
 			}, startPos, count);
 		}
 
-		template<typename CB, typename = typename enable_if<is_same<decltype(declval<CB>()(declval<__RefType>())), void>::value, void>::type>
+		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__RefType>())), void>>
 		void operator ()(const CB& cb) const
 		{
 			forEach(cb);
@@ -737,12 +853,9 @@ namespace NS_JSTL
 		bool getFront(__CB_RefType_void cb = NULL) const
 		{
 			return __Super::getFront([&](__PtrType ptr) {
-				if (NULL != ptr)
+				if (NULL != ptr && cb)
 				{
-					if (cb)
-					{
-						cb(*ptr);
-					}
+					cb(*ptr);
 				}
 			});
 		}
@@ -750,12 +863,9 @@ namespace NS_JSTL
 		bool getBack(__CB_RefType_void cb = NULL) const
 		{
 			return __Super::getBack([&](__PtrType ptr) {
-				if (NULL != ptr)
+				if (NULL != ptr && cb)
 				{
-					if (cb)
-					{
-						cb(*ptr);
-					}
+					cb(*ptr);
 				}
 			});
 		}
@@ -763,12 +873,9 @@ namespace NS_JSTL
 		bool pop(__CB_RefType_void cb = NULL)
 		{
 			return __Super::pop([&](__PtrType ptr) {
-				if (NULL != ptr)
+				if (NULL != ptr && cb)
 				{
-					if (cb)
-					{
-						cb(*ptr);
-					}
+					cb(*ptr);
 				}
 			});
 		}
@@ -776,51 +883,42 @@ namespace NS_JSTL
 		bool shift(__CB_RefType_void cb = NULL)
 		{
 			return __Super::shift([&](__PtrType ptr) {
-				if (NULL != ptr)
+				if (NULL != ptr && cb)
 				{
-					if (cb)
-					{
-						cb(*ptr);
-					}
+					cb(*ptr);
 				}
 			});
 		}
 
 		PtrArrayT& qsort(__CB_Sort_T<__Type> cb)
 		{
-            if (cb)
-            {
-				__Super::qsort([&](__PtrType lhs, __PtrType rhs) {
-                    if (NULL != lhs && NULL != rhs)
-                    {
-                        return cb(*lhs, *rhs);
-                    }
+			__Super::qsort([&](__PtrType lhs, __PtrType rhs) {
+                if (NULL != lhs && NULL != rhs)
+                {
+                    return cb(*lhs, *rhs);
+                }
 
-                    return false;
-                });
-            }
+                return false;
+            });
 
 			return *this;
 		}
 
 	public:
 		template <typename T>
-		JSArray<T> map(CB_T_Ret<__RefType, T> cb) const
+		SArray<T> map(CB_T_Ret<__RefType, T> cb) const
 		{
-			JSArray<T> arr;
+			SArray<T> arr;
 
-			if (cb)
-			{
-				forEach([&](__RefType ref) {
-					arr.add(cb(ref));
-				});
-			}
-
+			forEach([&](__RefType ref) {
+				arr.add(cb(ref));
+			});
+			
 			return arr;
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(declval<__RefType>()))>
-		JSArray<RET> map(const CB& cb) const
+		SArray<RET> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}
@@ -828,17 +926,13 @@ namespace NS_JSTL
 		PtrArrayT filter(__CB_RefType_bool cb) const
 		{
 			PtrArrayT arr;
-			
-			if (cb)
-			{
-				arr = __Super::filter([&](__PtrType ptr) {
-					if (NULL == ptr)
-					{
-						return false;
-					}
 
-					return cb(*ptr);
-				});
+			for (auto& ptr : m_data)
+			{
+				if (NULL != ptr && cb(*ptr))
+				{
+					arr.add(ptr);
+				}
 			}
 
 			return arr;
@@ -846,11 +940,6 @@ namespace NS_JSTL
 
 		bool every(__CB_RefType_bool cb) const
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			return __Super::every([&](__PtrType ptr) {
 				if (NULL == ptr)
 				{
@@ -863,11 +952,6 @@ namespace NS_JSTL
 
 		bool some(__CB_RefType_bool cb) const
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			return __Super::some([&](__PtrType ptr) {
 				if (NULL == ptr)
 				{

@@ -50,7 +50,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 
 	LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
 
-	(void)::EnableWindow(hWndOwner, TRUE);
+	//(void)::EnableWindow(hWndOwner, TRUE);
 
 	if(lpItemIDList)
 	{
@@ -250,9 +250,9 @@ wstring CFileDlg::Show(list<wstring>& lstFiles)
 {
 	BOOL bRet = ::GetOpenFileName(&m_ofn);
 
-	(void)::EnableWindow(m_ofn.hwndOwner, TRUE);
+	//(void)::EnableWindow(m_ofn.hwndOwner, TRUE);
 
-	(void)::SetFocus(m_ofn.hwndOwner);
+	//(void)::SetFocus(m_ofn.hwndOwner);
 
 	if (!bRet)
 	{

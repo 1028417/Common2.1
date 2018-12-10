@@ -6,45 +6,12 @@
 
 #include <list>
 
-namespace NS_JSTL
+#include "_check.h"
+
+#include "_util.h"
+
+namespace NS_SSTL
 {
-	enum class E_DelConfirm
-	{
-		DC_Yes
-		, DC_No
-		, DC_Abort
-		, DC_YesAbort
-	};
-
-	template <class __C>
-	class CContainVisitor
-	{
-		typedef decltype(CItrVisitor::begin(declval<__C&>())) __ITR;
-
-	public:
-		CContainVisitor(__C& container)
-			: m_container(container)
-		{
-		}
-
-		__C& m_container;
-
-		__ITR begin()
-		{
-			return CItrVisitor::begin(m_container);
-		}
-
-		__ITR end()
-		{
-			return CItrVisitor::end(m_container);
-		}
-
-		void erase(__ITR& itr)
-		{
-			CItrVisitor::erase(m_container, itr);
-		}
-	};
-
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
 	class ContainerT
 	{
@@ -54,6 +21,9 @@ namespace NS_JSTL
 		using __ContainerType = __ContainerType__;
 
 		__ContainerType m_data;
+
+		using __ItrType = decltype(m_data.begin());
+		using __ItrConstType = decltype(m_data.cbegin());
 
 		using __InitList = InitList_T<__DataType>;
 		using __InitList_Key = InitList_T<__KeyType>;
@@ -103,7 +73,7 @@ namespace NS_JSTL
 
 		template<typename T, typename = checkContainer_t<T>>
 		explicit ContainerT(const T& container)
-			: m_data(CContainVisitor<const T>(container).begin(), CContainVisitor<const T>(container).end())
+			: m_data(CItrVisitor<const T>(container).begin(), CItrVisitor<const T>(container).end())
 		{
 		}
 
@@ -201,7 +171,7 @@ namespace NS_JSTL
 
 			m_data.clear();
 
-			CContainVisitor<const T> Visitor(container);
+			CItrVisitor<const T> Visitor(container);
 			new (&m_data) __ContainerType(Visitor.begin(), Visitor.end());
 
 			return *this;
@@ -258,36 +228,72 @@ namespace NS_JSTL
 
 		bool getFront(__CB_Ref_void cb)
 		{
-			return _getOperator().getFront(cb);
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			cb(*m_data.begin());
+
+			return true;
 		}
 
 		bool getFront(__CB_ConstRef_void cb) const
 		{
-			return _getOperator().getFront(cb);
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			cb(*m_data.begin());
+
+			return true;
 		}
 
 		bool getFront(__DataRef data) const
 		{
-			return _getOperator().getFront([&](__DataConstRef _data) {
-				data = _data;
-			});
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			data = *m_data.begin();
+
+			return true;
 		}
 
 		bool getBack(__CB_Ref_void cb)
 		{
-			return _getOperator().getBack(cb);
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			cb(*m_data.rbegin());
+			
+			return true;
 		}
 
 		bool getBack(__CB_ConstRef_void cb) const
 		{
-			return _getOperator().getBack(cb);
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			cb(*m_data.rbegin());
 		}
 
 		bool getBack(__DataRef data) const
 		{
-			return _getOperator().getBack([&](__DataConstRef _data) {
-				data = _data;
-			});
+			if (m_data.empty())
+			{
+				return false;
+			}
+
+			data = *m_data.rbegin();
+
+			return true;
 		}
 
 		bool popFront(__CB_ConstRef_void cb = NULL)
@@ -302,6 +308,7 @@ namespace NS_JSTL
 			{
 				cb(*itr);
 			}
+
 			m_data.erase(itr);
 
 			return true;
@@ -321,11 +328,16 @@ namespace NS_JSTL
 			return true;
 		}
 
+		bool includes(__KeyConstRef data) const
+		{
+			return _find(data) != m_data.end();
+		}
+
 		template<typename... args>
 		bool includes(__KeyConstRef data, const args&... others) const
 		{
 			return tagDynamicArgsExtractor<__KeyConstRef>::extract([&](__KeyConstRef data) {
-				return _includes(data);
+				return includes(data);
 			}, data, others...);
 		}
 
@@ -339,7 +351,7 @@ namespace NS_JSTL
 
 			for (auto&data : container)
 			{
-				if (!_includes(data))
+				if (!includes(data))
 				{
 					return false;
 				}
@@ -351,82 +363,6 @@ namespace NS_JSTL
 		bool includes(__InitList_Key initList) const
 		{
 			return includes<__InitList_Key>(initList);
-		}
-
-		template<typename... args>
-		vector<__KeyType> getInner(__KeyConstRef key, const args&... others) const
-		{
-			vector<__KeyType> vec;
-			extractKeyTypeArgs(vec, key, others...);
-			return getInner(vec);
-		}
-
-		template <typename T>
-		T getInner(const T& container) const
-		{
-			T ret(container);
-
-			if (!m_data.empty())
-			{
-				CContainVisitor<T> Visitor(ret);
-				for (auto itr = Visitor.begin(); itr != Visitor.end(); )
-				{
-					if (!_includes(*itr))
-					{
-						Visitor.erase(itr);
-					}
-					else
-					{
-						itr++;
-					}
-				}
-			}
-
-			return ret;
-		}
-
-		vector<__KeyType> getInner(__InitList_Key keys) const
-		{
-			vector<__KeyType> vec(keys);
-			return getInner(vec);
-		}
-
-		template<typename... args>
-		vector<__KeyType> getOuter(__KeyConstRef key, const args&... others) const
-		{
-			vector<__KeyType> vec;
-			extractKeyTypeArgs(vec, key, others...);
-			return getOuter(vec);
-		}
-
-		template <typename T>
-		T getOuter(const T& container) const
-		{
-			T ret(container);
-
-			if (!m_data.empty())
-			{
-				CContainVisitor<T> Visitor(ret);
-				for (auto itr = Visitor.begin(); itr != Visitor.end(); )
-				{
-					if (_includes(*itr))
-					{
-						Visitor.erase(itr);
-					}
-					else
-					{
-						itr++;
-					}
-				}
-			}
-
-			return ret;
-		}
-
-		vector<__KeyType> getOuter(__InitList_Key keys) const
-		{
-			vector<__KeyType> vec(keys);
-			return getOuter(vec);
 		}
 
 		template<typename... args>
@@ -454,7 +390,7 @@ namespace NS_JSTL
 
 			size_t uRet = 0;
 
-			CContainVisitor<const T> Visitor(container);
+			CItrVisitor<const T> Visitor(container);
 			auto itrEnd = Visitor.end();
 			for (auto itr = Visitor.begin(); itr != itrEnd; itr++)
 			{
@@ -476,11 +412,6 @@ namespace NS_JSTL
 
 		size_t del_if(__CB_Ref_DelConfirm cb)
 		{
-			if (!cb)
-			{
-				return 0;
-			}
-
 			size_t uRet = 0;
 
 			for (auto itr = m_data.begin(); itr != m_data.end();)
@@ -529,11 +460,6 @@ namespace NS_JSTL
 
 		bool every(__CB_ConstRef_bool cb) const
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			for (auto&data : m_data)
 			{
 				if (!cb(data))
@@ -547,11 +473,6 @@ namespace NS_JSTL
 
 		bool some(__CB_ConstRef_bool cb) const
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			for (auto&data : m_data)
 			{
 				if (cb(data))
@@ -565,24 +486,24 @@ namespace NS_JSTL
 
 		__DataType reduce(const function<__DataType(__DataConstRef, __DataConstRef)>& cb) const
 		{
-			return NS_JSTL::reduce<__DataType, __ContainerType >(m_data, cb);
+			return NS_SSTL::reduce<__DataType, __ContainerType >(m_data, cb);
 		}
 
 	public:
-		decltype(m_data.begin()) begin()
+		__ItrType begin()
 		{
 			return m_data.begin();
 		}
-		decltype(m_data.end()) end()
+		__ItrType end()
 		{
 			return m_data.end();
 		}
 
-		decltype(m_data.cbegin()) begin() const
+		__ItrConstType begin() const
 		{
 			return m_data.cbegin();
 		}
-		decltype(m_data.cbegin()) end() const
+		__ItrConstType end() const
 		{
 			return m_data.cend();
 		}
@@ -593,7 +514,12 @@ namespace NS_JSTL
 			return m_data.erase(itr);
 		}
 
-	protected:
+	private:
+		virtual __ItrConstType _find(__KeyConstRef key) const
+		{
+			return m_data.end();
+		}
+		
 		virtual void _add(__DataConstRef data)
 		{
 			m_data.insert(m_data.end(), data);
@@ -604,16 +530,12 @@ namespace NS_JSTL
 			return 0;
 		}
 
-		virtual bool _includes(__KeyConstRef key) const
-		{
-			return false;
-		}
-
 		virtual void _toString(stringstream& ss, __DataConstRef data) const
 		{
 			tagSSTryLMove(ss) << data;
 		}
 
+	protected:
 		template<typename T>
 		bool checkIsSelf(const T& container) const
 		{
@@ -689,51 +611,6 @@ namespace NS_JSTL
 			DATA& m_data;
 
 		public:
-			template <typename CB>
-			bool getFront(const CB& cb)
-			{
-				auto itr = m_data.begin();
-				if (itr == m_data.end())
-				{
-					return false;
-				}
-
-				if (cb)
-				{
-					cb(*itr);
-				}
-
-				return true;
-			}
-
-			template <typename CB>
-			bool getBack(const CB& cb)
-			{
-				auto itr = m_data.rbegin();
-				if (itr == m_data.rend())
-				{
-					return false;
-				}
-
-				if (cb)
-				{
-					cb(*itr);
-				}
-
-				return true;
-			}
-
-			template <typename CB>
-			void forEach(const CB& cb)
-			{
-				for (auto& data : m_data)
-				{
-					if (!cb(data))
-					{
-						break;
-					}
-				}
-			}
 		};
 
 		using __ContainerOperator = __ContainerOperatorT<__ContainerType>;

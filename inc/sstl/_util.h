@@ -4,31 +4,8 @@
 
 #include "_define.h"
 
-namespace NS_JSTL
+namespace NS_SSTL
 {
-	template <typename T> struct tagGetTypeT {
-		typedef T type;
-		typedef T& type_ref;
-		typedef T* type_pointer;
-	};
-
-	template<typename T> struct tagGetTypeT<T&> {
-		typedef typename remove_reference<T>::type type;
-		typedef typename remove_reference<T>::type_ref type_ref;
-		typedef typename remove_reference<T>::type_pointer type_pointer;
-	};
-
-	template<typename T> struct tagGetTypeT<T*> {
-		typedef typename remove_reference<T>::type type;
-		typedef typename remove_reference<T>::type_ref type_ref;
-		typedef typename remove_reference<T>::type_pointer type_pointer;
-	};
-
-	template <typename T, typename U> struct decay_is_same
-		: is_same<typename decay<T>::type, U>::type
-	{
-	};
-	
 	template <typename T> struct tagTryCompare {
 		static bool compare(const T&t1, const T&t2)
 		{
@@ -140,22 +117,12 @@ namespace NS_JSTL
 		template<typename... args>
 		static bool extract(FN_ExtractCB cb, __DataType&v, args&... others)
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			return _extract(cb, true, v, others...);
 		}
 
 		template<typename... args>
 		static bool extractReverse(FN_ExtractCB cb, __DataType&v, args&... others)
 		{
-			if (!cb)
-			{
-				return false;
-			}
-
 			return _extract(cb, false, v, others...);
 		}
 
@@ -198,11 +165,6 @@ namespace NS_JSTL
 	template <typename T, typename C>
 	T reduce(const C& container, const function<T(const T& t1, const T& t2)>& cb)
 	{
-		if (!cb)
-		{
-			return T();
-		}
-
 		auto itr = container.begin();
 		if (itr == container.end())
 		{

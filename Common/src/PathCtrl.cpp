@@ -55,11 +55,12 @@ bool CPathList::SetPath(CPathObject* pPath)
 		
 	TD_ListObjectList lstObjects(lstSubPaths);
 
-	this->SetRedraw(FALSE);
+	CRedrawLockGuide RedrawLockGuide(*this);
+	
 	DeleteAllItems();
+	
 	__super::SetObjects(lstObjects);
-	this->SetRedraw(TRUE);
-
+	
 	return true;
 }
 
@@ -86,7 +87,7 @@ void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir)
 	TD_PathObjectList lstAllObjects;
 	GetAllPathObjects(lstAllObjects);
 
-	lstAllObjects.forEach([&](CPathObject& PathObject) {
+	lstAllObjects([&](CPathObject& PathObject) {
 		if (PathObject.m_bDir == bDir)
 		{
 			lstPathObjects.add(PathObject);

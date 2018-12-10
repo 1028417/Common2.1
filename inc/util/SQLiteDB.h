@@ -33,10 +33,10 @@ public:
 	BOOL GetData(UINT uRow, UINT uColumn, int& nValue) override;
 	BOOL GetData(UINT uRow, UINT uColumn, double& dbValue) override;
 
-	BOOL GetData(UINT uRow, JSArray<string>& arrData) override;
-	BOOL GetData(UINT uRow, JSArray<wstring>& arrData) override;
-	BOOL GetData(UINT uRow, JSArray<int>& arrValue) override;
-	BOOL GetData(UINT uRow, JSArray<double>& arrValue) override;
+	BOOL GetData(UINT uRow, SArray<string>& arrData) override;
+	BOOL GetData(UINT uRow, SArray<wstring>& arrData) override;
+	BOOL GetData(UINT uRow, SArray<int>& arrValue) override;
+	BOOL GetData(UINT uRow, SArray<double>& arrValue) override;
 	
 private:
 	BOOL _getData(UINT uRow, const function<void(const string&)>& cb);

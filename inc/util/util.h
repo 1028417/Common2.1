@@ -56,8 +56,8 @@ using fn_voidvoid = function<void()>;
 
 #include <fstream>
 
-#include <jstl/jstl.h>
-using namespace NS_JSTL;
+#include <sstl/sstl.h>
+using namespace NS_SSTL;
 
 class __UtilExt util
 {

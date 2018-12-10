@@ -1,25 +1,27 @@
 
-#ifndef __JSSet_H
-#define __JSSet_H
+#ifndef __SSet_H
+#define __SSet_H
 
 #include "Container.h"
 
 #include <unordered_set>
 #include <set>
 
-namespace NS_JSTL
+namespace NS_SSTL
 {
-#define __JSSetSuper ContainerT<__DataType, __BaseType<__DataType>>
+#define __SSetSuper ContainerT<__DataType, __BaseType<__DataType>>
 
 	template<typename __DataType, template<typename...> class __BaseType>
-	class JSSetT : public __JSSetSuper
+	class SSetT : public __SSetSuper
 	{
 	private:
-		using __Super = __JSSetSuper;
+		using __Super = __SSetSuper;
 
 #ifndef _MSC_VER
 	protected:
 		__UsingSuperType(__ContainerType);
+		__UsingSuperType(__ItrType);
+		__UsingSuperType(__ItrConstType);
 
 		__UsingSuperType(__InitList);
 
@@ -33,87 +35,87 @@ namespace NS_JSTL
 		__ContainerType& m_data = __Super::m_data;
 
 	public:
-		JSSetT()
+		SSetT()
 		{
 		}
 
 		template<typename... args>
-		explicit JSSetT(__DataConstRef data, const args&... others)
+		explicit SSetT(__DataConstRef data, const args&... others)
 			: __Super(data, others...)
 		{
 		}
 
-		explicit JSSetT(__ContainerType&& container)
+		explicit SSetT(__ContainerType&& container)
 		{
 			__Super::swap(container);
 		}
 
-		JSSetT(JSSetT&& set)
+		SSetT(SSetT&& set)
 		{
 			__Super::swap(set);
 		}
 
-		JSSetT(const JSSetT& set)
+		SSetT(const SSetT& set)
 			: __Super(set)
 		{
 		}
 
-		explicit JSSetT(__InitList initList)
+		explicit SSetT(__InitList initList)
 			: __Super(initList)
 		{
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		explicit JSSetT(const T& container)
+		explicit SSetT(const T& container)
 			: __Super(container)
 		{
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		explicit JSSetT(T& container)
+		explicit SSetT(T& container)
 			: __Super(container)
 		{
 		}
 
-		JSSetT& operator=(__ContainerType&& container)
+		SSetT& operator=(__ContainerType&& container)
 		{
 			__Super::swap(container);
 			return *this;
 		}
 
-		JSSetT& operator=(JSSetT&& set)
+		SSetT& operator=(SSetT&& set)
 		{
 			__Super::swap(set);
 			return *this;
 		}
 
-		JSSetT& operator=(const JSSetT& set)
+		SSetT& operator=(const SSetT& set)
 		{
 			__Super::assign(set);
 			return *this;
 		}
 
-		JSSetT& operator=(__InitList initList)
+		SSetT& operator=(__InitList initList)
 		{
 			__Super::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
-		JSSetT& operator=(const T&t)
+		SSetT& operator=(const T&t)
 		{
 			__Super::assign(t);
 			return *this;
 		}
 
 		template <typename T>
-		JSSetT& operator=(T&t)
+		SSetT& operator=(T&t)
 		{
 			__Super::assign(t);
 			return *this;
 		}
 
-	protected:
+	private:
 		void _add(__DataConstRef data) override
 		{
 			m_data.insert(data);
@@ -132,59 +134,59 @@ namespace NS_JSTL
 			return 1;
 		}
 
-		bool _includes(__DataConstRef data) const override
+		__ItrConstType _find(__DataConstRef data) const override
 		{
-			return m_data.find(data) != m_data.end();
+			return m_data.find(data);
 		}
 
 	public:
 		template <typename T>
-		JSSetT& operator+= (const T& rhs)
+		SSetT& operator+= (const T& rhs)
 		{
 			__Super::add(rhs);
 			return *this;
 		}
 
-		JSSetT& operator+= (__InitList rhs)
+		SSetT& operator+= (__InitList rhs)
 		{
 			__Super::add(rhs);
 			return *this;
 		}
 
 		template <typename T>
-		JSSetT& operator-= (const T& rhs)
+		SSetT& operator-= (const T& rhs)
 		{
 			__Super::del(rhs);
 			return *this;
 		}
 
-		JSSetT& operator-= (__InitList rhs)
+		SSetT& operator-= (__InitList rhs)
 		{
 			__Super::del(rhs);
 			return *this;
 		}
 		
 		template <typename T>
-		JSSetT operator+ (const T& rhs)
+		SSetT operator+ (const T& rhs)
 		{
-			JSSetT set(*this);
+			SSetT set(*this);
 			set += rhs;
 			return set;
 		}
 
 		template <typename T>
-		JSSetT operator- (const T& rhs)
+		SSetT operator- (const T& rhs)
 		{
-			JSSetT set(*this);
+			SSetT set(*this);
 			set -= rhs;
 			return set;
 		}
 
 		template <typename T>
-		JSSetT operator& (const T& rhs)
+		SSetT operator& (const T& rhs)
 		{
-			JSSetT set;
-			JSSetT other(rhs);
+			SSetT set;
+			SSetT other(rhs);
 			for (auto&data : m_data)
 			{
 				if (other.includes(data))
@@ -197,39 +199,33 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
+		SSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
-			JSSetT<T, __BaseType> set;
+			SSetT<T, __BaseType> set;
 
-			if (cb)
+			for (auto&data : m_data)
 			{
-				for (auto&data : m_data)
-				{
-					set.add(cb(data));
-				}
+				set.add(cb(data));
 			}
-
+			
 			return set;
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
-		JSSetT<RET, __BaseType> map(const CB& cb) const
+		SSetT<RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}
 
-		JSSetT filter(__CB_ConstRef_bool cb) const
+		SSetT filter(__CB_ConstRef_bool cb) const
 		{
-			JSSetT set;
+			SSetT set;
 
-			if (cb)
+			for (auto&data : m_data)
 			{
-				for (auto&data : m_data)
+				if (cb(data))
 				{
-					if (cb(data))
-					{
-						set.add(data);
-					}
+					set.add(data);
 				}
 			}
 
@@ -237,11 +233,11 @@ namespace NS_JSTL
 		}
 	};
 
-	template <typename __DataType>
-	using JSSet = JSSetT<__DataType, set>;
+	template <typename __DataType, template<typename...> class __BaseType = std::set>
+	using SSet = SSetT<__DataType, __BaseType>;
 
 	template <typename __DataType>
-	using JSUnsortSet = JSSetT<__DataType, unordered_set>;
+	using SUnsortSet = SSet < __DataType, std::unordered_set> ;
 }
 
-#endif // __JSSet_H
+#endif // __SSet_H

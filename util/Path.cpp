@@ -81,7 +81,7 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const 
 
 	TD_PathList& lstSubPath = _findFile(strFind);
 
-	lstSubPath.forEach([&](CPath& SubPath) {
+	lstSubPath([&](CPath& SubPath) {
 		if (SubPath.m_bDir)
 		{
 			if (plstSubDir)
@@ -134,7 +134,7 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
 
 		pPath = NULL;
 
-		lstSubPath.forEach([&](CPath& SubPath) {
+		lstSubPath([&](CPath& SubPath) {
 			if (lstSubDirs.empty())
 			{
 				if (SubPath.m_bDir != bDir)

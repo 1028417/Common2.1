@@ -40,11 +40,6 @@ private:
 	void _AsyncLoop(UINT uDelayTime);
 
 public:
-	virtual void resize(CRect& rcPos, bool bManual)
-	{
-		MoveWindow(&rcPos);
-	}
-	
 	BOOL Active();
 
 	BOOL SetTitle(const CString& cstrTitle, int iImage = -1);
@@ -55,10 +50,10 @@ public:
 	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb);
 
 protected:
-	BOOL OnSetActive();
-	BOOL OnKillActive();
+	BOOL OnSetActive() override;
+	BOOL OnKillActive() override;
 
-	virtual void OnActive(BOOL bActive);
+	virtual void OnActive(BOOL bActive) {}
 
 	BOOL RegDragableCtrl(CWnd& wndCtrl)
 	{

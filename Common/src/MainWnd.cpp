@@ -21,11 +21,17 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	//{
 	//	dwStyle |= WS_MAXIMIZE;
 	//}
-	__AssertReturn(
-		this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName
-			, m_WndInfo.strText.c_str(), dwStyle, 0, 0
-			, m_WndInfo.uWidth, m_WndInfo.uHeight, NULL, m_WndInfo.hMenu)
-		, FALSE);
+
+	UINT uWidth = m_WndInfo.uWidth;
+	UINT uHeight = m_WndInfo.uHeight;
+	if (0 == uWidth || 0 == uHeight)
+	{
+		uWidth = 800;
+		uHeight = 600;
+	}
+
+	__AssertReturn(this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName, m_WndInfo.strText.c_str()
+		, dwStyle, 0, 0, uWidth, uHeight, NULL, m_WndInfo.hMenu), FALSE);
 
 	//if (NULL != m_WndInfo.hIcon)
 	//{
@@ -70,25 +76,42 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		}
 	}
 
+	CRect rcClient;
+	this->GetClientRect(rcClient);
+	m_cx = rcClient.right;
+	m_cy = rcClient.bottom;
+
+	if (m_ctlStatusBar)
+	{
+		m_cy -= m_uStatusBarHeight;
+
+		m_ctlStatusBar.MoveWindow(0, m_cy, m_cx, m_uStatusBarHeight);
+	}
+
 	resizeView();
 }
 
+static bool g_bResizing = false;
+
 void CMainWnd::resizeView(bool bManual)
 {
-	this->GetClientRect(&m_rcViewArea);
-	if (m_ctlStatusBar)
+	if (g_bResizing)
 	{
-		CRect rcStatusBar;
-		m_ctlStatusBar.GetWindowRect(&rcStatusBar);
-
-		m_rcViewArea.bottom -= rcStatusBar.Height();
-
-		m_ctlStatusBar.MoveWindow(0, m_rcViewArea.bottom, m_rcViewArea.Width(), rcStatusBar.Height());
+		return;
 	}
 
+	g_bResizing = true;
+
+	(void)::DoEvents();
+
+	g_bResizing = false;
+
+	CRect rcViewArea(0, 0, m_cx, m_cy);	
 	for (auto& pr : m_mapDockViews)
 	{
-		pr.second->Resize(m_rcViewArea, bManual);
+		pr.second->Resize(rcViewArea, bManual);
+
+		onViewResize(*pr.second);
 	}
 }
 
@@ -120,6 +143,10 @@ BOOL CMainWnd::CreateStatusBar(UINT uParts, ...)
 	}
 
 	m_ctlStatusBar.SetParts(uParts, &m_vctStatusPartWidth[0]);
+	
+	CRect rcStatusBar;
+	m_ctlStatusBar.GetWindowRect(rcStatusBar);
+	m_uStatusBarHeight = rcStatusBar.Height();
 
 	return TRUE;
 }
@@ -157,7 +184,7 @@ BOOL CMainWnd::AddView(CPage& Page, const tagViewStyle& ViewStyle)
 	return TRUE;
 }
 
-BOOL CMainWnd::AddPage(CPage& Page, E_ViewType eViewType)
+BOOL CMainWnd::AddPage(CPage& Page, E_DockViewType eViewType)
 {
 	return m_mapDockViews.get(eViewType, [&](CDockView *pDockView) {
 		pDockView->AddPage(Page);
@@ -167,7 +194,7 @@ BOOL CMainWnd::AddPage(CPage& Page, E_ViewType eViewType)
 BOOL CMainWnd::ActivePage(CPage& Page)
 {
 	return m_mapDockViews.some([&](auto& pr) {
-		return pr.second->ActivePage(Page);
+		return pr.second->SetActivePage(Page);
 	});
 }
 
@@ -190,13 +217,11 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 		pszTitle = m_WndInfo.strText.c_str();
 	}
 
-	int nResult = ::MessageBox(this->GetSafeHwnd(), cstrText, pszTitle, uType);
+	int nResult = this->MessageBox(cstrText, pszTitle, uType);
 
-	(void)this->EnableWindow(TRUE);
+	//(void)this->SetFocus();
 
-	(void)this->SetFocus();
-
-	(void)::DoEvents();
+	//(void)::DoEvents();
 
 	return nResult;
 }
@@ -226,8 +251,8 @@ CDockView* CMainWnd::hittestView(const CPoint& ptPos)
 	{
 		CDockView* pView = pr.second;
 
-		E_ViewType eViewType = pView->getViewStyle().eViewType;
-		if (E_ViewType::VT_DockCenter == eViewType)
+		E_DockViewType eViewType = pView->getViewStyle().eViewType;
+		if (E_DockViewType::DVT_DockCenter == eViewType)
 		{
 			continue;
 		}
@@ -240,10 +265,10 @@ CDockView* CMainWnd::hittestView(const CPoint& ptPos)
 		pView->GetWindowRect(&rcPos);
 		this->ScreenToClient(&rcPos);
 		
-		if ((E_ViewType::VT_DockLeft == eViewType && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
-			|| (E_ViewType::VT_DockTop == eViewType && PtInRect(&CRect(rcPos.left, rcPos.bottom, rcPos.right, rcPos.bottom+__DXView), ptPos))
-			|| (E_ViewType::VT_DockRight == eViewType && PtInRect(&CRect(rcPos.left-__DXView, rcPos.top, rcPos.left, rcPos.bottom), ptPos))
-			|| (E_ViewType::VT_DockBottom == eViewType && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos)))
+		if ((E_DockViewType::DVT_DockLeft == eViewType && PtInRect(&CRect(rcPos.right, rcPos.top, rcPos.right+__DXView, rcPos.bottom), ptPos))
+			|| (E_DockViewType::DVT_DockTop == eViewType && PtInRect(&CRect(rcPos.left, rcPos.bottom, rcPos.right, rcPos.bottom+__DXView), ptPos))
+			|| (E_DockViewType::DVT_DockRight == eViewType && PtInRect(&CRect(rcPos.left-__DXView, rcPos.top, rcPos.left, rcPos.bottom), ptPos))
+			|| (E_DockViewType::DVT_DockBottom == eViewType && PtInRect(&CRect(rcPos.left, rcPos.top-__DXView, rcPos.right, rcPos.top), ptPos)))
 		{
 			return pView;
 		}
@@ -252,39 +277,31 @@ CDockView* CMainWnd::hittestView(const CPoint& ptPos)
 	return NULL;
 }
 
-void CMainWnd::ResizeView(CDockView &wndTargetView, CPoint &ptPos)
+void CMainWnd::setDockSize(CDockView &wndTargetView, UINT x, UINT y)
 {
-	CRect rcPos;
-	this->GetClientRect(&rcPos);
-
-	if (!::PtInRect(&rcPos, ptPos))
-	{
-		return;
-	}
-
 	switch (wndTargetView.getViewStyle().eViewType)
 	{
-	case E_ViewType::VT_DockLeft:
-		wndTargetView.setDockSize(ptPos.x);
+	case E_DockViewType::DVT_DockLeft:
+		wndTargetView.setDockSize(x);
 
 		break;
-	case E_ViewType::VT_DockTop:
-		wndTargetView.setDockSize(ptPos.y);
+	case E_DockViewType::DVT_DockTop:
+		wndTargetView.setDockSize(y);
 		
 		break;
-	case E_ViewType::VT_DockRight:
-		wndTargetView.setDockSize(rcPos.right - ptPos.x);
-		
+	case E_DockViewType::DVT_DockRight:
+		wndTargetView.setDockSize(m_cx - x);
+	
 		break;
-	case E_ViewType::VT_DockBottom:
-		wndTargetView.setDockSize(rcPos.bottom - ptPos.y);
-		
+	case E_DockViewType::DVT_DockBottom:
+		wndTargetView.setDockSize(m_cy - y);
+	
 		break;
 	default:
+		return;
 		break;
 	}
-	
-	(void)::DoEvents();
+
 	resizeView(true);
 }
 
@@ -294,22 +311,17 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 
 	switch (message)
 	{
-	case WM_CAPTURECHANGED:
-		pTargetView = NULL;
-		
-		break;
-	case WM_LBUTTONUP:
-		ReleaseCapture();
-
-		break;
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONDOWN:
 	{
 		CPoint ptPos(lParam);
-
 		if (WM_MOUSEMOVE == message && pTargetView)
 		{
-			ResizeView(*pTargetView, ptPos);
+			if (ptPos.x > 0 && ptPos.y > 0 && ptPos.x < m_cx && ptPos.y < m_cy)
+			{
+				setDockSize(*pTargetView, ptPos.x, ptPos.y);
+			}
+			
 			break;
 		}
 
@@ -318,12 +330,12 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 
 		LPCWSTR pszCursorName = NULL;
 		
-		E_ViewType eViewType = pView->getViewStyle().eViewType;
-		if (E_ViewType::VT_DockLeft == eViewType || E_ViewType::VT_DockRight == eViewType)
+		E_DockViewType eViewType = pView->getViewStyle().eViewType;
+		if (E_DockViewType::DVT_DockLeft == eViewType || E_DockViewType::DVT_DockRight == eViewType)
 		{
 			pszCursorName = IDC_SIZEWE;
 		}
-		else if (E_ViewType::VT_DockTop == eViewType || E_ViewType::VT_DockBottom == eViewType)
+		else if (E_DockViewType::DVT_DockTop == eViewType || E_DockViewType::DVT_DockBottom == eViewType)
 		{
 			pszCursorName = IDC_SIZENS;
 		}
@@ -342,6 +354,14 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 	}
 	
 	break;
+	case WM_LBUTTONUP:
+		ReleaseCapture();
+
+		break;
+	case WM_CAPTURECHANGED:
+		pTargetView = NULL;
+		
+		break;
 	default:
 		return FALSE;
 	}
@@ -351,17 +371,17 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 
 BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
+	if (HandleResizeViewMessage(message, wParam, lParam))
+	{
+		return TRUE;
+	}
+
 	if (WM_NCLBUTTONDBLCLK == message)
 	{
 		if (!m_WndInfo.bSizeable)
 		{
 			return true;
 		}
-	}
-
-	if (HandleResizeViewMessage(message, wParam, lParam))
-	{
-		return TRUE;
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);

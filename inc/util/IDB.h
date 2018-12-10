@@ -6,8 +6,8 @@ using namespace std;
 typedef unsigned int UINT;
 typedef int BOOL;
 
-#include <jstl/jstl.h>
-using namespace NS_JSTL;
+#include <sstl/sstl.h>
+using namespace NS_SSTL;
 
 interface IDBResult
 {
@@ -19,10 +19,10 @@ interface IDBResult
 	virtual BOOL GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
 	virtual BOOL GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
 	
-	virtual BOOL GetData(UINT uRow, JSArray<string>& arrData) = 0;
-	virtual BOOL GetData(UINT uRow, JSArray<wstring>& arrData) = 0;
-	virtual BOOL GetData(UINT uRow, JSArray<int>& arrValue) = 0;
-	virtual BOOL GetData(UINT uRow, JSArray<double>& arrValue) = 0;
+	virtual BOOL GetData(UINT uRow, SArray<string>& arrData) = 0;
+	virtual BOOL GetData(UINT uRow, SArray<wstring>& arrData) = 0;
+	virtual BOOL GetData(UINT uRow, SArray<int>& arrValue) = 0;
+	virtual BOOL GetData(UINT uRow, SArray<double>& arrValue) = 0;
 };
 
 interface IDB

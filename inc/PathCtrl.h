@@ -55,7 +55,7 @@ public:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 	
-		lstSubDirs.forEach([&](CPath& SubDir){
+		lstSubDirs([&](CPath& SubDir){
 			(void)InsertObject((CDirObject&)SubDir, pDirObject);
 		});
 	}
@@ -87,7 +87,7 @@ private:
 		TD_PathList lstSubDirs;
 		pDirObject->GetSubPath(lstSubDirs);
 
-		lstSubDirs.forEach([&](CPath& SubDir){
+		lstSubDirs([&](CPath& SubDir){
 			InsertChilds((CDirObject*)&SubDir);
 		});
 	}

@@ -7,18 +7,18 @@
 
 #define __DXView 4
 
-enum class E_ViewTabStyle
+enum class E_TabStyle
 {
-	VTS_HideTab = 0,
-	VTS_TabTop,
-	VTS_TabBottom,
-	VTS_TabLeft,
-	VTS_TabRight
+	TS_HideTab = 0,
+	TS_Top,
+	TS_Bottom,
+	TS_Left,
+	TS_Right
 };
 
 struct tagViewTabStyle
 {
-	E_ViewTabStyle eTabStyle = E_ViewTabStyle::VTS_HideTab;
+	E_TabStyle eTabStyle = E_TabStyle::TS_HideTab;
 
 	UINT uTabFontSize = 0;
 
@@ -39,20 +39,22 @@ public:
 private:
 	CFontGuide m_fontGuide;
 	
-	E_ViewTabStyle m_eTabStyle = E_ViewTabStyle::VTS_HideTab;
+	E_TabStyle m_eTabStyle = E_TabStyle::TS_HideTab;
 
 	CImageList m_Imglst;
 
 	int m_iTrackMouseFlag = -1;
 
 	CB_TrackMouseEvent m_cbMouseEvent;
-
-	void OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point);
+	
+	CRect m_rcTabItem;
 
 public:
+	UINT getItemHeight() const;
+
 	BOOL init(const tagViewTabStyle& TabStyle);
 
-	void SetTabStyle(E_ViewTabStyle eTabStyle);
+	void SetTabStyle(E_TabStyle eTabStyle);
 
 	BOOL SetFontSize(UINT uFontSize);
 
@@ -61,26 +63,28 @@ public:
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent);
 
 private:
+	void OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point);
+
 	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 };
 
-enum class E_ViewType
+enum class E_DockViewType
 {
-	VT_DockLeft,
-	VT_DockTop,
-	VT_DockBottom,
-	VT_DockRight,
-	VT_DockCenter,
+	DVT_DockLeft,
+	DVT_DockTop,
+	DVT_DockBottom,
+	DVT_DockRight,
+	DVT_DockCenter
 };
 
 struct tagViewStyle
 {
-	tagViewStyle(E_ViewType t_eViewType=E_ViewType::VT_DockCenter)
+	tagViewStyle(E_DockViewType t_eViewType=E_DockViewType::DVT_DockCenter)
 	{
 		eViewType = t_eViewType;
 	}
 
-	E_ViewType eViewType;
+	E_DockViewType eViewType;
 
 	UINT uDockSize = 0;
 	UINT uMaxDockSize = 0;
@@ -88,6 +92,8 @@ struct tagViewStyle
 
 	UINT uStartPos = 0;
 	UINT uEndPos = 0;
+
+	bool bBorder = false;
 
 	tagViewTabStyle TabStyle;
 
@@ -119,8 +125,7 @@ class CPage;
 
 class __CommonExt CDockView : public CPropertySheet
 {
-protected:
-	typedef vector<CPage*> PageVector;
+	friend class CPage;
 
 public:
 	CDockView(CWnd& wndParent);
@@ -136,6 +141,7 @@ private:
 	
 	CTabCtrlEx m_wndTabCtrl;
 
+	typedef vector<CPage*> PageVector;
 	PageVector m_vctPages;
 
 public:
@@ -153,16 +159,16 @@ public:
 
 	BOOL AddPage(CPage& Page);
 
-	BOOL ActivePage(CPage& pPage);
+	BOOL SetActivePage(CPage& pPage);
 
 	BOOL SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage = -1);
 
-	void Resize(CRect& rcViewArea, bool bManual);
+	void Resize(CRect& rcViewArea, bool bManual=false);
 
 private:
 	BOOL Create();
 
 	afx_msg void OnSize(UINT nType, int, int);
 
-	void resizePage();
+	void resizePage(CPropertyPage& Page);
 };

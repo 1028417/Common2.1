@@ -3,6 +3,23 @@
 
 #include <DockView.h>
 
+UINT CTabCtrlEx::getItemHeight() const
+{
+	switch (m_eTabStyle)
+	{
+	case E_TabStyle::TS_Top:
+	case E_TabStyle::TS_Bottom:
+		return m_rcTabItem.Height();
+		break;
+	case E_TabStyle::TS_Left:
+	case E_TabStyle::TS_Right:
+		return m_rcTabItem.Width();
+		break;
+	default:
+		return 0;
+	}
+}
+
 BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 {
 	SetTabStyle(TabStyle.eTabStyle);
@@ -15,12 +32,16 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 	if (NULL != TabStyle.pImglst)
 	{
 		SetImageList(TabStyle.pImglst);
+	
+		(void)GetItemRect(0, m_rcTabItem);
 	}
 	else if (0 != TabStyle.uTabHeight)
 	{
 		if (0 != TabStyle.uTabWidth)
 		{
 			SetItemSize(CSize(TabStyle.uTabWidth, TabStyle.uTabHeight));
+
+			(void)GetItemRect(0, m_rcTabItem);
 		}
 		else
 		{
@@ -31,22 +52,22 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 	return TRUE;
 }
 
-void CTabCtrlEx::SetTabStyle(E_ViewTabStyle eTabStyle)
+void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
 {
 	DWORD dwTabStyle = TCS_FOCUSNEVER;
 
 	switch (m_eTabStyle = eTabStyle)
 	{
-	case E_ViewTabStyle::VTS_HideTab:
+	case E_TabStyle::TS_HideTab:
 		ShowWindow(SW_HIDE);
 		break;
-	case E_ViewTabStyle::VTS_TabBottom:
+	case E_TabStyle::TS_Bottom:
 		dwTabStyle |= TCS_BOTTOM;
 		break;
-	case E_ViewTabStyle::VTS_TabLeft:
+	case E_TabStyle::TS_Left:
 		dwTabStyle |= TCS_VERTICAL | TCS_MULTILINE | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT;
 		break;
-	case E_ViewTabStyle::VTS_TabRight:
+	case E_TabStyle::TS_Right:
 		dwTabStyle |= TCS_RIGHT | TCS_VERTICAL | TCS_MULTILINE | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT;
 		break;
 	}
@@ -81,11 +102,11 @@ BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
 
 	UINT cx = 1;
 	UINT cy = 1;
-	if (E_ViewTabStyle::VTS_TabTop == m_eTabStyle || E_ViewTabStyle::VTS_TabBottom == m_eTabStyle)
+	if (E_TabStyle::TS_Top == m_eTabStyle || E_TabStyle::TS_Bottom == m_eTabStyle)
 	{
 		cy = uTabHeight;
 	}
-	else if (E_ViewTabStyle::VTS_TabLeft == m_eTabStyle || E_ViewTabStyle::VTS_TabRight == m_eTabStyle)
+	else if (E_TabStyle::TS_Left == m_eTabStyle || E_TabStyle::TS_Right == m_eTabStyle)
 	{
 		cx = uTabHeight;
 	}
@@ -96,7 +117,9 @@ BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
 
 	__EnsureReturn(m_Imglst.Create(cx, cy, ILC_COLOR, 0, 0), FALSE);
 	SetImageList(&m_Imglst);
-	
+
+	(void)GetItemRect(0, m_rcTabItem);
+
 	return TRUE;
 }
 
@@ -142,13 +165,11 @@ BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 
 		break;
 	case WM_MOUSEHOVER:
-	{
 		//m_iTrackMouseFlag = 0;
 
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
-	}
 
-	break;
+		break;
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
@@ -190,9 +211,8 @@ void CDockView::setViewStyle(const tagViewStyle& ViewStyle)
 
 BOOL CDockView::Create()
 {
-	DWORD dwStyle = WS_CHILD;
-
-	if (E_ViewTabStyle::VTS_HideTab == m_ViewStyle.TabStyle.eTabStyle)
+	DWORD dwStyle = WS_VISIBLE | WS_CHILD;
+	if (m_ViewStyle.bBorder)
 	{
 		dwStyle |= WS_BORDER;
 	}
@@ -202,6 +222,10 @@ BOOL CDockView::Create()
 	__AssertReturn(m_wndTabCtrl.SubclassWindow(this->GetTabControl()->GetSafeHwnd()), FALSE);
 	
 	__AssertReturn(m_wndTabCtrl.init(m_ViewStyle.TabStyle), FALSE);
+
+	CRect rcClient;
+	this->GetClientRect(rcClient);
+	m_wndTabCtrl.MoveWindow(rcClient);
 
 	return TRUE;
 }
@@ -216,11 +240,10 @@ BOOL CDockView::AddPage(CPage& Page)
 
 	if (NULL == m_hWnd)
 	{
-		__AssertReturn(this->Create(), FALSE);
-		this->ShowWindow(SW_SHOWNOACTIVATE);
+		__AssertReturn(Create(), FALSE);
 	}
 	
-	if (E_ViewTabStyle::VTS_HideTab != m_ViewStyle.TabStyle.eTabStyle)
+	if (E_TabStyle::TS_HideTab != m_ViewStyle.TabStyle.eTabStyle)
 	{
 		TCITEM tci = {0};
 		tci.mask = TCIF_TEXT;
@@ -250,7 +273,7 @@ BOOL CDockView::AddPage(CPage& Page)
 	return TRUE;
 }
 
-BOOL CDockView::ActivePage(CPage& Page)
+BOOL CDockView::SetActivePage(CPage& Page)
 {
 	int nActivePage = __super::GetActiveIndex();
 
@@ -262,7 +285,7 @@ BOOL CDockView::ActivePage(CPage& Page)
 		(void)__super::SetActivePage(*itPage);
 	}
 
-	this->resizePage();
+	this->resizePage(Page);
 
 	return TRUE;
 }
@@ -297,7 +320,7 @@ static bool g_bManualResize = false;
 void CDockView::Resize(CRect& rcViewArea, bool bManual)
 {
 	UINT uOffset = 0;
-	if (0 != m_ViewStyle.uMaxDockSize)
+	if (m_ViewStyle.sizeable())
 	{
 		uOffset = __DXView;
 	}
@@ -309,25 +332,25 @@ void CDockView::Resize(CRect& rcViewArea, bool bManual)
 	CRect rtPos(rcViewArea);
 	switch (m_ViewStyle.eViewType)
 	{
-	case E_ViewType::VT_DockLeft:
+	case E_DockViewType::DVT_DockLeft:
 		rtPos.SetRect(0, rcViewArea.top + m_ViewStyle.uStartPos, m_ViewStyle.uDockSize
 			, m_ViewStyle.uEndPos ? rcViewArea.top + m_ViewStyle.uEndPos : rcViewArea.bottom);
 		rcViewArea.left += m_ViewStyle.uDockSize + uOffset;
 		
 		break;
-	case E_ViewType::VT_DockTop:
+	case E_DockViewType::DVT_DockTop:
 		rtPos.SetRect(rcViewArea.left + m_ViewStyle.uStartPos, 0
 			, m_ViewStyle.uEndPos ? rcViewArea.left + m_ViewStyle.uEndPos : rcViewArea.right, m_ViewStyle.uDockSize);
 		rcViewArea.top += m_ViewStyle.uDockSize + uOffset;
 
 		break;
-	case E_ViewType::VT_DockRight:
+	case E_DockViewType::DVT_DockRight:
 		rtPos.SetRect(rcViewArea.right - m_ViewStyle.uDockSize, rcViewArea.top + m_ViewStyle.uStartPos
 			, rcViewArea.right, m_ViewStyle.uStartPos ? rcViewArea.top + m_ViewStyle.uStartPos : rcViewArea.bottom);
 		rcViewArea.right -= m_ViewStyle.uDockSize + uOffset;
 
 		break;
-	case E_ViewType::VT_DockBottom:
+	case E_DockViewType::DVT_DockBottom:
 		rtPos.SetRect(rcViewArea.left + m_ViewStyle.uStartPos, rcViewArea.bottom - m_ViewStyle.uDockSize
 			, m_ViewStyle.uEndPos ? rcViewArea.left + m_ViewStyle.uStartPos : rcViewArea.right, rcViewArea.bottom);
 		rcViewArea.bottom -= m_ViewStyle.uDockSize + uOffset;
@@ -340,54 +363,51 @@ void CDockView::Resize(CRect& rcViewArea, bool bManual)
 	g_bManualResize = false;
 }
 
-void CDockView::OnSize(UINT nType, int, int)
+void CDockView::OnSize(UINT nType, int cx, int cy)
 {
-	__Ensure(SIZE_MINIMIZED != nType);
+	if (m_wndTabCtrl)
+	{
+		m_wndTabCtrl.MoveWindow(0, 0, cx, cy, g_bManualResize ? FALSE : TRUE);
+		//m_wndTabCtrl.SetWindowPos(NULL, 0, 0, cx, cy, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE
+			//| (g_bManualResize?SWP_NOREDRAW:0));
+	}
 
-	__Ensure(m_wndTabCtrl);
-
-	this->resizePage();
+	CPropertyPage *pPage = __super::GetActivePage();
+	if (NULL != pPage)
+	{
+		this->resizePage(*pPage);
+	}
 }
 
-void CDockView::resizePage()
+void CDockView::resizePage(CPropertyPage& Page)
 {
 	CRect rcClient;
 	this->GetClientRect(&rcClient);
 
-	int nPage = __super::GetActiveIndex();
-	__Assert(nPage < (int)m_vctPages.size());
-
-	CPage* pPage = m_vctPages[nPage];
-	__Ensure(pPage->m_hWnd);
-
-	if (E_ViewTabStyle::VTS_HideTab == m_ViewStyle.TabStyle.eTabStyle)
+	if (E_TabStyle::TS_HideTab == m_ViewStyle.TabStyle.eTabStyle)
 	{
-		pPage->resize(rcClient, g_bManualResize);
+		Page.MoveWindow(rcClient);
 	}
 	else
 	{
-		CRect rcTabItem;
-		(void)m_wndTabCtrl.GetItemRect(0, &rcTabItem);
-
-		CRect rcPage(1, 1, rcClient.Width()-2, rcClient.Height()-2);
+		CRect rcPage(2, 2, rcClient.right-2, rcClient.bottom-2);
+		UINT uTabHeight = m_wndTabCtrl.getItemHeight() + 2;
 		switch (m_ViewStyle.TabStyle.eTabStyle)
 		{
-		case E_ViewTabStyle::VTS_TabTop:
-			rcPage.top += rcTabItem.Height() + 2;
+		case E_TabStyle::TS_Top:
+			rcPage.top += uTabHeight;
 			break;
-		case E_ViewTabStyle::VTS_TabBottom:
-			rcPage.bottom -= rcTabItem.Height() + 2;
+		case E_TabStyle::TS_Bottom:
+			rcPage.bottom -= uTabHeight;
 			break;
-		case E_ViewTabStyle::VTS_TabLeft:
-			rcPage.left += rcTabItem.Width() + 2;
+		case E_TabStyle::TS_Left:
+			rcPage.left += uTabHeight;
 			break;
-		case E_ViewTabStyle::VTS_TabRight:
-			rcPage.right -= rcTabItem.Width() + 2;
+		case E_TabStyle::TS_Right:
+			rcPage.right -= uTabHeight;
 			break;
 		}
 
-		m_wndTabCtrl.MoveWindow(0, 0, rcClient.Width(), rcClient.Height(), g_bManualResize?FALSE:TRUE);
-
-		pPage->resize(rcPage, g_bManualResize);
+		Page.MoveWindow(rcPage);
 	}
 }

@@ -161,7 +161,7 @@ void CObjectList::SetImageList(CImglst *pImglst, CImglst *pImglstSmall)
 
 void CObjectList::SetView(E_ListViewType eViewType, bool bArrange)
 {
-	this->SetRedraw(FALSE);
+	CRedrawLockGuide RedrawLockGuide(*this);
 
 	m_para.eViewType = eViewType;
 	(void)__super::SetView((int)eViewType);
@@ -170,8 +170,6 @@ void CObjectList::SetView(E_ListViewType eViewType, bool bArrange)
 	{
 		(void)Arrange(0);
 	}
-
-	this->SetRedraw(TRUE);
 }
 
 E_ListViewType CObjectList::GetView()
@@ -350,10 +348,10 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 
 	DeselectAllItems();
 
-	this->SetRedraw(FALSE);
-	
+	CRedrawLockGuide RedrawLockGuide(*this);
+
 	int nItem = nPos;
-	lstObjects.forEach([&](CListObject& object) {
+	lstObjects([&](CListObject& object) {
 		if (nItem <= nMaxItem)
 		{
 			SetItemObject(nItem, object);
@@ -370,8 +368,6 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 	{
 		(void)DeleteItem(nMaxItem);
 	}
-
-	this->SetRedraw(TRUE);
 }
 
 void CObjectList::SetColumnText(UINT uColumn, const wstring& strText)
@@ -648,15 +644,13 @@ void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 
 void CObjectList::SelectAllItems()
 {
-	this->SetRedraw(FALSE);
+	CRedrawLockGuide RedrawLockGuide(*this);
 
 	int nCount = this->GetItemCount();
 	for (int nItem = 0; nItem < nCount; ++nItem)
 	{
 		(void)__super::SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
 	}
-
-	this->SetRedraw(TRUE);
 }
 
 void CObjectList::DeselectAllItems()

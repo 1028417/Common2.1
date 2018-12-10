@@ -83,28 +83,28 @@ BOOL CSQLiteDBResult::_getData(UINT uRow, const function<void(const string&)>& c
 	return TRUE;
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<string>& arrData)
+BOOL CSQLiteDBResult::GetData(UINT uRow, SArray<string>& arrData)
 {
 	return _getData(uRow, [&](const string& strData) {
 		arrData.add(strData);
 	});
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<wstring>& arrData)
+BOOL CSQLiteDBResult::GetData(UINT uRow, SArray<wstring>& arrData)
 {
 	return _getData(uRow, [&](const string& strData) {
 		arrData.add(util::StrToWStr(strData, CP_UTF8));
 	});
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<int>& arrValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, SArray<int>& arrValue)
 {
 	return _getData(uRow, [&](const string& strData) {
 		arrValue.add(atoi(strData.c_str()));
 	});
 }
 
-BOOL CSQLiteDBResult::GetData(UINT uRow, JSArray<double>& arrValue)
+BOOL CSQLiteDBResult::GetData(UINT uRow, SArray<double>& arrValue)
 {
 	return _getData(uRow, [&](const string& strData) {
 		arrValue.add(atof(strData.c_str()));

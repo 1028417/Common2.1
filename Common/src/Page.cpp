@@ -26,12 +26,24 @@ void CPage::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPage::Active()
 {
-	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
-	__EnsureReturn(pMainWnd, FALSE);
-
-	if (!::IsWindowVisible(this->m_hWnd))
+	if (NULL == this->m_hWnd)
 	{
+		CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+		__EnsureReturn(pMainWnd, FALSE);
+
 		__EnsureReturn(pMainWnd->ActivePage(*this), FALSE);
+	}
+	else if (!::IsWindowVisible(this->m_hWnd))
+	{
+		auto pParent = GetParentSheet();
+		__EnsureReturn(pParent, FALSE);
+		pParent->SetActivePage(this);
+
+		//CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
+		//if (NULL != pDockView)
+		//{
+		//	pDockView->SetActivePage(*this);
+		//}
 	}
 
 	(void)this->SetFocus();
@@ -63,23 +75,26 @@ int CPage::MsgBox(const CString& cstrText, UINT uType)
 
 BOOL CPage::OnSetActive()
 {
-	(void)this->Active();
-	
+	BOOL bRet = __super::OnSetActive();
+
+	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
+	if (NULL != pDockView)
+	{
+		//pDockView->resizePage(*this);
+	}
+
 	OnActive(TRUE);
 
-	return __super::OnSetActive();
+	return bRet;
 }
 
 BOOL CPage::OnKillActive()
 {
+	BOOL bRet = __super::OnKillActive();
+
 	OnActive(FALSE);
 
-	return __super::OnKillActive();
-}
-
-void CPage::OnActive(BOOL bActive)
-{
-	//do nothing
+	return bRet;
 }
 
 BOOL CPage::PreTranslateMessage(MSG* pMsg)

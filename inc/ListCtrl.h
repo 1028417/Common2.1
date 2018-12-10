@@ -48,7 +48,6 @@ class __CommonExt CListColumnGuide
 public:
 	CListColumnGuide()
 	{
-
 	}
 
 	CListColumnGuide(const TD_ListColumn& lstColumn, UINT uTotalWidth=0)
