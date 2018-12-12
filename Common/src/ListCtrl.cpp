@@ -24,7 +24,7 @@ BOOL CHeader::Init(UINT uHeight, UINT uFontSize)
 {
 	if (0 != uFontSize)
 	{
-		__EnsureReturn(m_fontGuide.setFontSize(*this, uFontSize), FALSE);
+		__EnsureReturn(m_fontGuard.setFontSize(*this, uFontSize), FALSE);
 	}
 
 	m_uHeight = uHeight;
@@ -100,7 +100,7 @@ BOOL CObjectList::InitFont(COLORREF crText, UINT uFontSize)
 
 	if (0 != uFontSize)
 	{
-		__AssertReturn(m_fontGuide.setFontSize(*this, uFontSize), FALSE);
+		__AssertReturn(m_fontGuard.setFontSize(*this, uFontSize), FALSE);
 	}
 
 	return TRUE;
@@ -161,7 +161,7 @@ void CObjectList::SetImageList(CImglst *pImglst, CImglst *pImglstSmall)
 
 void CObjectList::SetView(E_ListViewType eViewType, bool bArrange)
 {
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
 	m_para.eViewType = eViewType;
 	(void)__super::SetView((int)eViewType);
@@ -348,7 +348,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 
 	DeselectAllItems();
 
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
 	int nItem = nPos;
 	lstObjects([&](CListObject& object) {
@@ -450,7 +450,7 @@ void CObjectList::UpdateItems()
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
 	for (int iItem = 0; iItem < this->GetItemCount(); ++iItem)
 	{
@@ -462,7 +462,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
 	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); uItem++)
 	{
@@ -644,7 +644,7 @@ void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 
 void CObjectList::SelectAllItems()
 {
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
 	int nCount = this->GetItemCount();
 	for (int nItem = 0; nItem < nCount; ++nItem)

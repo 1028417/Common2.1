@@ -48,7 +48,7 @@ class __UtilExt CSQLiteDB : public IDB
 public:
 	CSQLiteDB(const string& strDBPath="");
 
-	virtual ~CSQLiteDB();
+	~CSQLiteDB();
 
 private:
 	string m_strDBPath;

@@ -2,14 +2,11 @@
 #ifndef __SMap_H
 #define __SMap_H
 
-#include "Container.h"
-
-#include <map>
-#include <unordered_map>
+#include "SContainer.h"
 
 namespace NS_SSTL
 {
-#define __SMapSuper ContainerT<pair<__KeyType const, __ValueType>, __BaseType<__KeyType, __ValueType>, __KeyType>
+#define __SMapSuper SContainerT<pair<__KeyType const, __ValueType>, __BaseType<__KeyType, __ValueType>, __KeyType>
 
 	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType>
 	class SMapT : public __SMapSuper
@@ -58,14 +55,6 @@ namespace NS_SSTL
 		const bool m_bMulti = is_same<__ContainerType, std::multimap<__KeyType, __ValueType>>::value
 			|| is_same<__ContainerType, std::unordered_multimap<__KeyType, __ValueType>>::value;
 		
-		template <typename __ContainerType>
-		using enable_if_NoMulti = enable_if_t<is_same<__ContainerType, std::map<__KeyType, __ValueType>>::value
-			|| is_same<__ContainerType, std::unordered_map<__KeyType, __ValueType>>::value>;
-
-		template <typename __ContainerType>
-		using enable_if_Multi = enable_if_t<is_same<__ContainerType, std::multimap<__KeyType, __ValueType>>::value
-			|| is_same<__ContainerType, std::unordered_multimap<__KeyType, __ValueType>>::value>;
-
 	public:
 		SMapT()
 		{
@@ -165,7 +154,7 @@ namespace NS_SSTL
 
 		size_t _del(__KeyConstRef key) override
 		{
-			return _find(key, [&](__ItrType& itr) {
+			return find(key, [&](__ItrType& itr) {
 				itr = m_data.erase(itr);
 				return true;
 			});
@@ -176,7 +165,21 @@ namespace NS_SSTL
 			return m_data.find(key);
 		}
 
-		size_t _find(__KeyConstRef key, const function<bool(__ItrType& itr)>& cb)
+	private:
+		template <typename _V>
+		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value }).first->second)&
+		{
+			return m_data.insert({ key, value }).first->second;
+		}
+
+		template <typename _V>
+		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
+		{
+			return m_data.insert({ key, value })->second;
+		}
+
+	public:
+		size_t find(__KeyConstRef key, const function<bool(__ItrType& itr)>& cb)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -217,7 +220,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _find(__KeyConstRef key, const function<bool(const __ItrConstType& itr)>& cb) const
+		size_t find(__KeyConstRef key, const function<bool(__ItrConstType itr)>& cb) const
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -232,7 +235,7 @@ namespace NS_SSTL
 				{
 					break;
 				}
-				
+
 				if (itr->first != key)
 				{
 					break;
@@ -244,114 +247,74 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		template <typename _V>
-		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value }).first->second)&
+		template <typename CB>
+		size_t get(__KeyConstRef key, const CB& cb)
 		{
-			return m_data.insert({ key, value }).first->second;
-		}
-
-		template <typename _V>
-		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
-		{
-			return m_data.insert({ key, value })->second;
-		}
-
-	public:
-		template <typename T>
-		SMapT& operator+= (const T& rhs)
-		{
-			__Super::add(rhs);
-			return *this;
-		}
-
-		SMapT& operator+= (__InitList rhs)
-		{
-			__Super::add(rhs);
-			return *this;
-		}
-
-		template <typename T>
-		SMapT& operator-= (const T& keys)
-		{
-			__Super::del(keys);
-			return *this;
-		}
-
-		SMapT& operator-= (__InitList_Key keys)
-		{
-			__Super::del(keys);
-			return *this;
-		}
-
-		template <typename T>
-		SMapT operator+ (const T& rhs)
-		{
-			SMapT map(*this);
-			map += rhs;
-			return map;
-		}
-
-		template <typename T>
-		SMapT operator- (const T& rhs)
-		{
-			SMapT map(*this);
-			map -= rhs;
-			return map;
-		}
-
-		size_t get(__KeyConstRef key, __CB_ValueR_void cb)
-		{
-			return _find(key, [&](__ItrType& itr) {
+			return find(key, [&](__ItrType& itr) {
 				cb(itr->second);
 
 				return true;
 			});
 		}
 
-		bool get(__KeyConstRef key, __CB_ValueCR_void cb) const
+		template <typename CB>
+		size_t get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](__ItrConstType& itr) {
+			return find(key, [&](__ItrConstType itr) {
 				cb(itr->second);
 				
 				return true;
 			});
 		}
-
-		size_t get_if(__KeyConstRef key, __CB_ValueR_bool cb)
+		
+		template <typename CB, checkCBBool_t<CB, __ValueRef>>
+		size_t get(__KeyConstRef key, const CB& cb)
 		{
-			return _find(key, [&](__ItrType& itr) {
+			return find(key, [&](__ItrType& itr) {
 				return cb(itr->second);
 			});
 		}
 
-		bool get_if(__KeyConstRef key, __CB_ValueCR_bool cb) const
+		template <typename CB, checkCBBool_t<CB, __ValueRef>>
+		bool get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](__ItrConstType& itr) {
+			return find(key, [&](__ItrConstType& itr) {
 				return cb(itr->second);
 			});
 		}
 
-		size_t del_key(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef, __KeyType>>
+		void operator() (const CB& cb)
 		{
-			return _find(key, [&](__ItrType& itr) {
-				if (cb)
+			for (auto& pr : m_data)
+			{
+				if (!cb(pr.second, pr.first))
 				{
-					cb(itr->second);
+					break;
 				}
-				
-				itr = m_data.erase(itr);
-				return true;
-			});
+			}
 		}
 
-		size_t del_if(__CB_ValueR_DelConfirm cb)
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef, __KeyType>, typename = void>
+		void operator() (const CB& cb)
 		{
-			return __Super::del_if([&](__DataType& data) {
-				return cb(data.second);
-			});
+			for (auto& pr : m_data)
+			{
+				cb(pr.second, pr.first);
+			}
 		}
 
-		void forEachValue(__CB_ValueR_bool cb)
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>, typename = void, typename = void>
+		void operator() (const CB& cb)
+		{
+			for (auto& pr : m_data)
+			{
+				cb(pr.second);
+			}
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void, typename = void, typename = void>
+		void operator() (const CB& cb)
 		{
 			for (auto& pr : m_data)
 			{
@@ -362,7 +325,38 @@ namespace NS_SSTL
 			}
 		}
 
-		void forEachValue(__CB_ValueCR_bool cb) const
+		template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef, __KeyType>>
+		void operator() (const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				if (!cb(pr.second, pr.first))
+				{
+					break;
+				}
+			}
+		}
+
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueConstRef, __KeyType>, typename = void>
+		void operator() (const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				cb(pr.second, pr.first);
+			}
+		}
+
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueConstRef>, typename = void, typename = void>
+		void operator() (const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				cb(pr.second);
+			}
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef>, typename = void, typename = void, typename = void>
+		void operator() (const CB& cb) const
 		{
 			for (auto& pr : m_data)
 			{
@@ -405,6 +399,11 @@ namespace NS_SSTL
 			return arr;
 		}
 
+		__ValueType& insert(__KeyConstRef key, __ValueConstRef value= __ValueType())
+		{
+			return _insert(key, value);
+		}
+
 		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
 			auto itr = m_data.find(key);
@@ -417,12 +416,7 @@ namespace NS_SSTL
 				return _insert(key, value);
 			}
 		}
-				
-		__ValueType& insert(__KeyConstRef key, __ValueConstRef value)
-		{
-			return _insert(key, value);
-		}
-
+		
 		template<typename T>
 		void set(const T& container)
 		{
@@ -437,6 +431,11 @@ namespace NS_SSTL
 			set<__InitList>(initList);
 		}
 
+		void set(__InitList_Key keys, const function<__ValueType(__KeyConstRef)>& cb)
+		{
+			set<__InitList_Key>(keys, cb);
+		}
+
 		template <typename T>
 		void set(const T& container, const function<__ValueType(__KeyConstRef)>& cb)
 		{
@@ -444,11 +443,6 @@ namespace NS_SSTL
 			{
 				this->set(key, cb(key));
 			}
-		}
-
-		void set(__InitList_Key keys, const function<__ValueType(__KeyConstRef)>& cb)
-		{
-			set<__InitList_Key>(keys, cb);
 		}
 
 	public:
@@ -501,18 +495,6 @@ namespace NS_SSTL
 			return map;
 		}
 	};
-
-	template <typename __KeyType, typename __ValueType, template<typename...> class __BaseType = std::map>
-	using SMap = SMapT<__KeyType, __ValueType, __BaseType>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SHashMap = SMap<__KeyType, __ValueType, std::unordered_map>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SMultiMap = SMap<__KeyType, __ValueType, std::multimap>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SMultiHashMap = SMap<__KeyType, __ValueType, std::unordered_multimap>;
 }
 
 #endif // __SMap_H

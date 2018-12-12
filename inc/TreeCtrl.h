@@ -3,7 +3,7 @@
 
 #include <img.h>
 
-#include <Guide.h>
+#include <Guard.h>
 
 class __CommonExt CBaseTree: public CTreeCtrl
 {
@@ -16,7 +16,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CFontGuide m_fontGuide;
+	CFontGuard m_fontGuard;
 
 	CImglst m_Imglst;
 

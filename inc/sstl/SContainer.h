@@ -13,7 +13,7 @@
 namespace NS_SSTL
 {
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
-	class ContainerT
+	class SContainerT
 	{
 	protected:
 		using __DataType = __DataType__;
@@ -38,98 +38,233 @@ namespace NS_SSTL
 		using __CB_ConstRef_void = CB_T_void<__DataConstRef>;
 		using __CB_ConstRef_bool = CB_T_bool<__DataConstRef>;
 
-		using __CB_Ref_DelConfirm = CB_T_Ret<__DataRef, E_DelConfirm>;
-
 	public:
-		ContainerT()
+		SContainerT()
 		{
 		}
 
 		template<typename... args>
-		explicit ContainerT(__DataConstRef data, const args&... others)
+		explicit SContainerT(__DataConstRef data, const args&... others)
 		{
 			add(data, others...);
 		}
 
-		explicit ContainerT(__ContainerType&& container)
+		explicit SContainerT(__ContainerType&& container)
 		{
 			m_data.swap(container);
 		}
 
-		ContainerT(ContainerT&& container)
+		SContainerT(SContainerT&& container)
 		{
 			swap(container);
 		}
 
-		ContainerT(const ContainerT& container)
+		SContainerT(const SContainerT& container)
 			: m_data(container.begin(), container.end())
 		{
 		}
 
-		explicit ContainerT(__InitList initList)
+		explicit SContainerT(__InitList initList)
 			: m_data(initList.begin(), initList.end())
 		{
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		explicit ContainerT(const T& container)
+		explicit SContainerT(const T& container)
 			: m_data(CItrVisitor<const T>(container).begin(), CItrVisitor<const T>(container).end())
 		{
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		explicit ContainerT(T& container)
+		explicit SContainerT(T& container)
 			: m_data(container.begin(), container.end())
 		{
 		}
 
-		ContainerT& operator=(ContainerT&& container)
+		SContainerT& operator=(SContainerT&& container)
 		{
 			swap(container);
 			return *this;
 		}
 
-		ContainerT& operator=(const ContainerT& container)
+		SContainerT& operator=(const SContainerT& container)
 		{
 			assign(container);
 			return *this;
 		}
 
-		ContainerT& operator=(__InitList initList)
+		SContainerT& operator=(__InitList initList)
 		{
 			assign(initList);
 			return *this;
 		}
 
 		template <typename T>
-		ContainerT& operator=(const T&t)
+		SContainerT& operator=(const T&t)
 		{
 			assign(t);
 			return *this;
 		}
 
 		template <typename T>
-		ContainerT& operator=(T&t)
+		SContainerT& operator=(T&t)
 		{
 			assign(t);
 			return *this;
 		}
 
+		SContainerT& operator+= (__DataConstRef data)
+		{
+			add(data);
+			return *this;
+		}
+
+		template <typename T>
+		SContainerT& operator+= (const T& rhs)
+		{
+			add(rhs);
+			return *this;
+		}
+
+		SContainerT& operator+= (__InitList rhs)
+		{
+			add(rhs);
+			return *this;
+		}
+		
+		SContainerT& operator-= (__KeyConstRef key)
+		{
+			del(key);
+			return *this;
+		}
+
+		template <typename T>
+		SContainerT& operator-= (const T& container)
+		{
+			del(container);
+			return *this;
+		}
+
+		SContainerT& operator-= (__InitList_Key keys)
+		{
+			del(keys);
+			return *this;
+		}
+
+		friend SContainerT operator+ (const SContainerT& lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs) += rhs;
+		}
+
+		friend SContainerT operator+ (const SContainerT& lhs, __InitList rhs)
+		{
+			return SContainerT(lhs) += rhs;
+		}
+
+		friend SContainerT operator+ (__InitList lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs) += rhs;
+		}
+
+		template <typename T>
+		friend SContainerT operator+ (const SContainerT& lhs, const T& rhs)
+		{
+			return SContainerT(lhs) += rhs;
+		}
+		
+		template <typename T, typename = checkNotIsBase_t<SContainerT, T>>
+		friend SContainerT operator+ (const T& lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs) += rhs;
+		}
+
+		friend SContainerT operator- (const SContainerT& lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs)-=rhs;
+		}
+
+		friend SContainerT operator- (const SContainerT& lhs, __InitList rhs)
+		{
+			return SContainerT(lhs) -= rhs;
+		}
+
+		friend SContainerT operator- (__InitList lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs) -= rhs;
+		}
+
+		template <typename T>
+		friend SContainerT operator- (const SContainerT& lhs, const T& rhs)
+		{
+			return SContainerT(lhs) -= rhs;
+		}
+
+		template <typename T, typename = checkNotIsBase_t<SContainerT, T>>
+		friend SContainerT operator- (const T& lhs, const SContainerT& rhs)
+		{
+			return SContainerT(lhs) -= rhs;
+		}
+
+		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataRef>())), void>>
+		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
+		{
+			for (auto& data : m_data)
+			{
+				cb(data);
+			}
+		}
+
+		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataConstRef>())), void>>
+		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			for (auto& data : m_data)
+			{
+				cb(data);
+			}
+		}
+
+		void operator() (__CB_Ref_bool cb, TD_PosType startPos = 0, size_t count = 0)
+		{
+			for (auto& data : m_data)
+			{
+				if (!cb(data))
+				{
+					break;
+				}
+			}
+		}
+
+		void operator() (__CB_ConstRef_bool cb) const
+		{
+			for (auto& data : m_data)
+			{
+				if (!cb(data))
+				{
+					break;
+				}
+			}
+		}
+
+		const __ContainerType& operator->()
+		{
+			return m_data;
+		}
+
 	public:
-		ContainerT& swap(ContainerT& container)
+		SContainerT& swap(SContainerT& container)
 		{
 			_swap(container.m_data);
 			return *this;
 		}
 
-		ContainerT& swap(__ContainerType& container)
+		SContainerT& swap(__ContainerType& container)
 		{
 			_swap(container);
 			return *this;
 		}
 
 		template<typename... args>
-		ContainerT& assign(__DataConstRef data, const args&... others)
+		SContainerT& assign(__DataConstRef data, const args&... others)
 		{
 			clear();
 
@@ -138,23 +273,23 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		ContainerT assign(__ContainerType&& container)
+		SContainerT assign(__ContainerType&& container)
 		{
 			m_data.swap(container);
 		}
 
-		ContainerT& assign(ContainerT&& container)
+		SContainerT& assign(SContainerT&& container)
 		{
 			return swap(container);
 		}
 
-		ContainerT& assign(__InitList initList)
+		SContainerT& assign(__InitList initList)
 		{
 			return assign<__InitList>(initList);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		ContainerT& assign(const T& container)
+		SContainerT& assign(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
@@ -175,11 +310,6 @@ namespace NS_SSTL
 			new (&m_data) __ContainerType(Visitor.begin(), Visitor.end());
 
 			return *this;
-		}
-
-		void add(__DataConstRef data)
-		{
-			_add(data);
 		}
 
 		template<typename... args>
@@ -210,15 +340,36 @@ namespace NS_SSTL
 			}
 		}
 
-	public:
-		operator bool() const
+		template<typename... args>
+		SContainerT concat(__DataConstRef data, const args&... others) const
 		{
-			return !m_data.empty();
+			SContainerT ret(*this);
+			ret.add(data, others...);
+			return ret;
 		}
 
+		SContainerT concat(__InitList initList) const
+		{
+			return concat<__InitList>(initList);
+		}
+
+		template<typename T>
+		SContainerT concat(const T& container) const
+		{
+			SContainerT ret(*this);
+			ret.add(container);
+			return ret;
+		}
+
+	public:
 		void clear()
 		{
 			m_data.clear();
+		}
+
+		operator bool() const
+		{
+			return !m_data.empty();
 		}
 
 		size_t size() const
@@ -410,7 +561,8 @@ namespace NS_SSTL
 			return del<__InitList_Key>(keys);
 		}
 
-		size_t del_if(__CB_Ref_DelConfirm cb)
+		template <typename CB, typename = void, typename = checkCBRet_t<CB, E_DelConfirm, __DataRef>>
+		size_t del(const CB& cb)
 		{
 			size_t uRet = 0;
 
@@ -544,7 +696,7 @@ namespace NS_SSTL
 				return (__ContainerType*)&container == &m_data;
 			}
 
-			return (ContainerT*)&container == this;
+			return (SContainerT*)&container == this;
 		}
 
 		template<typename... args>
@@ -599,40 +751,37 @@ namespace NS_SSTL
 		}
 
 	private:
-		template <typename DATA> class __ContainerOperatorT
+		template <typename __CT = __ContainerType> class __ContainerOperator
 		{
 		public:
-			__ContainerOperatorT(DATA& data)
+			__ContainerOperator(__CT& data)
 				: m_data(data)
 			{
 			}
 
 		private:
-			DATA& m_data;
+			__CT& m_data;
 
 		public:
 		};
 
-		using __ContainerOperator = __ContainerOperatorT<__ContainerType>;
-		__ContainerOperator m_ContainerOperator = __ContainerOperator(m_data);
-		__ContainerOperator& _getOperator()
+		__ContainerOperator<> m_ContainerOperator = __ContainerOperator<>(m_data);
+		__ContainerOperator<>& _getOperator()
 		{
 			return m_ContainerOperator;
 		}
 
-		using __ContainerReader = __ContainerOperatorT<const __ContainerType>;
-		__ContainerReader m_ContainerReader = __ContainerReader(m_data);
-		__ContainerReader& _getOperator() const
+		__ContainerOperator<const __ContainerType>& _getOperator() const
 		{
-			return (__ContainerReader&)m_ContainerReader;
+			return (__ContainerOperator<const __ContainerType>&)m_ContainerOperator;
 		}
 	};
 
 	template <template<typename...> typename __BaseType, class __DataType>
-	using Container = ContainerT<__DataType, __BaseType<__DataType>>;
+	using SContainer = SContainerT<__DataType, __BaseType<__DataType>>;
 
 	template <class __DataType>
-	using ListT = Container<list, __DataType>;
+	using SList = SContainer<list, __DataType>;
 }
 
 #endif //__ContainerType_H

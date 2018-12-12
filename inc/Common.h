@@ -75,7 +75,7 @@ using CB_TrackMouseEvent = function<void(E_TrackMouseEvent, const CPoint&)>;
 
 #include <Page.h>
 
-#include <Guide.h>
+#include <Guard.h>
 
 #include <ListCtrl.h>
 

@@ -44,10 +44,10 @@
     <ClCompile Include="src\DragDrop.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Guide.cpp">
+    <ClCompile Include="src\ProgressDlg.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ProgressDlg.cpp">
+    <ClCompile Include="src\Guard.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,13 +87,13 @@
     <ClInclude Include="..\inc\DragDrop.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\Guide.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\inc\ProgressDlg.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\Common.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\Guard.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

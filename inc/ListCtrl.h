@@ -3,7 +3,7 @@
 
 #include <img.h>
 
-#include <Guide.h>
+#include <Guard.h>
 
 class CHeader : public CHeaderCtrl
 {
@@ -15,7 +15,7 @@ public:
 private:
 	UINT m_uHeight = 0;
 
-	CFontGuide m_fontGuide;
+	CFontGuard m_fontGuard;
 
 private:
 	LRESULT OnLayout(WPARAM wParam, LPARAM lParam);
@@ -43,14 +43,14 @@ struct __CommonExt tagListColumn
 };
 typedef list<tagListColumn> TD_ListColumn;
 
-class __CommonExt CListColumnGuide
+class __CommonExt CListColumnGuard
 {
 public:
-	CListColumnGuide()
+	CListColumnGuard()
 	{
 	}
 
-	CListColumnGuide(const TD_ListColumn& lstColumn, UINT uTotalWidth=0)
+	CListColumnGuard(const TD_ListColumn& lstColumn, UINT uTotalWidth=0)
 		: m_lstColumn(lstColumn)
 	{
 		m_uTotalWidth = uTotalWidth;
@@ -61,7 +61,7 @@ public:
 		}
 	}
 
-	CListColumnGuide(UINT uTotalWidth)
+	CListColumnGuard(UINT uTotalWidth)
 	{
 		m_uTotalWidth = uTotalWidth;
 	}
@@ -76,7 +76,7 @@ private:
 	UINT m_uFixWidth = 0;
 
 public:
-	CListColumnGuide& add(const CString& cstrText, UINT uWidth, UINT uFormat=LVCFMT_LEFT)
+	CListColumnGuard& add(const CString& cstrText, UINT uWidth, UINT uFormat=LVCFMT_LEFT)
 	{
 		m_lstColumn.push_back({ cstrText, uWidth, uFormat });
 		
@@ -85,7 +85,7 @@ public:
 		return *this;
 	}
 
-	CListColumnGuide& add(const CString& cstrText, double fPercentWidth, UINT uFormat = LVCFMT_LEFT)
+	CListColumnGuard& add(const CString& cstrText, double fPercentWidth, UINT uFormat = LVCFMT_LEFT)
 	{
 		m_lstColumn.push_back({ cstrText, 0, uFormat });
 
@@ -184,7 +184,7 @@ public:
 private:
 	tagListPara m_para;
 
-	CFontGuide m_fontGuide;
+	CFontGuard m_fontGuard;
 
 	CHeader m_wndHeader;
 

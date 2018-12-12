@@ -79,7 +79,7 @@ BOOL CTabCtrlEx::SetFontSize(UINT uFontSize)
 {
 	__EnsureReturn(0 != uFontSize, FALSE);
 	
-	return m_fontGuide.setFontSize(*this, uFontSize);
+	return m_fontGuard.setFontSize(*this, uFontSize);
 }
 
 BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)

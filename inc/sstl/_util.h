@@ -31,7 +31,7 @@ namespace NS_SSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&lhs, const T&rhs)const
+		bool operator() (const T&lhs, const T&rhs)const
 		{
 			return m_cb(lhs, rhs);
 		}
@@ -44,7 +44,7 @@ namespace NS_SSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(T&lhs, T&rhs) const
+		bool operator() (T&lhs, T&rhs) const
 		{
 			if (m_cb)
 			{

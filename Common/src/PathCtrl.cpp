@@ -55,7 +55,7 @@ bool CPathList::SetPath(CPathObject* pPath)
 		
 	TD_ListObjectList lstObjects(lstSubPaths);
 
-	CRedrawLockGuide RedrawLockGuide(*this);
+	CRedrawLockGuard RedrawLockGuard(*this);
 	
 	DeleteAllItems();
 	

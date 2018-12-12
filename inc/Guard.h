@@ -2,16 +2,16 @@
 
 #include <Page.h>
 
-class __CommonExt CResGuide
+class __CommonExt CResGuard
 {
 public:
-	CResGuide(CResModule& resModule)
+	CResGuard(CResModule& resModule)
 	{
 		m_hPreInstance = AfxGetResourceHandle();
 		resModule.ActivateResource();
 	}
 
-	CResGuide(CResModule *pResModule)
+	CResGuard(CResModule *pResModule)
 	{
 		if (NULL != pResModule)
 		{
@@ -20,7 +20,7 @@ public:
 		}
 	}
 
-	~CResGuide()
+	~CResGuard()
 	{
 		if (NULL != m_hPreInstance)
 		{
@@ -32,12 +32,12 @@ private:
 	HINSTANCE m_hPreInstance = NULL;
 };
 
-class __CommonExt CRedrawLockGuide
+class __CommonExt CRedrawLockGuard
 {
 public:
-	CRedrawLockGuide(CWnd& wnd);
+	CRedrawLockGuard(CWnd& wnd);
 
-	~CRedrawLockGuide();
+	~CRedrawLockGuard();
 
 	void Unlock();
 
@@ -45,10 +45,10 @@ private:
 	CWnd& m_wnd;
 };
 
-class __CommonExt CMenuGuide : public CMenu
+class __CommonExt CMenuGuard : public CMenu
 {
 public:
-	CMenuGuide(CPage& Page, UINT uIDMenu);
+	CMenuGuard(CPage& Page, UINT uIDMenu);
 
 private:
 	CPage& m_Page;
@@ -96,10 +96,10 @@ public:
 	}
 };
 
-class __CommonExt CFontGuide
+class __CommonExt CFontGuard
 {
 public:
-	CFontGuide() {};
+	CFontGuard() {};
 
 	CCompatableFont m_font;
 

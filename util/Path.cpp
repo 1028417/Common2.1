@@ -167,7 +167,7 @@ void CPath::ClearSubPath()
 {
 	if (NULL != m_plstSubPath)
 	{
-		m_plstSubPath->forEach([](CPath& SubPath) {
+		(*m_plstSubPath)([](CPath& SubPath) {
 			delete &SubPath;
 		});
 
@@ -181,7 +181,7 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
-	m_plstSubPath->del_if([&](CPath& SubPath) {
+	m_plstSubPath->del([&](CPath& SubPath) {
 		if (lstDeletePaths.includes(&SubPath))
 		{
 			delete &SubPath;

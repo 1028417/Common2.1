@@ -2,14 +2,11 @@
 #ifndef __SSet_H
 #define __SSet_H
 
-#include "Container.h"
-
-#include <unordered_set>
-#include <set>
+#include "SContainer.h"
 
 namespace NS_SSTL
 {
-#define __SSetSuper ContainerT<__DataType, __BaseType<__DataType>>
+#define __SSetSuper SContainerT<__DataType, __BaseType<__DataType>>
 
 	template<typename __DataType, template<typename...> class __BaseType>
 	class SSetT : public __SSetSuper
@@ -139,62 +136,25 @@ namespace NS_SSTL
 			return m_data.find(data);
 		}
 
-	public:
+	public:		
 		template <typename T>
-		SSetT& operator+= (const T& rhs)
-		{
-			__Super::add(rhs);
-			return *this;
-		}
-
-		SSetT& operator+= (__InitList rhs)
-		{
-			__Super::add(rhs);
-			return *this;
-		}
-
-		template <typename T>
-		SSetT& operator-= (const T& rhs)
-		{
-			__Super::del(rhs);
-			return *this;
-		}
-
-		SSetT& operator-= (__InitList rhs)
-		{
-			__Super::del(rhs);
-			return *this;
-		}
-		
-		template <typename T>
-		SSetT operator+ (const T& rhs)
-		{
-			SSetT set(*this);
-			set += rhs;
-			return set;
-		}
-
-		template <typename T>
-		SSetT operator- (const T& rhs)
-		{
-			SSetT set(*this);
-			set -= rhs;
-			return set;
-		}
-
-		template <typename T>
-		SSetT operator& (const T& rhs)
+		friend SSetT operator& (const SSetT& lhs, const T& rhs)
 		{
 			SSetT set;
-			SSetT other(rhs);
-			for (auto&data : m_data)
+			for (auto&data : rhs)
 			{
-				if (other.includes(data))
+				if (lhs.includes(data))
 				{
 					set.add(data);
 				}
 			}
+
 			return set;
+		}
+
+		friend SSetT operator& (const SSetT& lhs, __InitList rhs)
+		{
+			return lhs & SSetT(rhs);
 		}
 
 	public:
@@ -232,12 +192,6 @@ namespace NS_SSTL
 			return set;
 		}
 	};
-
-	template <typename __DataType, template<typename...> class __BaseType = std::set>
-	using SSet = SSetT<__DataType, __BaseType>;
-
-	template <typename __DataType>
-	using SUnsortSet = SSet < __DataType, std::unordered_set> ;
 }
 
 #endif // __SSet_H

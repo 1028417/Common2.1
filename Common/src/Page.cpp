@@ -112,9 +112,6 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 
 			break;
 		case WM_LBUTTONUP:
-			bDragable = FALSE;
-
-			break;
 		case WM_RBUTTONDOWN:
 			bDragable = FALSE;
 			

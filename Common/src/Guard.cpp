@@ -1,50 +1,50 @@
 #include "stdafx.h"
 
-#include "Guide.h"
+#include "Guard.h"
 
 #include "App.h"
 
-// CRedrawLockGuide
+// CRedrawLockGuard
 
-CRedrawLockGuide::CRedrawLockGuide(CWnd& wnd)
+CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd)
 	: m_wnd(wnd)
 {
 	m_wnd.SetRedraw(FALSE);
 }
 
-CRedrawLockGuide::~CRedrawLockGuide()
+CRedrawLockGuard::~CRedrawLockGuard()
 {
 	this->Unlock();
 }
 
-void CRedrawLockGuide::Unlock()
+void CRedrawLockGuard::Unlock()
 {
 	m_wnd.SetRedraw(TRUE);
 	m_wnd.RedrawWindow();
 }
 
 
-CMenuGuide::CMenuGuide(CPage& Page, UINT uIDMenu)
+CMenuGuard::CMenuGuard(CPage& Page, UINT uIDMenu)
 	: m_Page(Page)
 	, m_uIDMenu(uIDMenu)
 {
 }
 
-void CMenuGuide::EnableItem(UINT uIDItem, BOOL bEnable)
+void CMenuGuard::EnableItem(UINT uIDItem, BOOL bEnable)
 {
 	m_mapMenuItemInfos[uIDItem].first = bEnable;
 }
 
-void CMenuGuide::SetItemText(UINT uIDItem, const CString& cstrText)
+void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 {
 	m_mapMenuItemInfos[uIDItem].second = cstrText;
 }
 
-BOOL CMenuGuide::Popup()
+BOOL CMenuGuard::Popup()
 {
 	if (!*this)
 	{
-		CResGuide ResGuide (m_Page.m_resModule);
+		CResGuard ResGuard (m_Page.m_resModule);
 
 		__AssertReturn(__super::LoadMenu(m_uIDMenu), FALSE);
 	}
@@ -79,7 +79,7 @@ BOOL CMenuGuide::Popup()
 }
 
 
-bool CFontGuide::setFontSize(CWnd& wnd, ULONG uFontSize)
+bool CFontGuard::setFontSize(CWnd& wnd, ULONG uFontSize)
 {
 	if (NULL == m_font.m_hObject)
 	{

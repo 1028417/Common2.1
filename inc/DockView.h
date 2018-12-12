@@ -3,7 +3,7 @@
 
 #include "Page.h"
 
-#include "Guide.h"
+#include "Guard.h"
 
 #define __DXView 4
 
@@ -37,7 +37,7 @@ public:
 	}
 
 private:
-	CFontGuide m_fontGuide;
+	CFontGuard m_fontGuard;
 	
 	E_TabStyle m_eTabStyle = E_TabStyle::TS_HideTab;
 

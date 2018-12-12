@@ -5,6 +5,15 @@
 #include <initializer_list>
 
 #include <vector>
+#include <deque>
+
+#include <list>
+
+#include <set>
+#include <unordered_set>
+
+#include <map>
+#include <unordered_map>
 
 #include <functional>
 
@@ -41,10 +50,60 @@ namespace NS_SSTL
 	};
 
 
-	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
+	template <template<typename...> typename __BaseType, class __PtrType> class ptrcontainerT;
 
+	template <class __PtrType>
+	using ptrvectorT = ptrcontainerT<vector, __PtrType>;
+
+	template <class __Type>
+	using ptrvector = ptrvectorT<__Type*>;
+
+	template <class __PtrType>
+	using ptrlistT = ptrcontainerT<list, __PtrType>;
+
+	template <class __Type>
+	using ptrlist = ptrlistT<__Type*>;
+
+
+	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
 	template <typename __DataType, template<typename...> class __BaseType = std::vector>
 	using SArray = SArrayT<__DataType, __BaseType>;
+
+	template <typename __DataType>
+	using SVector = SArray<__DataType>;
+
+	template <typename __DataType>
+	using SDeque = SArrayT<__DataType, std::deque>;
+
+
+	template<typename __Type, template<typename...> class __BaseType> class PtrArrayT;
+	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
+	using PtrArray = PtrArrayT<__Type, __BaseType>;
+
+	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
+	using ConstPtrArray = PtrArray<const __Type, __BaseType>;
+
+
+	template<typename __DataType, template<typename...> class __BaseType> class SSetT;
+	template <typename __DataType, template<typename...> class __BaseType = std::set>
+	using SSet = SSetT<__DataType, __BaseType>;
+
+	template <typename __DataType>
+	using SHashSet = SSet < __DataType, std::unordered_set>;
+	
+
+	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType> class SMapT;
+	template <typename __KeyType, typename __ValueType, template<typename...> class __BaseType = std::map>
+	using SMap = SMapT<__KeyType, __ValueType, __BaseType>;
+
+	template <typename __KeyType, typename __ValueType>
+	using SHashMap = SMap<__KeyType, __ValueType, std::unordered_map>;
+
+	template <typename __KeyType, typename __ValueType>
+	using SMultiMap = SMap<__KeyType, __ValueType, std::multimap>;
+
+	template <typename __KeyType, typename __ValueType>
+	using SMultiHashMap = SMap<__KeyType, __ValueType, std::unordered_multimap>;
 };
 
 #define __SuperType(T) typename __Super::T

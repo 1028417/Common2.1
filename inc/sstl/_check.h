@@ -9,15 +9,52 @@ namespace NS_SSTL
 	template <bool _test>
 	using enable_if_t = typename enable_if<_test, void>::type;
 
-	template <typename T1, typename T2>
-	using checkSameType_t = enable_if_t<is_same<T1, T2>::value>;
+	template <bool _test>
+	using enable_ifnot_t = enable_if_t<!_test>;
+
+	template<template<typename...> typename _check, typename... _types>
+	using enableIf_t = enable_if_t<_check<_types...>::value>;
+
+	template<template<typename...> typename _check, typename... _types>
+	using enableIfNot_t = enable_ifnot_t<_check<_types...>::value>;
+
+	template <typename _check1, typename _check2>
+	using enableIf_and_t = enable_if_t<_check1::value && _check2::value>;
+
+	template <typename _check1, typename _check2>
+	using enableIf_or_t = enable_if_t<_check1::value || _check2::value>;
 
 	template <typename T1, typename T2>
-	using checkNotSameType_t = enable_if_t<!is_same<T1, T2>::value>;
+	using checkSameType_t = enableIf_t<is_same, T1, T2>;
+
+	template <typename T1, typename T2>
+	using checkNotSameType_t = enableIfNot_t<is_same, T1, T2>;
+
+	template <typename CB, typename Ret, typename... Paras>
+	using checkCBRet_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), Ret>;
+
+	template <typename CB, typename... Paras>
+	using checkCBVoid_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), void>;
+
+	template <typename CB, typename... Paras>
+	using checkCBBool_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), bool>;
+
+	template <typename T1, typename T2>
+	using checkClass_t = enableIf_and_t<is_class<T1>, is_class<T2>>;
+
+	template <typename T>
+	using checkIsConst_t = enableIf_t<is_const, T>;
+
+	template <typename _Base, typename T>
+	using checkIsBase_t = enableIf_t<is_base_of, _Base, T>;
+
+	template <typename _Base, typename T>
+	using checkNotIsBase_t = enableIfNot_t<is_base_of, _Base, T>;
+
 
 	template<class _Iter>
 #ifdef _MSC_VER
-	using checkIter_t = enable_if_t<_Is_iterator<_Iter>::value>;
+	using checkIter_t = enableIf_t<_Is_iterator, _Iter>;
 #else
 	using checkIter_t = _RequireInputIter<_Iter>;
 #endif
@@ -92,13 +129,6 @@ namespace NS_SSTL
 			return m_itr = tagItrVisitor::end(m_container);
 		}
 	};
-
-
-	template <typename T1, typename T2>
-	using checkClass_t = enable_if_t<is_class<T1>::value && is_class<T2>::value>;
-
-	//template <typename T>
-	//using checkNotConstType_t = checkNotSameType_t<typename remove_const<T>::type, T>;
 
 	template <typename T> struct tagGetTypeT {
 		typedef T type;

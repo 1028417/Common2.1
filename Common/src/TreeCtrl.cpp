@@ -35,7 +35,7 @@ void CBaseTree::SetFont(ULONG uFontSize)
 {
 	if (0 < uFontSize)
 	{
-		(void)m_fontGuide.setFontSize(*this, uFontSize);
+		(void)m_fontGuard.setFontSize(*this, uFontSize);
 	}
 }
 

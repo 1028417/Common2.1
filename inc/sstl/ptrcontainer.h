@@ -4,8 +4,6 @@
 
 #include "_define.h"
 
-#include <list>
-
 namespace NS_SSTL
 {
 	template <template<typename...> typename __BaseType, class __PtrType>
@@ -381,18 +379,6 @@ namespace NS_SSTL
 			return _indexOf(ref);
 		}
 	};
-
-	template <class __PtrType>
-	using ptrvectorT = ptrcontainerT<vector, __PtrType>;
-
-	template <class __Type>
-	using ptrvector = ptrvectorT<__Type*>;
-
-	template <class __PtrType>
-	using ptrlistT = ptrcontainerT<list, __PtrType>;
-
-	template <class __Type>
-	using ptrlist = ptrlistT<__Type*>;
 };
 
 #endif // __ptrcontainer_H

@@ -40,7 +40,7 @@ interface IDB
 	virtual bool CommitTrans() = 0;
 };
 
-class __UtilExt CDBTransGuide
+class __UtilExt CDBTransGuard
 {
 private:
 	IDB *m_pDB = NULL;
@@ -58,7 +58,7 @@ private:
 	}
 
 public:
-	CDBTransGuide(IDB& db)
+	CDBTransGuard(IDB& db)
 	{
 		if (_BeginTrans(db))
 		{
@@ -66,7 +66,7 @@ public:
 		}
 	}
 
-	CDBTransGuide(IDB *pDB)
+	CDBTransGuard(IDB *pDB)
 	{
 		if (NULL != pDB)
 		{
@@ -77,7 +77,7 @@ public:
 		}
 	}
 
-	~CDBTransGuide()
+	~CDBTransGuard()
 	{
 		(void)Commit();
 	}
