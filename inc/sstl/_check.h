@@ -30,6 +30,9 @@ namespace NS_SSTL
 	template <typename T1, typename T2>
 	using checkNotSameType_t = enableIfNot_t<is_same, T1, T2>;
 
+	template <typename T1, typename T2>
+	using checkSameDecayType_t = enableIf_t<is_same, typename decay<T1>::type, typename decay<T2>::type>;
+	
 	template <typename CB, typename Ret, typename... Paras>
 	using checkCBRet_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), Ret>;
 
@@ -52,11 +55,22 @@ namespace NS_SSTL
 	using checkNotIsBase_t = enableIfNot_t<is_base_of, _Base, T>;
 
 
-	template<class _Iter>
+	template <typename T, typename... others>
+	struct tagCheckArgs0
+	{
+		typedef T type;
+	};
+	template <typename... args>
+	using args0Type_t = typename tagCheckArgs0<args...>::type;
+
+	template <typename T, typename... args>
+	using checkArgs0Type_t = checkSameType_t<T, args0Type_t<args...>>;
+
+	template<class _Iter> using checkIter_t =
 #ifdef _MSC_VER
-	using checkIter_t = enableIf_t<_Is_iterator, _Iter>;
+	enableIf_t<_Is_iterator, _Iter>;
 #else
-	using checkIter_t = _RequireInputIter<_Iter>;
+	_RequireInputIter<_Iter>;
 #endif
 
 	struct tagItrVisitor
@@ -128,29 +142,6 @@ namespace NS_SSTL
 		{
 			return m_itr = tagItrVisitor::end(m_container);
 		}
-	};
-
-	template <typename T> struct tagGetTypeT {
-		typedef T type;
-		typedef T& type_ref;
-		typedef T* type_pointer;
-	};
-
-	template<typename T> struct tagGetTypeT<T&> {
-		typedef typename remove_reference<T>::type type;
-		typedef typename remove_reference<T>::type_ref type_ref;
-		typedef typename remove_reference<T>::type_pointer type_pointer;
-	};
-
-	template<typename T> struct tagGetTypeT<T*> {
-		typedef typename remove_reference<T>::type type;
-		typedef typename remove_reference<T>::type_ref type_ref;
-		typedef typename remove_reference<T>::type_pointer type_pointer;
-	};
-
-	template <typename T, typename U> struct decay_is_same
-		: is_same<typename decay<T>::type, U>::type
-	{
 	};
 };
 

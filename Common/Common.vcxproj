@@ -135,6 +135,7 @@
     <ClCompile Include="src\Guard.cpp" />
     <ClCompile Include="src\img.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="src\ResModule.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -164,6 +165,7 @@
     <ClInclude Include="..\inc\LogList.h" />
     <ClInclude Include="..\inc\MainWnd.h" />
     <ClInclude Include="..\inc\ListCtrl.h" />
+    <ClInclude Include="..\inc\ModuleApp.h" />
     <ClInclude Include="..\inc\Page.h" />
     <ClInclude Include="..\inc\PathCtrl.h" />
     <ClInclude Include="..\inc\ProgressDlg.h" />

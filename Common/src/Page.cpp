@@ -5,7 +5,7 @@
 
 #include "MainWnd.h"
 
-#define WM_Async WM_USER+1
+#define WM_PageAsync WM_USER+1
 
 //CPage
 
@@ -165,13 +165,13 @@ void CPage::Async(const CB_Async& cb, UINT uDelayTime)
 
 	if (0 == uDelayTime)
 	{
-		this->PostMessage(WM_Async);
+		this->PostMessage(WM_PageAsync);
 	}
 	else
 	{
 		thread thr([=]() {
 			::Sleep(uDelayTime);
-			this->PostMessage(WM_Async);
+			this->PostMessage(WM_PageAsync);
 		});
 		thr.detach();
 	}
@@ -214,7 +214,7 @@ void CPage::_AsyncLoop(UINT uDelayTime)
 
 BOOL CPage::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	if (WM_Async == message)
+	if (WM_PageAsync == message)
 	{
 		if (m_cbAsync)
 		{

@@ -24,13 +24,14 @@ namespace NS_SSTL
 		using __ConstRef = const __Type&;
 		using __ConstPtr = const __Type*;
 
-#ifndef _MSC_VER
-		__UsingSuperType(__ContainerType);
-		__UsingSuperType(__ItrType);
-		__UsingSuperType(__ItrConstType);
+		__UsingSuperType(__ContainerType)
+		__UsingSuperType(__ItrType)
+		__UsingSuperType(__CItrType)
 
-		__UsingSuperType(__InitList);
-#endif
+		__UsingSuperType(__RItrType)
+		__UsingSuperType(__CRItrType)
+
+		__UsingSuperType(__InitList)
 
 		using __CB_RefType_void = CB_T_void<__RefType>;
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
@@ -41,9 +42,7 @@ namespace NS_SSTL
 		__ContainerType& m_data = __Super::m_data;
 
 	public:
-		PtrArrayT()
-		{
-		}
+		PtrArrayT() {}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>>
 		explicit PtrArrayT(T* ptr, args... others)
@@ -141,39 +140,41 @@ namespace NS_SSTL
 		}
 
 	private:
-		void _add(const __PtrType& ptr) override
-		{
-			m_data.add((__PtrType)ptr);
-		}
+		__ContainerType& operator->() = delete;
+		const __ContainerType& operator->() const = delete;
 
-		size_t _del(const __PtrType& ptr) override
-		{
-			return m_data.del((__PtrType)ptr);
-		}
+		__ContainerType& data() = delete;
+		const __ContainerType& data() const = delete;
 
 		__ItrType begin()
 		{
 			return m_data.begin();
 		}
+		__CItrType begin() const
+		{
+			return m_data.begin();
+		}
+
 		__ItrType end()
 		{
 			return m_data.end();
 		}
-
-		__ItrConstType begin() const
+		__CItrType end() const
 		{
-			return m_data.cbegin();
-		}
-		__ItrConstType end() const
-		{
-			return m_data.cend();
+			return m_data.end();
 		}
 
-		//template <typename T, typename = checkIter_t<T>>
-		//T erase(const T& itr)
-		//{
-		//	return m_data.erase(itr);
-		//}
+		__RItrType rbegin() = delete;
+		__CRItrType rbegin() const = delete;
+
+		__RItrType rend() = delete;
+		__CRItrType rend() const = delete;
+
+	private:
+		void _add(const __PtrType& ptr) override
+		{
+			m_data.add((__PtrType)ptr);
+		}
 
 		void _addFront(__PtrType ptr)
 		{
@@ -478,16 +479,27 @@ namespace NS_SSTL
 			return m_data.del(initList);
 		}
 
-		template <typename CB, typename = checkCBRet_t<CB, E_DelConfirm, __RefType>, typename = void>
-		size_t del(const CB& cb)
+		size_t del_if(const function<E_DelConfirm(__RefType)>& cb)
 		{
-			return __Super::del([&](__PtrType ptr) {
+			return __Super::del_if([&](__PtrType ptr) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr);
 				}
 
 				return E_DelConfirm::DC_No;
+			});
+		}
+
+		size_t del_if(const function<bool(__RefType)>& cb)
+		{
+			return __Super::del_if([&](__PtrType ptr) {
+				if (NULL != ptr)
+				{
+					return cb(*ptr);
+				}
+
+				return true;
 			});
 		}
 

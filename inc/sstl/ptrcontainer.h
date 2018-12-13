@@ -22,9 +22,7 @@ namespace NS_SSTL
 		using __InitList = InitList_T<__PtrType>;
 
 	public:
-		ptrcontainerT()
-		{
-		}
+		ptrcontainerT() = default;
 
 		template<class _Iter, typename = checkIter_t<_Iter>>
 		explicit ptrcontainerT(_Iter _First, _Iter _Last)

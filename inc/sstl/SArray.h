@@ -1,6 +1,6 @@
 
-#ifndef __SSArray_H
-#define __SSArray_H
+#ifndef __SArray_H
+#define __SArray_H
 
 #include "SContainer.h"
 
@@ -8,39 +8,41 @@
 
 namespace NS_SSTL
 {
-#define __SArraySuper SContainerT<__DataType, __BaseType<__DataType>>
-
 	template<typename __DataType, template<typename...> class __BaseType>
-	class SArrayT : public __SArraySuper
+	class SArrayT : public __SuperT
 	{
 	private:
-		using __Super = __SArraySuper;
+		using __Super = __SuperT;
 
-#ifndef _MSC_VER
 	protected:
-		__UsingSuperType(__ContainerType);
-		__UsingSuperType(__ItrType);
-		__UsingSuperType(__ItrConstType);
+		__UsingSuperType(__ContainerType)
+		
+		__UsingSuperType(__ItrType)
+		__UsingSuperType(__CItrType)
+		__UsingSuperType(CB_Find)
+		__UsingSuperType(CB_ConstFind)
 
-		__UsingSuperType(__InitList);
+		__UsingSuperType(__InitList)
 
-		__UsingSuperType(__DataRef);
-		__UsingSuperType(__DataConstRef);
+		__UsingSuperType(__DataRef)
+		__UsingSuperType(__DataConstRef)
 
-		__UsingSuperType(__CB_Ref_void);
-		__UsingSuperType(__CB_Ref_bool);
+		__UsingSuperType(__CB_Ref_void)
+		__UsingSuperType(__CB_Ref_bool)
 
-		__UsingSuperType(__CB_ConstRef_void);
-		__UsingSuperType(__CB_ConstRef_bool);
-#endif
+		__UsingSuperType(__CB_ConstRef_void)
+		__UsingSuperType(__CB_ConstRef_bool)
+
+	protected:
+		__ContainerType& m_data = __Super::m_data;
+		
+		using __RItrType = decltype(m_data.rbegin());
+		using __CRItrType = decltype(m_data.crbegin());
 
 		using __CB_Ref_Pos_void = CB_T_Pos_RET<__DataRef, void>;
 		using __CB_Ref_Pos_bool = CB_T_Pos_RET<__DataRef, bool>;
 		using __CB_ConstRef_Pos_void = CB_T_Pos_RET<__DataConstRef, void>;
 		using __CB_ConstRef_Pos_bool = CB_T_Pos_RET<__DataConstRef, bool>;
-
-	protected:
-		__ContainerType& m_data = __Super::m_data;
 
 	private:
 		template <class T= __ContainerType>
@@ -98,7 +100,7 @@ namespace NS_SSTL
 					return true;
 				}, startPos, count);
 			}
-			
+
 			template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void>
 			void forEach(const CB& cb, size_t startPos, size_t count)
 			{
@@ -136,9 +138,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		SArrayT()
-		{
-		}
+		SArrayT() = default;
 
 		template<typename... args>
 		explicit SArrayT(__DataConstRef data, const args&... others)
@@ -222,41 +222,55 @@ namespace NS_SSTL
 			m_data.push_back(data);
 		}
 
-		size_t _del(__DataConstRef data) override
+		size_t _find(__DataConstRef data, const CB_Find& cb = NULL) override
 		{
 			size_t uRet = 0;
-			
-			tagTryCompare<__DataType> comparetor;
 
-			auto itr = m_data.begin();
-			while (itr != m_data.end())
+			for (auto itr = m_data.begin(); itr != m_data.end(); )
 			{
-				if (comparetor.compare(*itr, data))
+				if (tagTryCompare<__DataType>().compare(*itr, data))
 				{
-					itr = m_data.erase(itr);
 					uRet++;
+
+					if (cb)
+					{
+						auto lpData = &*itr;
+						if (!cb(itr) || itr == m_data.end())
+						{
+							break;
+						}
+
+						if (&*itr != lpData)
+						{
+							continue;
+						}
+					}
 				}
-				else
-				{
-					itr++;
-				}
+
+				itr++;
 			}
 
 			return uRet;
 		}
 
-		__ItrConstType _find(__DataConstRef data) const override
+		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
 		{
-			auto itr = m_data.begin();
-			for (; itr != m_data.end(); itr++)
+			size_t uRet = 0;
+
+			for (auto itr = m_data.begin(); itr != m_data.end(); itr++)
 			{
 				if (tagTryCompare<__DataType>().compare(*itr, data))
 				{
-					break;
+					uRet++;
+
+					if (cb && !cb(itr))
+					{
+						break;
+					}
 				}
 			}
 
-			return itr;
+			return uRet;
 		}
 
 	private:
@@ -313,7 +327,7 @@ namespace NS_SSTL
 			}
 
 			cb(m_data[pos]);
-			
+
 			return true;
 		}
 
@@ -344,19 +358,23 @@ namespace NS_SSTL
 			}
 
 			m_data.erase(m_data.begin() + pos);
-	
+
 			return true;
 		}
 
 		int indexOf(__DataConstRef data) const
 		{
-			auto itr = _find(data);
-			if (itr == m_data.end())
+			int uIdx = 0;
+			for (auto& item : m_data)
 			{
-				return -1;
+				if (tagTryCompare<__DataType>().compare(item, data))
+				{
+					return uIdx;
+				}
+				uIdx++;
 			}
 
-			return itr - m_data.begin();
+			return -1;
 		}
 
 		int lastIndexOf(__DataConstRef data) const
@@ -401,6 +419,24 @@ namespace NS_SSTL
 			});
 
 			return iRetPos;
+		}
+
+		__RItrType rbegin()
+		{
+			return m_data.rbegin();
+		}
+		__CRItrType rbegin() const
+		{
+			return m_data.rbegin();
+		}
+
+		__RItrType rend()
+		{
+			return m_data.rend();
+		}
+		__CRItrType rend() const
+		{
+			return m_data.rend();
 		}
 
 		template<typename T>
@@ -491,7 +527,7 @@ namespace NS_SSTL
 
 			return __Super::size();
 		}
-		
+
 		SArrayT slice(int startPos) const
 		{
 			SArrayT arr;
@@ -595,7 +631,7 @@ namespace NS_SSTL
 			{
 				arr.add(cb(data));
 			}
-			
+
 			return arr;
 		}
 
@@ -616,7 +652,7 @@ namespace NS_SSTL
 					arr.add(data);
 				}
 			}
-			
+
 			return arr;
 		}
 

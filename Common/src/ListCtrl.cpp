@@ -278,23 +278,17 @@ void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, cons
 
 int CObjectList::InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix)
 {
+	__EnsureReturn(!vecText.empty(), -1);
+
 	wstring strText(strPrefix);
-
-	auto itr = vecText.begin();
-	if (itr != vecText.end())
-	{
-		strText = *itr;
-		
-		itr = vecText.erase(itr);
-	}
-
+	strText.append(vecText.front());
 	int iItem = InsertItem(uItem, strText.c_str());
 	if (iItem >= 0)
 	{
-		for (UINT uIndex = 1; uIndex < m_uColumnCount && itr != vecText.end(); ++uIndex, ++itr)
+		for (UINT uIndex = 1; uIndex < m_uColumnCount && uIndex < vecText.size(); ++uIndex)
 		{
 			wstring strText(strPrefix);
-			strText.append(*itr);
+			strText.append(vecText[uIndex]);
 
 			(void)__super::SetItemText(uItem, uIndex, strText.c_str());
 		}
@@ -303,12 +297,12 @@ int CObjectList::InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring
 	return iItem;
 }
 
-int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText)
+int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
 {
 	int iItem = InsertItem(uItem, L"");
 	if (iItem >= 0)
 	{
-		SetItemTexts(iItem, lstText);
+		SetItemTexts(iItem, lstText, strPrefix);
 	}
 
 	return iItem;
@@ -319,13 +313,16 @@ void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, const
 	_SetItemTexts<false>(uItem, vecText, strPrefix);
 }
 
-void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText)
+void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
 {
 	for (auto& pr : lstText)
 	{
 		if (pr.first < m_uColumnCount)
 		{
-			(void)__super::SetItemText(uItem, pr.first, pr.second.c_str());
+			wstring strText(strPrefix);
+			strText.append(pr.second);
+
+			(void)__super::SetItemText(uItem, pr.first, strText.c_str());
 		}
 	}
 }

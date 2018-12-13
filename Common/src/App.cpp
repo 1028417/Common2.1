@@ -5,72 +5,97 @@
 
 #include "MainWnd.h"
 
-void CResModule::ActivateResource()
-{
-	HINSTANCE hInstance = GetHInstance();
-	__Assert(hInstance);
 
-	AfxSetResourceHandle(hInstance);
+static map<UINT, LPVOID> g_mapInterfaces;
+
+static vector<tagHotkeyInfo> g_vctHotkeyInfos;
+
+static UINT g_uTimerID = 0;
+
+struct tagTimer
+{
+	UINT uTimerID;
+	CB_Timer cb;
+	bool bDynamicallyKill = true;
+};
+
+static SMap<HWND, SMap<UINT, tagTimer>> g_mapTimer;
+
+void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	g_mapTimer.del_if(hwnd, [&](auto& pr) {
+		auto& mapTimer = pr.second;
+		if (0 != mapTimer.del_if([&](const auto& pr) {
+			const auto& timer = pr.second;
+			if (timer.uTimerID == idEvent)
+			{
+				if (!timer.cb() && timer.bDynamicallyKill)
+				{
+					::KillTimer(hwnd, idEvent);
+					return E_DelConfirm::DC_YesAbort;
+				}
+
+				return E_DelConfirm::DC_Abort;
+			}
+
+			return E_DelConfirm::DC_No;
+		}))
+		{
+			if (!mapTimer)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	});
 }
 
-HICON CResModule::loadIcon(UINT uID)
+bool CMainApp::SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse, bool bDynamicallyKill)
 {
-	HINSTANCE hInstance = GetHInstance();
-	__AssertReturn(hInstance, NULL);
+	__AssertReturn(uElapse, false);
+	
+	bool bExists = false;
+	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		if (mapTimer.includes(uElapse))
+		{
+			bExists = true;
+		}
+	});
+	__EnsureReturn(!bExists, false);
 
-	HICON hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(uID));
-	__AssertReturn(hIcon, NULL);
 
-	return hIcon;
+	tagTimer timer;
+	timer.uTimerID = ++g_uTimerID;
+	timer.cb = cb;
+	timer.bDynamicallyKill = bDynamicallyKill;
+
+	if (!g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		mapTimer.set(uElapse, timer);
+	}))
+	{
+		g_mapTimer.insert(hWnd).set(uElapse, timer);
+	}
+
+	::SetTimer(hWnd, g_uTimerID, uElapse, TimerProc);
+
+	return true;
 }
 
-HBITMAP CResModule::loadBitmap(UINT uID)
+bool CMainApp::KillTimer(UINT uElapse, HWND hWnd)
 {
-	HINSTANCE hInstance = GetHInstance();
-	__AssertReturn(hInstance, NULL);
+	bool bRet = false;
+	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		mapTimer.del(uElapse, [&](auto& pr) {
+			::KillTimer(hWnd, pr.second.uTimerID);
+			bRet = true;
+		});
+	});
 
-	HBITMAP hBitmap = ::LoadBitmap(hInstance, MAKEINTRESOURCE(uID));
-	__AssertReturn(hBitmap, NULL);
-
-	return hBitmap;
-}
-
-HMENU CResModule::loadMenu(UINT uID)
-{
-	HINSTANCE hInstance = GetHInstance();
-	__AssertReturn(hInstance, NULL);
-
-	HMENU hMenu = ::LoadMenu(hInstance, MAKEINTRESOURCE(uID));
-	__AssertReturn(hMenu, NULL);
-
-	return hMenu;
-}
-
-LPCDLGTEMPLATE CResModule::loadDialog(UINT uID)
-{
-	HINSTANCE hInstance = GetHInstance();
-	__AssertReturn(hInstance, NULL);
-
-	HRSRC hRes = ::FindResource(hInstance, MAKEINTRESOURCE(uID), RT_DIALOG);
-	__AssertReturn(hRes, NULL);
-
-	HGLOBAL hGlobal = ::LoadResource(hInstance, hRes);
-	__AssertReturn(hGlobal, NULL);
-
-	LPCDLGTEMPLATE lpRes = (LPCDLGTEMPLATE)LockResource(hGlobal);
-	__AssertReturn(lpRes, NULL);
-
-	return lpRes;
+	return bRet;
 }
 
 // CMainApp
-
-BOOL CModuleApp::InitInstance()
-{
-	CMainApp::GetMainApp()->AddModule(*this);
-
-	return __super::InitInstance();
-}
 
 BOOL CMainApp::InitInstance()
 {
@@ -121,9 +146,8 @@ BOOL CMainApp::InitInstance()
 	return TRUE;
 }
 
-#define WM_Async WM_USER
+#define WM_AppAsync WM_USER + 1
 
-static CB_Async g_cbAsync;
 
 void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
 {
@@ -132,17 +156,17 @@ void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
 		return;
 	}
 
-	g_cbAsync = cb;
+	m_cbAsync = cb;
 
 	if (0 == uDelayTime)
 	{
-		this->PostThreadMessage(WM_Async, 0, 0);
+		this->PostThreadMessage(WM_AppAsync, 0, 0);
 	}
 	else
 	{
 		thread thr([=]() {
 			::Sleep(uDelayTime);
-			this->PostThreadMessage(WM_Async, 0, 0);
+			this->PostThreadMessage(WM_AppAsync, 0, 0);
 		});
 		thr.detach();
 	}
@@ -150,12 +174,12 @@ void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_Async == pMsg->message && NULL == pMsg->hwnd)
+	if (WM_AppAsync == pMsg->message && NULL == pMsg->hwnd)
 	{
-		if (g_cbAsync)
+		if (m_cbAsync)
 		{
-			CB_Async cb = g_cbAsync;
-			g_cbAsync = NULL;
+			CB_Async cb = m_cbAsync;
+			m_cbAsync = NULL;
 			cb();
 		}
 
@@ -198,8 +222,8 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	
 	if (WM_SYSKEYDOWN == pMsg->message)
 	{
-		for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = m_vctHotkeyInfos.begin()
-			; itrHotkeyInfo != m_vctHotkeyInfos.end(); ++itrHotkeyInfo)
+		for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
+			; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
 		{
 			if (MOD_ALT == (UINT)itrHotkeyInfo->eFlag && ::GetKeyState(itrHotkeyInfo->uKey)&0x8000)
 			{
@@ -288,7 +312,7 @@ bool CMainApp::HandleHotkey(LPARAM lParam, bool bGlobal)
 	}
 	dwLastTime = ::GetTickCount();
 
-	for (auto& HotkeyInfo : m_vctHotkeyInfos)
+	for (auto& HotkeyInfo : g_vctHotkeyInfos)
 	{
 		if (HotkeyInfo.bGlobal != bGlobal)
 		{
@@ -357,8 +381,8 @@ BOOL CMainApp::Quit()
 		__EnsureReturn((*itModule)->OnQuit(), FALSE);
 	}
 
-	for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = m_vctHotkeyInfos.begin()
-		; itrHotkeyInfo != m_vctHotkeyInfos.end(); ++itrHotkeyInfo)
+	for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
+		; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
 	{
 		if (itrHotkeyInfo->bGlobal)
 		{
@@ -403,7 +427,7 @@ BOOL CMainApp::AddModule(CModuleApp& Module)
 	return TRUE;
 }
 
-LRESULT CMainApp::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CMainApp::SendModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CMainApp *pMainApp = GetMainApp();
 	__EnsureReturn(pMainApp, 0);
@@ -428,7 +452,7 @@ LRESULT CMainApp::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CMainApp::SendMessageEx(UINT uMsg, WPARAM wParam, LPARAM lParam)
+void CMainApp::BroadcastModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CMainApp *pMainApp = GetMainApp();
 	__Ensure(pMainApp);
@@ -445,21 +469,21 @@ void CMainApp::SendMessageEx(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 BOOL CMainApp::RegisterInterface(UINT uIndex, LPVOID lpInterface)
 {
-	if (m_mapInterfaces.find(uIndex) != m_mapInterfaces.end())
+	if (g_mapInterfaces.find(uIndex) != g_mapInterfaces.end())
 	{
 		return FALSE;
 	}
 
-	m_mapInterfaces[uIndex] = lpInterface;
+	g_mapInterfaces[uIndex] = lpInterface;
 
 	return TRUE;
 }
 
 LPVOID CMainApp::GetInterface(UINT uIndex)
 {
-	map<UINT, LPVOID>::iterator itInterface = m_mapInterfaces.find(uIndex);
+	map<UINT, LPVOID>::iterator itInterface = g_mapInterfaces.find(uIndex);
 
-	if (itInterface == m_mapInterfaces.end())
+	if (itInterface == g_mapInterfaces.end())
 	{
 		return itInterface->second;
 	}
@@ -469,10 +493,7 @@ LPVOID CMainApp::GetInterface(UINT uIndex)
 
 BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 {
-	CMainApp *pMainApp = GetMainApp();
-	__EnsureReturn(pMainApp, FALSE);
-
-	if (!util::ContainerFind(pMainApp->m_vctHotkeyInfos, HotkeyInfo))
+	if (!util::ContainerFind(g_vctHotkeyInfos, HotkeyInfo))
 	{
 		if (HotkeyInfo.bGlobal)
 		{
@@ -482,7 +503,7 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 			}
 		}
 
-		pMainApp->m_vctHotkeyInfos.push_back(HotkeyInfo);
+		g_vctHotkeyInfos.push_back(HotkeyInfo);
 	}
 
 	return TRUE;

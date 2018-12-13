@@ -50,6 +50,9 @@
     <ClCompile Include="src\Guard.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ResModule.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -95,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="..\inc\Guard.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\ModuleApp.h">
+      <Filter>src\app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

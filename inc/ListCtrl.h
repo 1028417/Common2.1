@@ -241,10 +241,10 @@ private:
 
 public:
 	int InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix = L"");
-	int InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText);
+	int InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
 
 	void SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
-	void SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText);
+	void SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
 
 	void SetObjects(const TD_ListObjectList& lstObjects, int nPos=0);
 

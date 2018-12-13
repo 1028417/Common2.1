@@ -41,15 +41,6 @@ namespace NS_SSTL
 	template <typename T>
 	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
 
-	enum class E_DelConfirm
-	{
-		DC_Yes
-		, DC_No
-		, DC_Abort
-		, DC_YesAbort
-	};
-
-
 	template <template<typename...> typename __BaseType, class __PtrType> class ptrcontainerT;
 
 	template <class __PtrType>
@@ -63,6 +54,39 @@ namespace NS_SSTL
 
 	template <class __Type>
 	using ptrlist = ptrlistT<__Type*>;
+
+
+	enum class E_DelConfirm
+	{
+		DC_Yes
+		, DC_No
+		, DC_Abort
+		, DC_YesAbort
+	};
+
+
+	template <typename T>
+	using ItrType_t = decltype(declval<T>().begin());
+
+	template <typename T>
+	using CItrType_t = decltype(declval<T>().cbegin());
+
+	template <typename T>
+	using containerInnerType_t = decltype(*declval<T>().begin());
+
+	template <typename T>
+	using removeConst_t = typename std::remove_const<T>::type;
+
+	template <typename T>
+	using removeConstRef_t = removeConst_t<typename std::remove_reference<T>::type>;
+	
+	template<typename __ContainerType__, typename __KeyType__ = removeConstRef_t<containerInnerType_t<__ContainerType__>>> class SContainerT;
+	template <template<typename...> typename __BaseType, class __DataType>
+	using SContainer = SContainerT<__BaseType<__DataType>>;
+
+	
+	template <class __DataType>
+	using SList = SContainer<list, __DataType>;
 
 
 	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
@@ -106,7 +130,12 @@ namespace NS_SSTL
 	using SMultiHashMap = SMap<__KeyType, __ValueType, std::unordered_multimap>;
 };
 
-#define __SuperType(T) typename __Super::T
-#define __UsingSuperType(T) using T = __SuperType(T)
+#define __SuperT SContainer<__BaseType, __DataType>
+
+#ifdef _MSC_VER
+	#define __UsingSuperType(T)
+#else
+	#define __UsingSuperType(T) using T = typename __Super::T;
+#endif
 
 #endif // __Define_H

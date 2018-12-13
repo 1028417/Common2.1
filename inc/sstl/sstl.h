@@ -5,6 +5,8 @@
 #include "SArray.h"
 #include "PtrArray.h"
 
+#include "SList.h"
+
 #include "SSet.h"
 
 #include "SMap.h"

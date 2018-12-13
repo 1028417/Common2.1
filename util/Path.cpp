@@ -3,7 +3,7 @@
 
 #include <Path.h>
 
-wstring CPath::GetName()
+wstring CPath::GetName() const
 {
 	if (NULL != m_pParentPath)
 	{
@@ -181,18 +181,18 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
-	m_plstSubPath->del([&](CPath& SubPath) {
+	m_plstSubPath->del_if([&](CPath& SubPath) {
 		if (lstDeletePaths.includes(&SubPath))
 		{
 			delete &SubPath;
-			return E_DelConfirm::DC_Yes;
+			return true;
 		}
 
-		return E_DelConfirm::DC_No;
+		return false;
 	});
 }
 
-UINT CPath::GetSubPathCount()
+UINT CPath::GetSubPathCount() const
 {
 	if (NULL == m_plstSubPath)
 	{
@@ -202,7 +202,7 @@ UINT CPath::GetSubPathCount()
 	return m_plstSubPath->size();
 }
 
-bool CPath::HasFile()
+bool CPath::HasFile() const
 {
 	__EnsureReturn(m_plstSubPath, FALSE);
 	return m_plstSubPath->some([](CPath& SubPath) {

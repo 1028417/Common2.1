@@ -6,35 +6,32 @@
 
 namespace NS_SSTL
 {
-#define __SSetSuper SContainerT<__DataType, __BaseType<__DataType>>
-
 	template<typename __DataType, template<typename...> class __BaseType>
-	class SSetT : public __SSetSuper
+	class SSetT : public __SuperT
 	{
 	private:
-		using __Super = __SSetSuper;
+		using __Super = __SuperT;
 
-#ifndef _MSC_VER
 	protected:
-		__UsingSuperType(__ContainerType);
-		__UsingSuperType(__ItrType);
-		__UsingSuperType(__ItrConstType);
+		__UsingSuperType(__ContainerType)
 
-		__UsingSuperType(__InitList);
+		__UsingSuperType(__ItrType)
+		__UsingSuperType(CB_Find)
+		__UsingSuperType(__CItrType)
+		__UsingSuperType(CB_ConstFind)
 
-		__UsingSuperType(__DataConstRef);
+		__UsingSuperType(__InitList)
 
-		__UsingSuperType(__CB_ConstRef_void);
-		__UsingSuperType(__CB_ConstRef_bool);
-#endif
+		__UsingSuperType(__DataConstRef)
+
+		__UsingSuperType(__CB_ConstRef_void)
+		__UsingSuperType(__CB_ConstRef_bool)
 
 	private:
 		__ContainerType& m_data = __Super::m_data;
 
 	public:
-		SSetT()
-		{
-		}
+		SSetT() = default;
 
 		template<typename... args>
 		explicit SSetT(__DataConstRef data, const args&... others)
@@ -118,7 +115,7 @@ namespace NS_SSTL
 			m_data.insert(data);
 		}
 
-		size_t _del(__DataConstRef data) override
+		size_t _find(__DataConstRef data, const CB_Find& cb = NULL) override
 		{
 			auto itr = m_data.find(data);
 			if (itr == m_data.end())
@@ -126,16 +123,30 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			m_data.erase(itr);
+			if (cb)
+			{
+				(void)cb(itr);
+			}
 
 			return 1;
 		}
 
-		__ItrConstType _find(__DataConstRef data) const override
+		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
 		{
-			return m_data.find(data);
-		}
+			auto itr = m_data.find(data);
+			if (itr == m_data.end())
+			{
+				return 0;
+			}
 
+			if (cb)
+			{
+				(void)cb(itr);
+			}
+
+			return 1;
+		}
+		
 	public:		
 		template <typename T>
 		friend SSetT operator& (const SSetT& lhs, const T& rhs)

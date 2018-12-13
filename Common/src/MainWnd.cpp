@@ -3,6 +3,8 @@
 
 #include <MainWnd.h>
 
+#define WM_Sync WM_USER + 1
+
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -226,6 +228,13 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 	return nResult;
 }
 
+void CMainWnd::Sync(const CB_Sync& cb)
+{
+	m_cbSync = cb;
+
+	this->SendMessage(WM_Sync);
+}
+
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
 	if (m_WndInfo.bSizeable)
@@ -371,6 +380,16 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 
 BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
+	if (WM_Sync == message)
+	{
+		if (m_cbSync)
+		{
+			m_cbSync();
+		}
+
+		return TRUE;
+	}
+
 	if (HandleResizeViewMessage(message, wParam, lParam))
 	{
 		return TRUE;

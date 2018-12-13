@@ -6,6 +6,32 @@
 
 namespace NS_SSTL
 {
+	template <typename T>
+	using decayType_t = typename decay<T>::type;
+
+	template <typename T, typename U> struct decay_is_same
+		: is_same<typename decay<T>::type, U>::type
+	{
+	};
+
+	template <typename T> struct tagGetTypeT {
+		typedef T type;
+		typedef T& type_ref;
+		typedef T* type_pointer;
+	};
+
+	template<typename T> struct tagGetTypeT<T&> {
+		typedef typename remove_reference<T>::type type;
+		typedef typename remove_reference<T>::type_ref type_ref;
+		typedef typename remove_reference<T>::type_pointer type_pointer;
+	};
+
+	template<typename T> struct tagGetTypeT<T*> {
+		typedef typename remove_reference<T>::type type;
+		typedef typename remove_reference<T>::type_ref type_ref;
+		typedef typename remove_reference<T>::type_pointer type_pointer;
+	};
+
 	template <typename T> struct tagTryCompare {
 		static bool compare(const T&t1, const T&t2)
 		{

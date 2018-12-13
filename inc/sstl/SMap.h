@@ -6,7 +6,7 @@
 
 namespace NS_SSTL
 {
-#define __SMapSuper SContainerT<pair<__KeyType const, __ValueType>, __BaseType<__KeyType, __ValueType>, __KeyType>
+#define __SMapSuper SContainerT<__BaseType<__KeyType, __ValueType>, __KeyType>
 
 	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType>
 	class SMapT : public __SMapSuper
@@ -14,20 +14,21 @@ namespace NS_SSTL
 	private:
 		using __Super = __SMapSuper;
 
-#ifndef _MSC_VER
 	protected:
-		__UsingSuperType(__ContainerType);
-		__UsingSuperType(__ItrType);
-		__UsingSuperType(__ItrConstType);
+		__UsingSuperType(__ContainerType)
 
-		__UsingSuperType(__DataType);
+		__UsingSuperType(__ItrType)
+		__UsingSuperType(CB_Find)
+		__UsingSuperType(__CItrType)
+		__UsingSuperType(CB_ConstFind)
 
-		__UsingSuperType(__InitList);
-		__UsingSuperType(__InitList_Key);
+		__UsingSuperType(__DataType)
 
-		__UsingSuperType(__KeyConstRef);
-#endif
+		__UsingSuperType(__InitList)
+		__UsingSuperType(__InitList_Key)
 
+		__UsingSuperType(__KeyConstRef)
+		
 	protected:
 		using __ValueRef = __ValueType&;
 		using __ValueConstRef = const __ValueType&;
@@ -56,9 +57,7 @@ namespace NS_SSTL
 			|| is_same<__ContainerType, std::unordered_multimap<__KeyType, __ValueType>>::value;
 		
 	public:
-		SMapT()
-		{
-		}
+		SMapT() = default;
 
 		template <typename T>
 		explicit SMapT(const T& keys, const function<__ValueType(__KeyConstRef)>& cb)
@@ -152,34 +151,7 @@ namespace NS_SSTL
 			m_data.insert(pr);
 		}
 
-		size_t _del(__KeyConstRef key) override
-		{
-			return find(key, [&](__ItrType& itr) {
-				itr = m_data.erase(itr);
-				return true;
-			});
-		}
-
-		__ItrConstType _find(__KeyConstRef key) const override
-		{
-			return m_data.find(key);
-		}
-
-	private:
-		template <typename _V>
-		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value }).first->second)&
-		{
-			return m_data.insert({ key, value }).first->second;
-		}
-
-		template <typename _V>
-		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
-		{
-			return m_data.insert({ key, value })->second;
-		}
-
-	public:
-		size_t find(__KeyConstRef key, const function<bool(__ItrType& itr)>& cb)
+		size_t _find(__KeyConstRef key, const CB_Find& cb = NULL) override
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -187,40 +159,32 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			size_t uRet = 1;
-			while (true)
+			if (!cb)
 			{
+				return 1;
+			}
+
+			size_t uRet = 0;
+			do
+			{
+				uRet++;
+
 				auto lpValue = &itr->second;
 				if (!cb(itr) || !m_bMulti)
 				{
 					break;
 				}
 
-				if (itr == m_data.end())
+				if (&itr->second == lpValue)
 				{
-					break;
+					itr++;
 				}
-
-				if (lpValue == &itr->second)
-				{
-					if (++itr == m_data.end())
-					{
-						break;
-					}
-				}
-
-				if (itr->first != key)
-				{
-					break;
-				}
-
-				uRet++;
-			}
+			} while (itr != m_data.end() && itr->first == key);
 
 			return uRet;
 		}
 
-		size_t find(__KeyConstRef key, const function<bool(__ItrConstType itr)>& cb) const
+		size_t _cfind(__KeyConstRef key, const CB_ConstFind& cb = NULL) const override
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -229,7 +193,7 @@ namespace NS_SSTL
 			}
 
 			size_t uRet = 1;
-			while (cb(itr) && m_bMulti)
+			while (cb && cb(itr) && m_bMulti)
 			{
 				if (++itr == m_data.end())
 				{
@@ -247,10 +211,24 @@ namespace NS_SSTL
 			return uRet;
 		}
 
+	private:
+		template <typename _V>
+		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value }).first->second)&
+		{
+			return m_data.insert({ key, value }).first->second;
+		}
+
+		template <typename _V>
+		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
+		{
+			return m_data.insert({ key, value })->second;
+		}
+
+	public:
 		template <typename CB>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
-			return find(key, [&](__ItrType& itr) {
+			return _find(key, [&](__ItrType& itr) {
 				cb(itr->second);
 
 				return true;
@@ -260,7 +238,7 @@ namespace NS_SSTL
 		template <typename CB>
 		size_t get(__KeyConstRef key, const CB& cb) const
 		{
-			return find(key, [&](__ItrConstType itr) {
+			return _find(key, [&](__CItrType itr) {
 				cb(itr->second);
 				
 				return true;
@@ -270,7 +248,7 @@ namespace NS_SSTL
 		template <typename CB, checkCBBool_t<CB, __ValueRef>>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
-			return find(key, [&](__ItrType& itr) {
+			return _find(key, [&](__ItrType& itr) {
 				return cb(itr->second);
 			});
 		}
@@ -278,7 +256,7 @@ namespace NS_SSTL
 		template <typename CB, checkCBBool_t<CB, __ValueRef>>
 		bool get(__KeyConstRef key, const CB& cb) const
 		{
-			return find(key, [&](__ItrConstType& itr) {
+			return _find(key, [&](__CItrType& itr) {
 				return cb(itr->second);
 			});
 		}

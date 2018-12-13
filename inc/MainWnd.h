@@ -27,6 +27,8 @@ struct tagMainWndInfo
 	ULONG uMinHeight = 0;
 };
 
+using CB_Sync = fn_voidvoid;
+
 class __CommonExt CMainWnd: public CWnd
 {
 public:
@@ -44,7 +46,8 @@ public:
 
 protected:
 	tagMainWndInfo m_WndInfo;
-	
+
+private:	
 	vector<int> m_vctStatusPartWidth;
 	CStatusBarCtrl m_ctlStatusBar;
 	UINT m_uStatusBarHeight = 0;
@@ -53,6 +56,8 @@ protected:
 	int m_cy = 0;
 
 	SMap<E_DockViewType, CDockView*> m_mapDockViews;
+	
+	CB_Sync m_cbSync;
 
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
@@ -76,7 +81,9 @@ public:
 	{
 		return MsgBox(cstrText, L"", uType);
 	}
-	
+
+	void Sync(const CB_Sync& cb);
+
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);
 

@@ -78,7 +78,7 @@ protected:
 	bool m_bExists = false;
 
 protected:
-	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentPath)
+	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentPath) const
 	{
 		return new CPath(findData, pParentPath);
 	}
@@ -87,7 +87,7 @@ private:
 	TD_PathList& _findFile(const wstring& strFind = L"");
 
 public:
-	wstring GetName();
+	wstring GetName() const;
 
 	void SetName(const wstring& strNewName);
 
@@ -103,9 +103,9 @@ public:
 
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
 
-	UINT GetSubPathCount();
+	UINT GetSubPathCount() const;
 
-	bool HasFile();
+	bool HasFile() const;
 };
 
 class __UtilExt CListObject
@@ -115,7 +115,7 @@ public:
 	{
 	}
 
-	virtual wstring GetRenameText()
+	virtual wstring GetRenameText() const
 	{
 		return L"";
 	}
@@ -137,10 +137,10 @@ public:
 public:
 	void *m_hTreeItem;
 
-	virtual wstring GetTreeText()
+	virtual wstring GetTreeText() const
 	{
 		return L"";
-	};
+	}
 
 	virtual int GetTreeImage()
 	{
@@ -180,7 +180,7 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath)
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath) const override
 	{
 		return new CPathObject(findData, pParentPath);
 	}
@@ -229,7 +229,7 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath)
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath) const override
 	{
 		__EnsureReturn(findData.isDir(), NULL);
 
@@ -237,7 +237,7 @@ protected:
 	}
 
 public:
-	wstring GetTreeText() override
+	wstring GetTreeText() const override
 	{
 		return m_strName;
 	}

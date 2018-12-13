@@ -1,17 +1,21 @@
 ﻿  stdafx.cpp
+  Guard.cpp
   img.cpp
-  TreeCtrl.cpp
-  ProgressDlg.cpp
-  PathCtrl.cpp
-  Page.cpp
-  MainWnd.cpp
+  Main.cpp
+  ResModule.cpp
+  DragDrop.cpp
   LogList.cpp
   ListCtrl.cpp
-  Guard.cpp
-  DragDrop.cpp
-  DockView.cpp
+  PathCtrl.cpp
+  ProgressDlg.cpp
+  TreeCtrl.cpp
   App.cpp
-  Main.cpp
-  正在生成代码...
-  Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Commond.dll
-  Common.vcxproj -> ../build/Commond.pdb (Full PDB)
+  DockView.cpp
+  MainWnd.cpp
+  Page.cpp
+    正在创建库 ../lib/Common.lib 和对象 ../lib/Common.exp
+  正在生成代码
+  All 5434 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Common.dll
+  Common.vcxproj -> ../build/Common.pdb (Full PDB)

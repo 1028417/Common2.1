@@ -1,116 +1,11 @@
 
 #pragma once
 
-// Hotkey
-enum class E_HotkeyFlag
-{
-	HKF_Null = 0
+#include <ModuleApp.h>
 
-	, HKF_Alt = MOD_ALT
-	, HKF_Control = MOD_CONTROL
-	, HKF_Shift = MOD_SHIFT
+using CB_Async = fn_voidvoid;
 
-	, HKF_AltControl = MOD_ALT | MOD_CONTROL
-	, HKF_AltShift = MOD_ALT | MOD_SHIFT
-	, HKF_ControlShift = MOD_CONTROL | MOD_SHIFT
-	, HKF_AltControlShift = MOD_ALT | MOD_CONTROL | MOD_SHIFT
-};
-
-struct tagHotkeyInfo
-{
-	tagHotkeyInfo(UINT t_uKey, E_HotkeyFlag eHotkeyFlag = E_HotkeyFlag::HKF_Null, bool t_bGlobal=FALSE, UINT t_uIDMenuItem = 0)
-		: uKey(t_uKey)
-		, eFlag(eHotkeyFlag)
-		, lParam(MAKELPARAM(eHotkeyFlag, uKey))
-		, bGlobal(t_bGlobal)
-		, uIDMenuItem(t_uIDMenuItem)
-	{
-		bHandling = false;
-	}
-
-	UINT uKey;
-	E_HotkeyFlag eFlag;
-	LPARAM lParam;
-
-	bool bGlobal;
-
-	UINT uIDMenuItem;
-
-	bool bHandling;
-
-	bool operator ==(const tagHotkeyInfo &HotkeyInfo)
-	{
-		return (lParam == HotkeyInfo.lParam && bGlobal == HotkeyInfo.bGlobal);
-	}
-};
-
-class __CommonExt CResModule
-{
-public:
-	CResModule(HINSTANCE hInstance=NULL)
-	{
-		_hInstance = hInstance;
-	}
-
-	CResModule(const string& strDllName)
-	{
-		_hInstance = GetModuleHandleA(__DllFile(strDllName).c_str());
-	}
-
-private:
-	HINSTANCE _hInstance = NULL;
-
-	virtual HINSTANCE GetHInstance()
-	{
-		return _hInstance;
-	}
-
-public:
-	void ActivateResource();
-
-	HICON loadIcon(UINT uID);
-
-	HBITMAP loadBitmap(UINT uID);
-
-	HMENU loadMenu(UINT uID);
-
-	LPCDLGTEMPLATE loadDialog(UINT uID);
-};
-
-class CMainWnd;
-
-// CModuleApp
-class __CommonExt CModuleApp: public CWinApp, public CResModule
-{
-friend class CMainApp;
-
-public:
-	CModuleApp() {}
-
-	virtual ~CModuleApp() {}
-
-	HINSTANCE GetHInstance() override
-	{
-		return m_hInstance;
-	}
-	
-protected:
-	virtual BOOL InitInstance() override;
-
-protected:
-	virtual BOOL OnReady(CMainWnd& MainWnd) { return TRUE; }
-
-	virtual BOOL HandleCommand(UINT uID) { return FALSE; }
-
-	virtual BOOL HandleHotkey(const tagHotkeyInfo& HotkeyInfo) { return FALSE; }
-
-	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) { return 0; }
-
-	virtual BOOL OnQuit() { return TRUE; }
-};
-
-struct tagMainWndInfo;
-
+using CB_Timer = function<bool()>;
 
 class IView
 {
@@ -184,8 +79,6 @@ public:
 	}
 };
 
-using CB_Async = fn_voidvoid;
-
 enum class E_DoEventsResult
 {
 	DER_None
@@ -193,7 +86,7 @@ enum class E_DoEventsResult
 	, DER_Quit
 };
 
-class __CommonExt CMainApp: public CModuleApp
+class __CommonExt CMainApp : public CModuleApp
 {
 public:
 	static CMainApp* GetMainApp()
@@ -215,9 +108,7 @@ private:
 	typedef vector<CModuleApp*> ModuleVector;
 	ModuleVector m_vctModules;
 
-	map<UINT, LPVOID> m_mapInterfaces;
-
-	vector<tagHotkeyInfo> m_vctHotkeyInfos;
+	CB_Async m_cbAsync;
 
 protected:
 	virtual BOOL InitInstance() override;
@@ -231,43 +122,46 @@ private:
 	BOOL OnCommand(UINT uID);
 
 public:
-	void Async(const CB_Async& cb, UINT uDelayTime=0);
+	void Async(const CB_Async& cb, UINT uDelayTime = 0);
 
 	BOOL Quit();
 
-	static E_DoEventsResult DoEvents(bool bOnce=false);
-
+public:
 	static BOOL AddModule(CModuleApp& Module);
 
-	BOOL RegisterInterface(UINT uIndex, LPVOID lpInterface);
-	LPVOID GetInterface(UINT uIndex);
+	static E_DoEventsResult DoEvents(bool bOnce=false);
+
+	static bool SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse, bool bDynamicallyKill = true);
+	static bool KillTimer(UINT uElapse, HWND hWnd = NULL);
 
 	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
 
-public:
-	static LRESULT SendMessage(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
+	static BOOL RegisterInterface(UINT uIndex, LPVOID lpInterface);
+	static LPVOID GetInterface(UINT uIndex);
 
-	static LRESULT SendMessage(UINT uMsg, LPVOID pPara)
+	static LRESULT SendModuleMessage(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
+
+	static LRESULT SendModuleMessage(UINT uMsg, LPVOID pPara)
 	{
-		return CMainApp::SendMessage(uMsg, (WPARAM)pPara);
+		return CMainApp::SendModuleMessage(uMsg, (WPARAM)pPara);
 	}
 
 	template <typename _T1, typename _T2>
-	static LRESULT SendMessage(UINT uMsg, _T1 para1, _T2 para2)
+	static LRESULT SendModuleMessage(UINT uMsg, _T1 para1, _T2 para2)
 	{
-		return CMainApp::SendMessage(uMsg, (WPARAM)para1, (LPARAM)para2);
+		return CMainApp::SendModuleMessage(uMsg, (WPARAM)para1, (LPARAM)para2);
 	}
 
-	static void SendMessageEx(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
+	static void BroadcastModuleMessage(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 
-	static void SendMessageEx(UINT uMsg, LPVOID pPara)
+	static void BroadcastModuleMessage(UINT uMsg, LPVOID pPara)
 	{
-		SendMessageEx(uMsg, (WPARAM)pPara);
+		BroadcastModuleMessage(uMsg, (WPARAM)pPara);
 	}
 
 	template <typename _T1, typename _T2>
-	static void SendMessageEx(UINT uMsg, _T1 para1, _T2 para2)
+	static void BroadcastModuleMessage(UINT uMsg, _T1 para1, _T2 para2)
 	{
-		SendMessageEx(uMsg, (WPARAM)para1, (LPARAM)para2);
+		BroadcastModuleMessage(uMsg, (WPARAM)para1, (LPARAM)para2);
 	}
 };
