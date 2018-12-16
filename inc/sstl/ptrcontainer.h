@@ -2,8 +2,6 @@
 #ifndef __ptrcontainer_H
 #define __ptrcontainer_H
 
-#include "_define.h"
-
 namespace NS_SSTL
 {
 	template <template<typename...> typename __BaseType, class __PtrType>
@@ -87,44 +85,60 @@ namespace NS_SSTL
 		}
 
 	private:
-		bool _add(__PtrType ptr)
+		bool _add(__PtrType ptr, bool bToFront=false)
 		{
 			if (NULL == ptr)
 			{
 				return false;
 			}
 
-			__Super::push_back(ptr);
+			if (bToFront)
+			{
+				__Super::insert(__Super::begin(), ptr);
+			}
+			else
+			{
+				__Super::push_back(ptr);
+			}
+
 			return true;
 		}
 
-		bool _add(__RefType ref)
+		bool _add(__RefType ref, bool bToFront = false)
 		{
-			__Super::push_back(&ref);
+			if (bToFront)
+			{
+				__Super::insert(__Super::begin(), &ref);
+			}
+			else
+			{
+				__Super::push_back(&ref);
+			}
+
 			return true;
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		bool _add(T* ptr, ...)
+		inline bool _add(T* ptr, bool bToFront = false, ...)
 		{
-			return _add(dynamic_cast<__PtrType>(ptr));
+			return _add(dynamic_cast<__PtrType>(ptr), bToFront);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		bool _add(T& ref, ...)
+		inline bool _add(T& ref, bool bToFront = false, ...)
 		{
-			return _add(&ref);
+			return _add(&ref, bToFront);
 		}
 
 		template <typename T>
-		size_t _addContainer(T& container)
+		size_t _addContainer(T& container, bool bToFront = false)
 		{
 			size_t uRet = 0;
 
 			CItrVisitor<T> Visitor(container);
 			for (auto&data : Visitor)
 			{
-				if (_add(data))
+				if (_add(data, bToFront))
 				{
 					uRet++;
 				}
@@ -150,22 +164,22 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool _set(TD_PosType pos, __RefType ref)
+		inline bool _set(TD_PosType pos, __RefType ref)
 		{
 			return _set(pos, &ref);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		bool _set(TD_PosType pos, T* ptr, ...)
+		inline bool _set(TD_PosType pos, T* ptr, ...)
 		{
 			return _set(pos, dynamic_cast<__PtrType>(ptr));
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		bool _set(TD_PosType pos, T& ref, ...)
+		inline bool _set(TD_PosType pos, T& ref, ...)
 		{
 			return _set(pos, &ref);
-		}
+		}                                                                     
 
 		size_t _del(__ConstPtr ptr)
 		{
@@ -193,19 +207,19 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _del(__ConstRef ref)
+		inline size_t _del(__ConstRef ref)
 		{
 			return _del(&ref);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		size_t _del(T* ptr, ...)
+		inline size_t _del(T* ptr, ...)
 		{
 			return _del((__ConstPtr)dynamic_cast<__ConstPtr>(ptr));
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		size_t _del(T& ref, ...)
+		inline size_t _del(T& ref, ...)
 		{
 			return _del(&ref);
 		}
@@ -243,24 +257,63 @@ namespace NS_SSTL
 			return -1;
 		}
 
-		int _indexOf(__ConstRef ref) const
+		inline int _indexOf(__ConstRef ref) const
 		{
 			return _indexOf(&ref);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		int _indexOf(T* ptr, ...) const
+		inline int _indexOf(T* ptr, ...) const
 		{
 			return _indexOf((__ConstPtr)dynamic_cast<__ConstPtr>(ptr));
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		int _indexOf(T& ref, ...) const
+		inline int _indexOf(T& ref, ...) const
 		{
 			return _indexOf(&ref);
 		}
 
 	public:
+		bool addFront(__PtrType ptr)
+		{
+			return _add(ptr, true);
+		}
+
+		bool addFront(__RefType ref)
+		{
+			return _add(ref, true);
+		}
+
+		template<typename T>
+		bool addFront(T* ptr)
+		{
+			return _add(ptr, true);
+		}
+
+		template<typename T, typename = checkNotContainer_t<T>>
+		bool addFront(T& ref)
+		{
+			return _add(ref, true);
+		}
+
+		size_t addFront(__InitList initLst)
+		{
+			return _addContainer(initLst, true);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t addFront(const T& container)
+		{
+			return _addContainer(container, true);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t addFront(T& container)
+		{
+			return _addContainer(container, true);
+		}
+
 		bool add(__PtrType ptr)
 		{
 			return _add(ptr);

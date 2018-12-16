@@ -63,79 +63,43 @@ namespace NS_SSTL
 		, DC_Abort
 		, DC_YesAbort
 	};
-
-
-	template <typename T>
-	using ItrType_t = decltype(declval<T>().begin());
-
-	template <typename T>
-	using CItrType_t = decltype(declval<T>().cbegin());
-
-	template <typename T>
-	using containerInnerType_t = decltype(*declval<T>().begin());
-
-	template <typename T>
-	using removeConst_t = typename std::remove_const<T>::type;
-
-	template <typename T>
-	using removeConstRef_t = removeConst_t<typename std::remove_reference<T>::type>;
-	
-	template<typename __ContainerType__, typename __KeyType__ = removeConstRef_t<containerInnerType_t<__ContainerType__>>> class SContainerT;
-	template <template<typename...> typename __BaseType, class __DataType>
-	using SContainer = SContainerT<__BaseType<__DataType>>;
-
-	
-	template <class __DataType>
-	using SList = SContainer<list, __DataType>;
-
-
-	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
-	template <typename __DataType, template<typename...> class __BaseType = std::vector>
-	using SArray = SArrayT<__DataType, __BaseType>;
-
-	template <typename __DataType>
-	using SVector = SArray<__DataType>;
-
-	template <typename __DataType>
-	using SDeque = SArrayT<__DataType, std::deque>;
-
-
-	template<typename __Type, template<typename...> class __BaseType> class PtrArrayT;
-	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
-	using PtrArray = PtrArrayT<__Type, __BaseType>;
-
-	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
-	using ConstPtrArray = PtrArray<const __Type, __BaseType>;
-
-
-	template<typename __DataType, template<typename...> class __BaseType> class SSetT;
-	template <typename __DataType, template<typename...> class __BaseType = std::set>
-	using SSet = SSetT<__DataType, __BaseType>;
-
-	template <typename __DataType>
-	using SHashSet = SSet < __DataType, std::unordered_set>;
-	
-
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType> class SMapT;
-	template <typename __KeyType, typename __ValueType, template<typename...> class __BaseType = std::map>
-	using SMap = SMapT<__KeyType, __ValueType, __BaseType>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SHashMap = SMap<__KeyType, __ValueType, std::unordered_map>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SMultiMap = SMap<__KeyType, __ValueType, std::multimap>;
-
-	template <typename __KeyType, typename __ValueType>
-	using SMultiHashMap = SMap<__KeyType, __ValueType, std::unordered_multimap>;
 };
 
 #define __SuperT SContainer<__BaseType, __DataType>
 
 #ifdef _MSC_VER
-	#define __UsingSuperType(T)
+#define __UsingSuperType(T)
 #else
-	#define __UsingSuperType(T) using T = typename __Super::T;
+#define __UsingSuperType(T) using T = typename __Super::T;
 #endif
+
+#define __UsingSuperData ;
+
+#define __UsingSuper(Super) \
+	using __Super = Super; \
+	\
+	__UsingSuperType(__ContainerType) \
+	__ContainerType& m_data = __Super::m_data; \
+	\
+	__UsingSuperType(__DataRef) \
+	__UsingSuperType(__DataConstRef) \
+	\
+	__UsingSuperType(__ItrType) \
+	__UsingSuperType(__CItrType) \
+	\
+	__UsingSuperType(__RItrType) \
+	__UsingSuperType(__CRItrType) \
+	\
+	__UsingSuperType(CB_Find) \
+	__UsingSuperType(CB_ConstFind) \
+	\
+	__UsingSuperType(__InitList) \
+	\
+	__UsingSuperType(__CB_Ref_void) \
+	__UsingSuperType(__CB_Ref_bool) \
+	\
+	__UsingSuperType(__CB_ConstRef_void) \
+	__UsingSuperType(__CB_ConstRef_bool) \
+
 
 #endif // __Define_H

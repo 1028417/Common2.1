@@ -2,34 +2,14 @@
 #ifndef __SSet_H
 #define __SSet_H
 
-#include "SContainer.h"
-
 namespace NS_SSTL
 {
 	template<typename __DataType, template<typename...> class __BaseType>
 	class SSetT : public __SuperT
 	{
 	private:
-		using __Super = __SuperT;
-
-	protected:
-		__UsingSuperType(__ContainerType)
-
-		__UsingSuperType(__ItrType)
-		__UsingSuperType(CB_Find)
-		__UsingSuperType(__CItrType)
-		__UsingSuperType(CB_ConstFind)
-
-		__UsingSuperType(__InitList)
-
-		__UsingSuperType(__DataConstRef)
-
-		__UsingSuperType(__CB_ConstRef_void)
-		__UsingSuperType(__CB_ConstRef_bool)
-
-	private:
-		__ContainerType& m_data = __Super::m_data;
-
+		__UsingSuper(__SuperT);
+		
 	public:
 		SSetT() = default;
 
@@ -65,11 +45,11 @@ namespace NS_SSTL
 		{
 		}
 
-		template<typename T, typename = checkContainer_t<T>>
-		explicit SSetT(T& container)
-			: __Super(container)
-		{
-		}
+		//template<typename T, typename = checkContainer_t<T>>
+		//explicit SSetT(T& container)
+		//	: __Super(container)
+		//{
+		//}
 
 		SSetT& operator=(__ContainerType&& container)
 		{
@@ -110,7 +90,7 @@ namespace NS_SSTL
 		}
 
 	private:
-		void _add(__DataConstRef data) override
+		inline void _add(__DataConstRef data) override
 		{
 			m_data.insert(data);
 		}
@@ -186,21 +166,6 @@ namespace NS_SSTL
 		SSetT<RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
-		}
-
-		SSetT filter(__CB_ConstRef_bool cb) const
-		{
-			SSetT set;
-
-			for (auto&data : m_data)
-			{
-				if (cb(data))
-				{
-					set.add(data);
-				}
-			}
-
-			return set;
 		}
 	};
 }

@@ -6,6 +6,9 @@
 #include "MainWnd.h"
 
 
+#define WM_AppAsync WM_USER + 1
+
+
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
@@ -29,7 +32,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 			const auto& timer = pr.second;
 			if (timer.uTimerID == idEvent)
 			{
-				if (!timer.cb() && timer.bDynamicallyKill)
+				if (!timer.cb())
 				{
 					::KillTimer(hwnd, idEvent);
 					return E_DelConfirm::DC_YesAbort;
@@ -51,62 +54,17 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	});
 }
 
-bool CMainApp::SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse, bool bDynamicallyKill)
-{
-	__AssertReturn(uElapse, false);
-	
-	bool bExists = false;
-	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		if (mapTimer.includes(uElapse))
-		{
-			bExists = true;
-		}
-	});
-	__EnsureReturn(!bExists, false);
-
-
-	tagTimer timer;
-	timer.uTimerID = ++g_uTimerID;
-	timer.cb = cb;
-	timer.bDynamicallyKill = bDynamicallyKill;
-
-	if (!g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		mapTimer.set(uElapse, timer);
-	}))
-	{
-		g_mapTimer.insert(hWnd).set(uElapse, timer);
-	}
-
-	::SetTimer(hWnd, g_uTimerID, uElapse, TimerProc);
-
-	return true;
-}
-
-bool CMainApp::KillTimer(UINT uElapse, HWND hWnd)
-{
-	bool bRet = false;
-	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		mapTimer.del(uElapse, [&](auto& pr) {
-			::KillTimer(hWnd, pr.second.uTimerID);
-			bRet = true;
-		});
-	});
-
-	return bRet;
-}
-
-// CMainApp
 
 BOOL CMainApp::InitInstance()
 {
 	__AssertReturn(__super::InitInstance(), FALSE);
-	
+
 	INITCOMMONCONTROLSEX InitCtrls;
 	InitCtrls.dwSize = sizeof(InitCtrls);
 
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
-	
+
 	(void)AfxOleInit();
 	//(void)::OleInitialize(NULL);
 
@@ -146,8 +104,48 @@ BOOL CMainApp::InitInstance()
 	return TRUE;
 }
 
-#define WM_AppAsync WM_USER + 1
+bool CMainApp::SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse)
+{
+	__AssertReturn(uElapse, false);
+	
+	bool bExists = false;
+	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		if (mapTimer.includes(uElapse))
+		{
+			bExists = true;
+		}
+	});
+	__EnsureReturn(!bExists, false);
 
+
+	tagTimer timer;
+	timer.uTimerID = ++g_uTimerID;
+	timer.cb = cb;
+
+	if (!g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		mapTimer.set(uElapse, timer);
+	}))
+	{
+		g_mapTimer.insert(hWnd).set(uElapse, timer);
+	}
+
+	UINT_PTR idEvent = ::SetTimer(hWnd, g_uTimerID, uElapse, TimerProc);
+
+	return true;
+}
+
+bool CMainApp::KillTimer(HWND hWnd, UINT uElapse)
+{
+	bool bRet = false;
+	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
+		mapTimer.del(uElapse, [&](auto& pr) {
+			::KillTimer(hWnd, pr.second.uTimerID);
+			bRet = true;
+		});
+	});
+
+	return bRet;
+}
 
 void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
 {
@@ -190,10 +188,6 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	{
 		switch (pMsg->message)
 		{
-		case WM_CLOSE:
-			Quit();
-
-			break;
 		case WM_COMMAND:
 			{				
 				UINT uCode = HIWORD(pMsg->wParam);

@@ -327,6 +327,19 @@ void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstT
 	}
 }
 
+void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, const wstring& strPrefix)
+{
+	for (auto& strText : vecText)
+	{
+		if (uSubItem >= m_uColumnCount)
+		{
+			break;
+		}
+
+		(void)__super::SetItemText(uItem, uSubItem++, (strPrefix+strText).c_str());
+	}
+}
+
 void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 {
 	if (!lstObjects)

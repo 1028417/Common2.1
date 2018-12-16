@@ -131,8 +131,8 @@ public:
 
 	static E_DoEventsResult DoEvents(bool bOnce=false);
 
-	static bool SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse, bool bDynamicallyKill = true);
-	static bool KillTimer(UINT uElapse, HWND hWnd = NULL);
+	static bool SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse);
+	static bool KillTimer(HWND hWnd, UINT uElapse);
 
 	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
 

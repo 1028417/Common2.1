@@ -2,42 +2,13 @@
 #ifndef __SArray_H
 #define __SArray_H
 
-#include "SContainer.h"
-
-#include "SMap.h"
-
 namespace NS_SSTL
 {
 	template<typename __DataType, template<typename...> class __BaseType>
 	class SArrayT : public __SuperT
 	{
-	private:
-		using __Super = __SuperT;
-
 	protected:
-		__UsingSuperType(__ContainerType)
-		
-		__UsingSuperType(__ItrType)
-		__UsingSuperType(__CItrType)
-		__UsingSuperType(CB_Find)
-		__UsingSuperType(CB_ConstFind)
-
-		__UsingSuperType(__InitList)
-
-		__UsingSuperType(__DataRef)
-		__UsingSuperType(__DataConstRef)
-
-		__UsingSuperType(__CB_Ref_void)
-		__UsingSuperType(__CB_Ref_bool)
-
-		__UsingSuperType(__CB_ConstRef_void)
-		__UsingSuperType(__CB_ConstRef_bool)
-
-	protected:
-		__ContainerType& m_data = __Super::m_data;
-		
-		using __RItrType = decltype(m_data.rbegin());
-		using __CRItrType = decltype(m_data.crbegin());
+		__UsingSuper(__SuperT);
 
 		using __CB_Ref_Pos_void = CB_T_Pos_RET<__DataRef, void>;
 		using __CB_Ref_Pos_bool = CB_T_Pos_RET<__DataRef, bool>;
@@ -58,12 +29,6 @@ namespace NS_SSTL
 			T& m_data;
 
 			using __RefType = decltype(m_data[0])&;
-
-			//template <typename CB, typename Ret>
-			//using checkCBRet_1 = checkCBRet_t<CB, Ret, __RefType>;
-
-			//template <typename CB, typename Ret>
-			//using checkCBRet_2 = checkCBRet_t<CB, Ret, __RefType, size_t>;
 
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
@@ -132,12 +97,6 @@ namespace NS_SSTL
 		}
 
 	public:
-		SArrayT& init(size_t size, __DataConstRef data)
-		{
-			m_data.assign(size, data);
-			return *this;
-		}
-
 		SArrayT() = default;
 
 		template<typename... args>
@@ -166,14 +125,8 @@ namespace NS_SSTL
 		{
 		}
 
-		template<typename T, typename = checkContainer_t<T>>
+		template<typename T, typename = checkContainerData_t<T, __DataType>>
 		explicit SArrayT(const T& container)
-			: __Super(container)
-		{
-		}
-
-		template<typename T, typename = checkContainer_t<T>>
-		explicit SArrayT(T& container)
 			: __Super(container)
 		{
 		}
@@ -216,88 +169,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-	private:
-		void _add(__DataConstRef data) override
-		{
-			m_data.push_back(data);
-		}
-
-		size_t _find(__DataConstRef data, const CB_Find& cb = NULL) override
-		{
-			size_t uRet = 0;
-
-			for (auto itr = m_data.begin(); itr != m_data.end(); )
-			{
-				if (tagTryCompare<__DataType>().compare(*itr, data))
-				{
-					uRet++;
-
-					if (cb)
-					{
-						auto lpData = &*itr;
-						if (!cb(itr) || itr == m_data.end())
-						{
-							break;
-						}
-
-						if (&*itr != lpData)
-						{
-							continue;
-						}
-					}
-				}
-
-				itr++;
-			}
-
-			return uRet;
-		}
-
-		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
-		{
-			size_t uRet = 0;
-
-			for (auto itr = m_data.begin(); itr != m_data.end(); itr++)
-			{
-				if (tagTryCompare<__DataType>().compare(*itr, data))
-				{
-					uRet++;
-
-					if (cb && !cb(itr))
-					{
-						break;
-					}
-				}
-			}
-
-			return uRet;
-		}
-
-	private:
-		int _checkPos(int pos) const
-		{
-			auto size = m_data.size();
-			if (0 == size)
-			{
-				return -1;
-			}
-
-			if (pos < 0)
-			{
-				return (int)size + pos;
-			}
-			else
-			{
-				if (pos >= (int)size)
-				{
-					return -1;
-				}
-
-				return pos;
-			}
-		}
-
-	public:
 		template <typename T>
 		friend SArrayT operator& (const SArrayT& lhs, const T& rhs)
 		{
@@ -318,7 +189,37 @@ namespace NS_SSTL
 			return lhs & SArrayT(rhs);
 		}
 
+		template<typename CB>
+		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
+		{
+			_getOperator().forEach(cb, startPos, count);
+		}
+
+		template<typename CB>
+		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+		{
+			_getOperator().forEach(cb, startPos, count);
+		}
+
 	public:
+		__RItrType rbegin()
+		{
+			return m_data.rbegin();
+		}
+		__CRItrType rbegin() const
+		{
+			return m_data.rbegin();
+		}
+
+		__RItrType rend()
+		{
+			return m_data.rend();
+		}
+		__CRItrType rend() const
+		{
+			return m_data.rend();
+		}
+
 		bool get(TD_PosType pos, __CB_Ref_void cb)
 		{
 			if (pos >= m_data.size())
@@ -365,9 +266,10 @@ namespace NS_SSTL
 		int indexOf(__DataConstRef data) const
 		{
 			int uIdx = 0;
+
 			for (auto& item : m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(item, data))
+				if (tagTryCompare<__DataType>::compare(item, data))
 				{
 					return uIdx;
 				}
@@ -380,9 +282,10 @@ namespace NS_SSTL
 		int lastIndexOf(__DataConstRef data) const
 		{
 			int uIdx = 1;
+
 			for (auto& item : m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(item, data))
+				if (tagTryCompare<const __DataType>::compare(item, data))
 				{
 					return m_data.size()-uIdx;
 				}
@@ -390,18 +293,6 @@ namespace NS_SSTL
 			}
 
 			return -1;
-		}
-
-		template<typename CB>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
-		{
-			_getOperator().forEach(cb, startPos, count);
-		}
-
-		template<typename CB>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
-		{
-			_getOperator().forEach(cb, startPos, count);
 		}
 
 		int find(__CB_ConstRef_Pos_bool cb, TD_PosType stratPos = 0) const
@@ -421,70 +312,31 @@ namespace NS_SSTL
 			return iRetPos;
 		}
 
-		__RItrType rbegin()
-		{
-			return m_data.rbegin();
-		}
-		__CRItrType rbegin() const
-		{
-			return m_data.rbegin();
-		}
-
-		__RItrType rend()
-		{
-			return m_data.rend();
-		}
-		__CRItrType rend() const
-		{
-			return m_data.rend();
-		}
-
 		template<typename T>
-		size_t addFront(const T& container)
+		SArrayT& addFront(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
 				m_data.insert(m_data.begin(), container.begin(), container.end());
 			}
 
-			return m_data.size();
+			return *this;
 		}
 
-		size_t addFront(__InitList initList)
+		SArrayT& addFront(__InitList initList)
 		{
 			return addFront<__InitList>(initList);
 		}
 
-		bool popFront(__CB_ConstRef_void cb = NULL)
+		template<typename... args>
+		SArrayT& addFront(__DataConstRef data, const args&... others)
 		{
-			if (m_data.empty())
-			{
-				return false;
-			}
+			(void)tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
+				m_data.insert(m_data.begin(), data);
+				return true;
+			}, data, others...);
 
-			auto itr = m_data.begin();
-			if (cb)
-			{
-				cb(*itr);
-			}
-
-			m_data.erase(itr);
-
-			return true;
-		}
-
-		bool popFront(__DataRef data)
-		{
-			if (m_data.empty())
-			{
-				return false;
-			}
-
-			auto itr = m_data.begin();
-			data = *itr;
-			m_data.erase(itr);
-
-			return true;
+			return *this;
 		}
 
 		bool popBack(__CB_ConstRef_void cb = NULL)
@@ -517,15 +369,22 @@ namespace NS_SSTL
 			return true;
 		}
 
-		template<typename... args>
-		size_t addFront(__DataConstRef data, const args&... others)
+		SArrayT& qsort(__CB_Sort_T<__DataType> cb = NULL)
 		{
-			return tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
-				m_data.insert(m_data.begin(), data);
-				return true;
-			}, data, others...);
+			size_t size = m_data.size();
+			if (size > 1)
+			{
+				NS_SSTL::qsort<__DataType>(&m_data.front(), size, cb);
+			}
 
-			return __Super::size();
+			return *this;
+		}
+
+		SArrayT& Reverse()
+		{
+			reverse(m_data.begin(), m_data.end());
+
+			return *this;
 		}
 
 		SArrayT slice(int startPos) const
@@ -598,24 +457,6 @@ namespace NS_SSTL
 			return splice(pos, nRemove, initList);
 		}
 
-		SArrayT& qsort(__CB_Sort_T<__DataType> cb = NULL)
-		{
-			size_t size = m_data.size();
-			if (size > 1)
-			{
-				NS_SSTL::qsort<__DataType>(&m_data.front(), size, cb);
-			}
-
-			return *this;
-		}
-
-		SArrayT& Reverse()
-		{
-			reverse(m_data.begin(), m_data.end());
-
-			return *this;
-		}
-
 		string join(const string& strSplitor = ",") const
 		{
 			return __Super::toString(strSplitor);
@@ -639,21 +480,6 @@ namespace NS_SSTL
 		SArrayT<RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
-		}
-
-		SArrayT filter(__CB_ConstRef_bool cb) const
-		{
-			SArrayT arr;
-
-			for (auto&data : m_data)
-			{
-				if (cb(data))
-				{
-					arr.add(data);
-				}
-			}
-
-			return arr;
 		}
 
 		SMap<__DataType, size_t> itemSum() const
@@ -684,6 +510,46 @@ namespace NS_SSTL
 			SMap<size_t, SArrayT> mapSumItem;
 			sum(mapItemSum, mapSumItem);
 			return mapSumItem;
+		}
+
+	private:
+		inline void _add(__DataConstRef data) override
+		{
+			m_data.push_back(data);
+		}
+
+		size_t _find(__DataConstRef data, const CB_Find& cb=NULL) override
+		{
+			return NS_SSTL::find(m_data, data, cb);
+		}
+
+		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
+		{
+			return NS_SSTL::find(m_data, data, cb);
+		}
+
+	private:
+		int _checkPos(int pos) const
+		{
+			auto size = m_data.size();
+			if (0 == size)
+			{
+				return -1;
+			}
+
+			if (pos < 0)
+			{
+				return (int)size + pos;
+			}
+			else
+			{
+				if (pos >= (int)size)
+				{
+					return -1;
+				}
+
+				return pos;
+			}
 		}
 	};
 }

@@ -2,8 +2,6 @@
 #ifndef __SMap_H
 #define __SMap_H
 
-#include "SContainer.h"
-
 namespace NS_SSTL
 {
 #define __SMapSuper SContainerT<__BaseType<__KeyType, __ValueType>, __KeyType>
@@ -12,24 +10,14 @@ namespace NS_SSTL
 	class SMapT : public __SMapSuper
 	{
 	private:
-		using __Super = __SMapSuper;
-
-	protected:
-		__UsingSuperType(__ContainerType)
-
-		__UsingSuperType(__ItrType)
-		__UsingSuperType(CB_Find)
-		__UsingSuperType(__CItrType)
-		__UsingSuperType(CB_ConstFind)
+		__UsingSuper(__SMapSuper)
 
 		__UsingSuperType(__DataType)
 
-		__UsingSuperType(__InitList)
+		__UsingSuperType(__KeyConstRef)
+
 		__UsingSuperType(__InitList_Key)
 
-		__UsingSuperType(__KeyConstRef)
-		
-	protected:
 		using __ValueRef = __ValueType&;
 		using __ValueConstRef = const __ValueType&;
 
@@ -51,8 +39,6 @@ namespace NS_SSTL
 		using __CB_ValueR_DelConfirm = const function<E_DelConfirm(__ValueRef)>&;
 
 	private:
-		__ContainerType& m_data = __Super::m_data;
-
 		const bool m_bMulti = is_same<__ContainerType, std::multimap<__KeyType, __ValueType>>::value
 			|| is_same<__ContainerType, std::unordered_multimap<__KeyType, __ValueType>>::value;
 		
@@ -96,11 +82,11 @@ namespace NS_SSTL
 		{
 		}
 
-		template<typename T, typename = checkContainer_t<T>>
-		explicit SMapT(T& container)
-			: __Super(container)
-		{
-		}
+		//template<typename T, typename = checkContainer_t<T>>
+		//explicit SMapT(T& container)
+		//	: __Super(container)
+		//{
+		//}
 
 		SMapT& operator=(__ContainerType&& container)
 		{

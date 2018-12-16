@@ -62,8 +62,8 @@ using namespace NS_SSTL;
 class __UtilExt util
 {
 public:
-	static void sys2tm(const SYSTEMTIME& sysTime, tm& atm);
-	static void tm2sys(const tm& atm, SYSTEMTIME& sysTime);
+	static bool toSysTime(time_t time, SYSTEMTIME& sysTime);
+	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	
 	static void getCurrentTime(int& nHour, int& nMinute);
 	static void getCurrentTime(SYSTEMTIME& sysTime);

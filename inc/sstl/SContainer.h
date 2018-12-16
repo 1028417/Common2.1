@@ -6,10 +6,6 @@
 
 #include <list>
 
-#include "_util.h"
-
-#include "_check.h"
-
 namespace NS_SSTL
 {
 	template<typename __ContainerType__, typename __KeyType__>
@@ -18,27 +14,30 @@ namespace NS_SSTL
 	protected:
 		using __ContainerType = __ContainerType__;
 
-		using __DataRef = containerInnerType_t<__ContainerType>; //__DataType&;
-		using __DataType = decayType_t<__DataRef>;
+		using __DataType = containerDataType_t<__ContainerType>;
+		using __DataRef = containerRefType_t<__ContainerType>;
 		using __DataConstRef = const __DataType&;
 
-		using __ItrType = ItrType_t<__ContainerType>;
-		using __CItrType = CItrType_t<__ContainerType>;
+		using __ItrType = containerItrType_t<__ContainerType>;
+		using __CItrType = containerCItrType_t<__ContainerType>;
+
+		using __RItrType = containerRItrType_t<__ContainerType>;
+		using __CRItrType = containerCRItrType_t<__ContainerType>;
 
 		using CB_Find = function<bool(__ItrType& itr)>;
-		using CB_ConstFind = function<bool(__CItrType itr)>;
-
-		using __KeyType = __KeyType__;
-		using __KeyConstRef = const __KeyType&;
+		using CB_ConstFind = function<bool(const __CItrType& itr)>;
 
 		using __InitList = InitList_T<__DataType>;
-		using __InitList_Key = InitList_T<__KeyType>;
 
 		using __CB_Ref_void = CB_T_void<removeConst_t<__DataRef>>;
 		using __CB_Ref_bool = CB_T_bool<removeConst_t<__DataRef>>;
 
 		using __CB_ConstRef_void = CB_T_void<__DataConstRef>;
 		using __CB_ConstRef_bool = CB_T_bool<__DataConstRef>;
+
+		using __KeyType = __KeyType__;
+		using __KeyConstRef = const __KeyType&;
+		using __InitList_Key = InitList_T<__KeyType>;
 
 		__ContainerType m_data;
 
@@ -76,13 +75,7 @@ namespace NS_SSTL
 			: m_data(CItrVisitor<const T>(container).begin(), CItrVisitor<const T>(container).end())
 		{
 		}
-
-		template<typename T, typename = checkContainer_t<T>>
-		explicit SContainerT(T& container)
-			: m_data(container.begin(), container.end())
-		{
-		}
-
+		
 		SContainerT& operator=(SContainerT&& container)
 		{
 			swap(container);
@@ -247,6 +240,72 @@ namespace NS_SSTL
 			}
 		}
 
+		__ContainerType& operator->()
+		{
+			return m_data;
+		}
+		const __ContainerType& operator->() const
+		{
+			return m_data;
+		}
+
+		operator __ContainerType& ()
+		{
+			return m_data;
+		}
+
+		operator const __ContainerType& () const
+		{
+			return m_data;
+		}
+		__ContainerType& data()
+		{
+			return m_data;
+		}
+		const __ContainerType& data() const
+		{
+			return m_data;
+		}
+
+		operator bool() const
+		{
+			return !m_data.empty();
+		}
+
+		size_t size() const
+		{
+			return m_data.size();
+		}
+
+		void clear()
+		{
+			m_data.clear();
+		}
+
+		__ItrType begin()
+		{
+			return m_data.begin();
+		}
+		__CItrType begin() const
+		{
+			return m_data.begin();
+		}
+
+		__ItrType end()
+		{
+			return m_data.end();
+		}
+		__CItrType end() const
+		{
+			return m_data.end();
+		}
+
+		//template <typename T, typename = checkIter_t<T>>
+		//T erase(const T& itr)
+		//{
+		//	return m_data.erase(itr);
+		//}
+
 	public:
 		SContainerT& swap(SContainerT& container)
 		{
@@ -292,15 +351,7 @@ namespace NS_SSTL
 			{
 				return *this;
 			}
-
-			//m_data = __ContainerType(container.begin(), container.end());
-
-			//m_data.clear();
-			//for (auto&data : container)
-			//{
-			//	_add(data);
-			//}
-
+			
 			m_data.clear();
 
 			CItrVisitor<const T> Visitor(container);
@@ -335,43 +386,6 @@ namespace NS_SSTL
 			{
 				_add(data);
 			}
-		}
-
-		template<typename... args>
-		SContainerT concat(__DataConstRef data, const args&... others) const
-		{
-			SContainerT ret(*this);
-			ret.add(data, others...);
-			return ret;
-		}
-
-		SContainerT concat(__InitList initList) const
-		{
-			return concat<__InitList>(initList);
-		}
-
-		template<typename T>
-		SContainerT concat(const T& container) const
-		{
-			SContainerT ret(*this);
-			ret.add(container);
-			return ret;
-		}
-
-	public:
-		void clear()
-		{
-			m_data.clear();
-		}
-
-		operator bool() const
-		{
-			return !m_data.empty();
-		}
-
-		size_t size() const
-		{
-			return m_data.size();
 		}
 
 		bool getFront(__CB_Ref_void cb)
@@ -444,41 +458,23 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool popFront(__CB_ConstRef_void cb = NULL)
+		bool popFront(__CB_Ref_void cb = NULL)
 		{
-			auto itr = m_data.begin();
-			if (itr == m_data.end())
-			{
-				return false;
-			}
-
-			if (cb)
-			{
-				cb(*itr);
-			}
-
-			m_data.erase(itr);
-
-			return true;
+			return _popFront(cb);
 		}
 
 		bool popFront(__DataRef data)
 		{
-			auto itr = m_data.begin();
-			if (itr == m_data.end())
-			{
-				return false;
-			}
-
-			data = *itr;
-			m_data.erase(itr);
-
-			return true;
+			return _popFront([&](__DataRef t_data) {
+				data = t_data;
+			});
 		}
 
-		bool includes(__KeyConstRef data) const
+		bool includes(__KeyConstRef key) const
 		{
-			return 0 != _cfind(data);
+			return 0 != _cfind(key, [](const __CItrType& itr) {
+				return false;
+			});
 		}
 
 		template<typename... args>
@@ -660,8 +656,8 @@ namespace NS_SSTL
 		{
 			if (checkIsSelf(container))
 			{
-				size_t uRet = this->size();
-				this->clear();
+				size_t uRet = m_data.size();
+				m_data.clear();
 				return uRet;
 			}
 
@@ -686,22 +682,42 @@ namespace NS_SSTL
 			return del<__InitList_Key>(keys);
 		}
 
-		string toString(const string& strSplitor = ",") const
+	public:
+		template<typename... args>
+		SContainerT concat(__DataConstRef data, const args&... others) const
 		{
-			stringstream ss;
-			ss << '[';
-			for (auto itr = m_data.begin(); itr != m_data.end(); itr++)
-			{
-				if (itr != m_data.begin())
-				{
-					ss << strSplitor.c_str();
-				}
+			SContainerT ret(*this);
+			ret.add(data, others...);
+			return ret;
+		}
 
-				_toString(ss, *itr);
+		SContainerT concat(__InitList initList) const
+		{
+			return concat<__InitList>(initList);
+		}
+
+		template<typename T>
+		SContainerT concat(const T& container) const
+		{
+			SContainerT ret(*this);
+			ret.add(container);
+			return ret;
+		}
+
+	public:
+		SContainerT filter(__CB_ConstRef_bool cb) const
+		{
+			SContainerT ret;
+
+			for (auto&data : m_data)
+			{
+				if (cb(data))
+				{
+					ret.add(data);
+				}
 			}
 
-			ss << ']';
-			return ss.str();
+			return ret;
 		}
 
 		bool every(__CB_ConstRef_bool cb) const
@@ -735,59 +751,52 @@ namespace NS_SSTL
 			return NS_SSTL::reduce<__DataType, __ContainerType >(m_data, cb);
 		}
 
-	public:
-		__ContainerType& operator->()
+		string toString(const string& strSplitor = ",") const
 		{
-			return m_data;
-		}
-		const __ContainerType& operator->() const
-		{
-			return m_data;
-		}
+			stringstream ss;
+			ss << '[';
+			for (auto itr = m_data.begin(); itr != m_data.end(); itr++)
+			{
+				if (itr != m_data.begin())
+				{
+					ss << strSplitor.c_str();
+				}
 
-		__ContainerType& data()
-		{
-			return m_data;
-		}
-		const __ContainerType& data() const
-		{
-			return m_data;
-		}
+				_toString(ss, *itr);
+			}
 
-		__ItrType begin()
-		{
-			return m_data.begin();
+			ss << ']';
+			return ss.str();
 		}
-		__CItrType begin() const
-		{
-			return m_data.begin();
-		}
-
-		__ItrType end()
-		{
-			return m_data.end();
-		}
-		__CItrType end() const
-		{
-			return m_data.end();
-		}
-		
-		//template <typename T, typename = checkIter_t<T>>
-		//T erase(const T& itr)
-		//{
-		//	return m_data.erase(itr);
-		//}
 
 	private:
+		inline virtual void _add(__DataConstRef data)
+		{
+			m_data.insert(m_data.end(), data);
+		}
+
+		virtual bool _popFront(__CB_Ref_void cb=NULL)
+		{
+			auto itr = m_data.begin();
+			if (itr == m_data.end())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(*itr);
+			}
+
+			m_data.erase(itr);
+
+			return true;
+		}
+
 		virtual size_t _find(__KeyConstRef key, const CB_Find& cb = NULL) {return 0;}
 		
 		virtual size_t _cfind(__KeyConstRef key, const CB_ConstFind& cb = NULL) const {return 0;}
 
-		virtual void _add(__DataConstRef data)
-		{
-			m_data.insert(m_data.end(), data);
-		}
-		
 		virtual void _toString(stringstream& ss, __DataConstRef data) const
 		{
 			tagSSTryLMove(ss) << data;

@@ -15,7 +15,7 @@
   Page.cpp
     正在创建库 ../lib/Common.lib 和对象 ../lib/Common.exp
   正在生成代码
-  All 5434 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 5620 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
   Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Common.dll
   Common.vcxproj -> ../build/Common.pdb (Full PDB)

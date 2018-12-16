@@ -2,8 +2,6 @@
 #ifndef __Check_H
 #define __Check_H
 
-#include "_define.h"
-
 namespace NS_SSTL
 {
 	template <bool _test>
@@ -24,6 +22,14 @@ namespace NS_SSTL
 	template <typename _check1, typename _check2>
 	using enableIf_or_t = enable_if_t<_check1::value || _check2::value>;
 
+
+	template <typename T>
+	using removeConst_t = typename std::remove_const<T>::type;
+
+	template <typename T>
+	using removeConstRef_t = removeConst_t<typename std::remove_reference<T>::type>;
+
+
 	template <typename T1, typename T2>
 	using checkSameType_t = enableIf_t<is_same, T1, T2>;
 
@@ -31,7 +37,7 @@ namespace NS_SSTL
 	using checkNotSameType_t = enableIfNot_t<is_same, T1, T2>;
 
 	template <typename T1, typename T2>
-	using checkSameDecayType_t = enableIf_t<is_same, typename decay<T1>::type, typename decay<T2>::type>;
+	using checkSameDecayType_t = checkSameType_t<typename decay<T1>::type, typename decay<T2>::type>;
 	
 	template <typename CB, typename Ret, typename... Paras>
 	using checkCBRet_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), Ret>;
@@ -100,8 +106,56 @@ namespace NS_SSTL
 		}
 	};
 
+	template <typename _C, typename __RItrType = decltype(declval<_C&>().rbegin())>
+	struct tagCheckRItr
+	{
+		typedef __RItrType RItr_Type;
+
+		typedef decltype(declval<const _C&>().rbegin()) CRItr_Type;
+	};
+	
+	template <typename _C>
+	struct tagCheckRItr<_C, void>
+	{
+		typedef void RItr_Type;
+
+		typedef void CRItr_Type;
+	};
+
+	template <typename _C, typename __Itr = decltype(tagItrVisitor::begin(declval<_C&>())), typename = checkIter_t<__Itr>>
+	struct tagCheckContainer
+	{
+		typedef __Itr Itr_Type;
+		typedef decltype(tagItrVisitor::begin(declval<const _C&>())) CItr_Type;
+
+		typedef typename tagCheckRItr<_C, void>::RItr_Type RItr_Type;
+		typedef typename tagCheckRItr<_C, void>::CRItr_Type CRItr_Type;
+
+		typedef decltype(*declval<__Itr>()) Ref_Type;
+		typedef removeConstRef_t<Ref_Type> Data_Type;
+	};
+
 	template<class T>
-	using checkContainer_t = checkIter_t<decltype(tagItrVisitor::begin(declval<T>()))>;
+	using containerItrType_t = typename tagCheckContainer<T>::Itr_Type;
+	template<class T>
+	using containerCItrType_t = typename tagCheckContainer<T>::CItr_Type;
+
+	template<class T>
+	using containerRItrType_t = typename tagCheckContainer<T>::RItr_Type;
+	template<class T>
+	using containerCRItrType_t = typename tagCheckContainer<T>::CRItr_Type;
+
+	template<class T>
+	using containerRefType_t = typename tagCheckContainer<T>::Ref_Type;
+
+	template<class T>
+	using containerDataType_t = typename tagCheckContainer<T>::Data_Type;
+
+	template<class T>
+	using checkContainer_t = containerDataType_t<T>;
+
+	template<class T, typename DATA>
+	using checkContainerData_t = checkSameType_t<containerDataType_t<T>, DATA>;
 
 	struct tagCheckNotContainer
 	{
@@ -110,15 +164,13 @@ namespace NS_SSTL
 
 		template <typename T>
 		static T check(...);
-
-		//enum { value = is_same<T, decltype(check<T>())>::value };
 	};
-
 	template<typename T>
 	using checkNotContainer_t = checkSameType_t<T, decltype(tagCheckNotContainer::check<T>())>;
 
+
 	template <class __C>
-	struct CItrVisitor : private tagItrVisitor
+	class CItrVisitor : private tagItrVisitor
 	{
 	public:
 		CItrVisitor(__C& container)
@@ -130,17 +182,16 @@ namespace NS_SSTL
 		__C& m_container;
 
 		typedef decltype(tagItrVisitor::begin(declval<__C&>())) __ITR;
-		__ITR m_itr;
 
 	public:
-		__ITR& begin()
+		__ITR begin()
 		{
-			return m_itr = tagItrVisitor::begin(m_container);
+			return tagItrVisitor::begin(m_container);
 		}
 
-		__ITR& end()
+		__ITR end()
 		{
-			return m_itr = tagItrVisitor::end(m_container);
+			return tagItrVisitor::end(m_container);
 		}
 	};
 };

@@ -2,8 +2,6 @@
 #ifndef __PtrArray_H
 #define __PtrArray_H
 
-#include "SArray.h"
-
 #include "ptrcontainer.h"
 
 namespace NS_SSTL
@@ -16,7 +14,7 @@ namespace NS_SSTL
 		friend tagItrVisitor;
 
 	private:
-		using __Super = __PtrArraySuper;
+		__UsingSuper(__PtrArraySuper)
 
 		using __PtrType = __Type*;
 		using __RefType = __Type&;
@@ -24,23 +22,12 @@ namespace NS_SSTL
 		using __ConstRef = const __Type&;
 		using __ConstPtr = const __Type*;
 
-		__UsingSuperType(__ContainerType)
-		__UsingSuperType(__ItrType)
-		__UsingSuperType(__CItrType)
-
-		__UsingSuperType(__RItrType)
-		__UsingSuperType(__CRItrType)
-
-		__UsingSuperType(__InitList)
-
 		using __CB_RefType_void = CB_T_void<__RefType>;
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
 
 		using __CB_RefType_Pos_void = CB_T_Pos_RET<__RefType, void>;
 		using __CB_RefType_Pos_bool = CB_T_Pos_RET<__RefType, bool>;
-
-		__ContainerType& m_data = __Super::m_data;
-
+		
 	public:
 		PtrArrayT() {}
 
@@ -59,14 +46,14 @@ namespace NS_SSTL
 
 		template<typename... args>
 		explicit PtrArrayT(__PtrType ptr, args... others)
-			: __Super(ptr, others...)
 		{
+			add(ptr, others...);
 		}
 
 		template<typename... args>
 		explicit PtrArrayT(__RefType ref, args&... others)
 		{
-			assign(ref, others...);
+			add(ref, others...);
 		}
 
 		explicit PtrArrayT(__ContainerType&& container)
@@ -86,19 +73,19 @@ namespace NS_SSTL
 
 		explicit PtrArrayT(__InitList initList)
 		{
-			assign(initList);
+			add(initList);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		explicit PtrArrayT(const T& container)
 		{
-			assign(container);
+			add(container);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		explicit PtrArrayT(T& container)
 		{
-			assign(container);
+			add(container);
 		}
 
 		PtrArrayT& operator=(__ContainerType&& container)
@@ -146,6 +133,9 @@ namespace NS_SSTL
 		__ContainerType& data() = delete;
 		const __ContainerType& data() const = delete;
 
+		operator __ContainerType& () = delete;
+		operator const __ContainerType& () const = delete;
+
 		__ItrType begin()
 		{
 			return m_data.begin();
@@ -169,22 +159,6 @@ namespace NS_SSTL
 
 		__RItrType rend() = delete;
 		__CRItrType rend() const = delete;
-
-	private:
-		void _add(const __PtrType& ptr) override
-		{
-			m_data.add((__PtrType)ptr);
-		}
-
-		void _addFront(__PtrType ptr)
-		{
-			__Super::addFront(ptr);
-		}
-
-		void _addFront(__RefType ref)
-		{
-			__Super::addFront(&ref);
-		}
 
 	public:
 		PtrArrayT& operator+= (__RefType rhs)
@@ -400,10 +374,8 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 			(void)tagDynamicArgsExtractor<T*>::extract([&](T* ptr) {
-				if (m_data.del(ptr))
-				{
-					uRet++;
-				}
+				uRet += m_data.del(ptr);
+
 				return true;
 			}, ptr, others...);
 			return uRet;
@@ -415,10 +387,8 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
-				if (m_data.del(ref))
-				{
-					uRet++;
-				}
+				uRet += m_data.del(ref);
+
 				return true;
 			}, ref, others...);
 			return uRet;
@@ -429,10 +399,8 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 			(void)tagDynamicArgsExtractor<__ConstPtr>::extract([&](__ConstPtr ptr) {
-				if (m_data.del(ptr))
-				{
-					uRet++;
-				}
+				uRet += m_data.del(ptr);
+
 				return true;
 			}, ptr, others...);
 			return uRet;
@@ -443,10 +411,8 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 			(void)tagDynamicArgsExtractor<__ConstRef>::extract([&](__ConstRef ref) {
-				if (m_data.del(ref))
-				{
-					uRet++;
-				}
+				uRet += m_data.del(ref);
+				
 				return true;
 			}, ref, others...);
 			return uRet;
@@ -455,23 +421,27 @@ namespace NS_SSTL
 		template<typename T, typename = checkContainer_t<T>>
 		size_t del(T& container)
 		{
-			if (!__Super::checkIsSelf(container))
+			if (__Super::checkIsSelf(container))
 			{
-				return m_data.del(container);
+				size_t uRet = m_data.size();
+				m_data.clear();
+				return uRet;
 			}
-
-			return 0;
+			
+			return m_data.del(container);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t del(const T& container)
 		{
-			if (!__Super::checkIsSelf(container))
+			if (__Super::checkIsSelf(container))
 			{
-				return m_data.del(container);
+				size_t uRet = m_data.size();
+				m_data.clear();
+				return uRet;
 			}
-
-			return 0;
+			
+			return m_data.del(container);
 		}
 
 		size_t del(__InitList initList)
@@ -499,7 +469,7 @@ namespace NS_SSTL
 					return cb(*ptr);
 				}
 
-				return true;
+				return false;
 			});
 		}
 
@@ -594,70 +564,98 @@ namespace NS_SSTL
 		template<typename... args>
 		size_t addFront(__PtrType ptr, args... others)
 		{
-			return __Super::addFront(ptr, others...);
+			size_t uRet = 0;
+
+			(void)tagDynamicArgsExtractor<__PtrType>::extractReverse([&](__PtrType ptr) {
+				if (m_data.addFront(ptr))
+				{
+					uRet++;
+				}
+
+				return true;
+			}, ptr, others...);
+
+			return uRet;
 		}
 
 		template<typename... args>
-		size_t addFront(__RefType ref, args&... others)
+		void addFront(__RefType ref, args&... others)
 		{
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
-				_addFront(ref);
+				m_data.addFront(ref);
 				return true;
 			}, ref, others...);
-
-			return __Super::size();
 		}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
-			size_t addFront(T& ref, args&... others)
+		size_t addFront(T& ref, args&... others)
 		{
+			size_t uRet = 0;
+
 			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
-				_addFront(ref);
+				if (m_data.addFront(ref))
+				{
+					uRet++;
+				}
+
 				return true;
 			}, ref, others...);
 
-			return __Super::size();
+			return uRet;
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t addFront(T& container)
 		{
-			if (!__Super::checkIsSelf(container))
+			if (__Super::checkIsSelf(container))
 			{
-				CItrVisitor<T> Visitor(container);
-				for (auto&data : Visitor)
-				{
-					_addFront(data);
-				}
+				return 0;
 			}
 
-			return __Super::size();
+			size_t uRet = 0;
+			CItrVisitor<T> visitor(container);
+			for (auto&data : visitor)
+			{
+				if (m_data.addFront(data))
+				{
+					uRet++;
+				}
+			}
+			return uRet;
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t addFront(const T& container)
 		{
-			if (!__Super::checkIsSelf(container))
+			if (__Super::checkIsSelf(container))
 			{
-				for (auto&data : container)
-				{
-					_addFront(data);
-				}
+				return 0;
 			}
 
-			return __Super::size();
+			size_t uRet = 0;
+			CItrVisitor<T> visitor(container);
+			for (auto&data : visitor)
+			{
+				if (m_data.addFront(data))
+				{
+					uRet++;
+				}
+			}
+			return uRet;
 		}
 
 		size_t addFront(__InitList initList)
 		{
-			return __Super::addFront(initList);
+			return m_data.addFront(initList);
 		}
 
 		template<typename... args>
 		PtrArrayT& assign(__PtrType ptr, args... others)
 		{
-			__Super::assign(ptr, others...);
+			m_data.clear();
+			add(ptr, others...);
+			
 			return *this;
 		}
 
@@ -665,7 +663,6 @@ namespace NS_SSTL
 		PtrArrayT& assign(__RefType ref, args&... others)
 		{
 			m_data.clear();
-
 			add(ref, others...);
 
 			return *this;
@@ -722,7 +719,8 @@ namespace NS_SSTL
 
 		PtrArrayT& assign(__InitList initList)
 		{
-			__Super::assign(initList);
+			m_data.clear();
+			m_data.add(initList);
 			return *this;
 		}
 
@@ -809,7 +807,7 @@ namespace NS_SSTL
 			startPos = __Super::_checkPos(startPos);
 			if (startPos >= 0)
 			{
-				forEach([&](__RefType ref) {
+				(*this)([&](__RefType ref) {
 					arr.add(&ref);
 				}, (TD_PosType)startPos);
 			}
@@ -826,7 +824,7 @@ namespace NS_SSTL
 
 			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
 			{
-				forEach([&](__RefType ref) {
+				(*this)([&](__RefType ref) {
 					arr.add(&ref);
 				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
 			}
@@ -972,7 +970,7 @@ namespace NS_SSTL
 
 		bool popFront(__CB_RefType_void cb = NULL)
 		{
-			return __Super::shift([&](__PtrType ptr) {
+			return __Super::popFront([&](__PtrType ptr) {
 				if (NULL != ptr && cb)
 				{
 					cb(*ptr);
@@ -1060,6 +1058,12 @@ namespace NS_SSTL
 
 				return cb(*ptr);
 			});
+		}
+
+	private:
+		void _add(const __PtrType& ptr) override
+		{
+			m_data.add((__PtrType)ptr);
 		}
 	};
 }

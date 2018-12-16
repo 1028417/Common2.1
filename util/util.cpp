@@ -6,18 +6,20 @@ static const char *g_lplocaleName_CN = "Chinese_china";
 static const locale g_locale_CN = locale(g_lplocaleName_CN);
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
-void util::sys2tm(const SYSTEMTIME& sysTime, tm& atm)
+bool util::toSysTime(time_t time, SYSTEMTIME& sysTime)
 {
-	atm.tm_year = sysTime.wYear - 1900;     // tm_year is 1900 based
-	atm.tm_mon = sysTime.wMonth - 1;        // tm_mon is 0 based
-	atm.tm_mday = sysTime.wDay;
-	atm.tm_hour = sysTime.wHour;
-	atm.tm_min = sysTime.wMinute;
-	atm.tm_sec = sysTime.wSecond;
-	atm.tm_isdst = -1;
+	tm atm;
+	if (0 != _localtime64_s(&atm, &time))
+	{
+		return false;
+	}
+
+	toSysTime(atm, sysTime);
+
+	return true;
 }
 
-void util::tm2sys(const tm& atm, SYSTEMTIME& sysTime)
+void util::toSysTime(const tm& atm, SYSTEMTIME& sysTime)
 {
 	sysTime.wYear = atm.tm_year + 1900;     // tm_year is 1900 based
 	sysTime.wMonth = atm.tm_mon + 1;        // tm_mon is 0 based
@@ -27,27 +29,18 @@ void util::tm2sys(const tm& atm, SYSTEMTIME& sysTime)
 	sysTime.wSecond = atm.tm_sec;
 }
 
-static void _getCurrentTime(tm& atm)
-{
-	time_t time(time(0));
-	(void)_localtime64_s(&atm, &time);
-}
-
 void util::getCurrentTime(int& nHour, int& nMinute)
 {
-	tm atm;
-	_getCurrentTime(atm);
-
-	nHour = atm.tm_hour;
-	nMinute = atm.tm_min;
+	SYSTEMTIME sysTime;
+	getCurrentTime(sysTime);
+	
+	nHour = sysTime.wHour;
+	nMinute = sysTime.wMinute;
 }
 
 void util::getCurrentTime(SYSTEMTIME& sysTime)
 {
-	tm atm;
-	_getCurrentTime(atm);
-
-	tm2sys(atm, sysTime);
+	toSysTime(time(0), sysTime);
 }
 
 static wstring _FormatTime(const tm& atm, const wstring& strFormat)
@@ -92,7 +85,7 @@ wstring util::FormatTime(time_t time, const wstring& strFormat)
 	}
 
 	tm atm;
-	if (_localtime64_s(&atm, &time) != 0)
+	if (0 != _localtime64_s(&atm, &time))
 	{
 		return L"";
 	}
