@@ -71,10 +71,11 @@ namespace NS_SSTL
 
 	template <typename T, typename... args>
 	using checkArgs0Type_t = checkSameType_t<T, args0Type_t<args...>>;
-
+	
 	template<class _Iter> using checkIter_t =
 #ifdef _MSC_VER
-	enableIf_t<_Is_iterator, _Iter>;
+	//enableIf_t<_Is_iterator, _Iter>;
+	typename iterator_traits<_Iter>::iterator_category;
 #else
 	_RequireInputIter<_Iter>;
 #endif
@@ -106,30 +107,11 @@ namespace NS_SSTL
 		}
 	};
 
-	template <typename _C, typename __RItrType = decltype(declval<_C&>().rbegin())>
-	struct tagCheckRItr
-	{
-		typedef __RItrType RItr_Type;
-
-		typedef decltype(declval<const _C&>().rbegin()) CRItr_Type;
-	};
-	
-	template <typename _C>
-	struct tagCheckRItr<_C, void>
-	{
-		typedef void RItr_Type;
-
-		typedef void CRItr_Type;
-	};
-
 	template <typename _C, typename __Itr = decltype(tagItrVisitor::begin(declval<_C&>())), typename = checkIter_t<__Itr>>
 	struct tagCheckContainer
 	{
 		typedef __Itr Itr_Type;
 		typedef decltype(tagItrVisitor::begin(declval<const _C&>())) CItr_Type;
-
-		typedef typename tagCheckRItr<_C, void>::RItr_Type RItr_Type;
-		typedef typename tagCheckRItr<_C, void>::CRItr_Type CRItr_Type;
 
 		typedef decltype(*declval<__Itr>()) Ref_Type;
 		typedef removeConstRef_t<Ref_Type> Data_Type;

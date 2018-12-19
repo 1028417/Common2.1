@@ -10,6 +10,9 @@ namespace NS_SSTL
 	protected:
 		__UsingSuper(__SuperT);
 
+		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
+		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
+
 		using __CB_Ref_Pos_void = CB_T_Pos_RET<__DataRef, void>;
 		using __CB_Ref_Pos_bool = CB_T_Pos_RET<__DataRef, bool>;
 		using __CB_ConstRef_Pos_void = CB_T_Pos_RET<__DataConstRef, void>;
@@ -31,7 +34,7 @@ namespace NS_SSTL
 			using __RefType = decltype(m_data[0])&;
 
 		public:
-			template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
+			template <typename CB, typename = checkCBBool_t<CB, __RefType, TD_PosType>>
 			void forEach(const CB& cb, size_t startPos, size_t count)
 			{
 				if (startPos >= m_data.size())
@@ -57,7 +60,7 @@ namespace NS_SSTL
 				}
 			}
 
-			template <typename CB, typename = checkCBVoid_t<CB, __RefType, size_t>, typename = void>
+			template <typename CB, typename = checkCBVoid_t<CB, __RefType, TD_PosType>, typename = void>
 			void forEach(const CB& cb, size_t startPos, size_t count)
 			{
 				forEach([&](__RefType data, size_t pos) {
@@ -90,7 +93,6 @@ namespace NS_SSTL
 		{
 			return m_ArrayOperator;
 		}
-
 		__ArrayOperator<const __ContainerType>& _getOperator() const
 		{
 			return (__ArrayOperator<const __ContainerType>&)m_ArrayOperator;
@@ -167,26 +169,6 @@ namespace NS_SSTL
 		{
 			__Super::assign(t);
 			return *this;
-		}
-
-		template <typename T>
-		friend SArrayT operator& (const SArrayT& lhs, const T& rhs)
-		{
-			SArrayT arr;
-			for (auto&data : rhs)
-			{
-				if (lhs.includes(data))
-				{
-					arr.add(data);
-				}
-			}
-
-			return arr;
-		}
-
-		friend SArrayT operator& (const SArrayT& lhs, __InitList rhs)
-		{
-			return lhs & SArrayT(rhs);
 		}
 
 		template<typename CB>

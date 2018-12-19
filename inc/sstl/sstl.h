@@ -66,6 +66,7 @@ namespace NS_SSTL
 #include "PtrArray.h"
 
 #include "SList.h"
+#include "ArrList.h"
 
 #include "SSet.h"
 

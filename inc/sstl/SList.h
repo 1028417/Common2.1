@@ -9,7 +9,10 @@ namespace NS_SSTL
 	{
 	private:
 		__UsingSuper(__SuperT);
-		
+
+		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
+		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
+
 	private:
 		template <class T = __ContainerType>
 		class __ListOperator
@@ -23,10 +26,8 @@ namespace NS_SSTL
 		private:
 			T& m_data;
 
-			using __RefType = decltype(m_data.front())&;
-
 		public:
-			template <typename CB, typename = checkCBBool_t<CB, __RefType>>
+			template <typename CB, typename = checkCBBool_t<CB, __DataRef>>
 			void forEach(const CB& cb)
 			{
 				for (auto& data : m_data)
@@ -38,13 +39,13 @@ namespace NS_SSTL
 				}
 			}
 
-			template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void>
+			template <typename CB, typename = checkCBVoid_t<CB, __DataRef>, typename = void>
 			void forEach(const CB& cb)
 			{
-				forEach([&](__RefType data) {
+				for (auto& data : m_data)
+				{
 					cb(data);
-					return true;
-				});
+				}
 			}
 		};
 
@@ -53,7 +54,6 @@ namespace NS_SSTL
 		{
 			return m_ListOperator;
 		}
-
 		__ListOperator<const __ContainerType>& _getOperator() const
 		{
 			return (__ListOperator<const __ContainerType>&)m_ListOperator;
@@ -131,27 +131,7 @@ namespace NS_SSTL
 			__Super::assign(t);
 			return *this;
 		}
-
-		template <typename T>
-		friend SListT operator& (const SListT& lhs, const T& rhs)
-		{
-			SListT lst;
-			for (auto&data : rhs)
-			{
-				if (lhs.includes(data))
-				{
-					lst.add(data);
-				}
-			}
-
-			return lst;
-		}
-
-		friend SListT operator& (const SListT& lhs, __InitList rhs)
-		{
-			return lhs & SListT(rhs);
-		}
-
+		
 		template<typename CB>
 		void operator() (const CB& cb)
 		{
@@ -186,14 +166,17 @@ namespace NS_SSTL
 		template<typename T>
 		SListT& addFront(const T& container)
 		{
-			__Super::addFront(container);
+			if (!__Super::checkIsSelf(container))
+			{
+				m_data.insert(m_data.begin(), container.begin(), container.end());
+			}
+
 			return *this;
 		}
 
 		SListT& addFront(__InitList initList)
 		{
-			__Super::addFront(initList);
-			return *this;
+			addFront<__InitList>(initList);
 		}
 
 		template<typename... args>
@@ -309,7 +292,7 @@ namespace NS_SSTL
 			return mapSumItem;
 		}
 
-	private:
+	protected:
 		inline void _add(__DataConstRef data) override
 		{
 			m_data.push_back(data);

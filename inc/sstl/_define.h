@@ -87,9 +87,6 @@ namespace NS_SSTL
 	__UsingSuperType(__ItrType) \
 	__UsingSuperType(__CItrType) \
 	\
-	__UsingSuperType(__RItrType) \
-	__UsingSuperType(__CRItrType) \
-	\
 	__UsingSuperType(CB_Find) \
 	__UsingSuperType(CB_ConstFind) \
 	\

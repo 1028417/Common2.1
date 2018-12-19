@@ -25,7 +25,7 @@ namespace NS_SSTL
 		template<class _Iter, typename = checkIter_t<_Iter>>
 		explicit ptrcontainerT(_Iter _First, _Iter _Last)
 		{
-			for (auto itr = _First; itr != _Last; itr++)
+			for (auto itr = _First; itr != _Last; ++itr)
 			{
 				_add(*itr);
 			}
@@ -135,15 +135,31 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 
-			CItrVisitor<T> Visitor(container);
-			for (auto&data : Visitor)
+			if (bToFront)
 			{
-				if (_add(data, bToFront))
+				auto itrBegin = container.begin();
+				auto itr = container.end();
+				while (itr != itrBegin)
 				{
-					uRet++;
+					itr--;
+
+					if (_add(*itr, bToFront))
+					{
+						uRet++;
+					}
 				}
 			}
-
+			else
+			{
+				for (auto&data : container)
+				{
+					if (_add(data, bToFront))
+					{
+						uRet++;
+					}
+				}
+			}
+			
 			return uRet;
 		}
 
@@ -200,7 +216,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr++;
+					++itr;
 				}
 			}
 
@@ -229,8 +245,7 @@ namespace NS_SSTL
 		{
 			size_t uRet = 0;
 
-			CItrVisitor<T> Visitor(container);
-			for (auto&data : Visitor)
+			for (auto&data : container)
 			{
 				uRet += _del(data);
 			}

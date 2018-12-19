@@ -44,19 +44,13 @@ namespace NS_SSTL
 			: __Super(container)
 		{
 		}
-
-		//template<typename T, typename = checkContainer_t<T>>
-		//explicit SSetT(T& container)
-		//	: __Super(container)
-		//{
-		//}
-
+		
 		SSetT& operator=(__ContainerType&& container)
 		{
 			__Super::swap(container);
 			return *this;
 		}
-
+		
 		SSetT& operator=(SSetT&& set)
 		{
 			__Super::swap(set);
@@ -127,27 +121,6 @@ namespace NS_SSTL
 			return 1;
 		}
 		
-	public:		
-		template <typename T>
-		friend SSetT operator& (const SSetT& lhs, const T& rhs)
-		{
-			SSetT set;
-			for (auto&data : rhs)
-			{
-				if (lhs.includes(data))
-				{
-					set.add(data);
-				}
-			}
-
-			return set;
-		}
-
-		friend SSetT operator& (const SSetT& lhs, __InitList rhs)
-		{
-			return lhs & SSetT(rhs);
-		}
-
 	public:
 		template <typename T>
 		SSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const

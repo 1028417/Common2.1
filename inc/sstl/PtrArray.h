@@ -6,22 +6,24 @@
 
 namespace NS_SSTL
 {
-#define __PtrArraySuper SArrayT<__Type*, __BaseType>
+#define __PtrArraySuper SArrayT<__DataType__*, __BaseType>
 
-	template<typename __Type, template<typename...> class __BaseType>
+	template<typename __DataType__, template<typename...> class __BaseType>
 	class PtrArrayT : public __PtrArraySuper
 	{
-		friend tagItrVisitor;
-
 	private:
 		__UsingSuper(__PtrArraySuper)
 
-		using __PtrType = __Type*;
-		using __RefType = __Type&;
+		__UsingSuperType(__RItrType)
+		__UsingSuperType(__CRItrType)
 
-		using __ConstRef = const __Type&;
-		using __ConstPtr = const __Type*;
+		using __DataType = __DataType__;
+		using __PtrType = __DataType*;
+		using __RefType = __DataType&;
 
+		using __ConstPtr = const __DataType*;
+		using __ConstRef = const __DataType&;
+		
 		using __CB_RefType_void = CB_T_void<__RefType>;
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
 
@@ -31,13 +33,13 @@ namespace NS_SSTL
 	public:
 		PtrArrayT() {}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
 		explicit PtrArrayT(T* ptr, args... others)
 		{
 			add(ptr, others...);
 		}
 		
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		explicit PtrArrayT(T& ref, args&... others)
 		{
@@ -125,40 +127,6 @@ namespace NS_SSTL
 			assign(t);
 			return *this;
 		}
-
-	private:
-		__ContainerType& operator->() = delete;
-		const __ContainerType& operator->() const = delete;
-
-		__ContainerType& data() = delete;
-		const __ContainerType& data() const = delete;
-
-		operator __ContainerType& () = delete;
-		operator const __ContainerType& () const = delete;
-
-		__ItrType begin()
-		{
-			return m_data.begin();
-		}
-		__CItrType begin() const
-		{
-			return m_data.begin();
-		}
-
-		__ItrType end()
-		{
-			return m_data.end();
-		}
-		__CItrType end() const
-		{
-			return m_data.end();
-		}
-
-		__RItrType rbegin() = delete;
-		__CRItrType rbegin() const = delete;
-
-		__RItrType rend() = delete;
-		__CRItrType rend() const = delete;
 
 	public:
 		PtrArrayT& operator+= (__RefType rhs)
@@ -369,7 +337,7 @@ namespace NS_SSTL
 			return m_data.del(ptr);
 		}
 		
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
 		size_t del(T* ptr, args... others)
 		{
 			size_t uRet = 0;
@@ -381,7 +349,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		size_t del(T& ref, args&... others)
 		{
@@ -473,7 +441,7 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
 		size_t add(T* ptr, args... others)
 		{
 			size_t uRet = 0;
@@ -490,7 +458,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 		
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		size_t add(T& ref, args&... others)
 		{
@@ -581,19 +549,19 @@ namespace NS_SSTL
 		template<typename... args>
 		void addFront(__RefType ref, args&... others)
 		{
-			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
+			(void)tagDynamicArgsExtractor<__RefType>::extractReverse([&](__RefType ref) {
 				m_data.addFront(ref);
 				return true;
 			}, ref, others...);
 		}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		size_t addFront(T& ref, args&... others)
 		{
 			size_t uRet = 0;
 
-			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
+			(void)tagDynamicArgsExtractor<T>::extractReverse([&](T& ref) {
 				if (m_data.addFront(ref))
 				{
 					uRet++;
@@ -613,16 +581,7 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			size_t uRet = 0;
-			CItrVisitor<T> visitor(container);
-			for (auto&data : visitor)
-			{
-				if (m_data.addFront(data))
-				{
-					uRet++;
-				}
-			}
-			return uRet;
+			return m_data.addFront(container);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
@@ -633,16 +592,7 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			size_t uRet = 0;
-			CItrVisitor<T> visitor(container);
-			for (auto&data : visitor)
-			{
-				if (m_data.addFront(data))
-				{
-					uRet++;
-				}
-			}
-			return uRet;
+			return m_data.addFront(container);
 		}
 
 		size_t addFront(__InitList initList)
@@ -668,7 +618,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		PtrArrayT& assign(T& ref, args&... others)
 		{
@@ -768,7 +718,7 @@ namespace NS_SSTL
 			return arr;
 		}
 
-		template <typename T, typename... args, typename = checkNotSameType_t<T, __Type>
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		PtrArrayT concat(T& ref, args&... others) const
 		{
@@ -988,7 +938,7 @@ namespace NS_SSTL
 			});
 		}
 
-		PtrArrayT& qsort(__CB_Sort_T<__Type> cb)
+		PtrArrayT& qsort(__CB_Sort_T<__DataType> cb)
 		{
 			__Super::qsort([&](__PtrType lhs, __PtrType rhs) {
                 if (NULL != lhs && NULL != rhs)
@@ -1065,7 +1015,84 @@ namespace NS_SSTL
 		{
 			m_data.add((__PtrType)ptr);
 		}
+
+	public:
+		const __ContainerType& operator->() const
+		{
+			return m_data;
+		}
+
+		const __ContainerType& data() const
+		{
+			return m_data;
+		}
+
+		operator __ContainerType& () = delete;
+		operator const __ContainerType& () const
+		{
+			return m_data;
+		}
+
+		__CItrType begin() const
+		{
+			return m_data.cbegin();
+		}
+		__CItrType end() const
+		{
+			return m_data.cend();
+		}
+
+		__CRItrType rbegin() const
+		{
+			return m_data.crbegin();
+		}
+		__CRItrType rend() const
+		{
+			return m_data.crend();
+		}
 	};
 }
+
+//class iterator
+//{
+//	friend class PtrArrayT;
+//
+//private:
+//	__CItrType m_itr;
+//
+//	iterator(const __CItrType& itr)
+//		: m_itr(itr)
+//	{
+//	}
+//
+//public:
+//	operator __PtrType()
+//	{
+//		return *m_itr;
+//	}
+//
+//	__PtrType operator*()
+//	{
+//		return *m_itr;
+//	}
+//
+//	bool operator==(const iterator& other)
+//	{
+//		return m_itr == other.m_itr;
+//	}
+//
+//	iterator& operator++()
+//	{
+//		++m_itr;
+//		return *this;
+//	}
+//
+//	iterator operator++(int)
+//	{
+//		iterator prev = *this;
+//		++m_itr;
+//		return prev;
+//	}
+//};
 
 #endif // __PtrArray_H
