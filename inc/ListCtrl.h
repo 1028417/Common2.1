@@ -240,7 +240,7 @@ private:
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 
 public:
-	int InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix = L"");
+	int InsertItemEx(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 	int InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
 
 	void SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
@@ -263,7 +263,7 @@ public:
 
 	BOOL DeleteObject(const CListObject *pObject);
 	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
-	void DeleteItems(const set<UINT>& setItems);
+	void DeleteItems(list<UINT> lstItems);
 
 	void SetItemObject(UINT uItem, CListObject& Object);
 

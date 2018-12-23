@@ -163,6 +163,36 @@ namespace NS_SSTL
 			return m_data.rend();
 		}
 
+		int indexOf(__DataConstRef data) const
+		{
+			int nIdx = 0;
+			for (auto& item : m_data)
+			{
+				if (tagTryCompare<__DataType>::compare(item, data))
+				{
+					return nIdx;
+				}
+				nIdx++;
+			}
+
+			return -1;
+		}
+
+		int lastIndexOf(__DataConstRef data) const
+		{
+			int nIdx = m_data.size() - 1;
+			auto itrEnd = m_data.rend();
+			for (auto itr = m_data.rbegin(); itr != itrEnd; ++itr, nIdx--)
+			{
+				if (tagTryCompare<const __DataType>::compare(*itr, data))
+				{
+					return nIdx;
+				}
+			}
+
+			return -1;
+		}
+
 		template<typename T>
 		SListT& addFront(const T& container)
 		{

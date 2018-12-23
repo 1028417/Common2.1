@@ -31,6 +31,19 @@ namespace NS_SSTL
 			T& m_ptrArray;
 		
 		public:
+			template <typename CB>
+			bool get(TD_PosType pos, CB cb)
+			{
+				if (pos >= m_ptrArray.size())
+				{
+					return false;
+				}
+
+				cb(*m_ptrArray[pos]);
+
+				return true;
+			}
+
 			template <typename CB, typename = checkCBBool_t<CB, __DataRef, TD_PosType>>
 			void forEach(const CB& cb, size_t startPos, size_t count)
 			{
@@ -230,6 +243,39 @@ namespace NS_SSTL
 		}
 
 	public:
+		int find(CB_T_Pos_RET<__DataConstRef, bool> cb, TD_PosType stratPos = 0) const
+		{
+			int iRetPos = -1;
+
+			(*this)([&](__DataConstRef data, TD_PosType pos) {
+				if (cb(data, pos))
+				{
+					iRetPos = pos;
+					return false;
+				}
+
+				return true;
+			});
+
+			return iRetPos;
+		}
+
+		bool get(TD_PosType pos, __CB_Ref_void cb)
+		{
+			return _getOperator().get(pos, cb);
+		}
+		bool get(TD_PosType pos, __CB_ConstRef_void cb) const
+		{
+			return _getOperator().get(pos, cb);
+		}
+
+		bool set(TD_PosType pos, __DataConstRef& data)
+		{
+			return get([&](__DataRef m_data) {
+				m_data = data;
+			});
+		}
+
 		template<typename T>
 		ArrListT& addFront(const T& container)
 		{
@@ -275,7 +321,6 @@ namespace NS_SSTL
 			return __Super::popBak(data);
 		}
 
-	public:
 		ArrListT& sort(__CB_Sort_T<__DataType> cb = NULL)
 		{
 			__Super::sort(cb);
@@ -292,6 +337,38 @@ namespace NS_SSTL
 			return *this;
 		}
 
+		ArrListT slice(int startPos) const
+		{
+			ArrListT ret;
+
+			startPos = _checkPos(startPos);
+			if (startPos >= 0)
+			{
+				forEach([&](__DataConstRef data) {
+					ret.add(data);
+				}, (TD_PosType)startPos);
+			}
+
+			return ret;
+		}
+
+		ArrListT slice(int startPos, int endPos) const
+		{
+			ArrListT ret;
+
+			startPos = _checkPos(startPos);
+			endPos = _checkPos(endPos);
+
+			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
+			{
+				(*this)([&](__DataConstRef data) {
+					ret.add(data);
+				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
+			}
+
+			return ret;
+		}
+
 	private:
 		inline void _add(__DataConstRef data) override
 		{
@@ -304,6 +381,30 @@ namespace NS_SSTL
 			(void)m_ptrArray.popFront();
 
 			return __Super::_popFront(cb);
+		}
+
+	private:
+		int _checkPos(int pos) const
+		{
+			auto size = m_data.size();
+			if (0 == size)
+			{
+				return -1;
+			}
+
+			if (pos < 0)
+			{
+				return (int)size + pos;
+			}
+			else
+			{
+				if (pos >= (int)size)
+				{
+					return -1;
+				}
+
+				return pos;
+			}
 		}
 	};
 }

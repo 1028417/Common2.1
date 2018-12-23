@@ -1,14 +1,17 @@
-﻿  WorkThread.cpp
-  util.cpp
-  SQLiteDB.cpp
-  fsutil.cpp
-  ProFile.cpp
+﻿  fsdlg.cpp
   Path.cpp
-  fsdlg.cpp
-  正在生成代码...
-  sqlite3.c
+  ProFile.cpp
+  fsutil.cpp
+  SQLiteDB.cpp
+  util.cpp
+  WorkThread.cpp
   shell.c
-  正在生成代码...
-    正在创建库 ../lib/utild.lib 和对象 ../lib/utild.exp
-  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/utild.dll
-  util.vcxproj -> ../build\util/utild.pdb (Full PDB)
+sqlite\shell.c(16466): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _strdup. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt\string.h(530): note: 参见“strdup”的声明
+  sqlite3.c
+    正在创建库 ../lib/util.lib 和对象 ../lib/util.exp
+  正在生成代码
+  All 5382 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/util.dll
+  util.vcxproj -> ../build\util/util.pdb (Full PDB)

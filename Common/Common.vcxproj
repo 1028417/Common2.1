@@ -173,6 +173,11 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\PathTree_Normal.bmp" />
+    <Image Include="res\PathTree_Small.bmp" />
+    <Image Include="res\PathTree_State.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

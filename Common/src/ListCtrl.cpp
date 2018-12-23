@@ -276,7 +276,7 @@ void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, cons
 	}
 }
 
-int CObjectList::InsertItemEx(UINT uItem, vector<wstring> vecText, const wstring& strPrefix)
+int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
 {
 	__EnsureReturn(!vecText.empty(), -1);
 
@@ -512,14 +512,20 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 	}
 }
 
-void CObjectList::DeleteItems(const set<UINT>& setItems)
+void CObjectList::DeleteItems(list<UINT> lstItems)
 {
-	UINT uItemCount = GetItemCount();
-	for(auto itr = setItems.rbegin(); itr != setItems.rend(); itr++)
+	for (int iItem = GetItemCount()-1; iItem >= 0; iItem--)
 	{
-		if (*itr < uItemCount)
+		auto itr = std::find(lstItems.begin(), lstItems.end(), iItem);
+		if (itr != lstItems.end())
 		{
-			DeleteItem(*itr);
+			DeleteItem(iItem);
+
+			(void)lstItems.erase(itr);
+			if (lstItems.empty())
+			{
+				break;
+			}
 		}
 	}
 }
@@ -774,7 +780,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	{
 		LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(&NMHDR);
 
-		if ('A' == pLVKeyDow->wVKey && (0x80 & ::GetKeyState(VK_CONTROL)))
+		if ('A' == pLVKeyDow->wVKey && CMainApp::getKeyState(VK_CONTROL))
 		{
 			if (0 == (this->GetStyle() & LVS_SINGLESEL))
 			{

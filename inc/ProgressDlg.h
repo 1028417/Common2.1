@@ -7,11 +7,11 @@
 
 using FN_Work = function<void(class CProgressDlg&)>;
 
-class __CommonExt CProgressDlg : public CDialog, public CWorkThread
+class __CommonExt CProgressDlg : private CDialog, public CWorkThread
 {
 public:
-	CProgressDlg(const CString& cstrTitle, UINT uMaxProgress, const FN_Work& fnWork=NULL)
-		: m_cstrTitle(cstrTitle)
+	CProgressDlg(const wstring& strTitle, UINT uMaxProgress, const FN_Work& fnWork=NULL)
+		: m_strTitle(strTitle)
 		, m_fnWork(fnWork)
 	{
 		m_uMaxProgress = uMaxProgress;
@@ -25,14 +25,14 @@ protected:
 private:
 	FN_Work m_fnWork;
 
-	CString m_cstrTitle;
+	wstring m_strTitle;
 
 	UINT m_uMaxProgress = 0;
 
 	UINT m_uProgress = 0;
 
-	HANDLE m_hMutex = NULL;
-
+	NS_mtutil::CCSLock m_csLock;
+	
 	BOOL m_bFinished = false;
 
 	CString m_cstrStatusText;
@@ -42,15 +42,25 @@ private:
 public:
 	virtual INT_PTR DoModal(CWnd *pWndParent=NULL);
 
+	int showMsgBox(const wstring& strText, const wstring& strTitle, UINT uType = 0)
+	{
+		return MessageBoxW(strText.c_str(), strTitle.c_str(), uType);
+	}
+
+	int showMsgBox(const wstring& strText, UINT uType = 0)
+	{
+		return showMsgBox(strText, m_strTitle, uType);
+	}
+
 	void SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress=0);
 	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
 
 	void SetProgress(UINT uProgress);
 	LRESULT OnSetProgress(WPARAM wParam, LPARAM lParam);
 
-	UINT ForwardProgress(UINT uOffSet=1);
+	void ForwardProgress(UINT uOffSet=1);
 
-	void EndProgress(BOOL bClose, const CString& cstrButton=_T("Íê³É"));
+	void Close();
 
 	LRESULT OnEndProgress(WPARAM wParam, LPARAM lParam);
 
@@ -60,4 +70,6 @@ private:
 	virtual BOOL OnInitDialog();
 
 	virtual void OnCancel();
+
+	void _updateProgress();
 };

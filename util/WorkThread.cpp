@@ -16,19 +16,9 @@ DWORD WINAPI CWorkThread::ThreadProc(LPVOID lpThreadParam)
 
 	pThreadInfo->pThread->WorkThreadProc(*pThreadInfo);
 
-	pThreadInfo->bActive = true;
+	pThreadInfo->bActive = false;
 
 	return 0;
-}
-
-CWorkThread::CWorkThread()
-{
-	m_hEventCancel = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-}
-
-CWorkThread::~CWorkThread()
-{
-	(void)::CloseHandle(m_hEventCancel);
 }
 
 BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
@@ -44,58 +34,54 @@ BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
 
 	m_lstThreadInfos.clear();
 
-
-	(void)::ResetEvent(m_hEventCancel);
-
-
-	HANDLE hThread = NULL;
-
 	for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
 	{
 		tagWorkThreadInfo ThreadInfo;
-		::ZeroMemory(&ThreadInfo, sizeof ThreadInfo);
-
 		ThreadInfo.uIndex = uIndex;
 		ThreadInfo.pThread = this;
-
 		m_lstThreadInfos.push_back(ThreadInfo);
-
-		hThread = ::CreateThread(NULL, 0, ThreadProc, &m_lstThreadInfos.back(), CREATE_SUSPENDED, NULL);
-
-		m_lstThreadInfos.back().hHandle = hThread;
-
-		::Sleep(50);
+		m_lstThreadInfos.back().hHandle = ::CreateThread(NULL, 0, ThreadProc, &m_lstThreadInfos.back(), CREATE_SUSPENDED, NULL);
 	}
 
-	this->Pause(FALSE);
+	for (tagWorkThreadInfo& WorkThreadInfo : m_lstThreadInfos)
+	{
+		(void)::ResumeThread(WorkThreadInfo.hHandle);
+	}
 
 	return TRUE;
 }
 
 void CWorkThread::Pause(BOOL bPause)
 {
-	for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
-		; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
-	{
-		if (bPause)
-		{
-			(void)::SuspendThread(itThreadInfo->hHandle);
-		}
-		else
-		{
-			(void)::ResumeThread(itThreadInfo->hHandle);
-		}
-	}
+	m_bPause = bPause;
+
+	//for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
+	//	; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
+	//{
+	//	if (bPause)
+	//	{
+	//		(void)::SuspendThread(itThreadInfo->hHandle);
+	//	}
+	//	else
+	//	{
+	//		(void)::ResumeThread(itThreadInfo->hHandle);
+	//	}
+	//}
 }
 
 void CWorkThread::Cancel()
 {
-	(void)::SetEvent(m_hEventCancel);
+	(void)m_CancelEvent.notify();
 }
 
 BOOL CWorkThread::CheckCancelSignal()
 {
-	return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEventCancel, 0);
+	while (m_bPause)
+	{
+		Sleep(10);
+	}
+
+	return m_CancelEvent.wait(0);
 }
 
 UINT CWorkThread::GetActiveCount()
@@ -104,7 +90,7 @@ UINT CWorkThread::GetActiveCount()
 	for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
 		; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
 	{
-		if (!itThreadInfo->bActive)
+		if (itThreadInfo->bActive)
 		{
 			uCount++;
 		}

@@ -207,32 +207,6 @@ int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
 	return pos;
 }
 
-//int util::StrLowercaseFind(const wstring& str, const wstring& strToFind)
-//{
-//	__EnsureReturn(str.size() >= strToFind.size(), -1);
-//
-//	wstring::size_type pos = StrLowerCase(str).find(strToFind);
-//	if (wstring::npos == pos)
-//	{
-//		return -1;
-//	}
-//
-//	return pos;
-//}
-//
-//int util::StrUppercaseFind(const wstring& str, const wstring& strToFind)
-//{
-//	__EnsureReturn(str.size() >= strToFind.size(), -1);
-//
-//	wstring::size_type pos = StrUpperCase(str).find(strToFind);
-//	if (wstring::npos == pos)
-//	{
-//		return -1;
-//	}
-//
-//	return pos;
-//}
-
 wstring util::StrLowerCase(const wstring& str)
 {
 	wstring strTemp = str;

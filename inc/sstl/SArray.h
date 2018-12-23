@@ -2,6 +2,8 @@
 #ifndef __SArray_H
 #define __SArray_H
 
+#include <algorithm>
+
 namespace NS_SSTL
 {
 	template<typename __DataType, template<typename...> class __BaseType>
@@ -12,11 +14,6 @@ namespace NS_SSTL
 
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
-
-		using __CB_Ref_Pos_void = CB_T_Pos_RET<__DataRef, void>;
-		using __CB_Ref_Pos_bool = CB_T_Pos_RET<__DataRef, bool>;
-		using __CB_ConstRef_Pos_void = CB_T_Pos_RET<__DataConstRef, void>;
-		using __CB_ConstRef_Pos_bool = CB_T_Pos_RET<__DataConstRef, bool>;
 
 	private:
 		template <class T= __ContainerType>
@@ -34,6 +31,19 @@ namespace NS_SSTL
 			using __RefType = decltype(m_data[0])&;
 
 		public:
+			template <typename CB>
+			bool get(TD_PosType pos, CB cb)
+			{
+				if (pos >= m_data.size())
+				{
+					return false;
+				}
+
+				cb(m_data[pos]);
+
+				return true;
+			}
+
 			template <typename CB, typename = checkCBBool_t<CB, __RefType, TD_PosType>>
 			void forEach(const CB& cb, size_t startPos, size_t count)
 			{
@@ -204,26 +214,11 @@ namespace NS_SSTL
 
 		bool get(TD_PosType pos, __CB_Ref_void cb)
 		{
-			if (pos >= m_data.size())
-			{
-				return false;
-			}
-
-			cb(m_data[pos]);
-
-			return true;
+			return _getOperator().get(pos, cb);
 		}
-
 		bool get(TD_PosType pos, __CB_ConstRef_void cb) const
 		{
-			if (pos >= m_data.size())
-			{
-				return false;
-			}
-
-			cb(m_data[pos]);
-
-			return true;
+			return _getOperator().get(pos, cb);
 		}
 
 		bool set(TD_PosType pos, __DataConstRef& data)
@@ -245,17 +240,37 @@ namespace NS_SSTL
 			return true;
 		}
 
+		bool del_pos(list<TD_PosType> lstPos)
+		{
+			for (int iIdx = m_data.size() - 1; iIdx >= 0; iIdx--)
+			{
+				auto itr = std::find(lstPos.begin(), lstPos.end(), (TD_PosType)iIdx);
+				if (itr != lstPos.end())
+				{
+					m_data.erase(m_data.begin() + iIdx);
+
+					(void)lstPos.erase(itr);
+
+					if (lstPos.empty())
+					{
+						break;
+					}
+				}
+			}
+
+			return true;
+		}
+
 		int indexOf(__DataConstRef data) const
 		{
-			int uIdx = 0;
-
+			int nIdx = 0;
 			for (auto& item : m_data)
 			{
 				if (tagTryCompare<__DataType>::compare(item, data))
 				{
-					return uIdx;
+					return nIdx;
 				}
-				uIdx++;
+				nIdx++;
 			}
 
 			return -1;
@@ -263,21 +278,20 @@ namespace NS_SSTL
 
 		int lastIndexOf(__DataConstRef data) const
 		{
-			int uIdx = 1;
-
-			for (auto& item : m_data)
+			int nIdx = m_data.size()-1;
+			auto itrEnd = m_data.rend();
+			for (auto itr = m_data.rbegin(); itr != itrEnd; ++itr, nIdx--)
 			{
-				if (tagTryCompare<const __DataType>::compare(item, data))
+				if (tagTryCompare<const __DataType>::compare(*itr, data))
 				{
-					return m_data.size()-uIdx;
+					return nIdx;
 				}
-				uIdx++;
 			}
 
 			return -1;
 		}
 
-		int find(__CB_ConstRef_Pos_bool cb, TD_PosType stratPos = 0) const
+		int find(CB_T_Pos_RET<__DataConstRef, bool> cb, TD_PosType stratPos = 0) const
 		{
 			int iRetPos = -1;
 
@@ -369,6 +383,44 @@ namespace NS_SSTL
 			return *this;
 		}
 
+	public:
+		template<typename... args>
+		SArrayT& splice(TD_PosType pos, size_t nRemove, __DataConstRef data, const args&... others)
+		{
+			vector<__DataType> vecData;
+			extractDataTypeArgs(vecData, data, others...);
+			return splice(pos, nRemove, vecData);
+		}
+
+		template<typename T>
+		SArrayT& splice(TD_PosType pos, size_t nRemove = 0, const T& container = {})
+		{
+			if (__Super::checkIsSelf(container))
+			{
+				return *this;
+			}
+
+			auto itr = m_data.end();
+			if (pos < m_data.size())
+			{
+				itr = m_data.begin() + pos;
+
+				if (0 != nRemove)
+				{
+					itr = m_data.erase(itr, itr+(nRemove-1));
+				}
+			}
+
+			m_data.insert(itr, container.begin(), container.end());
+
+			return *this;
+		}
+
+		SArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
+		{
+			return splice(pos, nRemove, initList);
+		}
+
 		SArrayT slice(int startPos) const
 		{
 			SArrayT arr;
@@ -401,50 +453,6 @@ namespace NS_SSTL
 			return arr;
 		}
 
-		template<typename... args>
-		SArrayT& splice(TD_PosType pos, size_t nRemove, __DataConstRef data, const args&... others)
-		{
-			vector<__DataType> vecData;
-			extractDataTypeArgs(vecData, data, others...);
-			return splice(pos, nRemove, vecData);
-		}
-
-		template<typename T>
-		SArrayT& splice(TD_PosType pos, size_t nRemove = 0, const T& container = {})
-		{
-			if (__Super::checkIsSelf(container))
-			{
-				return *this;
-			}
-
-			auto itr = m_data.end();
-			if (pos < m_data.size())
-			{
-				itr = m_data.begin() + pos;
-			}
-
-			while (itr != m_data.end() && nRemove)
-			{
-				itr = m_data.erase(itr);
-				nRemove--;
-			}
-
-			m_data.insert(itr, container.begin(), container.end());
-
-			return *this;
-		}
-
-		SArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
-		{
-			return splice(pos, nRemove, initList);
-		}
-
-		string join(const string& strSplitor = ",") const
-		{
-			return __Super::toString(strSplitor);
-		}
-
-	public:
 		template <typename T>
 		SArrayT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
@@ -510,7 +518,7 @@ namespace NS_SSTL
 			return NS_SSTL::find(m_data, data, cb);
 		}
 
-	private:
+	protected:
 		int _checkPos(int pos) const
 		{
 			auto size = m_data.size();

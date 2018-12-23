@@ -116,8 +116,8 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 private:
-	bool HandleHotkey(LPARAM lParam, bool bGlobal);
-	bool HandleHotkey(tagHotkeyInfo &HotkeyInfo);
+	bool _HandleHotkey(LPARAM lParam);
+	bool _HandleHotkey(tagHotkeyInfo &HotkeyInfo);
 
 	BOOL OnCommand(UINT uID);
 
@@ -131,10 +131,17 @@ public:
 
 	static E_DoEventsResult DoEvents(bool bOnce=false);
 
+	static bool peekMsg(UINT uMsg, MSG msg, bool bPeekAll);
+
 	static bool SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse);
 	static bool KillTimer(HWND hWnd, UINT uElapse);
 
-	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
+	static bool getKeyState(UINT uKey)
+	{
+		return ::GetKeyState(uKey) < 0;
+	}
+
+	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo, bool bGlobal=false);
 
 	static BOOL RegisterInterface(UINT uIndex, LPVOID lpInterface);
 	static LPVOID GetInterface(UINT uIndex);

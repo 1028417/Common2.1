@@ -70,7 +70,6 @@ public:
 
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
 	static wstring FormatTime(time_t time, const wstring& strFormat);
-	//static wstring FormatTime(const tm& atm, const wstring& strFormat);
 
 	static void trim(wstring& strText, wchar_t chr = ' ');
 	static void ltrim(wstring& strText, wchar_t chr = ' ');
@@ -130,6 +129,8 @@ struct __UtilExt tagCNSortor
 #include "SQLiteDB.h"
 
 #include "fsutil.h"
+
+#include "mtutil.h"
 
 #include "ProFile.h"
 

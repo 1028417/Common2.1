@@ -36,6 +36,7 @@
     <ClInclude Include="..\inc\util\IDB.h">
       <Filter>db</Filter>
     </ClInclude>
+    <ClInclude Include="..\inc\util\mtutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

@@ -28,23 +28,17 @@ void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
 		m_fnWork(*this);
 	}
 
-	this->EndProgress(FALSE);
+	(void)this->PostMessage(WM_EndProgress);
 }
 
 INT_PTR CProgressDlg::DoModal(CWnd *pWndParent)
 {
-	m_hMutex = ::CreateMutex(NULL, FALSE, NULL);
-	__AssertReturn(m_hMutex, -1);
-
 	LPCDLGTEMPLATE lpDialogTemplate = g_ResModule.loadDialog(IDD_DLG_PROGRESS);
 	__AssertReturn(lpDialogTemplate, -1);
 
 	__AssertReturn(this->InitModalIndirect(lpDialogTemplate, pWndParent), -1);
 
 	INT_PTR nResult = __super::DoModal();
-
-	(void)::ReleaseMutex(m_hMutex);
-	(void)::CloseHandle(m_hMutex);
 
 	return nResult;
 }
@@ -53,10 +47,10 @@ BOOL CProgressDlg::OnInitDialog()
 {
 	__super::OnInitDialog();
 
-	(void)this->SetWindowText(m_cstrTitle);
+	(void)this->SetWindowText(m_strTitle.c_str());
 
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
-	this->SetProgress(0);
+	_updateProgress();
 
 	m_bFinished = FALSE;
 
@@ -67,108 +61,98 @@ BOOL CProgressDlg::OnInitDialog()
 
 void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)
 {
-	(void)::WaitForSingleObject(m_hMutex, INFINITE);
-
+	m_csLock.lock();
 	m_cstrStatusText = cstrStatusText;
-	
+	m_csLock.unlock();
+
 	(void)this->PostMessage(WM_SetStatusText);
-	
+
 	if (0 != uOffsetProgress)
 	{
-		m_uProgress += uOffsetProgress;
-		this->SetProgress(m_uProgress);
+		this->ForwardProgress(uOffsetProgress);
 	}
-
-	(void)::ReleaseMutex(m_hMutex);
 }
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
-	//if (!this->GetExitSignal()) // 防止死锁
-	{
-		(void)this->SetDlgItemText(IDC_STATIC_STATUS, m_cstrStatusText);
-	}
+	MSG msg;
+	memset(&msg, 0, sizeof msg);
+	(void)CMainApp::peekMsg(WM_SetStatusText, msg, true);
+
+	m_csLock.lock();
+	CString cstrStatusText(m_cstrStatusText);
+	m_csLock.unlock();
+
+	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
 
 	return TRUE;
 }
 
 void CProgressDlg::SetProgress(UINT uProgress)
-{	
-	(void)this->PostMessage(WM_SetProgress, uProgress);
+{
+	m_uProgress = uProgress;
+	(void)this->PostMessage(WM_SetProgress);
 }
 
 LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 {
-	UINT uProgress = (UINT)wParam;
-
-	CString cstrProgress;
-	cstrProgress.Format(_T("%d/%d"), uProgress, m_uMaxProgress);
-
-	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
-
-	(void)m_wndProgressCtrl.SetPos((int)uProgress);
-
+	MSG msg;
+	memset(&msg, 0, sizeof msg);
+	(void)CMainApp::peekMsg(WM_SetProgress, msg, true);
+	
+	_updateProgress();
+	
 	return TRUE;
 }
 
-UINT CProgressDlg::ForwardProgress(UINT uOffSet)
+void CProgressDlg::_updateProgress()
 {
-	(void)::WaitForSingleObject(m_hMutex, INFINITE);
+	CString cstrProgress;
+	cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
 
-	m_uProgress += uOffSet;
-	this->SetProgress(m_uProgress);
+	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
-	(void)::ReleaseMutex(m_hMutex);
-
-	return m_uProgress;
+	(void)m_wndProgressCtrl.SetPos((int)m_uProgress);
 }
 
-void CProgressDlg::EndProgress(BOOL bClose, const CString& cstrButton)
+void CProgressDlg::ForwardProgress(UINT uOffSet)
 {
-	this->SetProgress(m_uMaxProgress);
-
-	m_bFinished = TRUE;
-	
-	if (bClose)
-	{
-		(void)this->PostMessage(WM_EndProgress);
-	}
-	else
-	{
-		(void)::SetDlgItemText(m_hWnd, IDCANCEL, cstrButton);
-	}
+	this->SetProgress(m_uProgress + uOffSet);
 }
 
 LRESULT CProgressDlg::OnEndProgress(WPARAM wParam, LPARAM lParam)
 {
-	this->OnOK();
+	m_uProgress = m_uMaxProgress;
+	_updateProgress();
+
+	m_bFinished = TRUE;
 	
+	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
+
 	return 0;
 }
 
 void CProgressDlg::OnCancel()
 {
-	__Ensure(this->IsWindowVisible());
-
 	if (m_bFinished)
 	{
 		__super::OnOK();
 		return;
 	}
 
-	this->Pause(TRUE);
+	//__Ensure(this->IsWindowVisible());
+	
+	this->Pause(true);
 
-
-	if (IDYES != this->MessageBox(_T("确认取消?"), m_cstrTitle, MB_YESNO))
+	if (IDYES != this->showMsgBox(L"确认取消?", MB_YESNO))
 	{
-		this->Pause(FALSE);
-
+		this->Pause(false);
 		return;
 	}
 
 	this->Cancel();
 
-	this->Pause(FALSE);
+	this->Pause(false);
 
 	//CWaitCursor WaitCursor;
 
@@ -178,4 +162,11 @@ void CProgressDlg::OnCancel()
 	}
 
 	__super::OnCancel();
+}
+
+void CProgressDlg::Close()
+{
+	m_bFinished = true;
+
+	this->PostMessage(WM_SYSCOMMAND, SC_CLOSE);
 }

@@ -29,6 +29,7 @@
     <ClInclude Include="..\inc\util\fsdlg.h" />
     <ClInclude Include="..\inc\util\fsutil.h" />
     <ClInclude Include="..\inc\util\IDB.h" />
+    <ClInclude Include="..\inc\util\mtutil.h" />
     <ClInclude Include="..\inc\util\Path.h" />
     <ClInclude Include="..\inc\util\SQLiteDB.h" />
     <ClInclude Include="..\inc\util\util.h" />

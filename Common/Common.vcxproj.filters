@@ -106,4 +106,9 @@
   <ItemGroup>
     <ResourceCompile Include="Common.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\PathTree_State.bmp" />
+    <Image Include="res\PathTree_Normal.bmp" />
+    <Image Include="res\PathTree_Small.bmp" />
+  </ItemGroup>
 </Project>

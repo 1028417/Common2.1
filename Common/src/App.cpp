@@ -206,7 +206,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 			break;
 		case WM_HOTKEY:
-			(void)HandleHotkey(pMsg->lParam, TRUE);
+			(void)_HandleHotkey(pMsg->lParam);
 			
 			return TRUE;
 		default:
@@ -219,23 +219,20 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 		for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
 			; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
 		{
-			if (MOD_ALT == (UINT)itrHotkeyInfo->eFlag && ::GetKeyState(itrHotkeyInfo->uKey)&0x8000)
+			if ((UINT)itrHotkeyInfo->eFlag & MOD_ALT)
 			{
-				UINT uFlag = MOD_ALT;
-
-				if (0 == (::GetKeyState(VK_CONTROL) & 0x800))
+				if (getKeyState(itrHotkeyInfo->uKey))
 				{
-					uFlag |= MOD_CONTROL;
-				}
+					UINT uFlag = MOD_ALT;
+					if (getKeyState(VK_SHIFT))
+					{
+						uFlag |= MOD_SHIFT;
+					}
 
-				if (0 == (::GetKeyState(VK_SHIFT) & 0x800))
-				{
-					uFlag |= MOD_SHIFT;
-				}
-
-				if (HandleHotkey(MAKELPARAM(uFlag, itrHotkeyInfo->uKey), FALSE))
-				{
-					return TRUE;
+					if (_HandleHotkey(MAKELPARAM(uFlag, itrHotkeyInfo->uKey)))
+					{
+						return TRUE;
+					}
 				}
 			}
 		}
@@ -244,27 +241,25 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	if (WM_KEYDOWN == pMsg->message)
 	{
 		UINT uKey = pMsg->wParam;
-				
 		if (VK_CONTROL != uKey && VK_SHIFT != uKey && VK_MENU != uKey)
 		{
 			UINT uFlag = 0;
-
-			if(::GetKeyState(VK_CONTROL)&0x8000)
+			if(getKeyState(VK_CONTROL))
 			{
 				uFlag = MOD_CONTROL;
 			}
 
-			if (::GetKeyState(VK_SHIFT) & 0x8000)
+			if (getKeyState(VK_SHIFT))
 			{
 				uFlag |= MOD_SHIFT;
 			}
 
-			if (::GetKeyState(VK_MENU) & 0x8000)
+			if (getKeyState(VK_MENU))
 			{
 				uFlag |= MOD_ALT;
 			}
 			
-			if (HandleHotkey(MAKELPARAM(uFlag, uKey), FALSE))
+			if (_HandleHotkey(MAKELPARAM(uFlag, uKey)))
 			{
 				return TRUE;
 			}
@@ -297,7 +292,7 @@ BOOL CMainApp::OnCommand(UINT uID)
 	return FALSE;
 }
 
-bool CMainApp::HandleHotkey(LPARAM lParam, bool bGlobal)
+bool CMainApp::_HandleHotkey(LPARAM lParam)
 {
 	static DWORD dwLastTime = 0;
 	if (100 > ::GetTickCount() - dwLastTime)
@@ -308,14 +303,9 @@ bool CMainApp::HandleHotkey(LPARAM lParam, bool bGlobal)
 
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)
 	{
-		if (HotkeyInfo.bGlobal != bGlobal)
-		{
-			continue;
-		}
-
 		if (HotkeyInfo.lParam == lParam)
 		{
-			if (HandleHotkey(HotkeyInfo))
+			if (_HandleHotkey(HotkeyInfo))
 			{
 				return true;
 			}
@@ -325,7 +315,7 @@ bool CMainApp::HandleHotkey(LPARAM lParam, bool bGlobal)
 	return false;
 }
 
-bool CMainApp::HandleHotkey(tagHotkeyInfo &HotkeyInfo)
+bool CMainApp::_HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 {
 	if (HotkeyInfo.bHandling)
 	{
@@ -375,14 +365,14 @@ BOOL CMainApp::Quit()
 		__EnsureReturn((*itModule)->OnQuit(), FALSE);
 	}
 
-	for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
-		; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
-	{
-		if (itrHotkeyInfo->bGlobal)
-		{
-			(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
-		}
-	}
+	//for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
+	//	; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
+	//{
+	//	if (itrHotkeyInfo->bGlobal)
+	//	{
+	//		(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
+	//	}
+	//}
 
 	getView().close();
 
@@ -407,6 +397,17 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 	}
 
 	return iRet ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
+}
+
+bool CMainApp::peekMsg(UINT uMsg, MSG msg, bool bPeekAll)
+{
+	bool bRet = false;
+	do
+	{
+		bRet = ::PeekMessage(&msg, NULL, uMsg, uMsg, PM_REMOVE);
+	} while (bPeekAll && bRet);
+
+	return bRet;
 }
 
 BOOL CMainApp::AddModule(CModuleApp& Module)
@@ -485,19 +486,19 @@ LPVOID CMainApp::GetInterface(UINT uIndex)
 	return NULL;
 }
 
-BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
+BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo, bool bGlobal)
 {
 	if (!util::ContainerFind(g_vctHotkeyInfos, HotkeyInfo))
 	{
-		if (HotkeyInfo.bGlobal)
+		g_vctHotkeyInfos.push_back(HotkeyInfo);
+
+		if (bGlobal)
 		{
 			if (!::RegisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey))
 			{
 				return FALSE;
 			}
 		}
-
-		g_vctHotkeyInfos.push_back(HotkeyInfo);
 	}
 
 	return TRUE;
