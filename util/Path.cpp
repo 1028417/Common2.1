@@ -30,6 +30,21 @@ wstring CPath::GetPath() const
 	return m_strName;
 }
 
+TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData)
+{
+	m_plstSubPath = new TD_PathList();
+
+	arrFindData([&](auto& findData) {
+		CPath *pSubPath = NewSubPath(findData, this);
+		if (pSubPath)
+		{
+			m_plstSubPath->add(pSubPath);
+		}
+	});
+
+	return *m_plstSubPath;
+}
+
 TD_PathList& CPath::_findFile(const wstring& strFind)
 {
 	if (NULL != m_plstSubPath)
@@ -181,7 +196,7 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
-	m_plstSubPath->del_if([&](CPath& SubPath) {
+	m_plstSubPath->del_ex([&](CPath& SubPath) {
 		if (lstDeletePaths.includes(&SubPath))
 		{
 			delete &SubPath;

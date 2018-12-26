@@ -10,11 +10,10 @@ using FN_Work = function<void(class CProgressDlg&)>;
 class __CommonExt CProgressDlg : private CDialog, public CWorkThread
 {
 public:
-	CProgressDlg(const wstring& strTitle, UINT uMaxProgress, const FN_Work& fnWork=NULL)
-		: m_strTitle(strTitle)
-		, m_fnWork(fnWork)
+	CProgressDlg(const FN_Work& fnWork, UINT uMaxProgress=0)
+		: m_fnWork(fnWork)
+		, m_uMaxProgress(uMaxProgress)
 	{
-		m_uMaxProgress = uMaxProgress;
 	}
 
 protected:
@@ -40,8 +39,8 @@ private:
 	CProgressCtrl m_wndProgressCtrl;
 
 public:
-	virtual INT_PTR DoModal(CWnd *pWndParent=NULL);
-
+	virtual INT_PTR DoModal(const wstring& strTitle, CWnd *pWndParent=NULL);
+	
 	int showMsgBox(const wstring& strText, const wstring& strTitle, UINT uType = 0)
 	{
 		return MessageBoxW(strText.c_str(), strTitle.c_str(), uType);
@@ -53,21 +52,23 @@ public:
 	}
 
 	void SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress=0);
-	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
 
-	void SetProgress(UINT uProgress);
-	LRESULT OnSetProgress(WPARAM wParam, LPARAM lParam);
+	void SetProgress(UINT uProgress, int iMaxProgress=-1);
 
 	void ForwardProgress(UINT uOffSet=1);
 
 	void Close();
 
-	LRESULT OnEndProgress(WPARAM wParam, LPARAM lParam);
-
 private:
-	virtual void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) override;
+	void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) override;
 
 	virtual BOOL OnInitDialog();
+
+	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
+
+	LRESULT OnSetProgress(WPARAM wParam, LPARAM lParam);
+
+	LRESULT OnEndProgress(WPARAM wParam, LPARAM lParam);
 
 	virtual void OnCancel();
 

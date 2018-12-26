@@ -71,9 +71,11 @@ public:
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
 	static wstring FormatTime(time_t time, const wstring& strFormat);
 
-	static void trim(wstring& strText, wchar_t chr = ' ');
-	static void ltrim(wstring& strText, wchar_t chr = ' ');
-	static void rtrim(wstring& strText, wchar_t chr = ' ');
+	static bool checkWChar(const wstring& str);
+
+	static wstring& trim(wstring& strText, wchar_t chr = ' ');
+	static wstring& ltrim(wstring& strText, wchar_t chr = ' ');
+	static wstring& rtrim(wstring& strText, wchar_t chr = ' ');
 
 	static wstring trim(const wstring& strText, wchar_t chr = ' ');
 	static wstring ltrim(const wstring& strText, wchar_t chr = ' ');
@@ -86,7 +88,10 @@ public:
 
 	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
 
+	static wstring& StrLowerCase(wstring& str);
 	static wstring StrLowerCase(const wstring& str);
+	
+	static wstring& StrUpperCase(wstring& str);
 	static wstring StrUpperCase(const wstring& str);
 
 	static string WStrToStr(const wstring&str, UINT CodePage = CP_ACP);

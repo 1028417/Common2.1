@@ -21,13 +21,12 @@ namespace NS_SSTL
 		using __ItrType = containerItrType_t<__ContainerType>;
 		using __CItrType = containerCItrType_t<__ContainerType>;
 
-		using CB_Find = function<bool(__ItrType& itr)>;
-		using CB_ConstFind = function<bool(const __CItrType& itr)>;
+		using CB_Del = CB_T_Ret<__DataRef, E_DelConfirm>;
 
 		using __InitList = InitList_T<__DataType>;
 
-		using __CB_Ref_void = CB_T_void<removeConst_t<__DataRef>>;
-		using __CB_Ref_bool = CB_T_bool<removeConst_t<__DataRef>>;
+		using __CB_Ref_void = CB_T_void<__DataRef>;
+		using __CB_Ref_bool = CB_T_bool<__DataRef>;
 
 		using __CB_ConstRef_void = CB_T_void<__DataConstRef>;
 		using __CB_ConstRef_bool = CB_T_bool<__DataConstRef>;
@@ -300,9 +299,14 @@ namespace NS_SSTL
 			return m_data.size();
 		}
 
-		void clear()
+		virtual void clear()
 		{
 			m_data.clear();
+		}
+
+		virtual __ItrType erase(const __CItrType& itr)
+		{
+			return m_data.erase(itr);
 		}
 
 		__ItrType begin()
@@ -322,13 +326,7 @@ namespace NS_SSTL
 		{
 			return m_data.end();
 		}
-
-		//template <typename T, typename = checkIter_t<T>>
-		//T erase(const T& itr)
-		//{
-		//	return m_data.erase(itr);
-		//}
-
+		
 	public:
 		SContainerT& swap(SContainerT& container)
 		{
@@ -375,7 +373,7 @@ namespace NS_SSTL
 				return *this;
 			}
 
-			m_data.clear();
+			clear();
 			
 			new (&m_data) __ContainerType(container.begin(), container.end());
 
@@ -494,16 +492,14 @@ namespace NS_SSTL
 
 		bool includes(__KeyConstRef key) const
 		{
-			return 0 != _cfind(key, [](const __CItrType& itr) {
-				return false;
-			});
+			return _includes(key);
 		}
 
 		template<typename... args>
 		bool includes(__KeyConstRef data, const args&... others) const
 		{
 			return tagDynamicArgsExtractor<__KeyConstRef>::extract([&](__KeyConstRef data) {
-				return includes(data);
+				return _includes(data);
 			}, data, others...);
 		}
 
@@ -517,7 +513,7 @@ namespace NS_SSTL
 
 			for (auto&data : container)
 			{
-				if (!includes(data))
+				if (!_includes(data))
 				{
 					return false;
 				}
@@ -533,99 +529,36 @@ namespace NS_SSTL
 
 		size_t del(__KeyConstRef key, __CB_Ref_void cb = NULL)
 		{
-			return _find(key, [&](__ItrType& itr) {
+			return _del(key, [&](__DataRef data) {
 				if (cb)
 				{
-					cb(*itr);
+					cb(data);
 				}
 
-				itr = m_data.erase(itr);
-
-				return true;
-			});
-		}
-
-		bool del_one(__KeyConstRef key, __CB_Ref_void cb = NULL)
-		{
-			return 0 != _find(key, [&](__ItrType& itr) {
-				if (cb)
-				{
-					cb(*itr);
-				}
-
-				m_data.erase(itr);
-
-				return false;
+				return E_DelConfirm::DC_Yes;
 			});
 		}
 
 		size_t del_if(__KeyConstRef key, __CB_Ref_bool cb)
 		{
-			size_t uRet = 0;
-			(void)_find(key, [&](__ItrType& itr) {
-				if (cb(*itr))
+			return _del(key, [&](__DataRef data) {
+				if (cb(data))
 				{
-					uRet++;
-					itr = m_data.erase(itr);
-				}
-
-				return true;
-			});
-			return uRet;
-		}
-
-		size_t del_if(__KeyConstRef key, const function<E_DelConfirm(__DataRef)>& cb)
-		{
-			size_t uRet = 0;
-			(void)_find(key, [&](__ItrType& itr) {
-				E_DelConfirm ret = cb(*itr);
-				if (E_DelConfirm::DC_Abort == ret)
-				{
-					return false;
-				}
-				else if (E_DelConfirm::DC_No == ret)
-				{
-					return true;
+					return E_DelConfirm::DC_Yes;
 				}
 				else
 				{
-					itr = m_data.erase(itr);
-					uRet++;
-
-					if (E_DelConfirm::DC_YesAbort == ret)
-					{
-						return false;
-					}
-					else
-					{
-						return true;
-					}
+					return E_DelConfirm::DC_No;
 				}
 			});
-			return uRet;
 		}
 
-		size_t del_if(__CB_Ref_bool cb)
+		size_t del_if(__KeyConstRef key, CB_Del cb)
 		{
-			size_t uRet = 0;
-
-			for (auto itr = m_data.begin(); itr != m_data.end();)
-			{
-				if (cb(*itr))
-				{
-					itr = m_data.erase(itr);
-					uRet++;
-				}
-				else
-				{
-					++itr;
-				}
-			}
-
-			return uRet;
+			return _del(key, cb);
 		}
-
-		size_t del_if(const function<E_DelConfirm(__DataRef)>& cb)
+		
+		size_t del_ex(CB_Del cb)
 		{
 			size_t uRet = 0;
 
@@ -642,13 +575,33 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
+					itr = erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == ret)
 					{
 						break;
 					}
+				}
+			}
+
+			return uRet;
+		}
+
+		size_t del_ex(__CB_Ref_bool cb)
+		{
+			size_t uRet = 0;
+
+			for (auto itr = m_data.begin(); itr != m_data.end();)
+			{
+				if (cb(*itr))
+				{
+					itr = erase(itr);
+					uRet++;
+				}
+				else
+				{
+					++itr;
 				}
 			}
 
@@ -679,7 +632,7 @@ namespace NS_SSTL
 			if (checkIsSelf(container))
 			{
 				size_t uRet = m_data.size();
-				m_data.clear();
+				clear();
 				return uRet;
 			}
 
@@ -809,14 +762,14 @@ namespace NS_SSTL
 				cb(*itr);
 			}
 
-			m_data.erase(itr);
+			erase(itr);
 
 			return true;
 		}
 
-		virtual size_t _find(__KeyConstRef key, const CB_Find& cb = NULL) { return 0; }
+		virtual size_t _del(__KeyConstRef key, CB_Del cb) { return 0; }
 
-		virtual size_t _cfind(__KeyConstRef key, const CB_ConstFind& cb = NULL) const { return 0; }
+		virtual bool _includes(__KeyConstRef key) const { return false; }
 
 		virtual void _toString(stringstream& ss, __DataConstRef data) const
 		{

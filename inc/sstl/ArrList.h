@@ -213,15 +213,29 @@ namespace NS_SSTL
 			return m_data;
 		}
 
+		void clear() override
+		{
+			m_ptrArray.clear();
+			m_data.clear();
+		}
+
 		const __ContainerType& data() const
 		{
 			return m_data;
 		}
 
 		operator __ContainerType& () = delete;
+
 		operator const __ContainerType& () const
 		{
 			return m_data;
+		}
+
+		__ItrType erase(const __CItrType& itr) override
+		{
+			m_ptrArray.del_one(&*itr);
+
+			return m_data.erase(itr);
 		}
 
 		__CItrType begin() const
@@ -307,18 +321,18 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_ConstRef_void cb = NULL)
+		bool popBack(__CB_Ref_void cb = NULL)
 		{
 			(void)m_ptrArray.popBack();
 
-			return __Super::popBak(cb);
+			return __Super::popBack(cb);
 		}
 
 		bool popBack(__DataRef data)
 		{
 			(void)m_ptrArray.popBack();
 
-			return __Super::popBak(data);
+			return __Super::popBack(data);
 		}
 
 		ArrListT& sort(__CB_Sort_T<__DataType> cb = NULL)
@@ -370,7 +384,7 @@ namespace NS_SSTL
 		}
 
 	private:
-		inline void _add(__DataConstRef data) override
+		void _add(__DataConstRef data) override
 		{
 			m_data.push_back(data);
 			m_ptrArray.add(m_data.back());
@@ -379,8 +393,48 @@ namespace NS_SSTL
 		bool _popFront(__CB_Ref_void cb = NULL) override
 		{
 			(void)m_ptrArray.popFront();
-
 			return __Super::_popFront(cb);
+		}
+
+		size_t _del(__DataConstRef data, CB_Del cb) override
+		{
+			size_t uRet = 0;
+
+			auto itrPtr = m_ptrArray.begin();
+			for (auto itr = m_data.begin(); itr != m_data.end() && itrPtr != m_ptrArray.end(); )
+			{
+				if (!tagTryCompare<__DataConstRef>::compare(*itr, data))
+				{
+					++itr;
+					++itrPtr;
+					continue;
+				}
+
+				E_DelConfirm eRet = cb(*itr);
+				if (E_DelConfirm::DC_Abort == eRet)
+				{
+					break;
+				}
+				else if (E_DelConfirm::DC_No == eRet)
+				{
+					++itr;
+					++itrPtr;
+					continue;
+				}
+				else
+				{
+					itr = m_data.erase(itr);
+					itrPtr = m_ptrArray.erase(itrPtr);
+					uRet++;
+
+					if (E_DelConfirm::DC_YesAbort == eRet)
+					{
+						break;
+					}
+				}
+			}
+
+			return uRet;
 		}
 
 	private:

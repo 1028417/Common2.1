@@ -84,12 +84,12 @@ namespace NS_SSTL
 		}
 
 	private:
-		inline void _add(__DataConstRef data) override
+		void _add(__DataConstRef data) override
 		{
 			m_data.insert(data);
 		}
 
-		size_t _find(__DataConstRef data, const CB_Find& cb = NULL) override
+		size_t _del(__DataConstRef data, CB_Del cb) override
 		{
 			auto itr = m_data.find(data);
 			if (itr == m_data.end())
@@ -97,28 +97,36 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			if (cb)
+			size_t uRet = 0;
+			do
 			{
-				(void)cb(itr);
-			}
+				E_DelConfirm eRet = cb(*itr);
+				if (E_DelConfirm::DC_Abort == eRet)
+				{
+					break;
+				}
+				else if (E_DelConfirm::DC_No == eRet)
+				{
+					++itr;
+				}
+				else
+				{
+					itr = m_data.erase(itr);
+					uRet++;
 
-			return 1;
+					if (E_DelConfirm::DC_YesAbort == eRet)
+					{
+						break;
+					}
+				}
+			} while (itr != m_data.end() && *itr == data);
+
+			return uRet;
 		}
 
-		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
+		bool _includes(__DataConstRef data) const override
 		{
-			auto itr = m_data.find(data);
-			if (itr == m_data.end())
-			{
-				return 0;
-			}
-
-			if (cb)
-			{
-				(void)cb(itr);
-			}
-
-			return 1;
+			return m_data.find(data) != m_data.end();
 		}
 		
 	public:

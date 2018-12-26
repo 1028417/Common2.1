@@ -21,8 +21,10 @@ DWORD WINAPI CWorkThread::ThreadProc(LPVOID lpThreadParam)
 	return 0;
 }
 
-BOOL CWorkThread::RunWorkThread(UINT uThreadCount)
+BOOL CWorkThread::Run(UINT uThreadCount)
 {
+	m_CancelEvent.reset();
+
 	for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
 		; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
 	{
@@ -74,7 +76,7 @@ void CWorkThread::Cancel()
 	(void)m_CancelEvent.notify();
 }
 
-BOOL CWorkThread::CheckCancelSignal()
+BOOL CWorkThread::CheckCancel()
 {
 	while (m_bPause)
 	{

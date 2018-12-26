@@ -9,8 +9,7 @@
 
 struct __UtilExt tagFindData : WIN32_FIND_DATAW
 {
-	tagFindData(const WIN32_FIND_DATAW& t_data)
-		: data(t_data)
+	tagFindData()
 	{
 	}
 
@@ -24,7 +23,7 @@ struct __UtilExt tagFindData : WIN32_FIND_DATAW
 		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 	}
 
-	const WIN32_FIND_DATAW& data;
+	WIN32_FIND_DATAW data;
 };
 
 class __UtilExt fsutil
@@ -56,6 +55,7 @@ public:
 	static bool ExistsPath(const wstring& strDir);
 
 	static bool FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb);
+	static bool FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData);
 
 	static void GetSysDrivers(list<wstring>& lstDrivers);
 	

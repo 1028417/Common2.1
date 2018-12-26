@@ -106,6 +106,8 @@ public:
 	UINT GetSubPathCount() const;
 
 	bool HasFile() const;
+
+	TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData);
 };
 
 class __UtilExt CListObject

@@ -417,9 +417,9 @@ namespace NS_SSTL
 			return m_data.del(initList);
 		}
 
-		size_t del_if(const function<E_DelConfirm(__RefType)>& cb)
+		size_t del_ex(const function<E_DelConfirm(__RefType)>& cb)
 		{
-			return __Super::del_if([&](__PtrType ptr) {
+			return __Super::del_ex([&](const __PtrType ptr) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr);
@@ -429,9 +429,9 @@ namespace NS_SSTL
 			});
 		}
 
-		size_t del_if(const function<bool(__RefType)>& cb)
+		size_t del_ex(const function<bool(__RefType)>& cb)
 		{
-			return __Super::del_if([&](__PtrType ptr) {
+			return __Super::del_ex([&](const __PtrType ptr) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr);

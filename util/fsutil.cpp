@@ -149,7 +149,8 @@ bool fsutil_win::ExistsPath(const wstring& strDir)
 
 bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
 {
-	WIN32_FIND_DATAW FindFileData;
+	tagFindData FindData;
+	WIN32_FIND_DATAW& FindFileData = FindData.data;
 	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -168,13 +169,21 @@ bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const 
 			continue;
 		}
 
-		if (!cb(tagFindData(FindFileData)))
+		if (!cb(FindData))
 		{
 			break;
 		}
 	} while (::FindNextFileW(hFindFile, &FindFileData));
 
 	return true;
+}
+
+bool fsutil_win::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
+{
+	return fsutil_win::FindFile(strFindPath, [&](auto& FindData) {
+		arrFindData.add(FindData);
+		return true;
+	});
 }
 
 void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)

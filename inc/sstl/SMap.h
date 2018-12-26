@@ -369,7 +369,42 @@ namespace NS_SSTL
 			m_data.insert(pr);
 		}
 
-		size_t _find(__KeyConstRef key, const CB_Find& cb = NULL) override
+		size_t _del(__KeyConstRef key, CB_Del cb) override
+		{
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
+			{
+				return 0;
+			}
+
+			size_t uRet = 0;
+			do
+			{
+				E_DelConfirm eRet = cb(*itr);
+				if (E_DelConfirm::DC_Abort == eRet)
+				{
+					break;
+				}
+				else if (E_DelConfirm::DC_No == eRet)
+				{
+					++itr;
+				}
+				else
+				{
+					itr = m_data.erase(itr);
+					uRet++;
+
+					if (E_DelConfirm::DC_YesAbort == eRet)
+					{
+						break;
+					}
+				}
+			} while (m_bMulti && itr != m_data.end() && itr->first == key);
+
+			return uRet;
+		}
+
+		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb = NULL)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -402,31 +437,9 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _cfind(__KeyConstRef key, const CB_ConstFind& cb = NULL) const override
+		bool _includes(__KeyConstRef key) const override
 		{
-			auto itr = m_data.find(key);
-			if (itr == m_data.end())
-			{
-				return 0;
-			}
-
-			size_t uRet = 1;
-			while (cb && cb(itr) && m_bMulti)
-			{
-				if (++itr == m_data.end())
-				{
-					break;
-				}
-
-				if (itr->first != key)
-				{
-					break;
-				}
-
-				uRet++;
-			}
-
-			return uRet;
+			return m_data.find(key) != m_data.end();
 		}
 
 		template <typename _V>

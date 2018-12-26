@@ -27,12 +27,17 @@ void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
 	{
 		m_fnWork(*this);
 	}
-
-	(void)this->PostMessage(WM_EndProgress);
+	
+	if (!m_bFinished)
+	{
+		(void)this->PostMessage(WM_EndProgress);
+	}
 }
 
-INT_PTR CProgressDlg::DoModal(CWnd *pWndParent)
+INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
 {
+	m_strTitle = strTitle;
+
 	LPCDLGTEMPLATE lpDialogTemplate = g_ResModule.loadDialog(IDD_DLG_PROGRESS);
 	__AssertReturn(lpDialogTemplate, -1);
 
@@ -49,12 +54,9 @@ BOOL CProgressDlg::OnInitDialog()
 
 	(void)this->SetWindowText(m_strTitle.c_str());
 
-	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
-	_updateProgress();
-
 	m_bFinished = FALSE;
 
-	(void)this->RunWorkThread(1);
+	(void)this->Run(1);
 
 	return TRUE;
 }
@@ -88,9 +90,15 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CProgressDlg::SetProgress(UINT uProgress)
+void CProgressDlg::SetProgress(UINT uProgress, int iMaxProgress)
 {
 	m_uProgress = uProgress;
+	
+	if (iMaxProgress>0)
+	{
+		m_uMaxProgress = (UINT)iMaxProgress;
+	}
+
 	(void)this->PostMessage(WM_SetProgress);
 }
 
@@ -109,9 +117,9 @@ void CProgressDlg::_updateProgress()
 {
 	CString cstrProgress;
 	cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
-
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
+	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
 	(void)m_wndProgressCtrl.SetPos((int)m_uProgress);
 }
 
@@ -166,7 +174,7 @@ void CProgressDlg::OnCancel()
 
 void CProgressDlg::Close()
 {
-	m_bFinished = true;
+	m_bFinished = TRUE;
 
 	this->PostMessage(WM_SYSCOMMAND, SC_CLOSE);
 }

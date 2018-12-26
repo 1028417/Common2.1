@@ -302,49 +302,34 @@ namespace NS_SSTL
 	}
 
 	template <typename _C, typename DATA, typename CB>
-	size_t find(_C& container, const DATA& data, const CB& cb)
+	size_t del(_C& container, const DATA& data, const CB& cb)
 	{
 		size_t uRet = 0;
 
 		for (auto itr = container.begin(); itr != container.end(); )
 		{
-			if (tagTryCompare<DATA>::compare(*itr, data))
+			if (!tagTryCompare<DATA>::compare(*itr, data))
 			{
-				uRet++;
-
-				if (cb)
-				{
-					auto lpData = &*itr;
-					if (!cb(itr) || itr == container.end())
-					{
-						break;
-					}
-
-					if (&*itr != lpData)
-					{
-						continue;
-					}
-				}
+				++itr;
+				continue;
 			}
 
-			++itr;
-		}
-
-		return uRet;
-	}
-
-	template <typename _C, typename DATA, typename CB>
-	size_t find(const _C& container, const DATA& data, const CB& cb)
-	{
-		size_t uRet = 0;
-		
-		for (auto itr = container.begin(); itr != container.end(); ++itr)
-		{
-			if (tagTryCompare<DATA>::compare(*itr, data))
+			E_DelConfirm eRet = cb(*itr);
+			if (E_DelConfirm::DC_Abort == eRet)
 			{
+				break;
+			}
+			else if (E_DelConfirm::DC_No == eRet)
+			{
+				++itr;
+				continue;
+			}
+			else
+			{
+				itr = container.erase(itr);
 				uRet++;
 
-				if (!cb && !cb(itr))
+				if (E_DelConfirm::DC_YesAbort == eRet)
 				{
 					break;
 				}

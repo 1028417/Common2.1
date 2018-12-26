@@ -16,7 +16,10 @@ struct tagWorkThreadInfo
 class __UtilExt CWorkThread
 {
 public:
-	CWorkThread() {}
+	CWorkThread()
+		: m_CancelEvent(TRUE)
+	{
+	}
 
 public:
 	list<tagWorkThreadInfo> m_lstThreadInfos;
@@ -27,9 +30,9 @@ private:
 	NS_mtutil::CWinEvent m_CancelEvent;
 
 public:
-	BOOL RunWorkThread(UINT uThreadCount=1);
+	BOOL Run(UINT uThreadCount=1);
 
-	BOOL CheckCancelSignal();
+	BOOL CheckCancel();
 
 protected:
 	void Pause(BOOL bPause=TRUE);

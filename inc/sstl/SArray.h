@@ -261,6 +261,18 @@ namespace NS_SSTL
 			return true;
 		}
 
+		bool del_one(__DataConstRef data, __CB_Ref_void cb = NULL)
+		{
+			return 0 != _del(data, [&](__DataRef data) {
+				if (cb)
+				{
+					cb(data);
+				}
+
+				return E_DelConfirm::DC_YesAbort;
+			});
+		}
+
 		int indexOf(__DataConstRef data) const
 		{
 			int nIdx = 0;
@@ -335,7 +347,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_ConstRef_void cb = NULL)
+		bool popBack(__CB_Ref_void cb = NULL)
 		{
 			if (m_data.empty())
 			{
@@ -503,19 +515,27 @@ namespace NS_SSTL
 		}
 
 	private:
-		inline void _add(__DataConstRef data) override
+		void _add(__DataConstRef data) override
 		{
 			m_data.push_back(data);
 		}
 
-		size_t _find(__DataConstRef data, const CB_Find& cb=NULL) override
+		size_t _del(__DataConstRef data, CB_Del cb) override
 		{
-			return NS_SSTL::find(m_data, data, cb);
+			return NS_SSTL::del(m_data, data, cb);
 		}
-
-		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
+		
+		bool _includes(__DataConstRef data) const override
 		{
-			return NS_SSTL::find(m_data, data, cb);
+			for (auto& t_data : m_data)
+			{
+				if (tagTryCompare<__DataConstRef>::compare(t_data, data))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 	protected:

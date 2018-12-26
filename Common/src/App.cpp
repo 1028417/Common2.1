@@ -28,7 +28,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	g_mapTimer.del_if(hwnd, [&](auto& pr) {
 		auto& mapTimer = pr.second;
-		if (0 != mapTimer.del_if([&](const auto& pr) {
+		if (0 != mapTimer.del_ex([&](const auto& pr) {
 			const auto& timer = pr.second;
 			if (timer.uTimerID == idEvent)
 			{

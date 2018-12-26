@@ -40,9 +40,9 @@ namespace NS_mtutil
 	class __UtilExt CWinEvent
 	{
 	public:
-		CWinEvent()
+		CWinEvent(BOOL bManualReset)
 		{
-			m_hEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+			m_hEvent = ::CreateEvent(NULL, bManualReset, FALSE, NULL);
 		}
 
 		~CWinEvent()
@@ -65,6 +65,11 @@ namespace NS_mtutil
 			return TRUE==SetEvent(m_hEvent);
 		}
 
+		bool reset()
+		{
+			return TRUE == ResetEvent(m_hEvent);
+		}
+
 	private:
 		HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 	};
@@ -75,9 +80,13 @@ namespace NS_mtutil
 		CCASLock()
 		{
 		}
+		
+	private:
+		char m_lockFlag = 0;
 
-		#pragma intrinsic(_InterlockedCompareExchange8, _InterlockedExchange8)
-		bool lock(UINT uRetryTimes=0, UINT uSleepTime=0)
+	private:
+#pragma intrinsic(_InterlockedCompareExchange8, _InterlockedExchange8)
+		bool _lock(UINT uRetryTimes=0, UINT uSleepTime=0)
 		{
 			while (_InterlockedCompareExchange8(&m_lockFlag, 1, 0))
 			{
@@ -99,14 +108,22 @@ namespace NS_mtutil
 			return true;
 		}
 
-		void unlock()
+	public:
+		bool try_lock(UINT uRetryTimes, UINT uSleepTime = 0)
 		{
-			//m_lockFlag = 0;
-			(void)_InterlockedExchange8(&m_lockFlag, 0);
+			return _lock(uRetryTimes, uSleepTime);
 		}
 
-	private:
-		char m_lockFlag = 0;
+		void lock(UINT uSleepTime = 0)
+		{
+			_lock(0, uSleepTime);
+		}
+
+		void unlock()
+		{
+			//(void)_InterlockedExchange8(&m_lockFlag, 0);
+			m_lockFlag = 0;
+		}
 	};
 
 	class __UtilExt CCondVar : public condition_variable

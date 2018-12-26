@@ -93,20 +93,36 @@ wstring util::FormatTime(time_t time, const wstring& strFormat)
 	return _FormatTime(atm, strFormat);
 }
 
-void util::trim(wstring& strText, wchar_t chr)
+bool util::checkWChar(const wstring& str)
+{
+	for (auto& wchr : str)
+	{
+		if (wchr > 255)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+wstring& util::trim(wstring& strText, wchar_t chr)
 {
 	strText.erase(0, strText.find_first_not_of(chr));
 	strText.erase(strText.find_last_not_of(chr) + 1);
+	return strText;
 }
 
-void util::ltrim(wstring& strText, wchar_t chr)
+wstring& util::ltrim(wstring& strText, wchar_t chr)
 {
 	strText.erase(0, strText.find_first_not_of(chr));
+	return strText;
 }
 
-void util::rtrim(wstring& strText, wchar_t chr)
+wstring& util::rtrim(wstring& strText, wchar_t chr)
 {
 	strText.erase(strText.find_last_not_of(chr) + 1);
+	return strText;
 }
 
 wstring util::trim(const wstring& strText, wchar_t chr)
@@ -207,22 +223,30 @@ int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
 	return pos;
 }
 
+wstring& util::StrLowerCase(wstring& str)
+{
+	(void)::_wcslwr_s((TCHAR *)str.c_str(), str.size() + 1);
+	return str;
+}
+
 wstring util::StrLowerCase(const wstring& str)
 {
 	wstring strTemp = str;
-	
 	(void)::_wcslwr_s((TCHAR *)strTemp.c_str(), strTemp.size() + 1);
-
 	return strTemp;
+}
+
+wstring& util::StrUpperCase(wstring& str)
+{
+	(void)::_wcsupr_s((TCHAR *)str.c_str(), str.size() + 1);
+	return str;
 }
 
 wstring util::StrUpperCase(const wstring& str)
 {
 	wstring strTemp = str;
-
 	(void)::_wcsupr_s((TCHAR *)strTemp.c_str(), strTemp.size() + 1);
-
-	return strTemp;
+	return str;
 }
 
 string util::WStrToStr(const wstring&str, UINT CodePage)
