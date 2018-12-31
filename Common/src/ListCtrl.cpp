@@ -340,7 +340,48 @@ void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>&
 	}
 }
 
-void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
+void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts, int nPos, const wstring& strPrefix)
+{
+	if (vecTexts.empty())
+	{
+		if (0 == nPos)
+		{
+			(void)DeleteAllItems();
+		}
+
+		return;
+	}
+
+	__Assert(nPos <= GetItemCount());
+
+	int nMaxItem = GetItemCount() - 1;
+
+	DeselectAllItems();
+
+	CRedrawLockGuard RedrawLockGuard(*this);
+
+	int nItem = nPos;
+	for (auto& vecText : vecTexts)
+	{
+		if (nItem <= nMaxItem)
+		{
+			SetItemTexts(nItem, vecText, strPrefix);
+		}
+		else
+		{
+			(void)InsertItemEx(nItem, vecText, strPrefix);
+		}
+
+		nItem++;
+	}
+
+	for (; nMaxItem >= nItem; --nMaxItem)
+	{
+		(void)DeleteItem(nMaxItem);
+	}
+}
+
+void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos, const wstring& strPrefix)
 {
 	if (!lstObjects)
 	{
@@ -364,11 +405,11 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos)
 	lstObjects([&](CListObject& object) {
 		if (nItem <= nMaxItem)
 		{
-			SetItemObject(nItem, object);
+			SetItemObject(nItem, object, strPrefix);
 		}
 		else
 		{
-			(void)InsertObject(object, nItem);
+			(void)InsertObject(object, nItem, strPrefix);
 		}
 
 		nItem++;
@@ -388,7 +429,7 @@ void CObjectList::SetColumnText(UINT uColumn, const wstring& strText)
 	CListCtrl::GetHeaderCtrl()->SetItem(uColumn, &hdItem);
 }
 
-int CObjectList::InsertObject(CListObject& Object, int nItem)
+int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& strPrefix)
 {
 	if (-1 == nItem)
 	{
@@ -397,7 +438,7 @@ int CObjectList::InsertObject(CListObject& Object, int nItem)
 
 	nItem = __super::InsertItem(nItem, NULL);
 	
-	this->SetItemObject(nItem, Object);
+	this->SetItemObject(nItem, Object, strPrefix);
 	
 	return nItem;
 }
@@ -413,7 +454,7 @@ void CObjectList::UpdateObject(CListObject& Object)
 	}
 }
 
-void CObjectList::SetItemObject(UINT uItem, CListObject& Object)
+void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
 	int iImage = 0;
 	vector<wstring> vecText;
@@ -422,7 +463,7 @@ void CObjectList::SetItemObject(UINT uItem, CListObject& Object)
 	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
 		, iImage, 0, 0, (LPARAM)&Object));
 
-	_SetItemTexts<true>(uItem, vecText);
+	_SetItemTexts<true>(uItem, vecText, strPrefix);
 }
 
 void CObjectList::UpdateItem(UINT uItem)
@@ -433,6 +474,10 @@ void CObjectList::UpdateItem(UINT uItem)
 	if (NULL != pObject)
 	{
 		this->SetItemObject(uItem, *pObject);
+	}
+	else
+	{
+		__super::Update(uItem);
 	}
 }
 
@@ -462,9 +507,9 @@ void CObjectList::UpdateItems()
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	for (int iItem = 0; iItem < this->GetItemCount(); ++iItem)
+	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); ++uItem)
 	{
-		SetItemObject(iItem, *(CListObject*)__super::GetItemData(iItem));
+		UpdateItem(uItem);
 	}
 }
 
@@ -476,7 +521,11 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 
 	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); uItem++)
 	{
-		UpdateItem(uItem, *(CListObject*)__super::GetItemData(uItem), lstColumn);
+		auto pObject = (CListObject*)__super::GetItemData(uItem);
+		if (pObject)
+		{
+			UpdateItem(uItem, *pObject, lstColumn);
+		}
 	}
 }
 
@@ -564,11 +613,15 @@ void CObjectList::GetAllObjects(TD_ListObjectList& lstListObjects)
 {
 	for (int nItem = 0; nItem < __super::GetItemCount(); ++nItem)
 	{
-		lstListObjects.add((CListObject*)__super::GetItemData(nItem));
+		auto pObject = (CListObject*)__super::GetItemData(nItem);
+		if (pObject)
+		{
+			lstListObjects.add(pObject);
+		}
 	}
 }
 
-int CObjectList::GetSingleSelectedItem()
+int CObjectList::GetSelItem()
 {
 	POSITION lpPos = __super::GetFirstSelectedItemPosition();
 	__EnsureReturn(lpPos, -1);
@@ -576,15 +629,15 @@ int CObjectList::GetSingleSelectedItem()
 	return __super::GetNextSelectedItem(lpPos);
 }
 
-CListObject *CObjectList::GetSingleSelectedObject()
+CListObject *CObjectList::GetSelObject()
 {
-	int nItem = this->GetSingleSelectedItem();
+	int nItem = this->GetSelItem();
 	__EnsureReturn(0 <= nItem, NULL);
 
 	return this->GetItemObject(nItem);
 }
 
-void CObjectList::GetMultiSelectedItems(list<UINT>& lstItems)
+void CObjectList::GetSelItems(list<UINT>& lstItems)
 {
 	POSITION lpPos = __super::GetFirstSelectedItemPosition();
 	while (lpPos)
@@ -593,25 +646,33 @@ void CObjectList::GetMultiSelectedItems(list<UINT>& lstItems)
 	}
 }
 
-void CObjectList::GetMultiSelectedObjects(map<UINT, CListObject*>& mapObjects)
+void CObjectList::GetSelObjects(map<UINT, CListObject*>& mapObjects)
 {
 	list<UINT> lstItems;
-	this->GetMultiSelectedItems(lstItems);
+	this->GetSelItems(lstItems);
 
 	for (auto uItem : lstItems)
 	{
-		mapObjects[uItem] = this->GetItemObject(uItem);
+		auto pObject = this->GetItemObject(uItem);
+		if (pObject)
+		{
+			mapObjects[uItem] = pObject;
+		}
 	}
 }
 
-void CObjectList::GetMultiSelectedObjects(TD_ListObjectList& lstObjects)
+void CObjectList::GetSelObjects(TD_ListObjectList& lstObjects)
 {
 	list<UINT> lstItems;
-	this->GetMultiSelectedItems(lstItems);
+	this->GetSelItems(lstItems);
 
 	for (auto uItem : lstItems)
 	{
-		lstObjects.add(this->GetItemObject(uItem));
+		auto pObject = this->GetItemObject(uItem);
+		if (pObject)
+		{
+			lstObjects.add(pObject);
+		}
 	}
 }
 
@@ -737,19 +798,22 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	break;
 	case LVN_BEGINLABELEDIT:
 	{
-		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
-		CListObject *pObject = this->GetItemObject(pLVDispInfo->item.iItem);
-		__EnsureBreak(pObject);
-
 		CEdit *pwndEdit = this->GetEditControl();
 		__AssertBreak(pwndEdit);
 
-		m_cstrRenameText = pObject->GetRenameText().c_str();
-		if (m_cstrRenameText.IsEmpty())
+		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
+
+		CListObject *pObject = this->GetItemObject(pLVDispInfo->item.iItem);
+		if (pObject)
+		{
+			m_cstrRenameText = pObject->GetRenameText().c_str();
+		}
+		else
 		{
 			m_cstrRenameText = pLVDispInfo->item.pszText;
-			m_cstrRenameText.Trim();
+			getRenameText(pLVDispInfo->item.iItem, m_cstrRenameText);
 		}
+
 		pwndEdit->SetWindowText(m_cstrRenameText);
 		pwndEdit->SetSel(0, m_cstrRenameText.GetLength(), TRUE);
 	}
@@ -767,12 +831,16 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 		int nItem = pLVDispInfo->item.iItem;
 		CListObject *pObject = GetItemObject(nItem);
-		__AssertReturn(pObject, TRUE);
-
-		if (pObject->OnListItemRename((LPCTSTR)cstrNewText))
+		if (pObject)
 		{
-			this->UpdateItem(pLVDispInfo->item.iItem);
+			pObject->OnListItemRename((LPCTSTR)cstrNewText);
 		}
+		else
+		{
+			OnListItemRename(pLVDispInfo->item.iItem, cstrNewText);
+		}
+
+		this->UpdateItem(pLVDispInfo->item.iItem);
 	}
 
 	break;

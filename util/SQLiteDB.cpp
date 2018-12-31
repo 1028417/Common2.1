@@ -205,15 +205,35 @@ IDBResult* CSQLiteDB::Query(const wstring& strSql)
 
 bool CSQLiteDB::BeginTrans()
 {
-	return Execute(L"begin Transaction");
+	__EnsureReturn(!m_bInTrans, false);
+	
+	__EnsureReturn(Execute(L"begin Transaction"), false);
+
+	m_bInTrans = true;
+
+	return true;
 }
 
 bool CSQLiteDB::CommitTrans()
 {
-	return Execute(L"commit Transaction");
+	if (m_bInTrans)
+	{
+		__EnsureReturn(Execute(L"commit Transaction"), false);
+
+		m_bInTrans = false;
+	}
+
+	return true;
 }
 
 bool CSQLiteDB::RollbakTrans()
 {
-	return Execute(L"rollback Transaction");
+	if (m_bInTrans)
+	{
+		__EnsureReturn(Execute(L"rollback Transaction"), false);
+
+		m_bInTrans = false;
+	}
+
+	return true;
 }

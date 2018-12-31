@@ -6,7 +6,7 @@ namespace NS_SSTL
 {
 #define __SMapSuper SContainerT<__BaseType<__KeyType, __ValueType>, __KeyType>
 
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType>
+	template<typename __KeyType, typename __ValueType, template<typename...> class __BaseType>
 	class SMapT : public __SMapSuper
 	{
 	private:
@@ -40,6 +40,7 @@ namespace NS_SSTL
 			T& m_data;
 
 			using __ValueRef = decltype(m_data.begin()->second)&;
+
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>
 			void forEach(const CB& cb)
@@ -207,8 +208,8 @@ namespace NS_SSTL
 		template <typename CB>
 		size_t get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](__CItrType itr) {
-				cb(itr->second);
+			return _find(key, [&](const __DataType& pr) {
+				cb(pr.second);
 				
 				return true;
 			});
@@ -225,8 +226,8 @@ namespace NS_SSTL
 		template <typename CB, checkCBBool_t<CB, __ValueRef>>
 		bool get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](__CItrType& itr) {
-				return cb(itr->second);
+			return _find(key, [&](const __DataType& pr) {
+				return cb(pr.second);
 			});
 		}
 
@@ -391,7 +392,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
+					itr = __Super::erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == eRet)
@@ -432,6 +433,35 @@ namespace NS_SSTL
 				{
 					++itr;
 				}
+			} while (itr != m_data.end() && itr->first == key);
+
+			return uRet;
+		}
+
+		size_t _find(__KeyConstRef key, CB_T_Ret<const __DataType&, bool> cb = NULL) const
+		{
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
+			{
+				return 0;
+			}
+
+			if (!cb)
+			{
+				return 1;
+			}
+
+			size_t uRet = 0;
+			do
+			{
+				uRet++;
+
+				if (!cb(*itr) || !m_bMulti)
+				{
+					break;
+				}
+
+				++itr;
 			} while (itr != m_data.end() && itr->first == key);
 
 			return uRet;

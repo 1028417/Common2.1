@@ -42,83 +42,87 @@ interface IDB
 
 class __UtilExt CDBTransGuard
 {
-private:
-	IDB *m_pDB = NULL;
-
-	bool _BeginTrans(IDB& db)
-	{
-		try
-		{
-			return db.BeginTrans();
-		}
-		catch (...)
-		{
-			return false;
-		}
-	}
-
 public:
-	CDBTransGuard(IDB& db)
+	CDBTransGuard(IDB& db, bool bAutoCommit = true)
 	{
-		if (_BeginTrans(db))
+		if (db.BeginTrans())
 		{
 			m_pDB = &db;
+
+			m_bInTrans = true;
+
+			m_bAutoCommit = bAutoCommit;
 		}
 	}
 
-	CDBTransGuard(IDB *pDB)
+	CDBTransGuard(IDB *pDB, bool bAutoCommit = true)
 	{
-		if (NULL != pDB)
+		if (NULL != pDB && pDB->BeginTrans())
 		{
-			if (_BeginTrans(*pDB))
-			{
-				m_pDB = pDB;
-			}
+			m_pDB = pDB;
+
+			m_bInTrans = true;
+
+			m_bAutoCommit = bAutoCommit;
 		}
 	}
 
 	~CDBTransGuard()
 	{
-		(void)Commit();
+		if (m_bInTrans)
+		{
+			if (m_bAutoCommit)
+			{
+				(void)Commit();
+			}
+			else
+			{
+				(void)Rollback();
+			}
+		}
 	}
 
+private:
+	IDB *m_pDB = NULL;
+
+	bool m_bAutoCommit = true;
+
+	bool m_bInTrans = false;
+
+public:
 	bool Commit()
 	{
-		if (NULL == m_pDB)
-		{
-			return false;
-		}
+		m_bInTrans = false;
 
-		auto pDB = m_pDB;
-		m_pDB = NULL;
-
-		try
+		if (NULL != m_pDB)
 		{
-			return pDB->CommitTrans();
+			try
+			{
+				return m_pDB->CommitTrans();
+			}
+			catch (...)
+			{
+			}
 		}
-		catch (...)
-		{
-			return false;
-		}
+		
+		return false;
 	}
 
 	bool Rollback()
 	{
-		if (NULL == m_pDB)
+		m_bInTrans = false;
+
+		if (NULL != m_pDB)
 		{
-			return false;
+			try
+			{
+				return m_pDB->RollbakTrans();
+			}
+			catch (...)
+			{
+			}
 		}
 
-		auto pDB = m_pDB;
-		m_pDB = NULL;
-
-		try
-		{
-			return pDB->RollbakTrans();
-		}
-		catch (...)
-		{
-			return false;
-		}
+		return false;
 	}
 };

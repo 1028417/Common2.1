@@ -239,6 +239,10 @@ private:
 	template <bool _clear_other>
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 
+	virtual void getRenameText(UINT uItem, CString& cstrRenameText) {};
+
+	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {};
+
 public:
 	int InsertItemEx(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 	int InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
@@ -247,9 +251,11 @@ public:
 	void SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
 	void SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, const wstring& strPrefix);
 
-	void SetObjects(const TD_ListObjectList& lstObjects, int nPos=0);
+	void SetTexts(const vector<vector<wstring>>& vecTexts, int nPos = 0, const wstring& strPrefix=L"");
 
-	int InsertObject(CListObject& Object, int nItem=-1);
+	void SetObjects(const TD_ListObjectList& lstObjects, int nPos=0, const wstring& strPrefix=L"");
+
+	int InsertObject(CListObject& Object, int nItem=-1, const wstring& strPrefix=L"");
 
 	void UpdateObject(CListObject& Object);
 
@@ -265,7 +271,7 @@ public:
 	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
 	void DeleteItems(list<UINT> lstItems);
 
-	void SetItemObject(UINT uItem, CListObject& Object);
+	void SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
 
 	void SetItemImage(UINT uItem, int iImage);
 
@@ -274,12 +280,12 @@ public:
 	int GetObjectItem(const CListObject *pObject);
 	void GetAllObjects(TD_ListObjectList& lstListObjects);
 
-	int GetSingleSelectedItem();
-	CListObject *GetSingleSelectedObject();
+	int GetSelItem();
+	CListObject *GetSelObject();
 
-	void GetMultiSelectedItems(list<UINT>& lstItems);
-	void GetMultiSelectedObjects(map<UINT, CListObject*>& mapObjects);
-	void GetMultiSelectedObjects(TD_ListObjectList& lstObjects);
+	void GetSelItems(list<UINT>& lstItems);
+	void GetSelObjects(map<UINT, CListObject*>& mapObjects);
+	void GetSelObjects(TD_ListObjectList& lstObjects);
 
 	BOOL SelectFirstItem();
 	void SelectItem(UINT uItem, BOOL bSetFocus=TRUE);

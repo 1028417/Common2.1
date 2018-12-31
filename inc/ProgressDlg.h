@@ -30,7 +30,7 @@ private:
 
 	UINT m_uProgress = 0;
 
-	NS_mtutil::CCSLock m_csLock;
+	NS_mtutil::CCASLock m_csLock;
 	
 	BOOL m_bFinished = false;
 

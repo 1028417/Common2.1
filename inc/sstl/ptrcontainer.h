@@ -4,7 +4,7 @@
 
 namespace NS_SSTL
 {
-	template <template<typename...> typename __BaseType, class __PtrType>
+	template <template<typename...> class __BaseType, class __PtrType>
 	class ptrcontainerT : public __BaseType<__PtrType>
 	{
 	private:
@@ -197,7 +197,7 @@ namespace NS_SSTL
 			return _set(pos, &ref);
 		}                                                                     
 
-		size_t _del(__ConstPtr ptr)
+		size_t _del(__ConstPtr ptr, bool bDelOnlyOne=false)
 		{
 			if (NULL == ptr)
 			{
@@ -213,6 +213,11 @@ namespace NS_SSTL
 					uRet++;
 
 					itr = __Super::erase(itr);
+
+					if (bDelOnlyOne)
+					{
+						break;
+					}
 				}
 				else
 				{
@@ -223,9 +228,9 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		inline size_t _del(__ConstRef ref)
+		inline size_t _del(__ConstRef ref, bool bDelOnlyOne = false)
 		{
-			return _del(&ref);
+			return _del(&ref, bDelOnlyOne);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
@@ -389,21 +394,31 @@ namespace NS_SSTL
 		{
 			return _set(pos, ref);
 		}
-
-		size_t del(__ConstPtr ptr)
+		
+		bool del_one(__ConstPtr ptr)
 		{
-			return _del(ptr);
+			return 1 == _del(ptr, true);
 		}
 
-		size_t del(__ConstRef ref)
+		bool del_one(__ConstRef ref)
 		{
-			return _del(ref);
+			return 1 == _del(ref, true);
+		}
+
+		size_t del(__ConstPtr ptr, bool bDelOnlyOne = true)
+		{
+			return _del(ptr, bDelOnlyOne);
+		}
+
+		size_t del(__ConstRef ref, bool bDelOnlyOne = true)
+		{
+			return _del(ref, bDelOnlyOne);
 		}
 
 		template <typename T>
-		size_t del(T* ptr)
+		size_t del(T* ptr, bool bDelOnlyOne = true)
 		{
-			return _del(ptr);
+			return _del(ptr, bDelOnlyOne);
 		}
 
 		size_t del(__InitList initLst)

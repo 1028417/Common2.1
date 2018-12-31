@@ -41,7 +41,7 @@ namespace NS_SSTL
 	template <typename T>
 	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
 
-	template <template<typename...> typename __BaseType, class __PtrType> class ptrcontainerT;
+	template <template<typename...> class __BaseType, class __PtrType> class ptrcontainerT;
 
 	template <class __PtrType>
 	using ptrvectorT = ptrcontainerT<vector, __PtrType>;

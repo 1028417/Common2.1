@@ -10,10 +10,10 @@ namespace NS_SSTL
 	template <bool _test>
 	using enable_ifnot_t = enable_if_t<!_test>;
 
-	template<template<typename...> typename _check, typename... _types>
+	template<template<typename...> class _check, typename... _types>
 	using enableIf_t = enable_if_t<_check<_types...>::value>;
 
-	template<template<typename...> typename _check, typename... _types>
+	template<template<typename...> class _check, typename... _types>
 	using enableIfNot_t = enable_ifnot_t<_check<_types...>::value>;
 
 	template <typename _check1, typename _check2>

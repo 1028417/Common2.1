@@ -31,14 +31,9 @@ namespace NS_SSTL
 	};
 
 	template <typename T> struct tagTryCompare {
-		bool operator()(const T&t1, const T&t2)
-		{
-			return _compare(t1, t2);
-		}
-
 		static bool compare(const T&t1, const T&t2)
 		{
-			return _compare(t1, t2);
+			return &t1 == &t2 || _compare(t1, t2);
 		}
 
 		template <typename A, typename B>
@@ -299,44 +294,6 @@ namespace NS_SSTL
 		{
 			qsort<T>(&vecData.front(), size, cb);
 		}
-	}
-
-	template <typename _C, typename DATA, typename CB>
-	size_t del(_C& container, const DATA& data, const CB& cb)
-	{
-		size_t uRet = 0;
-
-		for (auto itr = container.begin(); itr != container.end(); )
-		{
-			if (!tagTryCompare<DATA>::compare(*itr, data))
-			{
-				++itr;
-				continue;
-			}
-
-			E_DelConfirm eRet = cb(*itr);
-			if (E_DelConfirm::DC_Abort == eRet)
-			{
-				break;
-			}
-			else if (E_DelConfirm::DC_No == eRet)
-			{
-				++itr;
-				continue;
-			}
-			else
-			{
-				itr = container.erase(itr);
-				uRet++;
-
-				if (E_DelConfirm::DC_YesAbort == eRet)
-				{
-					break;
-				}
-			}
-		}
-
-		return uRet;
 	}
 
 	template<typename _C, typename CB>

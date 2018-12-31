@@ -81,11 +81,14 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 	memset(&msg, 0, sizeof msg);
 	(void)CMainApp::peekMsg(WM_SetStatusText, msg, true);
 
-	m_csLock.lock();
-	CString cstrStatusText(m_cstrStatusText);
-	m_csLock.unlock();
+	CString cstrStatusText;
+	if (m_csLock.try_lock())
+	{
+		cstrStatusText = m_cstrStatusText;
+		m_csLock.unlock();
 
-	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
+		(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
+	}
 
 	return TRUE;
 }

@@ -327,14 +327,14 @@ namespace NS_SSTL
 			return indexOf(ref) >= 0;
 		}
 
-		size_t del(__ConstRef ref)
+		size_t del(__ConstRef ref, bool bDelOnlyOne = true)
 		{
-			return m_data.del(ref);
+			return m_data.del(ref, bDelOnlyOne);
 		}
 
-		size_t del(__ConstPtr ptr)
+		size_t del(__ConstPtr ptr, bool bDelOnlyOne = true)
 		{
-			return m_data.del(ptr);
+			return m_data.del(ptr, bDelOnlyOne);
 		}
 		
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
@@ -820,7 +820,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
+        PtrArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
 		{
 			__Super::splice(pos, nRemove, initList);
 
@@ -829,7 +829,7 @@ namespace NS_SSTL
 
 		PtrArrayT& splice(TD_PosType pos, size_t nRemove)
 		{
-			__Super::splice(pos, nRemove, ((__InitList) {}));
+            __Super::splice(pos, nRemove, __InitList());
 
 			return *this;
 		}

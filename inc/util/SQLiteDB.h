@@ -56,6 +56,8 @@ private:
 	HANDLE m_hDB = NULL;
 
 	string m_strError;
+	
+	bool m_bInTrans = false;
 
 public:
 	int GetStatus() override;

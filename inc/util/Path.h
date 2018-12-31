@@ -122,9 +122,8 @@ public:
 		return L"";
 	}
 
-	virtual bool OnListItemRename(const wstring& strNewName)
+	virtual void OnListItemRename(const wstring& strNewName)
 	{
-		return false;
 	}
 };
 

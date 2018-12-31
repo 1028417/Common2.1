@@ -17,97 +17,6 @@ namespace NS_SSTL
 
 		PtrArray<__DataType> m_ptrArray;
 
-	private:
-		template <class T = PtrArray<__DataType>>
-		class __ArrListOperator
-		{
-		public:
-			__ArrListOperator(T& ptrArray)
-				: m_ptrArray(ptrArray)
-			{
-			}
-
-		private:
-			T& m_ptrArray;
-		
-		public:
-			template <typename CB>
-			bool get(TD_PosType pos, CB cb)
-			{
-				if (pos >= m_ptrArray.size())
-				{
-					return false;
-				}
-
-				cb(*m_ptrArray[pos]);
-
-				return true;
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef, TD_PosType>>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				if (startPos >= m_ptrArray.size())
-				{
-					return;
-				}
-
-				for (auto pos = startPos; pos < m_ptrArray.size(); pos++)
-				{
-					if (!cb(*m_ptrArray[pos], pos))
-					{
-						break;
-					}
-
-					if (count > 0)
-					{
-						count--;
-						if (0 == count)
-						{
-							break;
-						}
-					}
-				}
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, TD_PosType>, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__DataRef data, size_t pos) {
-					cb(data, pos);
-					return true;
-				}, startPos, count);
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef>, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__DataRef data, size_t pos) {
-					cb(data);
-					return true;
-				}, startPos, count);
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef>
-				, typename = void, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__DataRef data, size_t pos) {
-					return cb(data);
-				}, startPos, count);
-			}
-		};
-
-		__ArrListOperator<> m_ListOperator = __ArrListOperator<>(m_ptrArray);
-		__ArrListOperator<>& _getOperator()
-		{
-			return m_ListOperator;
-		}
-		__ArrListOperator<const __ContainerType>& _getOperator() const
-		{
-			return (__ArrListOperator<const PtrArray<__DataType>>&)m_ListOperator;
-		}
-
 	public:
 		ArrListT() = default;
 
@@ -198,13 +107,13 @@ namespace NS_SSTL
 		template<typename CB>
 		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
 		{
-			_getOperator().forEach(cb, startPos, count);
+			m_ptrArray(cb, startPos, count);
 		}
 
 		template<typename CB>
 		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
 		{
-			_getOperator().forEach(cb, startPos, count);
+			m_ptrArray(cb, startPos, count);
 		}
 
 	public:
@@ -226,34 +135,48 @@ namespace NS_SSTL
 
 		operator __ContainerType& () = delete;
 
+		operator const __ContainerType& ()
+		{
+			return m_data;
+		}
+
 		operator const __ContainerType& () const
 		{
 			return m_data;
 		}
 
-		__ItrType erase(const __CItrType& itr) override
+#ifndef __MINGW32__
+		virtual __ItrType erase(const __CItrType& itr)
 		{
-			m_ptrArray.del_one(&*itr);
+			m_ptrArray.del(&*itr);
 
 			return m_data.erase(itr);
 		}
-
-		__CItrType begin() const
+#else
+		virtual __ItrType erase(const __ItrType& itr)
 		{
-			return m_data.cbegin();
-		}
-		__CItrType end() const
-		{
-			return m_data.cend();
-		}
+			rm_ptrArray.del(&*itr);
 
+			rreturn m_data.erase(itr);
+		}
+#endif
+
+		__RItrType rbegin()
+		{
+			return m_data.rbegin();
+		}
 		__CRItrType rbegin() const
 		{
-			return m_data.crbegin();
+			return m_data.rbegin();
+		}
+
+		__RItrType rend()
+		{
+			return m_data.rend();
 		}
 		__CRItrType rend() const
 		{
-			return m_data.crend();
+			return m_data.rend();
 		}
 
 	public:
@@ -276,11 +199,11 @@ namespace NS_SSTL
 
 		bool get(TD_PosType pos, __CB_Ref_void cb)
 		{
-			return _getOperator().get(pos, cb);
+			return m_ptrArray.get(pos, cb);
 		}
 		bool get(TD_PosType pos, __CB_ConstRef_void cb) const
 		{
-			return _getOperator().get(pos, cb);
+			return m_ptrArray.get(pos, cb);
 		}
 
 		bool set(TD_PosType pos, __DataConstRef& data)
@@ -358,7 +281,7 @@ namespace NS_SSTL
 			startPos = _checkPos(startPos);
 			if (startPos >= 0)
 			{
-				forEach([&](__DataConstRef data) {
+				m_ptrArray([&](__DataConstRef data) {
 					ret.add(data);
 				}, (TD_PosType)startPos);
 			}
@@ -423,7 +346,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
+					itr = __Super::erase(itr);
 					itrPtr = m_ptrArray.erase(itrPtr);
 					uRet++;
 

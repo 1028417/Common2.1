@@ -294,6 +294,11 @@ namespace NS_SSTL
 			return !m_data.empty();
 		}
 
+		bool empty() const
+		{
+			return m_data.empty();
+		}
+
 		size_t size() const
 		{
 			return m_data.size();
@@ -302,12 +307,19 @@ namespace NS_SSTL
 		virtual void clear()
 		{
 			m_data.clear();
-		}
+        }
 
+#ifndef __MINGW32__
 		virtual __ItrType erase(const __CItrType& itr)
 		{
 			return m_data.erase(itr);
 		}
+#else
+		virtual __ItrType erase(const __ItrType& itr)
+		{
+			return m_data.erase(itr);
+		}
+#endif
 
 		__ItrType begin()
 		{
@@ -527,14 +539,23 @@ namespace NS_SSTL
 			return includes<__InitList_Key>(initList);
 		}
 
-		size_t del(__KeyConstRef key, __CB_Ref_void cb = NULL)
+		bool del(__KeyConstRef key, bool bOnlyOne = false)
 		{
-			return _del(key, [&](__DataRef data) {
-				if (cb)
+			return 1==_del(key, [&](__DataRef data) {
+				if (bOnlyOne)
 				{
-					cb(data);
+					return E_DelConfirm::DC_YesAbort;
 				}
 
+				return E_DelConfirm::DC_Yes;
+			});
+		}
+
+		size_t del(__KeyConstRef key, __CB_Ref_void cb)
+		{
+			return _del(key, [&](__DataRef data) {
+				cb(data);
+				
 				return E_DelConfirm::DC_Yes;
 			});
 		}

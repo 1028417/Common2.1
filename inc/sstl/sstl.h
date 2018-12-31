@@ -11,14 +11,18 @@
 namespace NS_SSTL
 {
 	template<typename __ContainerType__, typename __KeyType__ = removeConstRef_t<typename tagCheckContainer<__ContainerType__>::Ref_Type>> class SContainerT;
-	template <template<typename...> typename __BaseType, class __DataType>
+	template <template<typename...> class __BaseType, class __DataType>
 	using SContainer = SContainerT<__BaseType<__DataType>>;
 
 
 	template<typename __DataType, template<typename...> class __BaseType> class SListT;
 	template <typename __DataType, template<typename...> class __BaseType = std::list>
 	using SList = SListT<__DataType, __BaseType>;
-	
+
+	template<typename __DataType, template<typename...> class __BaseType> class ArrListT;
+	template<typename __DataType, template<typename...> class __BaseType = std::list>
+	using ArrList = ArrListT<__DataType, __BaseType>;
+
 	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
 	template <typename __DataType, template<typename...> class __BaseType = std::vector>
 	using SArray = SArrayT<__DataType, __BaseType>;
@@ -46,7 +50,7 @@ namespace NS_SSTL
 	using SHashSet = SSet < __DataType, std::unordered_set>;
 
 
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType> class SMapT;
+	template<typename __KeyType, typename __ValueType, template<typename...> class __BaseType> class SMapT;
 	template <typename __KeyType, typename __ValueType, template<typename...> class __BaseType = std::map>
 	using SMap = SMapT<__KeyType, __ValueType, __BaseType>;
 

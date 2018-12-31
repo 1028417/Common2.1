@@ -235,7 +235,7 @@ namespace NS_SSTL
 				return false;
 			}
 
-			m_data.erase(m_data.begin() + pos);
+			__Super::erase(m_data.begin() + pos);
 
 			return true;
 		}
@@ -247,7 +247,7 @@ namespace NS_SSTL
 				auto itr = std::find(lstPos.begin(), lstPos.end(), (TD_PosType)iIdx);
 				if (itr != lstPos.end())
 				{
-					m_data.erase(m_data.begin() + iIdx);
+					__Super::erase(m_data.begin() + iIdx);
 
 					(void)lstPos.erase(itr);
 
@@ -259,18 +259,6 @@ namespace NS_SSTL
 			}
 
 			return true;
-		}
-
-		bool del_one(__DataConstRef data, __CB_Ref_void cb = NULL)
-		{
-			return 0 != _del(data, [&](__DataRef data) {
-				if (cb)
-				{
-					cb(data);
-				}
-
-				return E_DelConfirm::DC_YesAbort;
-			});
 		}
 
 		int indexOf(__DataConstRef data) const
@@ -522,7 +510,39 @@ namespace NS_SSTL
 
 		size_t _del(__DataConstRef data, CB_Del cb) override
 		{
-			return NS_SSTL::del(m_data, data, cb);
+			size_t uRet = 0;
+
+			for (auto itr = m_data.begin(); itr != m_data.end(); )
+			{
+				if (!tagTryCompare<__DataConstRef>::compare(*itr, data))
+				{
+					++itr;
+					continue;
+				}
+
+				E_DelConfirm eRet = cb(*itr);
+				if (E_DelConfirm::DC_Abort == eRet)
+				{
+					break;
+				}
+				else if (E_DelConfirm::DC_No == eRet)
+				{
+					++itr;
+					continue;
+				}
+				else
+				{
+					itr = __Super::erase(itr);
+					uRet++;
+
+					if (E_DelConfirm::DC_YesAbort == eRet)
+					{
+						break;
+					}
+				}
+			}
+
+			return uRet;
 		}
 		
 		bool _includes(__DataConstRef data) const override

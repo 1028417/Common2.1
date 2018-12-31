@@ -7,8 +7,31 @@ using namespace std;
 
 namespace NS_mtutil
 {
-	//QueueUserWorkItem(Function, Context, WT_EXECUTEDEFAULT))
-	
+	interface IAsyncCallback
+	{
+		virtual void onAsync() = 0;
+	};
+
+	class __UtilExt CAsync
+	{
+	public:
+		static bool async(IAsyncCallback& cbAsync)
+		{
+			return TRUE == QueueUserWorkItem(cbQueueUserWorkItem, &cbAsync, WT_EXECUTEDEFAULT);
+		}
+
+	private:
+		static DWORD WINAPI cbQueueUserWorkItem(LPVOID lpPara)
+		{
+			if (NULL != lpPara)
+			{
+				((IAsyncCallback*)lpPara)->onAsync();
+			}
+
+			return 0;
+		}
+	};
+
 	class __UtilExt CCSLock
 	{
 	public:
@@ -109,7 +132,7 @@ namespace NS_mtutil
 		}
 
 	public:
-		bool try_lock(UINT uRetryTimes, UINT uSleepTime = 0)
+		bool try_lock(UINT uRetryTimes=1, UINT uSleepTime = 0)
 		{
 			return _lock(uRetryTimes, uSleepTime);
 		}
