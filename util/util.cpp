@@ -146,12 +146,12 @@ wstring util::rtrim(const wstring& strText, wchar_t chr)
 	return strRet;
 }
 
-void util::SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim)
+void util::SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
 {
 	wstring::size_type startPos = 0;
 	while (true)
 	{
-		wstring::size_type pos = strText.find(cSplitor, startPos);
+		wstring::size_type pos = strText.find(wcSplitor, startPos);
 		if (wstring::npos == pos)
 		{
 			break;

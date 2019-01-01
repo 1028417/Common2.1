@@ -38,9 +38,13 @@ namespace NS_SSTL
 
 	template <typename T1, typename T2>
 	using checkSameDecayType_t = checkSameType_t<typename decay<T1>::type, typename decay<T2>::type>;
-	
+
+
+	template <typename CB, typename... Paras>
+	using cbRet_t = decltype(declval<CB>()(declval<Paras>()...));
+
 	template <typename CB, typename Ret, typename... Paras>
-	using checkCBRet_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), Ret>;
+	using checkCBRet_t = checkSameType_t<cbRet_t<CB, Paras...>, Ret>;
 
 	template <typename CB, typename... Paras>
 	using checkCBVoid_t = checkSameType_t<decltype(declval<CB>()(declval<Paras>()...)), void>;

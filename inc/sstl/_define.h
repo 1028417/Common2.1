@@ -21,8 +21,6 @@ using namespace std;
 
 namespace NS_SSTL
 {
-	typedef size_t TD_PosType;
-
 	template <typename T>
 	using InitList_T = const initializer_list<T>&;
 
@@ -34,9 +32,6 @@ namespace NS_SSTL
 
 	template <typename T>
 	using CB_T_bool = CB_T_Ret<T, bool>;
-
-	template <typename T, typename RET>
-	using CB_T_Pos_RET = const function<RET(T, TD_PosType)>&;
 
 	template <typename T>
 	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;

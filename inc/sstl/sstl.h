@@ -71,6 +71,7 @@ namespace NS_SSTL
 
 #include "SList.h"
 #include "ArrList.h"
+#include "PairList.h"
 
 #include "SSet.h"
 

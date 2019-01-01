@@ -195,14 +195,14 @@ BOOL CMainWnd::AddPage(CPage& Page, E_DockViewType eViewType)
 
 BOOL CMainWnd::ActivePage(CPage& Page)
 {
-	return m_mapDockViews.some([&](auto& pr) {
+	return m_mapDockViews.any([&](auto& pr) {
 		return pr.second->SetActivePage(Page);
 	});
 }
 
 BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 {
-	return m_mapDockViews.some([&](auto& pr) {
+	return m_mapDockViews.any([&](auto& pr) {
 		return pr.second->SetPageTitle(Page, cstrTitle, iImage);
 	});
 }

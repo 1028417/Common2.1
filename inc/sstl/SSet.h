@@ -83,6 +83,26 @@ namespace NS_SSTL
 			return *this;
 		}
 
+	public:
+		template <typename T>
+		SSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
+		{
+			SSetT<T, __BaseType> set;
+
+			for (auto&data : m_data)
+			{
+				set.add(cb(data));
+			}
+			
+			return set;
+		}
+
+		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
+		SSetT<RET, __BaseType> map(const CB& cb) const
+		{
+			return map<RET>(cb);
+		}
+
 	private:
 		void _add(__DataConstRef data) override
 		{
@@ -127,26 +147,6 @@ namespace NS_SSTL
 		bool _includes(__DataConstRef data) const override
 		{
 			return m_data.find(data) != m_data.end();
-		}
-		
-	public:
-		template <typename T>
-		SSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
-		{
-			SSetT<T, __BaseType> set;
-
-			for (auto&data : m_data)
-			{
-				set.add(cb(data));
-			}
-			
-			return set;
-		}
-
-		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
-		SSetT<RET, __BaseType> map(const CB& cb) const
-		{
-			return map<RET>(cb);
 		}
 	};
 }

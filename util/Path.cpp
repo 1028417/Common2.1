@@ -220,7 +220,7 @@ UINT CPath::GetSubPathCount() const
 bool CPath::HasFile() const
 {
 	__EnsureReturn(m_plstSubPath, FALSE);
-	return m_plstSubPath->some([](CPath& SubPath) {
+	return m_plstSubPath->any([](CPath& SubPath) {
 		return !SubPath.m_bDir;
 	});
 }

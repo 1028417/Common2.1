@@ -163,7 +163,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		bool _set(TD_PosType pos, __PtrType ptr)
+		bool _set(size_t pos, __PtrType ptr)
 		{
 			if (NULL == ptr)
 			{
@@ -180,19 +180,19 @@ namespace NS_SSTL
 			return true;
 		}
 
-		inline bool _set(TD_PosType pos, __RefType ref)
+		inline bool _set(size_t pos, __RefType ref)
 		{
 			return _set(pos, &ref);
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		inline bool _set(TD_PosType pos, T* ptr, ...)
+		inline bool _set(size_t pos, T* ptr, ...)
 		{
 			return _set(pos, dynamic_cast<__PtrType>(ptr));
 		}
 
 		template <typename T, typename = checkClass_t<T, __Type>>
-		inline bool _set(TD_PosType pos, T& ref, ...)
+		inline bool _set(size_t pos, T& ref, ...)
 		{
 			return _set(pos, &ref);
 		}                                                                     
@@ -373,24 +373,24 @@ namespace NS_SSTL
 			return _addContainer(container);
 		}
 		
-		bool set(TD_PosType pos, __PtrType ptr)
+		bool set(size_t pos, __PtrType ptr)
 		{
 			return _set(pos, ptr);
 		}
 
-		bool set(TD_PosType pos, __RefType ref)
+		bool set(size_t pos, __RefType ref)
 		{
 			return _set(pos, ref);
 		}
 
 		template<typename T>
-		bool set(TD_PosType pos, T* ptr)
+		bool set(size_t pos, T* ptr)
 		{
 			return _set(pos, ptr);
 		}
 
 		template<typename T>
-		bool set(TD_PosType pos, T& ref)
+		bool set(size_t pos, T& ref)
 		{
 			return _set(pos, ref);
 		}

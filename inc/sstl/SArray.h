@@ -15,99 +15,6 @@ namespace NS_SSTL
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
 
-	private:
-		template <class T= __ContainerType>
-		class __ArrayOperator
-		{
-		public:
-			__ArrayOperator(T& data)
-				: m_data(data)
-			{
-			}
-
-		private:
-			T& m_data;
-
-			using __RefType = decltype(m_data[0])&;
-
-		public:
-			template <typename CB>
-			bool get(TD_PosType pos, CB cb)
-			{
-				if (pos >= m_data.size())
-				{
-					return false;
-				}
-
-				cb(m_data[pos]);
-
-				return true;
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __RefType, TD_PosType>>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				if (startPos >= m_data.size())
-				{
-					return;
-				}
-
-				for (auto pos = startPos; pos < m_data.size(); pos++)
-				{
-					if (!cb(m_data[pos], pos))
-					{
-						break;
-					}
-
-					if (count > 0)
-					{
-						count--;
-						if (0 == count)
-						{
-							break;
-						}
-					}
-				}
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __RefType, TD_PosType>, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__RefType data, size_t pos) {
-					cb(data, pos);
-					return true;
-				}, startPos, count);
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__RefType data, size_t pos) {
-					cb(data);
-					return true;
-				}, startPos, count);
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __RefType>
-			, typename = void, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos, size_t count)
-			{
-				forEach([&](__RefType data, size_t pos) {
-					return cb(data);
-				}, startPos, count);
-			}
-		};
-
-		__ArrayOperator<> m_ArrayOperator = __ArrayOperator<>(m_data);
-		__ArrayOperator<>& _getOperator()
-		{
-			return m_ArrayOperator;
-		}
-		__ArrayOperator<const __ContainerType>& _getOperator() const
-		{
-			return (__ArrayOperator<const __ContainerType>&)m_ArrayOperator;
-		}
-
 	public:
 		SArrayT() = default;
 
@@ -182,15 +89,15 @@ namespace NS_SSTL
 		}
 
 		template<typename CB>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0)
 		{
-			_getOperator().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, count);
 		}
 
 		template<typename CB>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
 		{
-			_getOperator().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, count);
 		}
 
 	public:
@@ -212,23 +119,31 @@ namespace NS_SSTL
 			return m_data.rend();
 		}
 
-		bool get(TD_PosType pos, __CB_Ref_void cb)
+		bool get(size_t pos, __CB_Ref_void cb)
 		{
-			return _getOperator().get(pos, cb);
-		}
-		bool get(TD_PosType pos, __CB_ConstRef_void cb) const
-		{
-			return _getOperator().get(pos, cb);
+			return adaptor().get(pos, cb);
 		}
 
-		bool set(TD_PosType pos, __DataConstRef& data)
+		bool get(size_t pos, __CB_ConstRef_void cb) const
+		{
+			return adaptor().get(pos, cb);
+		}
+		
+		bool get(size_t pos, __DataRef& data) const
+		{
+			return adaptor().get(pos, [&](__DataConstRef& t_data) {
+				data = t_data;
+			});
+		}
+
+		bool set(size_t pos, __DataConstRef& data)
 		{
 			return get([&](__DataRef m_data) {
 				m_data = data;
 			});
 		}
 
-		bool del_pos(TD_PosType pos)
+		bool del_pos(size_t pos)
 		{
 			if (pos >= m_data.size())
 			{
@@ -240,11 +155,11 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool del_pos(list<TD_PosType> lstPos)
+		bool del_pos(list<size_t> lstPos)
 		{
 			for (int iIdx = m_data.size() - 1; iIdx >= 0; iIdx--)
 			{
-				auto itr = std::find(lstPos.begin(), lstPos.end(), (TD_PosType)iIdx);
+				auto itr = std::find(lstPos.begin(), lstPos.end(), (size_t)iIdx);
 				if (itr != lstPos.end())
 				{
 					__Super::erase(m_data.begin() + iIdx);
@@ -291,12 +206,12 @@ namespace NS_SSTL
 			return -1;
 		}
 
-		int find(CB_T_Pos_RET<__DataConstRef, bool> cb, TD_PosType stratPos = 0) const
+		int find(__CB_ConstRef_bool cb, size_t stratPos = 0) const
 		{
 			int iRetPos = -1;
 
-			(*this)([&](__DataConstRef data, TD_PosType pos) {
-				if (cb(data, pos))
+			(*this)([&](__DataConstRef data, size_t pos) {
+				if (cb(data))
 				{
 					iRetPos = pos;
 					return false;
@@ -385,7 +300,7 @@ namespace NS_SSTL
 
 	public:
 		template<typename... args>
-		SArrayT& splice(TD_PosType pos, size_t nRemove, __DataConstRef data, const args&... others)
+		SArrayT& splice(size_t pos, size_t nRemove, __DataConstRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
 			extractDataTypeArgs(vecData, data, others...);
@@ -393,7 +308,7 @@ namespace NS_SSTL
 		}
 
 		template<typename T>
-		SArrayT& splice(TD_PosType pos, size_t nRemove = 0, const T& container = {})
+		SArrayT& splice(size_t pos, size_t nRemove, const T& container)
 		{
 			if (__Super::checkIsSelf(container))
 			{
@@ -416,27 +331,17 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		SArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
+		SArrayT& splice(size_t pos, size_t nRemove, __InitList initList)
 		{
 			return splice(pos, nRemove, initList);
 		}
 
-		SArrayT slice(int startPos) const
+		SArrayT& splice(size_t pos, size_t nRemove)
 		{
-			SArrayT arr;
-
-			startPos = _checkPos(startPos);
-			if (startPos >= 0)
-			{
-				forEach([&](__DataConstRef data) {
-					arr.add(data);
-				}, (TD_PosType)startPos);
-			}
-
-			return arr;
+			return splice(pos, nRemove, __InitList());
 		}
 
-		SArrayT slice(int startPos, int endPos) const
+		SArrayT slice(int startPos, int endPos=-1) const
 		{
 			SArrayT arr;
 
@@ -447,7 +352,7 @@ namespace NS_SSTL
 			{
 				(*this)([&](__DataConstRef data) {
 					arr.add(data);
-				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
+				}, (size_t)startPos, size_t(endPos - startPos + 1));
 			}
 
 			return arr;
@@ -580,6 +485,99 @@ namespace NS_SSTL
 
 				return pos;
 			}
+		}
+
+	private:
+		template <class T = __ContainerType>
+		class CAdaptor
+		{
+		public:
+			CAdaptor(T& data)
+				: m_data(data)
+			{
+			}
+
+		private:
+			T& m_data;
+
+			using __RefType = decltype(m_data[0])&;
+
+		public:
+			template <typename CB>
+			bool get(size_t pos, CB cb)
+			{
+				if (pos >= m_data.size())
+				{
+					return false;
+				}
+
+				cb(m_data[pos]);
+
+				return true;
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
+			void forEach(const CB& cb, size_t startPos, size_t count)
+			{
+				if (startPos >= m_data.size())
+				{
+					return;
+				}
+
+				for (auto pos = startPos; pos < m_data.size(); pos++)
+				{
+					if (!cb(m_data[pos], pos))
+					{
+						break;
+					}
+
+					if (count > 0)
+					{
+						count--;
+						if (0 == count)
+						{
+							break;
+						}
+					}
+				}
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __RefType, size_t>, typename = void>
+			void forEach(const CB& cb, size_t startPos, size_t count)
+			{
+				forEach([&](__RefType data, size_t pos) {
+					cb(data, pos);
+					return true;
+				}, startPos, count);
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void>
+			void forEach(const CB& cb, size_t startPos, size_t count)
+			{
+				forEach([&](__RefType data, size_t pos) {
+					cb(data);
+					return true;
+				}, startPos, count);
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __RefType>
+				, typename = void, typename = void, typename = void>
+					void forEach(const CB& cb, size_t startPos, size_t count)
+				{
+					forEach([&](__RefType data, size_t pos) {
+						return cb(data);
+					}, startPos, count);
+				}
+		};
+
+		CAdaptor<> m_adaptor = CAdaptor<>(m_data);
+		CAdaptor<>& adaptor()
+		{
+			return m_adaptor;
+		}
+		CAdaptor<const __ContainerType>& adaptor() const
+		{
+			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}
 	};
 }

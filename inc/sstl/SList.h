@@ -13,54 +13,6 @@ namespace NS_SSTL
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
 
-	private:
-		template <class T = __ContainerType>
-		class __ListOperator
-		{
-		public:
-			__ListOperator(T& data)
-				: m_data(data)
-			{
-			}
-
-		private:
-			T& m_data;
-
-		public:
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef, size_t>>
-			void forEach(const CB& cb)
-			{
-				size_t idx = 0;
-				for (auto& data : m_data)
-				{
-					if (!cb(data, idx++))
-					{
-						break;
-					}
-				}
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, size_t>, typename = void>
-			void forEach(const CB& cb)
-			{
-				size_t idx = 0;
-				for (auto& data : m_data)
-				{
-					cb(data, idx++);
-				}
-			}
-		};
-
-		__ListOperator<> m_ListOperator = __ListOperator<>(m_data);
-		__ListOperator<>& _getOperator()
-		{
-			return m_ListOperator;
-		}
-		__ListOperator<const __ContainerType>& _getOperator() const
-		{
-			return (__ListOperator<const __ContainerType>&)m_ListOperator;
-		}
-
 	public:
 		SListT() = default;
 
@@ -137,13 +89,13 @@ namespace NS_SSTL
 		template<typename CB>
 		void operator() (const CB& cb)
 		{
-			_getOperator().forEach(cb);
+			adaptor().forEach(cb);
 		}
 
 		template<typename CB>
 		void operator() (const CB& cb) const
 		{
-			_getOperator().forEach(cb);
+			adaptor().forEach(cb);
 		}
 
 	public:
@@ -395,6 +347,54 @@ namespace NS_SSTL
 			}
 
 			return false;
+		}
+
+	private:
+		template <class T = __ContainerType>
+		class CAdaptor
+		{
+		public:
+			CAdaptor(T& data)
+				: m_data(data)
+			{
+			}
+
+		private:
+			T& m_data;
+
+		public:
+			template <typename CB, typename = checkCBBool_t<CB, __DataRef, size_t>>
+			void forEach(const CB& cb)
+			{
+				size_t idx = 0;
+				for (auto& data : m_data)
+				{
+					if (!cb(data, idx++))
+					{
+						break;
+					}
+				}
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, size_t>, typename = void>
+			void forEach(const CB& cb)
+			{
+				size_t idx = 0;
+				for (auto& data : m_data)
+				{
+					cb(data, idx++);
+				}
+			}
+		};
+
+		CAdaptor<> m_adaptor = CAdaptor<>(m_data);
+		CAdaptor<>& adaptor()
+		{
+			return m_adaptor;
+		}
+		CAdaptor<const __ContainerType>& adaptor() const
+		{
+			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}
 	};
 }

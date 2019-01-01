@@ -12,92 +12,17 @@ namespace NS_SSTL
 	private:
 		__UsingSuper(__SMapSuper)
 
-		__UsingSuperType(__DataType)
-
 		__UsingSuperType(__KeyConstRef)
-
 		__UsingSuperType(__InitList_Key)
 
 		using __ValueRef = __ValueType&;
 		using __ValueConstRef = const __ValueType&;
 
-		template <typename T>
-		using __CB_ValueCR_T = const function<T(__ValueConstRef)>&;
-
-		using __CB_KeyCR_ValueCR_bool = const function<bool(__KeyConstRef, __ValueConstRef)>&;
-
-	private:
-		template <class T = __ContainerType>
-		class __MapOperator
-		{
-		public:
-			__MapOperator(T& data)
-				: m_data(data)
-			{
-			}
-
-		private:
-			T& m_data;
-
-			using __ValueRef = decltype(m_data.begin()->second)&;
-
-		public:
-			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>
-			void forEach(const CB& cb)
-			{
-				for (auto& pr : m_data)
-				{
-					if (!cb(pr.first, pr.second))
-					{
-						break;
-					}
-				}
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __KeyConstRef, __ValueRef>, typename = void>
-			void forEach(const CB& cb)
-			{
-				for (auto& pr : m_data)
-				{
-					cb(pr.first, pr.second);
-				}
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>, typename = void, typename = void>
-			void forEach(const CB& cb)
-			{
-				for (auto& pr : m_data)
-				{
-					cb(pr.second);
-				}
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void, typename = void, typename = void>
-			void forEach(const CB& cb)
-			{
-				for (auto& pr : m_data)
-				{
-					if (!cb(pr.second))
-					{
-						break;
-					}
-				}
-			}
-		};
-
-		__MapOperator<> m_MapOperator = __MapOperator<>(m_data);
-		__MapOperator<>& _getOperator()
-		{
-			return m_MapOperator;
-		}
-		__MapOperator<const __ContainerType>& _getOperator() const
-		{
-			return (__MapOperator<const __ContainerType>&)m_MapOperator;
-		}
+		using __PairConstRef = __DataConstRef;
 
 		const bool m_bMulti = is_same<__ContainerType, std::multimap<__KeyType, __ValueType>>::value
 			|| is_same<__ContainerType, std::unordered_multimap<__KeyType, __ValueType>>::value;
-		
+
 	public:
 		SMapT() = default;
 
@@ -185,13 +110,13 @@ namespace NS_SSTL
 		template<typename CB>
 		void operator() (const CB& cb)
 		{
-			_getOperator().forEach(cb);
+			adaptor().forEach(cb);
 		}
 
 		template<typename CB>
 		void operator() (const CB& cb) const
 		{
-			_getOperator().forEach(cb);
+			adaptor().forEach(cb);
 		}
 
 	public:
@@ -208,7 +133,7 @@ namespace NS_SSTL
 		template <typename CB>
 		size_t get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](const __DataType& pr) {
+			return _find(key, [&](__PairConstRef pr) {
 				cb(pr.second);
 				
 				return true;
@@ -226,8 +151,16 @@ namespace NS_SSTL
 		template <typename CB, checkCBBool_t<CB, __ValueRef>>
 		bool get(__KeyConstRef key, const CB& cb) const
 		{
-			return _find(key, [&](const __DataType& pr) {
+			return _find(key, [&](__PairConstRef pr) {
 				return cb(pr.second);
+			});
+		}
+
+		bool get(__KeyConstRef key, __ValueRef value) const
+		{
+			return _find(key, [&](__PairConstRef pr) {
+				value = pr.second;
+				return false;
 			});
 		}
 
@@ -278,73 +211,60 @@ namespace NS_SSTL
 		}
 
 	public:
-		SArray<__KeyType> keys(__CB_KeyCR_ValueCR_bool cb = NULL) const
+		template <typename CB>
+		SArray<__KeyType> keys(const CB& cb = NULL) const
 		{
-			SArray<__KeyType> arr;
-			for (auto& pr : m_data)
-			{
-				if (cb && !cb(pr.first, pr.second))
-				{
-					continue;
-				}
-
-				arr.add(pr.first);
-			}
-
-			return arr;
+			return adaptor().keys(cb);
 		}
 
-		SArray<__ValueType> values(__CB_KeyCR_ValueCR_bool cb = NULL) const
+		SArray<__KeyType> keys() const
 		{
-			SArray<__ValueType> arr;
-			for (auto& pr : m_data)
-			{
-				if (cb && !cb(pr.first, pr.second))
-				{
-					continue;
-				}
-
-				arr.add(pr.second);
-			}
-
-			return arr;
+			return adaptor().keys([&](__KeyConstRef) {
+				return true;
+			});
 		}
 
-		template <typename T>
-		SMapT<__KeyType, T, __BaseType> map(__CB_ValueCR_T<T> cb) const
+		template <typename CB>
+		SArray<__ValueType> values(const CB& cb) const
 		{
-			SMapT<__KeyType, T, __BaseType> map;
+			return adaptor().values(cb);
+		}
+
+		SArray<__ValueType> values() const
+		{
+			return adaptor().values([&](__ValueConstRef) {
+				return true;
+			});
+		}
+
+		template <typename CB, typename RET = SMapT<cbRet_t<CB, __KeyConstRef>, __ValueType, __BaseType> >
+		RET mapKey(const CB& cb) const
+		{
+			RET map;
+
+			for (auto& pr : m_data)
+			{
+				map.set(cb(pr.first), pr.second);
+			}
+
+			return map;
+		}
+
+		template <typename CB, typename RET = SMapT<__KeyType, cbRet_t<CB, __ValueConstRef>, __BaseType> >
+		RET mapValue(const CB& cb) const
+		{
+			RET map;
 
 			for (auto& pr : m_data)
 			{
 				map.set(pr.first, cb(pr.second));
 			}
-			
-			return map;
-		}
-
-		template <typename CB, typename RET = decltype(declval<CB>()(__ValueType()))>
-		SMapT<__KeyType, RET, __BaseType> map(const CB& cb) const
-		{
-			return map<RET>(cb);
-		}
-
-		SMapT filter(__CB_ValueCR_T<bool> cb) const
-		{
-			SMapT map;
-
-			for (auto& pr : m_data)
-			{
-				if (cb(pr.second))
-				{
-					map.set(pr.first, pr.second);
-				}
-			}
 
 			return map;
 		}
 
-		SMapT filter(__CB_KeyCR_ValueCR_bool cb) const
+		template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueConstRef> >
+		SMapT filter(const CB& cb) const
 		{
 			SMapT map;
 
@@ -359,13 +279,96 @@ namespace NS_SSTL
 			return map;
 		}
 
-	private:
-		virtual void _toString(stringstream& ss, const __DataType& pr) const override
+		template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef> >
+		SMapT filterKey(const CB& cb) const
 		{
-			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
+			SMapT map;
+
+			for (auto& pr : m_data)
+			{
+				if (cb(pr.first))
+				{
+					map.set(pr.first, pr.second);
+				}
+			}
+
+			return map;
 		}
 
-		void _add(const __DataType& pr) override
+		template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef> >
+		SMapT filterValue(const CB& cb) const
+		{
+			SMapT map;
+
+			for (auto& pr : m_data)
+			{
+				if (cb(pr.second))
+				{
+					map.set(pr.first, pr.second);
+				}
+			}
+
+			return map;
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef> >
+		bool everyKey(const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				if (!cb(pr.first))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef> >
+		bool everyValue(const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				if (!cb(pr.second))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef> >
+		bool anyKey(const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				if (cb(pr.first))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef> >
+		bool anyValue(const CB& cb) const
+		{
+			for (auto& pr : m_data)
+			{
+				if (cb(pr.second))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+	private:
+		void _add(__PairConstRef pr) override
 		{
 			m_data.insert(pr);
 		}
@@ -405,6 +408,17 @@ namespace NS_SSTL
 			return uRet;
 		}
 
+		bool _includes(__KeyConstRef key) const override
+		{
+			return m_data.find(key) != m_data.end();
+		}
+
+		virtual void _toString(stringstream& ss, __PairConstRef pr) const override
+		{
+			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
+		}
+
+	private:
 		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb = NULL)
 		{
 			auto itr = m_data.find(key);
@@ -438,7 +452,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _find(__KeyConstRef key, CB_T_Ret<const __DataType&, bool> cb = NULL) const
+		size_t _find(__KeyConstRef key, CB_T_Ret<__PairConstRef, bool> cb = NULL) const
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -467,11 +481,6 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		bool _includes(__KeyConstRef key) const override
-		{
-			return m_data.find(key) != m_data.end();
-		}
-
 		template <typename _V>
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value }).first->second)&
 		{
@@ -482,6 +491,121 @@ namespace NS_SSTL
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
 		{
 			return m_data.insert({ key, value })->second;
+		}
+
+	private:
+		template <class T = __ContainerType>
+		class CAdaptor
+		{
+		public:
+			CAdaptor(T& data)
+				: m_data(data)
+			{
+			}
+
+		private:
+			T& m_data;
+
+			using __ValueRef = decltype(m_data.begin()->second)&;
+
+		public:
+			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>
+			void forEach(const CB& cb)
+			{
+				for (auto& pr : m_data)
+				{
+					if (!cb(pr.first, pr.second))
+					{
+						break;
+					}
+				}
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __KeyConstRef, __ValueRef>, typename = void>
+			void forEach(const CB& cb)
+			{
+				for (auto& pr : m_data)
+				{
+					cb(pr.first, pr.second);
+				}
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>, typename = void, typename = void>
+			void forEach(const CB& cb)
+			{
+				for (auto& pr : m_data)
+				{
+					cb(pr.second);
+				}
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void, typename = void, typename = void>
+			void forEach(const CB& cb)
+			{
+				for (auto& pr : m_data)
+				{
+					if (!cb(pr.second))
+					{
+						break;
+					}
+				}
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueConstRef> >
+			SArray<__KeyType> keys(const CB& cb) const
+			{
+				SArray<__KeyType> arr;
+				for (auto& pr : m_data)
+				{
+					if (cb(pr.first, pr.second))
+					{
+						arr.add(pr.first);
+					}
+				}
+
+				return arr;
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef>, typename = void>
+			SArray<__KeyType> keys(const CB& cb) const
+			{
+				return keys([&](__KeyConstRef key, __ValueConstRef) {
+					return cb(key);
+				});
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueConstRef> >
+			SArray<__ValueType> values(const CB& cb) const
+			{
+				SArray<__ValueType> arr;
+				for (auto& pr : m_data)
+				{
+					if (cb(pr.first, pr.second))
+					{
+						arr.add(pr.second);
+					}
+				}
+
+				return arr;
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __ValueConstRef>, typename = void>
+			SArray<__ValueType> values(const CB& cb) const
+			{
+				return values([&](__KeyConstRef, __ValueConstRef value) {
+					return cb(value);
+				});
+			}
+		};
+
+		CAdaptor<> m_adaptor = CAdaptor<>(m_data);
+		CAdaptor<>& adaptor()
+		{
+			return m_adaptor;
+		}
+		CAdaptor<const __ContainerType>& adaptor() const
+		{
+			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}
 	};
 }

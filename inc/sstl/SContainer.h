@@ -48,7 +48,7 @@ namespace NS_SSTL
 
 		explicit SContainerT(__ContainerType&& container)
 		{
-			m_data.swap(container);
+			_swap(container);
 		}
 
 		SContainerT(SContainerT&& container)
@@ -223,7 +223,7 @@ namespace NS_SSTL
 		}
 
 		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataRef>())), void>>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0)
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0)
 		{
 			for (auto& data : m_data)
 			{
@@ -232,7 +232,7 @@ namespace NS_SSTL
 		}
 
 		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataConstRef>())), void>>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
 		{
 			for (auto& data : m_data)
 			{
@@ -240,7 +240,7 @@ namespace NS_SSTL
 			}
 		}
 
-		void operator() (__CB_Ref_bool cb, TD_PosType startPos = 0, size_t count = 0)
+		void operator() (__CB_Ref_bool cb, size_t startPos = 0, size_t count = 0)
 		{
 			for (auto& data : m_data)
 			{
@@ -364,7 +364,7 @@ namespace NS_SSTL
 
 		SContainerT assign(__ContainerType&& container)
 		{
-			m_data.swap(container);
+			_swap(container);
 		}
 
 		SContainerT& assign(SContainerT&& container)
@@ -385,9 +385,10 @@ namespace NS_SSTL
 				return *this;
 			}
 
-			clear();
+			//clear();
 			
-			new (&m_data) __ContainerType(container.begin(), container.end());
+			__ContainerType tmp(container.begin(), container.end());
+			_swap(tmp);
 
 			return *this;
 		}
@@ -700,6 +701,18 @@ namespace NS_SSTL
 		}
 
 	public:
+		SContainerT map(CB_T_Ret<__DataConstRef, __DataType> cb) const
+		{
+			SContainerT ret;
+
+			for (auto&data : m_data)
+			{
+				ret.add(cb(data));
+			}
+
+			return ret;
+		}
+
 		SContainerT filter(__CB_ConstRef_bool cb) const
 		{
 			SContainerT ret;
@@ -728,7 +741,7 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool some(__CB_ConstRef_bool cb) const
+		bool any(__CB_ConstRef_bool cb) const
 		{
 			for (auto&data : m_data)
 			{
@@ -762,39 +775,6 @@ namespace NS_SSTL
 
 			ss << ']';
 			return ss.str();
-		}
-
-	private:
-		inline virtual void _add(__DataConstRef data)
-		{
-			m_data.insert(m_data.end(), data);
-		}
-
-		virtual bool _popFront(__CB_Ref_void cb = NULL)
-		{
-			auto itr = m_data.begin();
-			if (itr == m_data.end())
-			{
-				return false;
-			}
-
-			if (cb)
-			{
-				cb(*itr);
-			}
-
-			erase(itr);
-
-			return true;
-		}
-
-		virtual size_t _del(__KeyConstRef key, CB_Del cb) { return 0; }
-
-		virtual bool _includes(__KeyConstRef key) const { return false; }
-
-		virtual void _toString(stringstream& ss, __DataConstRef data) const
-		{
-			tagSSTryLMove(ss) << data;
 		}
 
 	protected:
@@ -835,12 +815,41 @@ namespace NS_SSTL
 		}
 
 	private:
-		void _swap(__ContainerType& container)
+		virtual void _swap(__ContainerType& container)
 		{
-			if (&container != &m_data)
+			m_data.swap(container);
+		}
+
+		virtual void _add(__DataConstRef data)
+		{
+			m_data.insert(m_data.end(), data);
+		}
+
+		virtual bool _popFront(__CB_Ref_void cb = NULL)
+		{
+			auto itr = m_data.begin();
+			if (itr == m_data.end())
 			{
-				m_data.swap(container);
+				return false;
 			}
+
+			if (cb)
+			{
+				cb(*itr);
+			}
+
+			erase(itr);
+
+			return true;
+		}
+
+		virtual size_t _del(__KeyConstRef key, CB_Del cb) { return 0; }
+
+		virtual bool _includes(__KeyConstRef key) const { return false; }
+
+		virtual void _toString(stringstream& ss, __DataConstRef data) const
+		{
+			tagSSTryLMove(ss) << data;
 		}
 	};
 }

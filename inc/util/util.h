@@ -81,7 +81,7 @@ public:
 	static wstring ltrim(const wstring& strText, wchar_t chr = ' ');
 	static wstring rtrim(const wstring& strText, wchar_t chr = ' ');
 
-	static void SplitString(const wstring& strText, char cSplitor, vector<wstring>& vecRet, bool bTrim=false);
+	static void SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim=false);
 
 	static int StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs);
 	static bool StrCompareIgnoreCase(const wstring& str1, const wstring& str2);

@@ -26,10 +26,7 @@ namespace NS_SSTL
 		
 		using __CB_RefType_void = CB_T_void<__RefType>;
 		using __CB_RefType_bool = CB_T_bool<__RefType>;
-
-		using __CB_RefType_Pos_void = CB_T_Pos_RET<__RefType, void>;
-		using __CB_RefType_Pos_bool = CB_T_Pos_RET<__RefType, bool>;
-		
+				
 	public:
 		PtrArrayT() {}
 
@@ -674,7 +671,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool get(TD_PosType pos, __CB_RefType_void cb) const
+		bool get(size_t pos, __CB_RefType_void cb) const
 		{
 			if (pos >= m_data.size())
 			{
@@ -691,13 +688,13 @@ namespace NS_SSTL
 			
 			return true;
 		}
-
-		bool set(TD_PosType pos, __PtrType ptr)
+		
+		bool set(size_t pos, __PtrType ptr)
 		{
 			return m_data.set(pos, ptr);
 		}
 
-		bool set(TD_PosType pos, __RefType ref)
+		bool set(size_t pos, __RefType ref)
 		{
 			return m_data.set(pos, &ref);
 		}
@@ -750,22 +747,7 @@ namespace NS_SSTL
 			return arr;
 		}
 
-		PtrArrayT slice(int startPos) const
-		{
-			PtrArrayT arr;
-
-			startPos = __Super::_checkPos(startPos);
-			if (startPos >= 0)
-			{
-				(*this)([&](__RefType ref) {
-					arr.add(&ref);
-				}, (TD_PosType)startPos);
-			}
-
-			return arr;
-		}
-
-		PtrArrayT slice(int startPos, int endPos) const
+		PtrArrayT slice(int startPos, int endPos=-1) const
 		{
 			PtrArrayT arr;
 
@@ -776,14 +758,14 @@ namespace NS_SSTL
 			{
 				(*this)([&](__RefType ref) {
 					arr.add(&ref);
-				}, (TD_PosType)startPos, size_t(endPos - startPos + 1));
+				}, (size_t)startPos, size_t(endPos - startPos + 1));
 			}
 
 			return arr;
 		}
 
 		template<typename... args>
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, __PtrType v, args... others)
+		PtrArrayT& splice(size_t pos, size_t nRemove, __PtrType v, args... others)
 		{
 			__Super::splice(pos, nRemove, v, others...);
 
@@ -791,7 +773,7 @@ namespace NS_SSTL
 		}
 
 		template<typename... args>
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, __RefType ref, args&... others)
+		PtrArrayT& splice(size_t pos, size_t nRemove, __RefType ref, args&... others)
 		{
 			vector<__PtrType> vec;
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
@@ -805,7 +787,7 @@ namespace NS_SSTL
 		}
 
 		template<typename T>
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, T& container)
+		PtrArrayT& splice(size_t pos, size_t nRemove, T& container)
 		{
 			__Super::splice(pos, nRemove, container);
 
@@ -813,21 +795,21 @@ namespace NS_SSTL
 		}
 
 		template<typename T>
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove, const T& container)
+		PtrArrayT& splice(size_t pos, size_t nRemove, const T& container)
 		{
 			__Super::splice(pos, nRemove, container);
 
 			return *this;
 		}
 
-        PtrArrayT& splice(TD_PosType pos, size_t nRemove, __InitList initList)
+        PtrArrayT& splice(size_t pos, size_t nRemove, __InitList initList)
 		{
 			__Super::splice(pos, nRemove, initList);
 
 			return *this;
 		}
 
-		PtrArrayT& splice(TD_PosType pos, size_t nRemove)
+		PtrArrayT& splice(size_t pos, size_t nRemove)
 		{
             __Super::splice(pos, nRemove, __InitList());
 
@@ -835,9 +817,10 @@ namespace NS_SSTL
 		}
 
 	public:
-		void operator() (__CB_RefType_Pos_bool cb, TD_PosType startPos = 0, size_t count = 0) const
+		template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
 		{
-			__Super::operator() ([&](__PtrType ptr, TD_PosType pos) {
+			__Super::operator() ([&](__PtrType ptr, size_t pos) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr, pos);
@@ -846,47 +829,41 @@ namespace NS_SSTL
 				return true;
 			}, startPos, count);
 		}
-		
-		template <typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__RefType>(), 0)), void>>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+
+		template <typename CB, typename = checkCBVoid_t<CB, __RefType, size_t>, typename = void>
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
 		{
-			__Super::operator() ([&](__PtrType ptr, TD_PosType pos) {
-				if (NULL != ptr)
-				{
-					cb(*ptr, pos);
-				}
+			(*this)([&](__RefType ref, size_t pos) {
+				cb(ref, pos);
+				
+				return true;
 			}, startPos, count);
 		}
 
-		template <typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__RefType>())), void>, typename=void>
-		void operator() (const CB& cb, TD_PosType startPos = 0, size_t count = 0) const
+		template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void>
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
 		{
-			__Super::operator() ([&](__PtrType ptr, TD_PosType pos) {
-				if (NULL != ptr)
-				{
-					cb(*ptr);
-				}
-			}, startPos, count);
-		}
-
-		void operator() (__CB_RefType_bool cb, TD_PosType startPos = 0, size_t count = 0) const
-		{
-			__Super::operator() ([&](__PtrType ptr) {
-				if (NULL != ptr)
-				{
-					return cb(*ptr);
-				}
+			(*this)([&](__RefType ref, size_t) {
+				cb(ref);
 
 				return true;
 			}, startPos, count);
 		}
 
-		int find(__CB_RefType_Pos_bool cb, TD_PosType stratPos = 0) const
+		template <typename CB, typename = checkCBBool_t<CB, __RefType>, typename = void, typename = void, typename = void>
+		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
+		{
+			(*this)([&](__RefType ref, size_t) {
+				return cb(ref);
+			}, startPos, count);
+		}
+
+		int find(__CB_RefType_bool cb, size_t stratPos = 0) const
 		{
 			int iRetPos = -1;
 			
-			(*this)([&](__RefType ref, TD_PosType pos) {
-				if (cb(ref, pos))
+			(*this)([&](__RefType ref, size_t pos) {
+				if (cb(ref))
 				{
 					iRetPos = pos;
 					return false;
@@ -898,20 +875,20 @@ namespace NS_SSTL
 			return iRetPos;
 		}
 
-		bool getFront(__CB_RefType_void cb = NULL) const
+		bool getFront(__CB_RefType_void cb) const
 		{
 			return __Super::getFront([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
+				if (NULL != ptr)
 				{
 					cb(*ptr);
 				}
 			});
 		}
 
-		bool getBack(__CB_RefType_void cb = NULL) const
+		bool getBack(__CB_RefType_void cb) const
 		{
 			return __Super::getBack([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
+				if (NULL != ptr)
 				{
 					cb(*ptr);
 				}
@@ -998,9 +975,9 @@ namespace NS_SSTL
 			});
 		}
 
-		bool some(__CB_RefType_bool cb) const
+		bool any(__CB_RefType_bool cb) const
 		{
-			return __Super::some([&](__PtrType ptr) {
+			return __Super::any([&](__PtrType ptr) {
 				if (NULL == ptr)
 				{
 					return false;
