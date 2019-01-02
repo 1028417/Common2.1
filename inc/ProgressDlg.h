@@ -53,15 +53,14 @@ public:
 
 	void SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress=0);
 
-	void SetProgress(UINT uProgress, int iMaxProgress=-1);
+	void SetProgress(UINT uProgress);
+	void SetProgress(UINT uProgress, UINT uMaxProgress);
 
 	void ForwardProgress(UINT uOffSet=1);
 
 	void Close();
 
 private:
-	void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) override;
-
 	virtual BOOL OnInitDialog();
 
 	LRESULT OnSetStatusText(WPARAM wParam, LPARAM lParam);
@@ -72,5 +71,9 @@ private:
 
 	virtual void OnCancel();
 
+private:
+	void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) override;
+
 	void _updateProgress();
+	void _endProgress();
 };

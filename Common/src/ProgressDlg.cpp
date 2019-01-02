@@ -9,7 +9,6 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PROGRESS1, m_wndProgressCtrl);
 }
 
-
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
 	ON_MESSAGE(WM_SetProgress, &CProgressDlg::OnSetProgress)
 
@@ -17,22 +16,6 @@ BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
 
 	ON_MESSAGE(WM_EndProgress, &CProgressDlg::OnEndProgress)
 END_MESSAGE_MAP()
-
-
-// CExportor 消息处理程序
-
-void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
-{
-	if (m_fnWork)
-	{
-		m_fnWork(*this);
-	}
-	
-	if (!m_bFinished)
-	{
-		(void)this->PostMessage(WM_EndProgress);
-	}
-}
 
 INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
 {
@@ -59,6 +42,19 @@ BOOL CProgressDlg::OnInitDialog()
 	(void)this->Run(1);
 
 	return TRUE;
+}
+
+void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
+{
+	if (m_fnWork)
+	{
+		m_fnWork(*this);
+	}
+
+	if (!m_bFinished)
+	{
+		(void)this->PostMessage(WM_EndProgress);
+	}
 }
 
 void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)
@@ -93,16 +89,23 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CProgressDlg::SetProgress(UINT uProgress, int iMaxProgress)
+void CProgressDlg::SetProgress(UINT uProgress)
 {
 	m_uProgress = uProgress;
 	
-	if (iMaxProgress>0)
-	{
-		m_uMaxProgress = (UINT)iMaxProgress;
-	}
-
 	(void)this->PostMessage(WM_SetProgress);
+}
+
+void CProgressDlg::SetProgress(UINT uProgress, UINT uMaxProgress)
+{
+	m_uMaxProgress = m_uMaxProgress;
+	
+	SetProgress(uProgress);
+}
+
+void CProgressDlg::ForwardProgress(UINT uOffSet)
+{
+	this->SetProgress(m_uProgress + uOffSet);
 }
 
 LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
@@ -123,24 +126,32 @@ void CProgressDlg::_updateProgress()
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
-	(void)m_wndProgressCtrl.SetPos((int)m_uProgress);
-}
-
-void CProgressDlg::ForwardProgress(UINT uOffSet)
-{
-	this->SetProgress(m_uProgress + uOffSet);
+	(void)m_wndProgressCtrl.SetPos(m_uProgress);
 }
 
 LRESULT CProgressDlg::OnEndProgress(WPARAM wParam, LPARAM lParam)
 {
-	m_uProgress = m_uMaxProgress;
-	_updateProgress();
-
+	_endProgress();
+	
 	m_bFinished = TRUE;
 	
 	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 
 	return 0;
+}
+
+void CProgressDlg::_endProgress()
+{
+	if (0 != m_uMaxProgress)
+	{
+		m_uProgress = m_uMaxProgress;
+		_updateProgress();
+	}
+	else
+	{
+		m_wndProgressCtrl.SetRange(0, 1);
+		(void)m_wndProgressCtrl.SetPos(1);
+	}
 }
 
 void CProgressDlg::OnCancel()
