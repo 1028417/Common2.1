@@ -4,13 +4,11 @@
 
 namespace NS_SSTL
 {
-#define __PairListSuper ArrListT<pair<__FirstType, __SecondType>, __BaseType>
-
-	template<typename __FirstType, typename __SecondType, template<typename...> class __BaseType>
-	class PairListT : public __PairListSuper
+	template<typename __FirstType, typename __SecondType, typename __DataType = pair<__FirstType, __SecondType>>
+	class PairListT : public ArrListT<__DataType>
 	{
 	private:
-		__UsingSuper(__PairListSuper)
+		__UsingSuper(ArrListT<__DataType>)
 		
 		using __PairType = pair<__FirstType, __SecondType>;
 		using __PairRef = __PairType&;
@@ -87,40 +85,64 @@ namespace NS_SSTL
 		}
 
 		template <typename CB>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0)
+		void operator() (int startPos, int endPos, const CB& cb)
 		{
-			adaptor().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, endPos);
 		}
 
 		template <typename CB>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
+		void operator() (int startPos, int endPos, const CB& cb) const
 		{
-			adaptor().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, endPos);
+		}
+
+		template <typename CB>
+		void operator() (int startPos, const CB& cb)
+		{
+			adaptor().forEach(cb, startPos);
+		}
+
+		template <typename CB>
+		void operator() (int startPos, const CB& cb) const
+		{
+			adaptor().forEach(cb, startPos);
+		}
+
+		template <typename CB>
+		void operator() (const CB& cb)
+		{
+			adaptor().forEach(cb);
+		}
+
+		template <typename CB>
+		void operator() (const CB& cb) const
+		{
+			adaptor().forEach(cb);
 		}
 
 	public:
 		template <typename CB>
-		void forFirst(const CB& cb, size_t startPos = 0, size_t count = 0)
+		void forFirst(const CB& cb, int startPos = 0, int endPos = -1)
 		{
-			adaptor().forFirst(cb, startPos, count);
+			adaptor().forFirst(cb, startPos, endPos);
 		}
 
 		template <typename CB>
-		void forFirst(const CB& cb, size_t startPos = 0, size_t count = 0) const
+		void forFirst(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			adaptor().forFirst(cb, startPos, count);
+			adaptor().forFirst(cb, startPos, endPos);
 		}
 
 		template <typename CB>
-		void forSecond(const CB& cb, size_t startPos = 0, size_t count = 0)
+		void forSecond(const CB& cb, int startPos = 0, int endPos = -1)
 		{
-			adaptor().forSecond(cb, startPos, count);
+			adaptor().forSecond(cb, startPos, endPos);
 		}
 
 		template <typename CB>
-		void forSecond(const CB& cb, size_t startPos = 0, size_t count = 0) const
+		void forSecond(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			adaptor().forSecond(cb, startPos, count);
+			adaptor().forSecond(cb, startPos, endPos);
 		}
 
 		inline PairListT& addPair(__FirstConstRef first, __SecondConstRef second)
@@ -162,7 +184,7 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB, typename RET = SMapT<cbRet_t<CB, __FirstConstRef>, __SecondType, __BaseType> >
+        template <typename CB, typename RET = SMap<cbRet_t<CB, __FirstConstRef>, __SecondType> >
 		RET mapFirst(const CB& cb) const
 		{
 			RET lst;
@@ -175,7 +197,7 @@ namespace NS_SSTL
 			return lst;
 		}
 
-		template <typename CB, typename RET = SMapT<__FirstType, cbRet_t<CB, __SecondConstRef>, __BaseType> >
+        template <typename CB, typename RET = SMap<__FirstType, cbRet_t<CB, __SecondConstRef>> >
 		RET mapSecond(const CB& cb) const
 		{
 			RET lst;
@@ -358,7 +380,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __SecondConstRef>, typename = void>
-			SArray<__SecondType> values(const CB& cb) const
+			SArray<__SecondType> seconds(const CB& cb) const
 			{
 				return seconds([&](__FirstConstRef, __SecondConstRef second) {
 					return cb(second);
@@ -366,17 +388,17 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __FirstRef, __SecondRef>>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
-				m_ptrArray([&](__PairRef pr) {
+				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					return cb(pr.first, pr.second);
 				});
 			}
 
 			template <typename CB, typename = checkCBVoid_t<CB, __FirstRef, __SecondRef>, typename = void>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
-				m_ptrArray([&](__PairRef pr) {
+				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					cb(pr.first, pr.second);
 
 					return true;
@@ -384,7 +406,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __FirstRef>>
-			void forFirst(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forFirst(const CB& cb, int startPos = 0, int endPos = 0) const
 			{
 				m_ptrArray([&](__PairRef pr) {
 					return cb(pr.first);
@@ -392,7 +414,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBVoid_t<CB, __FirstRef>, typename = void>
-			void forFirst(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forFirst(const CB& cb, int startPos = 0, int endPos = 0) const
 			{
 				m_ptrArray([&](__PairRef pr) {
 					cb(pr.first);
@@ -402,7 +424,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __SecondRef>>
-			void forSecond(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forSecond(const CB& cb, int startPos = 0, int endPos = 0) const
 			{
 				m_ptrArray([&](__PairRef pr) {
 					return cb(pr.second);
@@ -410,7 +432,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBVoid_t<CB, __SecondRef>, typename = void>
-			void forSecond(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			void forSecond(const CB& cb, int startPos = 0, int endPos = 0) const
 			{
 				m_ptrArray([&](__PairRef pr) {
 					cb(pr.second);
@@ -421,11 +443,11 @@ namespace NS_SSTL
 		};
 
 		CAdaptor<> m_adaptor = CAdaptor<>(m_data, __Super::m_ptrArray);
-		CAdaptor<>& adaptor()
+		inline CAdaptor<>& adaptor()
 		{
 			return m_adaptor;
 		}
-		CAdaptor<const __ContainerType>& adaptor() const
+		inline CAdaptor<const __ContainerType>& adaptor() const
 		{
 			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}

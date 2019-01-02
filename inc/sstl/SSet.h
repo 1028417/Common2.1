@@ -5,10 +5,10 @@
 namespace NS_SSTL
 {
 	template<typename __DataType, template<typename...> class __BaseType>
-	class SSetT : public __SuperT
+	class SSetT : public SContainerT<__BaseType<__DataType>>
 	{
 	private:
-		__UsingSuper(__SuperT);
+		__UsingSuper(SContainerT<__BaseType<__DataType>>);
 		
 	public:
 		SSetT() = default;

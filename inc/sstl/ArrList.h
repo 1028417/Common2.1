@@ -4,13 +4,11 @@
 
 namespace NS_SSTL
 {
-#define __ArrListSuper SListT<__DataType, __BaseType>
-
-	template<typename __DataType, template<typename...> class __BaseType>
-	class ArrListT : public __ArrListSuper
+	template<typename __DataType>
+	class ArrListT : public SListT<__DataType>
 	{
 	private:
-		__UsingSuper(__ArrListSuper)
+		__UsingSuper(SListT<__DataType>)
 
 		__UsingSuperType(__RItrType)
 		__UsingSuperType(__CRItrType)
@@ -94,15 +92,39 @@ namespace NS_SSTL
 		}
 
 		template<typename CB>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0)
+		void operator() (int startPos, int endPos, const CB& cb)
 		{
-			adaptor().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, endPos);
 		}
 
 		template<typename CB>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
+		void operator() (int startPos, int endPos, const CB& cb) const
 		{
-			adaptor().forEach(cb, startPos, count);
+			adaptor().forEach(cb, startPos, endPos);
+		}
+
+		template<typename CB>
+		void operator() (int startPos, const CB& cb)
+		{
+			adaptor().forEach(cb, startPos);
+		}
+
+		template<typename CB>
+		void operator() (int startPos, const CB& cb) const
+		{
+			adaptor().forEach(cb, startPos);
+		}
+
+		template<typename CB>
+		void operator() (const CB& cb)
+		{
+			adaptor().forEach(cb);
+		}
+
+		template<typename CB>
+		void operator() (const CB& cb) const
+		{
+			adaptor().forEach(cb);
 		}
 
 	public:
@@ -346,52 +368,34 @@ namespace NS_SSTL
 		}
 
 	private:
-		template <class __DataRef>
+        template <typename T = __DataType>
 		class CAdaptor
 		{
 		public:
-			CAdaptor(const PtrArray<__DataType>& ptrArray)
+            CAdaptor(const PtrArray<T>& ptrArray)
 				: m_ptrArray(ptrArray)
 			{
 			}
 
 		private:
-			const PtrArray<__DataType>& m_ptrArray;
+            const PtrArray<T>& m_ptrArray;
 
 		public:
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef, size_t>>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
+			template <typename CB>
+			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
-				m_ptrArray(cb);
-			}
-
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef>, typename = void>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
-			{
-				m_ptrArray(cb);
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef>, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
-			{
-				m_ptrArray(cb);
-			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, size_t>, typename = void, typename = void, typename = void>
-			void forEach(const CB& cb, size_t startPos = 0, size_t count = 0) const
-			{
-				m_ptrArray(cb);
+				m_ptrArray(startPos, endPos, cb);
 			}
 		};
 
-		CAdaptor<__DataRef> m_adaptor = CAdaptor<__DataRef>(m_ptrArray);
-		CAdaptor<__DataRef>& adaptor()
+        CAdaptor<> m_adaptor = CAdaptor<>(m_ptrArray);
+        CAdaptor<>& adaptor()
 		{
 			return m_adaptor;
 		}
-		CAdaptor<__DataConstRef>& adaptor() const
+		CAdaptor<const __DataType>& adaptor() const
 		{
-			return (CAdaptor<__DataConstRef>&)m_adaptor;
+			return (CAdaptor<const __DataType>&)m_adaptor;
 		}
 	};
 }

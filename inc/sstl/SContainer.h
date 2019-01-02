@@ -222,46 +222,6 @@ namespace NS_SSTL
 			return lhs & SContainerT(rhs);
 		}
 
-		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataRef>())), void>>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0)
-		{
-			for (auto& data : m_data)
-			{
-				cb(data);
-			}
-		}
-
-		template<typename CB, typename = checkSameType_t<decltype(declval<CB>()(declval<__DataConstRef>())), void>>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
-		{
-			for (auto& data : m_data)
-			{
-				cb(data);
-			}
-		}
-
-		void operator() (__CB_Ref_bool cb, size_t startPos = 0, size_t count = 0)
-		{
-			for (auto& data : m_data)
-			{
-				if (!cb(data))
-				{
-					break;
-				}
-			}
-		}
-
-		void operator() (__CB_ConstRef_bool cb) const
-		{
-			for (auto& data : m_data)
-			{
-				if (!cb(data))
-				{
-					break;
-				}
-			}
-		}
-
 		__ContainerType& operator->()
 		{
 			return m_data;

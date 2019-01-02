@@ -599,11 +599,11 @@ namespace NS_SSTL
 		};
 
 		CAdaptor<> m_adaptor = CAdaptor<>(m_data);
-		CAdaptor<>& adaptor()
+		inline CAdaptor<>& adaptor()
 		{
 			return m_adaptor;
 		}
-		CAdaptor<const __ContainerType>& adaptor() const
+		inline CAdaptor<const __ContainerType>& adaptor() const
 		{
 			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}

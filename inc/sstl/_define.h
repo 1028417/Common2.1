@@ -60,8 +60,6 @@ namespace NS_SSTL
 	};
 };
 
-#define __SuperT SContainer<__BaseType, __DataType>
-
 #ifdef _MSC_VER
 #define __UsingSuperType(T)
 #else

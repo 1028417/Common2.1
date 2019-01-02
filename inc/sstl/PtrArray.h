@@ -280,6 +280,76 @@ namespace NS_SSTL
 		}
 
 	public:
+		const __ContainerType& operator->() const
+		{
+			return m_data;
+		}
+
+		const __ContainerType& data() const
+		{
+			return m_data;
+		}
+
+		operator __ContainerType& () = delete;
+		operator const __ContainerType& () const
+		{
+			return m_data;
+		}
+
+		__CItrType begin() const
+		{
+			return m_data.cbegin();
+		}
+		__CItrType end() const
+		{
+			return m_data.cend();
+		}
+
+		__CRItrType rbegin() const
+		{
+			return m_data.crbegin();
+		}
+		__CRItrType rend() const
+		{
+			return m_data.crend();
+		}
+
+	public:
+		template <typename CB>
+		void operator() (int startPos, int endPos, const CB& cb) const
+		{
+			_forEach(cb, startPos, endPos);
+		}
+
+		template <typename CB>
+		void operator() (int startPos, const CB& cb) const
+		{
+			_forEach(cb, startPos);
+		}
+
+		template <typename CB>
+		void operator() (const CB& cb) const
+		{
+			_forEach(cb);
+		}
+
+		int find(__CB_RefType_bool cb, size_t stratPos = 0) const
+		{
+			int iRetPos = -1;
+
+			(*this)([&](__RefType ref, size_t pos) {
+				if (cb(ref))
+				{
+					iRetPos = pos;
+					return false;
+				}
+
+				return true;
+			});
+
+			return iRetPos;
+		}
+
 		int indexOf(__ConstPtr ptr) const
 		{
 			return m_data.indexOf(ptr);
@@ -597,6 +667,74 @@ namespace NS_SSTL
 			return m_data.addFront(initList);
 		}
 
+		bool getFront(__CB_RefType_void cb) const
+		{
+			return __Super::getFront([&](__PtrType ptr) {
+				if (NULL != ptr)
+				{
+					cb(*ptr);
+				}
+			});
+		}
+
+		bool getBack(__CB_RefType_void cb) const
+		{
+			return __Super::getBack([&](__PtrType ptr) {
+				if (NULL != ptr)
+				{
+					cb(*ptr);
+				}
+			});
+		}
+
+		bool popFront(__CB_RefType_void cb = NULL)
+		{
+			return __Super::popFront([&](__PtrType ptr) {
+				if (NULL != ptr && cb)
+				{
+					cb(*ptr);
+				}
+			});
+		}
+
+		bool popBack(__CB_RefType_void cb = NULL)
+		{
+			return __Super::pop([&](__PtrType ptr) {
+				if (NULL != ptr && cb)
+				{
+					cb(*ptr);
+				}
+			});
+		}
+
+		bool get(size_t pos, __CB_RefType_void cb) const
+		{
+			if (pos >= m_data.size())
+			{
+				return false;
+			}
+
+			__PtrType ptr = m_data[pos];
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			cb(*ptr);
+
+			return true;
+		}
+
+		bool set(size_t pos, __PtrType ptr)
+		{
+			return m_data.set(pos, ptr);
+		}
+
+		bool set(size_t pos, __RefType ref)
+		{
+			return m_data.set(pos, &ref);
+		}
+
 		template<typename... args>
 		PtrArrayT& assign(__PtrType ptr, args... others)
 		{
@@ -671,34 +809,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool get(size_t pos, __CB_RefType_void cb) const
-		{
-			if (pos >= m_data.size())
-			{
-				return false;
-			}
-
-			__PtrType ptr = m_data[pos];
-			if (NULL == ptr)
-			{
-				return false;
-			}
-			
-			cb(*ptr);
-			
-			return true;
-		}
-		
-		bool set(size_t pos, __PtrType ptr)
-		{
-			return m_data.set(pos, ptr);
-		}
-
-		bool set(size_t pos, __RefType ref)
-		{
-			return m_data.set(pos, &ref);
-		}
-
 		template<typename... args>
 		PtrArrayT concat(__PtrType ptr, args... others) const
 		{
@@ -744,23 +854,6 @@ namespace NS_SSTL
 		{
 			PtrArrayT arr(*this);
 			arr.add(initList);
-			return arr;
-		}
-
-		PtrArrayT slice(int startPos, int endPos=-1) const
-		{
-			PtrArrayT arr;
-
-			startPos = __Super::_checkPos(startPos);
-			endPos = __Super::_checkPos(endPos);
-
-			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
-			{
-				(*this)([&](__RefType ref) {
-					arr.add(&ref);
-				}, (size_t)startPos, size_t(endPos - startPos + 1));
-			}
-
 			return arr;
 		}
 
@@ -814,105 +907,6 @@ namespace NS_SSTL
             __Super::splice(pos, nRemove, __InitList());
 
 			return *this;
-		}
-
-	public:
-		template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
-		{
-			__Super::operator() ([&](__PtrType ptr, size_t pos) {
-				if (NULL != ptr)
-				{
-					return cb(*ptr, pos);
-				}
-
-				return true;
-			}, startPos, count);
-		}
-
-		template <typename CB, typename = checkCBVoid_t<CB, __RefType, size_t>, typename = void>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
-		{
-			(*this)([&](__RefType ref, size_t pos) {
-				cb(ref, pos);
-				
-				return true;
-			}, startPos, count);
-		}
-
-		template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
-		{
-			(*this)([&](__RefType ref, size_t) {
-				cb(ref);
-
-				return true;
-			}, startPos, count);
-		}
-
-		template <typename CB, typename = checkCBBool_t<CB, __RefType>, typename = void, typename = void, typename = void>
-		void operator() (const CB& cb, size_t startPos = 0, size_t count = 0) const
-		{
-			(*this)([&](__RefType ref, size_t) {
-				return cb(ref);
-			}, startPos, count);
-		}
-
-		int find(__CB_RefType_bool cb, size_t stratPos = 0) const
-		{
-			int iRetPos = -1;
-			
-			(*this)([&](__RefType ref, size_t pos) {
-				if (cb(ref))
-				{
-					iRetPos = pos;
-					return false;
-				}
-
-				return true;
-			});
-
-			return iRetPos;
-		}
-
-		bool getFront(__CB_RefType_void cb) const
-		{
-			return __Super::getFront([&](__PtrType ptr) {
-				if (NULL != ptr)
-				{
-					cb(*ptr);
-				}
-			});
-		}
-
-		bool getBack(__CB_RefType_void cb) const
-		{
-			return __Super::getBack([&](__PtrType ptr) {
-				if (NULL != ptr)
-				{
-					cb(*ptr);
-				}
-			});
-		}
-
-		bool popFront(__CB_RefType_void cb = NULL)
-		{
-			return __Super::popFront([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
-				{
-					cb(*ptr);
-				}
-			});
-		}
-
-		bool popBack(__CB_RefType_void cb = NULL)
-		{
-			return __Super::pop([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
-				{
-					cb(*ptr);
-				}
-			});
 		}
 
 		PtrArrayT& qsort(__CB_Sort_T<__DataType> cb)
@@ -993,39 +987,49 @@ namespace NS_SSTL
 			m_data.add((__PtrType)ptr);
 		}
 
-	public:
-		const __ContainerType& operator->() const
+		template <typename CB>
+		void __forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			return m_data;
+			__Super::operator() (startPos, endPos, [&](__PtrType ptr, size_t pos) {
+				if (NULL != ptr)
+				{
+					return cb(*ptr, pos);
+				}
+
+				return true;
+			});
 		}
 
-		const __ContainerType& data() const
+		template <typename CB, typename = checkCBBool_t<CB, __RefType, size_t>>
+		void _forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			return m_data;
+			__forEach(cb, startPos, endPos);
 		}
 
-		operator __ContainerType& () = delete;
-		operator const __ContainerType& () const
+		template <typename CB, typename = checkCBVoid_t<CB, __RefType, size_t>, typename = void>
+		void _forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			return m_data;
+			__forEach([&](__RefType ref, size_t pos) {
+				cb(ref, pos);
+				return true;
+			}, startPos, endPos);
 		}
 
-		__CItrType begin() const
+		template <typename CB, typename = checkCBBool_t<CB, __RefType>, typename = void, typename = void>
+		void _forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			return m_data.cbegin();
-		}
-		__CItrType end() const
-		{
-			return m_data.cend();
+			__forEach([&](__RefType ref, size_t) {
+				return cb(ref);
+			}, startPos, endPos);
 		}
 
-		__CRItrType rbegin() const
+		template <typename CB, typename = checkCBVoid_t<CB, __RefType>, typename = void, typename = void, typename = void>
+		void _forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 		{
-			return m_data.crbegin();
-		}
-		__CRItrType rend() const
-		{
-			return m_data.crend();
+			__forEach([&](__RefType ref, size_t) {
+				cb(ref);
+				return true;
+			}, startPos, endPos);
 		}
 	};
 }

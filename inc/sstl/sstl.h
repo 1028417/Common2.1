@@ -10,18 +10,14 @@
 
 namespace NS_SSTL
 {
-	template<typename __ContainerType__, typename __KeyType__ = removeConstRef_t<typename tagCheckContainer<__ContainerType__>::Ref_Type>> class SContainerT;
-	template <template<typename...> class __BaseType, class __DataType>
-	using SContainer = SContainerT<__BaseType<__DataType>>;
+	template<typename __ContainerType__, typename __KeyType__ = 
+		removeConstRef_t<typename tagCheckContainer<__ContainerType__>::Ref_Type>> class SContainerT;
 
+	template<typename __DataType> class SListT;
+	template <typename __DataType> using SList = SListT<__DataType>;
 
-	template<typename __DataType, template<typename...> class __BaseType> class SListT;
-	template <typename __DataType, template<typename...> class __BaseType = std::list>
-	using SList = SListT<__DataType, __BaseType>;
-
-	template<typename __DataType, template<typename...> class __BaseType> class ArrListT;
-	template<typename __DataType, template<typename...> class __BaseType = std::list>
-	using ArrList = ArrListT<__DataType, __BaseType>;
+	template<typename __DataType> class ArrListT;
+	template<typename __DataType> using ArrList = ArrListT<__DataType>;
 
 	template<typename __DataType, template<typename...> class __BaseType> class SArrayT;
 	template <typename __DataType, template<typename...> class __BaseType = std::vector>
