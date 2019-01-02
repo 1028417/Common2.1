@@ -4,11 +4,14 @@
 
 namespace NS_SSTL
 {
+#undef __Super__
+#define __Super__ SContainerT<std::list<__DataType>>
+
 	template<typename __DataType>
-	class SListT : public SContainerT<std::list<__DataType>>
+	class SListT : public __Super__
 	{
 	protected:
-		__UsingSuper(SContainerT<std::list<__DataType>>)
+		__UsingSuper(__Super__)
 
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;

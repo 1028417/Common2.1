@@ -4,11 +4,14 @@
 
 namespace NS_SSTL
 {
+#undef __Super__
+#define __Super__ SContainerT<__BaseType<__DataType>>
+
 	template<typename __DataType, template<typename...> class __BaseType>
-	class SSetT : public SContainerT<__BaseType<__DataType>>
+	class SSetT : public __Super__
 	{
 	private:
-		__UsingSuper(SContainerT<__BaseType<__DataType>>);
+		__UsingSuper(__Super__);
 		
 	public:
 		SSetT() = default;

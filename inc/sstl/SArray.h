@@ -6,11 +6,14 @@
 
 namespace NS_SSTL
 {
-	template<typename __DataType, template<typename...> class __BaseType>
-	class SArrayT : public SContainerT<__BaseType<__DataType>>
+#undef __Super__
+#define __Super__ SContainerT<__BaseType<__DataType>>
+
+	template <typename __DataType, template<typename...> class __BaseType>
+	class SArrayT : public __Super__
 	{
 	protected:
-		__UsingSuper(SContainerT<__BaseType<__DataType>>);
+		__UsingSuper(__Super__);
 
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;

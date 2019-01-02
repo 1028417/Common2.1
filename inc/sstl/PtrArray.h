@@ -6,13 +6,14 @@
 
 namespace NS_SSTL
 {
-#define __PtrArraySuper SArrayT<__DataType__*, __BaseType>
+#undef __Super__
+#define __Super__ SArrayT<__DataType__*, __BaseType>
 
-	template<typename __DataType__, template<typename...> class __BaseType>
-	class PtrArrayT : public __PtrArraySuper
+	template <typename __DataType__, template<typename...> class __BaseType>
+	class PtrArrayT : public __Super__
 	{
 	private:
-		__UsingSuper(__PtrArraySuper)
+		__UsingSuper(__Super__)
 
 		__UsingSuperType(__RItrType)
 		__UsingSuperType(__CRItrType)

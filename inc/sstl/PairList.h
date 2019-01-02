@@ -4,13 +4,18 @@
 
 namespace NS_SSTL
 {
-	template<typename __FirstType, typename __SecondType, typename __DataType = pair<__FirstType, __SecondType>>
-	class PairListT : public ArrListT<__DataType>
+#define __Pair__ pair<__FirstType, __SecondType>
+#undef __Super__
+#define __Super__ ArrListT<pair<__FirstType, __SecondType>>
+
+	template <typename __FirstType, typename __SecondType>
+	class PairListT : public __Super__
 	{
 	private:
-		__UsingSuper(ArrListT<__DataType>)
-		
-		using __PairType = pair<__FirstType, __SecondType>;
+		__UsingSuper(__Super__)
+
+		using __PairType = __Pair__;
+
 		using __PairRef = __PairType&;
 		using __PairConstRef = const __PairType&;
 
