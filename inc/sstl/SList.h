@@ -152,6 +152,7 @@ namespace NS_SSTL
 		SListT& addFront(__InitList initList)
 		{
 			addFront<__InitList>(initList);
+			return *this;
 		}
 
 		template<typename... args>

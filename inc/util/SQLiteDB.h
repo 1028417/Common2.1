@@ -28,18 +28,18 @@ public:
 		return m_uRowCount;
 	}
 
-	BOOL GetData(UINT uRow, UINT uColumn, string& strData) override;
-	BOOL GetData(UINT uRow, UINT uColumn, wstring& strData) override;
-	BOOL GetData(UINT uRow, UINT uColumn, int& nValue) override;
-	BOOL GetData(UINT uRow, UINT uColumn, double& dbValue) override;
+	bool GetData(UINT uRow, UINT uColumn, string& strData) override;
+	bool GetData(UINT uRow, UINT uColumn, wstring& strData) override;
+	bool GetData(UINT uRow, UINT uColumn, int& nValue) override;
+	bool GetData(UINT uRow, UINT uColumn, double& dbValue) override;
 
-	BOOL GetData(UINT uRow, SArray<string>& arrData) override;
-	BOOL GetData(UINT uRow, SArray<wstring>& arrData) override;
-	BOOL GetData(UINT uRow, SArray<int>& arrValue) override;
-	BOOL GetData(UINT uRow, SArray<double>& arrValue) override;
+	bool GetData(UINT uRow, SArray<string>& arrData) override;
+	bool GetData(UINT uRow, SArray<wstring>& arrData) override;
+	bool GetData(UINT uRow, SArray<int>& arrValue) override;
+	bool GetData(UINT uRow, SArray<double>& arrValue) override;
 	
 private:
-	BOOL _getData(UINT uRow, const function<void(const string&)>& cb);
+	bool _getData(UINT uRow, const function<void(const string&)>& cb);
 };
 
 
@@ -53,7 +53,7 @@ public:
 private:
 	string m_strDBPath;
 	
-	HANDLE m_hDB = NULL;
+	void *m_hDB = NULL;
 
 	string m_strError;
 	
@@ -67,12 +67,14 @@ public:
 		return m_strError;
 	}
 
-	BOOL Connect(const string& strPara="") override;
+	bool Connect(const string& strPara="") override;
 
-	BOOL Disconnect() override;
+	bool Disconnect() override;
 
-	BOOL Execute(const wstring& strSql) override;
+	bool Execute(const string& strSql) override;
+	bool Execute(const wstring& strSql) override;
 
+	IDBResult* Query(const string& strSql) override;
 	IDBResult* Query(const wstring& strSql) override;
 
 	bool BeginTrans() override;

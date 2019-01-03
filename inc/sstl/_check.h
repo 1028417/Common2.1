@@ -84,7 +84,7 @@ namespace NS_SSTL
 	_RequireInputIter<_Iter>;
 #endif
 
-	struct tagItrVisitor
+	/*struct tagItrVisitor
 	{
 		template <class __C>
 		static auto begin(__C& container)->decltype(container.begin())
@@ -109,13 +109,13 @@ namespace NS_SSTL
 		{
 			return container.end();
 		}
-	};
+	};*/
 
-	template <typename _C, typename __Itr = decltype(tagItrVisitor::begin(declval<_C&>())), typename = checkIter_t<__Itr>>
+	template <typename _C, typename __Itr = decltype(declval<_C&>().begin()), typename = checkIter_t<__Itr>>
 	struct tagCheckContainer
 	{
 		typedef __Itr Itr_Type;
-		typedef decltype(tagItrVisitor::begin(declval<const _C&>())) CItr_Type;
+		typedef decltype(declval<const _C&>().begin()) CItr_Type;
 
 		typedef decltype(*declval<__Itr>()) Ref_Type;
 		typedef removeConstRef_t<Ref_Type> Data_Type;
@@ -155,7 +155,7 @@ namespace NS_SSTL
 	using checkNotContainer_t = checkSameType_t<T, decltype(tagCheckNotContainer::check<T>())>;
 
 
-	template <class __C>
+	/*template <class __C>
 	class CItrVisitor : private tagItrVisitor
 	{
 	public:
@@ -179,7 +179,7 @@ namespace NS_SSTL
 		{
 			return tagItrVisitor::end(m_container);
 		}
-	};
+	};*/
 };
 
 #endif // __Check_H

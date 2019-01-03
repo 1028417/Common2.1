@@ -4,35 +4,39 @@
 using namespace std;
 
 typedef unsigned int UINT;
-typedef int BOOL;
 
 #include <sstl/sstl.h>
 using namespace NS_SSTL;
 
-interface IDBResult
+class IDBResult
 {
+public:
 	virtual const UINT& GetColumnCount() = 0;
 	virtual const UINT& GetRowCount() = 0;
 
-	virtual BOOL GetData(UINT uRow, UINT uColumn, int& nValue) = 0;
-	virtual BOOL GetData(UINT uRow, UINT uColumn, double& dbValue) = 0;
-	virtual BOOL GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
-	virtual BOOL GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, int& nValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, double& dbValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
 	
-	virtual BOOL GetData(UINT uRow, SArray<string>& arrData) = 0;
-	virtual BOOL GetData(UINT uRow, SArray<wstring>& arrData) = 0;
-	virtual BOOL GetData(UINT uRow, SArray<int>& arrValue) = 0;
-	virtual BOOL GetData(UINT uRow, SArray<double>& arrValue) = 0;
+	virtual bool GetData(UINT uRow, SArray<string>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<wstring>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<int>& arrValue) = 0;
+	virtual bool GetData(UINT uRow, SArray<double>& arrValue) = 0;
 };
 
-interface IDB
+class IDB
 {
+public:
 	virtual int GetStatus() = 0;
 
-	virtual BOOL Connect(const string& strPara="") = 0;
-	virtual BOOL Disconnect() = 0;
+	virtual bool Connect(const string& strPara="") = 0;
+	virtual bool Disconnect() = 0;
 
-	virtual BOOL Execute(const wstring& strSql) = 0;
+	virtual bool Execute(const string& strSql) = 0;
+	virtual bool Execute(const wstring& strSql) = 0;
+
+	virtual IDBResult* Query(const string& strSql) = 0;
 	virtual IDBResult* Query(const wstring& strSql) = 0;
 
 	virtual bool BeginTrans() = 0;

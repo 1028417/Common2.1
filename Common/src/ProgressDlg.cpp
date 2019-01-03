@@ -98,7 +98,7 @@ void CProgressDlg::SetProgress(UINT uProgress)
 
 void CProgressDlg::SetProgress(UINT uProgress, UINT uMaxProgress)
 {
-	m_uMaxProgress = m_uMaxProgress;
+	m_uMaxProgress = uMaxProgress;
 	
 	SetProgress(uProgress);
 }

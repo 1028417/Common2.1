@@ -153,6 +153,7 @@ namespace NS_SSTL
 		inline PairListT& addPair(__FirstConstRef first, __SecondConstRef second)
 		{
 			__Super::_add({ first, second });
+			return *this;
 		}
 
 		bool set(size_t pos, __FirstConstRef first, __SecondConstRef second)

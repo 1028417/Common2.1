@@ -307,7 +307,7 @@ namespace NS_SSTL
 			return lst;
 		}
 
-	private:
+	protected:
 		virtual void _swap(__ContainerType& container)
 		{
 			if (&container != &m_data)
