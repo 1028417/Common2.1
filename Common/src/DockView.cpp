@@ -223,10 +223,6 @@ BOOL CDockView::Create()
 	
 	__AssertReturn(m_wndTabCtrl.init(m_ViewStyle.TabStyle), FALSE);
 
-	CRect rcClient;
-	this->GetClientRect(rcClient);
-	m_wndTabCtrl.MoveWindow(rcClient);
-
 	return TRUE;
 }
 
@@ -319,14 +315,10 @@ static bool g_bManualResize = false;
 
 void CDockView::Resize(CRect& rcViewArea, bool bManual)
 {
-	UINT uOffset = 0;
-	if (m_ViewStyle.sizeable())
+	UINT uOffset = __DXView;
+	if (!m_ViewStyle.sizeable())
 	{
-		uOffset = __DXView;
-	}
-	else
-	{
-		uOffset = 2;
+		uOffset /= 2;
 	}
 	
 	CRect rtPos(rcViewArea);
@@ -368,14 +360,12 @@ void CDockView::OnSize(UINT nType, int cx, int cy)
 	if (m_wndTabCtrl)
 	{
 		m_wndTabCtrl.MoveWindow(0, 0, cx, cy, g_bManualResize ? FALSE : TRUE);
-		//m_wndTabCtrl.SetWindowPos(NULL, 0, 0, cx, cy, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE
-			//| (g_bManualResize?SWP_NOREDRAW:0));
-	}
 
-	CPropertyPage *pPage = __super::GetActivePage();
-	if (NULL != pPage)
-	{
-		this->resizePage(*pPage);
+		CPropertyPage *pPage = __super::GetActivePage();
+		if (NULL != pPage)
+		{
+			this->resizePage(*pPage);
+		}
 	}
 }
 
@@ -390,7 +380,7 @@ void CDockView::resizePage(CPropertyPage& Page)
 	}
 	else
 	{
-		CRect rcPage(2, 2, rcClient.right-2, rcClient.bottom-2);
+		CRect rcPage(0, 0, rcClient.right, rcClient.bottom);
 		UINT uTabHeight = m_wndTabCtrl.getItemHeight() + 2;
 		switch (m_ViewStyle.TabStyle.eTabStyle)
 		{

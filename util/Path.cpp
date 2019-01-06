@@ -3,6 +3,15 @@
 
 #include <Path.h>
 
+void CPath::SetDir(const wstring& strDir)
+{
+	m_bDir = true;
+	m_strName = strDir;
+
+	util::rtrim(m_strName, __Slant);
+	util::rtrim(m_strName, __BackSlant);
+}
+
 wstring CPath::GetName() const
 {
 	if (NULL != m_pParentPath)
@@ -13,11 +22,6 @@ wstring CPath::GetName() const
 	{
 		return fsutil::GetFileName(m_strName);
 	}
-}
-
-void CPath::SetName(const wstring& strNewName)
-{
-	m_strName = strNewName;
 }
 
 wstring CPath::GetPath() const

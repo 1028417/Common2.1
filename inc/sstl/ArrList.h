@@ -87,13 +87,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		ArrListT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
-
 		template<typename CB>
 		void operator() (int startPos, int endPos, const CB& cb)
 		{
@@ -131,24 +124,31 @@ namespace NS_SSTL
 		}
 
 	public:
-		const __ContainerType& operator->() const
-		{
-			return m_data;
-		}
-
 		void clear() override
 		{
 			m_ptrArray.clear();
 			m_data.clear();
 		}
 
-		const __ContainerType& data() const
+		const __ContainerType& operator->()
+		{
+			return m_data;
+		}
+		const __ContainerType& operator->() const
+		{
+			return m_data;
+		}
+
+		const __ContainerType& operator *()
+		{
+			return m_data;
+		}
+		const __ContainerType& operator *() const
 		{
 			return m_data;
 		}
 
 		operator __ContainerType& () = delete;
-
 		operator const __ContainerType& ()
 		{
 			return m_data;
@@ -157,22 +157,6 @@ namespace NS_SSTL
 		{
 			return m_data;
 		}
-
-#ifndef __MINGW32__
-		virtual __ItrType erase(const __CItrType& itr)
-		{
-			m_ptrArray.del(&*itr);
-
-			return m_data.erase(itr);
-		}
-#else
-		virtual __ItrType erase(const __ItrType& itr)
-		{
-            m_ptrArray.del(&*itr);
-
-            return m_data.erase(itr);
-		}
-#endif
 
 		__RItrType rbegin()
 		{
@@ -316,7 +300,12 @@ namespace NS_SSTL
 				m_ptrArray.assign(m_data);
 			}
 		}
-		
+
+		void _onErase(const __CItrType& itr) override
+		{
+			m_ptrArray.del(&*itr);
+		}
+
 		void _add(__DataConstRef data) override
 		{
 			m_data.push_back(data);

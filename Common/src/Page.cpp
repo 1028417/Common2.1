@@ -80,7 +80,7 @@ BOOL CPage::OnSetActive()
 	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
 	if (NULL != pDockView)
 	{
-		//pDockView->resizePage(*this);
+		pDockView->resizePage(*this);
 	}
 
 	OnActive(TRUE);

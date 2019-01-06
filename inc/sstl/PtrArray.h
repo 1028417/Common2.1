@@ -127,18 +127,6 @@ namespace NS_SSTL
 		}
 
 	public:
-		PtrArrayT& operator+= (__RefType rhs)
-		{
-			this->add(rhs);
-			return *this;
-		}
-
-		PtrArrayT& operator+= (__PtrType rhs)
-		{
-			this->add(rhs);
-			return *this;
-		}
-
 		template <typename T>
 		PtrArrayT& operator+= (T& rhs)
 		{
@@ -156,18 +144,6 @@ namespace NS_SSTL
 		PtrArrayT& operator+= (__InitList rhs)
 		{
 			this->add(rhs);
-			return *this;
-		}
-
-		PtrArrayT& operator-= (__RefType rhs)
-		{
-			this->del(rhs);
-			return *this;
-		}
-
-		PtrArrayT& operator-= (__PtrType rhs)
-		{
-			this->del(rhs);
 			return *this;
 		}
 
@@ -281,20 +257,37 @@ namespace NS_SSTL
 		}
 
 	public:
+		const __ContainerType& operator->()
+		{
+			return m_data;
+		}
 		const __ContainerType& operator->() const
 		{
 			return m_data;
 		}
 
-		const __ContainerType& data() const
+		const __ContainerType& operator *()
+		{
+			return m_data;
+		}
+		const __ContainerType& operator *() const
 		{
 			return m_data;
 		}
 
 		operator __ContainerType& () = delete;
+		operator const __ContainerType& ()
+		{
+			return m_data;
+		}
 		operator const __ContainerType& () const
 		{
 			return m_data;
+		}
+
+		__CItrType erase(const __CItrType& itr)
+		{
+			return __Super::erase(itr);
 		}
 
 		__CItrType begin() const

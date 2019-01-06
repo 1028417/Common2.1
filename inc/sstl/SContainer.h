@@ -103,16 +103,15 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		SContainerT& operator=(T&t)
+		SContainerT& operator<< (__InitList initList)
 		{
-			assign(t);
+			add(initList);
 			return *this;
 		}
-
-		SContainerT& operator+= (__DataConstRef data)
+		template <typename T>
+		SContainerT& operator<< (const T&t)
 		{
-			add(data);
+			add(t);
 			return *this;
 		}
 
@@ -129,16 +128,10 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		SContainerT& operator-= (__KeyConstRef key)
-		{
-			del(key);
-			return *this;
-		}
-
 		template <typename T>
-		SContainerT& operator-= (const T& container)
+		SContainerT& operator-= (const T& t)
 		{
-			del(container);
+			del(t);
 			return *this;
 		}
 
@@ -231,20 +224,20 @@ namespace NS_SSTL
 			return m_data;
 		}
 
-		operator __ContainerType& ()
+		__ContainerType& operator *()
+		{
+			return m_data;
+		}
+		const __ContainerType& operator *() const
 		{
 			return m_data;
 		}
 
+		operator __ContainerType& ()
+		{
+			return m_data;
+		}
 		operator const __ContainerType& () const
-		{
-			return m_data;
-		}
-		__ContainerType& data()
-		{
-			return m_data;
-		}
-		const __ContainerType& data() const
 		{
 			return m_data;
 		}
@@ -269,17 +262,11 @@ namespace NS_SSTL
 			m_data.clear();
         }
 
-#ifndef __MINGW32__
-		virtual __ItrType erase(const __CItrType& itr)
+		__ItrType erase(const __CItrType& itr)
 		{
-			return m_data.erase(itr);
+			_onErase(itr);
+			return m_data.erase((const __ItrType&)itr);
 		}
-#else
-		virtual __ItrType erase(const __ItrType& itr)
-		{
-			return m_data.erase(itr);
-		}
-#endif
 
 		__ItrType begin()
 		{
@@ -779,6 +766,8 @@ namespace NS_SSTL
 		{
 			m_data.swap(container);
 		}
+
+		virtual void _onErase(const __CItrType& itr) {}
 
 		virtual void _add(__DataConstRef data)
 		{

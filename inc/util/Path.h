@@ -28,25 +28,18 @@ public:
 	{
 	}
 
-	CPath(const wstring& strDir)
-		: m_bDir(true)
-		, m_strName(strDir)
+	CPath(const wstring& strName, bool bDir)
 	{
-		util::rtrim(m_strName, __Slant);
-		util::rtrim(m_strName, __BackSlant);
+		if (bDir)
+		{
+			SetDir(strName);
+		}
+		else
+		{
+			m_strName = strName;
+		}
 	}
 
-	CPath(const wstring& strDir, const TD_PathList& lstSubPath)
-		: m_bDir(true)
-		, m_strName(strDir)
-	{
-		util::rtrim(m_strName, __Slant);
-		util::rtrim(m_strName, __BackSlant);
-
-		m_plstSubPath = new TD_PathList();
-		m_plstSubPath->add(lstSubPath);
-	}
-	
 	CPath(const tagFindData& findData, CPath *pParentPath)
 		: m_bDir(findData.isDir())
 		, m_strName(findData.getFileName())
@@ -87,9 +80,14 @@ private:
 	TD_PathList& _findFile(const wstring& strFind = L"");
 
 public:
-	wstring GetName() const;
+	void SetDir(const wstring& strDir);
 
-	void SetName(const wstring& strNewName);
+	void SetName(const wstring& strNewName)
+	{
+		m_strName = strNewName;
+	}
+
+	wstring GetName() const;
 
 	wstring GetPath() const;
 
@@ -161,13 +159,8 @@ public:
 	{
 	}
 
-	CPathObject(const wstring& strDir)
-		: CPath(strDir)
-	{
-	}
-
-	CPathObject(const wstring& strDir, const TD_PathObjectList& lstSubPathObjects)
-		: CPath(strDir, TD_PathList(lstSubPathObjects))
+	CPathObject(const wstring& strName, bool bDir)
+		: CPath(strName, bDir)
 	{
 	}
 
@@ -211,12 +204,7 @@ class __UtilExt CDirObject : public CPathObject, public CTreeObject
 {
 public:
 	CDirObject(const wstring& strDir = L"")
-		: CPathObject(strDir)
-	{
-	}
-
-	CDirObject(const wstring& strName, const TD_DirObjectList& lstSubDirObjects)
-		: CPathObject(strName, TD_PathObjectList(lstSubDirObjects))
+		: CPathObject(strDir, true)
 	{
 	}
 

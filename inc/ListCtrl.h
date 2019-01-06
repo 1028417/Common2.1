@@ -220,6 +220,7 @@ public:
 	BOOL SetItemHeight(UINT uItemHeight);
 
 	void SetTileSize(ULONG cx, ULONG cy);
+	void SetTileRowCount(UINT uRowCount);
 
 	void SetCusomDrawNotify(const CB_LVCostomDraw& cbCustomDraw = NULL)
 	{

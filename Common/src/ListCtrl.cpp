@@ -243,8 +243,16 @@ void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 	LVTILEVIEWINFO LvTileViewInfo = { sizeof(LVTILEVIEWINFO) };
 	LvTileViewInfo.dwFlags = LVTVIF_FIXEDSIZE;
 	LvTileViewInfo.sizeTile = { (LONG)cx, (LONG)cy };
-	//LvTileViewInfo.cLines = 2;
-	LvTileViewInfo.dwMask = LVTVIM_TILESIZE;// | LVTVIM_COLUMNS;
+	LvTileViewInfo.dwMask = LVTVIM_TILESIZE;
+	(void)__super::SetTileViewInfo(&LvTileViewInfo);
+}
+
+void CObjectList::SetTileRowCount(UINT uRowCount)
+{
+	LVTILEVIEWINFO LvTileViewInfo = { sizeof(LVTILEVIEWINFO) };
+	LvTileViewInfo.dwFlags = LVTVIF_AUTOSIZE;
+	LvTileViewInfo.cLines = uRowCount;
+	LvTileViewInfo.dwMask = LVTVIM_COLUMNS;
 	(void)__super::SetTileViewInfo(&LvTileViewInfo);
 }
 

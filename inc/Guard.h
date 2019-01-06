@@ -84,6 +84,9 @@ public:
 		LOGFONT logFont;
 		::ZeroMemory(&logFont, sizeof(logFont));
 		(void)pFont->GetLogFont(&logFont);
+		
+		logFont.lfQuality = PROOF_QUALITY;
+		wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
 
 		cb(logFont);
 

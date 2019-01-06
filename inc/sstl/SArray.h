@@ -84,13 +84,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		SArrayT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
-
 		template<typename CB>
 		void operator() (int startPos, int endPos, const CB& cb)
 		{

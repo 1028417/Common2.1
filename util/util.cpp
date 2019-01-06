@@ -113,18 +113,6 @@ wstring& util::trim(wstring& strText, wchar_t chr)
 	return strText;
 }
 
-wstring& util::ltrim(wstring& strText, wchar_t chr)
-{
-	strText.erase(0, strText.find_first_not_of(chr));
-	return strText;
-}
-
-wstring& util::rtrim(wstring& strText, wchar_t chr)
-{
-	strText.erase(strText.find_last_not_of(chr) + 1);
-	return strText;
-}
-
 wstring util::trim(const wstring& strText, wchar_t chr)
 {
 	wstring strRet(strText);
@@ -132,11 +120,23 @@ wstring util::trim(const wstring& strText, wchar_t chr)
 	return strRet;
 }
 
+wstring& util::ltrim(wstring& strText, wchar_t chr)
+{
+	strText.erase(0, strText.find_first_not_of(chr));
+	return strText;
+}
+
 wstring util::ltrim(const wstring& strText, wchar_t chr)
 {
 	wstring strRet(strText);
 	ltrim(strRet, chr);
 	return strRet;
+}
+
+wstring& util::rtrim(wstring& strText, wchar_t chr)
+{
+	strText.erase(strText.find_last_not_of(chr) + 1);
+	return strText;
 }
 
 wstring util::rtrim(const wstring& strText, wchar_t chr)
