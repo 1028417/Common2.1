@@ -247,15 +247,6 @@ void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 	(void)__super::SetTileViewInfo(&LvTileViewInfo);
 }
 
-void CObjectList::SetTileRowCount(UINT uRowCount)
-{
-	LVTILEVIEWINFO LvTileViewInfo = { sizeof(LVTILEVIEWINFO) };
-	LvTileViewInfo.dwFlags = LVTVIF_AUTOSIZE;
-	LvTileViewInfo.cLines = uRowCount;
-	LvTileViewInfo.dwMask = LVTVIM_COLUMNS;
-	(void)__super::SetTileViewInfo(&LvTileViewInfo);
-}
-
 void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 {
 	m_para.cbMouseEvent = cbMouseEvent;
