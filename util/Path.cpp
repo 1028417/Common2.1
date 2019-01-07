@@ -5,6 +5,8 @@
 
 void CPath::SetDir(const wstring& strDir)
 {
+	ClearSubPath();
+
 	m_bDir = true;
 	m_strName = strDir;
 
@@ -190,7 +192,6 @@ void CPath::ClearSubPath()
 			delete &SubPath;
 		});
 
-		m_plstSubPath->clear();
 		delete m_plstSubPath;
 		m_plstSubPath = NULL;
 	}
