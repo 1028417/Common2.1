@@ -27,11 +27,6 @@ public:
 	~CImg()
 	{
 		RestoreMemDC();
-
-		if (NULL )
-		CDC m_MemDC;
-		CBitmap m_MemBitmap;
-
 	}
 
 private:
