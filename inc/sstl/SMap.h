@@ -100,12 +100,12 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template<typename T>
-		SMapT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
+		//template<typename T>
+		//SMapT& operator=(T&t)
+		//{
+		//	__Super::assign(t);
+		//	return *this;
+		//}
 
 		template<typename CB>
 		void operator() (const CB& cb)
@@ -120,7 +120,15 @@ namespace NS_SSTL
 		}
 
 	public:
-		template <typename CB>
+		bool get(__KeyConstRef key, __ValueRef value) const
+		{
+			return _find(key, [&](__PairConstRef pr) {
+				value = pr.second;
+				return false;
+			});
+		}
+
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
 			return _find(key, [&](__ItrType& itr) {
@@ -130,17 +138,7 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB>
-		size_t get(__KeyConstRef key, const CB& cb) const
-		{
-			return _find(key, [&](__PairConstRef pr) {
-				cb(pr.second);
-				
-				return true;
-			});
-		}
-		
-		template <typename CB, checkCBBool_t<CB, __ValueRef>>
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
 			return _find(key, [&](__ItrType& itr) {
@@ -148,19 +146,21 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB, checkCBBool_t<CB, __ValueRef>>
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>>
+		bool get(__KeyConstRef key, const CB& cb) const
+		{
+			return _find(key, [&](__PairConstRef pr) {
+				cb(pr.second);
+
+				return true;
+			});
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void>
 		bool get(__KeyConstRef key, const CB& cb) const
 		{
 			return _find(key, [&](__PairConstRef pr) {
 				return cb(pr.second);
-			});
-		}
-
-		bool get(__KeyConstRef key, __ValueRef value) const
-		{
-			return _find(key, [&](__PairConstRef pr) {
-				value = pr.second;
-				return false;
 			});
 		}
 
@@ -212,7 +212,7 @@ namespace NS_SSTL
 
 	public:
 		template <typename CB>
-		SArray<__KeyType> keys(const CB& cb = NULL) const
+		SArray<__KeyType> keys(const CB& cb) const
 		{
 			return adaptor().keys(cb);
 		}
@@ -395,7 +395,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = __Super::erase(itr);
+					itr = m_data.erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == eRet)
@@ -419,17 +419,12 @@ namespace NS_SSTL
 		}
 
 	private:
-		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb = NULL)
+		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
 			{
 				return 0;
-			}
-
-			if (!cb)
-			{
-				return 1;
 			}
 
 			size_t uRet = 0;
@@ -452,17 +447,12 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _find(__KeyConstRef key, CB_T_Ret<__PairConstRef, bool> cb = NULL) const
+		size_t _find(__KeyConstRef key, CB_T_Ret<__PairConstRef, bool> cb) const
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
 			{
 				return 0;
-			}
-
-			if (!cb)
-			{
-				return 1;
 			}
 
 			size_t uRet = 0;
@@ -487,7 +477,7 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-		template <typename _V>
+		template <typename _V, typename = void>
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
 		{
 			return m_data.insert({ key, value })->second;
@@ -506,7 +496,7 @@ namespace NS_SSTL
 		private:
 			T& m_data;
 
-			using __ValueRef = decltype(m_data.begin()->second)&;
+			using __ValueRef = decltype(declval<T&>().begin()->second)&;
 
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>

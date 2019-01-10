@@ -70,7 +70,7 @@ TD_PathList& CPath::_findFile(const wstring& strFind)
 		return true;
 	});
 	
-	m_plstSubPath->qsort([](CPath& lhs, CPath& rhs) {
+	m_plstSubPath->qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)
 		{
 			return true;

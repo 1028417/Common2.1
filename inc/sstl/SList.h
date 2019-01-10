@@ -82,12 +82,12 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		SListT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
+		//template <typename T>
+		//SListT& operator=(T&t)
+		//{
+		//	__Super::assign(t);
+		//	return *this;
+		//}
 		
 	public:
 		__RItrType rbegin()
@@ -166,17 +166,26 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_Ref_void cb = NULL)
+		bool popBack()
 		{
 			if (m_data.empty())
 			{
 				return false;
 			}
 
-			if (cb)
+			m_data.pop_back();
+
+			return true;
+		}
+
+		bool popBack(__CB_Ref_void cb)
+		{
+			if (m_data.empty())
 			{
-				cb(m_data.back());
+				return false;
 			}
+			
+			cb(m_data.back());
 
 			m_data.pop_back();
 
@@ -197,17 +206,17 @@ namespace NS_SSTL
 		}
 		
 	public:
-		SListT& sort(__CB_Sort_T<__DataType> cb = NULL)
+		SListT& sort()
 		{
-			if (cb)
-			{
-				m_data.sort(tagTrySort<__DataType>(cb));
-			}
-			else
-			{
-				m_data.sort();
-			}
+			m_data.sort(tagTrySort<__DataType>());
+			
+			return *this;
+		}
 
+		SListT& sort(__CB_Sort_T<__DataType> cb)
+		{
+			m_data.sort(tagSort<__DataType>(cb));
+			
 			return *this;
 		}
 
@@ -274,7 +283,7 @@ namespace NS_SSTL
 			m_data.push_back(data);
 		}
 
-		bool _popFront(__CB_Ref_void cb = NULL) override
+		bool _popFront(__CB_Ref_void cb) override
 		{
 			if (m_data.empty())
 			{

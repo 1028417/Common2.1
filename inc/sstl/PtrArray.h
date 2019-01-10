@@ -287,7 +287,7 @@ namespace NS_SSTL
 
 		__CItrType erase(const __CItrType& itr)
 		{
-			return __Super::erase(itr);
+			return m_data.erase((const __ItrType&)itr);
 		}
 
 		__CItrType begin() const
@@ -681,20 +681,30 @@ namespace NS_SSTL
 			});
 		}
 
-		bool popFront(__CB_RefType_void cb = NULL)
+		bool popFront()
+		{
+			return __Super::popFront();
+		}
+
+		bool popFront(__CB_RefType_void cb)
 		{
 			return __Super::popFront([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
+				if (NULL != ptr)
 				{
 					cb(*ptr);
 				}
 			});
 		}
 
-		bool popBack(__CB_RefType_void cb = NULL)
+		bool popBack()
 		{
-			return __Super::pop([&](__PtrType ptr) {
-				if (NULL != ptr && cb)
+			return __Super::popBack();
+		}
+
+		bool popBack(__CB_RefType_void cb)
+		{
+			return __Super::popBack([&](__PtrType ptr) {
+				if (NULL != ptr)
 				{
 					cb(*ptr);
 				}

@@ -70,7 +70,7 @@ namespace NS_SSTL
 		explicit SContainerT(const T& container)
 			: m_data(container.begin(), container.end())
 		{
-		}
+		}		
 
 		SContainerT& operator=(__ContainerType&& container)
 		{
@@ -438,7 +438,12 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool popFront(__CB_Ref_void cb = NULL)
+		bool popFront()
+		{
+			return _popFront([](__DataRef) {});
+		}
+
+		bool popFront(__CB_Ref_void cb)
 		{
 			return _popFront(cb);
 		}
@@ -774,7 +779,7 @@ namespace NS_SSTL
 			m_data.insert(m_data.end(), data);
 		}
 
-		virtual bool _popFront(__CB_Ref_void cb = NULL)
+		virtual bool _popFront(__CB_Ref_void cb)
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())

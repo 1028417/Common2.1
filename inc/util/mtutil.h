@@ -7,6 +7,86 @@ using namespace std;
 
 namespace NS_mtutil
 {
+	template <typename T, typename R>
+	void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, vector<R>& vecResult
+		, const function<bool(UINT uTaskIdx, T&, R&)>& cb)
+	{
+		if (0 == uThreadCount)
+		{
+			uThreadCount = 1;
+		}
+
+		vecResult.resize(uThreadCount);
+
+		bool bCancelFlag = false;
+
+		vector<thread> vecThread(uThreadCount);
+		for (UINT uThreadIdx = 0; uThreadIdx < vecThread.size(); uThreadIdx++)
+		{
+			vecThread[uThreadIdx] = thread([&, uThreadIdx]() {
+				for (UINT uTaskIdx = uThreadIdx; uTaskIdx < alTask.size(); uTaskIdx += uThreadCount)
+				{
+					alTask.get(uTaskIdx, [&](T& task) {
+						if (!cb(uTaskIdx, task, vecResult[uThreadIdx]))
+						{
+							bCancelFlag = true;
+						}
+					});
+					if (bCancelFlag)
+					{
+						break;
+					}
+				}
+			});
+		}
+
+		for (auto& thr : vecThread)
+		{
+			thr.join();
+		}
+	}
+
+	template <typename T>
+	void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
+	{
+		vector<BOOL> vecResult;
+		startMultiTask<T, BOOL>(alTask, uThreadCount, vecResult, [&](UINT uTaskIdx, T& task, BOOL&) {
+			return cb(uTaskIdx, task);
+		});
+	}
+
+	template <typename T, typename R>
+	class CMultiTask
+	{
+	public:
+		CMultiTask()
+		{
+		}
+
+	private:
+		vector<R> m_vecResult;
+
+	public:
+		vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&, R&)>& cb=NULL)
+		{
+			startMultiTask(alTask, uThreadCount, m_vecResult, cb);
+
+			return m_vecResult;
+		}
+
+		vector<R>& start(ArrList<T>& alTask, UINT uThreadCount)
+		{
+			startMultiTask(alTask, uThreadCount, [&](UINT uTaskIdx, T& task, R& result) {
+				return onTask(uTaskIdx, task, result);
+			});
+
+			return m_vecResult;
+		}
+
+	private:
+		virtual bool onTask(UINT uTaskIdx, T&, R&) { return false; }
+	};
+
 	interface IAsyncCallback
 	{
 		virtual void onAsync() = 0;

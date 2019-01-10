@@ -79,12 +79,12 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		SSetT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
+		//template <typename T>
+		//SSetT& operator=(T&t)
+		//{
+		//	__Super::assign(t);
+		//	return *this;
+		//}
 
 	public:
 		template <typename T>

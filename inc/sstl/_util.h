@@ -55,38 +55,32 @@ namespace NS_SSTL
 		}
 	};
 
-	//template <typename T> struct tagSortT {
-	//	tagSortT(__CB_Sort_T<T> cb) : m_cb(cb)
-	//	{
-	//	}
-
-	//	__CB_Sort_T<T> m_cb;
-
-	//	bool operator() (const T&lhs, const T&rhs)const
-	//	{
-	//		return m_cb(lhs, rhs);
-	//	}
-	//};
-
-	template <typename T> struct tagTrySort {
-		tagTrySort(__CB_Sort_T<T> cb = NULL) : m_cb(cb)
+	template <typename T> struct tagSort {
+		tagSort(__CB_Sort_T<T> cb)
+			: m_cb(cb)
 		{
 		}
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator() (T&lhs, T&rhs) const
+        bool operator() (const T&lhs, const T&rhs) const
 		{
-			if (m_cb)
-			{
-				return m_cb(lhs, rhs);
-			}
+			return m_cb(lhs, rhs);
+		}
+	};
 
+	template <typename T> struct tagTrySort {
+		tagTrySort()
+		{
+		}
+
+        bool operator() (const T&lhs, const T&rhs) const
+		{
 			return _compare(lhs, rhs);
 		}
 
 		template <typename U>
-		static auto _compare(U&lhs, U&rhs) -> decltype(declval<U>() < declval<U>())
+        static auto _compare(const U&lhs, const U&rhs) -> decltype(declval<const U>() < declval<const U>())
 		{
 			return lhs < rhs;
 		}
@@ -230,22 +224,13 @@ namespace NS_SSTL
 	}
 
 	template <typename T>
-	void qsort(T* lpData, size_t size, __CB_Sort_T<T> cbCompare)
+	void _qsort(T* lpData, size_t size, __CB_Sort_T<T> cbCompare)
 	{
 		if (size < 2)
 		{
 			return;
 		}
 		int end = (int)size - 1;
-
-		tagTrySort<T> sort;
-		auto fnCompare = [&](T& lhs, T& rhs) {
-			if (cbCompare) {
-				return cbCompare(lhs, rhs);
-			}
-
-			return sort(lhs, rhs);
-		};
 
 		function<void(int, int)> fnSort;
 		fnSort = [&](int begin, int end) {
@@ -259,7 +244,7 @@ namespace NS_SSTL
 
 			do {
 				do {
-					if (fnCompare(lpData[j], t)) {
+					if (cbCompare(lpData[j], t)) {
 						lpData[i] = lpData[j];
 						i++;
 						break;
@@ -268,7 +253,7 @@ namespace NS_SSTL
 				} while (i < j);
 
 				while (i < j) {
-					if (fnCompare(t, lpData[i])) {
+					if (cbCompare(t, lpData[i])) {
 						lpData[j] = lpData[i];
 						j--;
 						break;
@@ -286,8 +271,25 @@ namespace NS_SSTL
 		fnSort(0, end);
 	}
 
+    template <typename T>
+    void qsort(T* lpData, size_t size)
+    {
+        tagTrySort<T> sort;
+        __CB_Sort_T<T> cbCompare = [&](const T& lhs, const T& rhs) {
+            return sort(lhs, rhs);
+        };
+
+        _qsort(lpData, size, cbCompare);
+    }
+
+    template <typename T>
+    void qsort(T* lpData, size_t size, __CB_Sort_T<T> cbCompare)
+    {
+        _qsort(lpData, size, cbCompare);
+    }
+
 	template <typename T>
-	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
+	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb)
 	{
 		size_t size = vecData.size();
 		if (size > 1)
@@ -296,8 +298,8 @@ namespace NS_SSTL
 		}
 	}
 
-	template<typename _C, typename CB>
-	void itrReverseVisit(_C& container, const CB& cb)
+	template<typename C, typename CB>
+	void itrReverseVisit(C& container, const CB& cb)
 	{
 		auto itrBegin = container.begin();
 		auto itr = container.end();

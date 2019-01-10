@@ -78,48 +78,51 @@ namespace NS_SSTL
 	
 	template<class _Iter> using checkIter_t =
 #ifdef _MSC_VER
-	//enableIf_t<_Is_iterator, _Iter>;
-	typename iterator_traits<_Iter>::iterator_category;
+	enableIf_t<_Is_iterator, _Iter>;
 #else
 	_RequireInputIter<_Iter>;
 #endif
 
-	/*struct tagItrVisitor
+	template <typename C>
+	struct _tagCheckContainer
 	{
-		template <class __C>
-		static auto begin(__C& container)->decltype(container.begin())
-		{
-			return container.begin();
-		}
+		template<typename T, typename = checkIter_t<decltype(declval<T&>().begin())>>
+		static auto itr(const T& t)->decltype(declval<T&>().begin());
 
-		template <class __C>
-		static auto begin(const __C& container)->decltype(container.begin())
-		{
-			return container.begin();
-		}
+		template<typename T>
+		static void itr(...);
 
-		template <class __C>
-		static auto end(__C& container)->decltype(container.end())
-		{
-			return container.end();
-		}
+		static constexpr bool value = !std::is_same<decltype(itr<C>(declval<C>())), void>::value;
+	};
 
-		template <class __C>
-		static auto end(const __C& container)->decltype(container.end())
-		{
-			return container.end();
-		}
-	};*/
+	template<typename T>
+	using checkContainer_t = enableIf_t<_tagCheckContainer, T>;
 
-	template <typename _C, typename __Itr = decltype(declval<_C&>().begin()), typename = checkIter_t<__Itr>>
+	template<typename T>
+	using checkNotContainer_t = enableIfNot_t<_tagCheckContainer, T>;
+
+	template <typename C, typename = void>
 	struct tagCheckContainer
 	{
-		typedef __Itr Itr_Type;
-		typedef decltype(declval<const _C&>().begin()) CItr_Type;
+	};
 
-		typedef decltype(*declval<__Itr>()) Ref_Type;
+	template <typename C>
+	struct tagCheckContainer<C, enable_if_t<_tagCheckContainer<C>::value>>
+	{
+		typedef decltype(declval<C&>().begin()) Itr_Type;
+
+		typedef decltype(declval<const C&>().begin()) CItr_Type;
+
+		typedef decltype(*declval<C&>().begin()) Ref_Type;
+
 		typedef removeConstRef_t<Ref_Type> Data_Type;
 	};
+
+	template<class T>
+	using containerRefType_t = typename tagCheckContainer<T>::Ref_Type;
+
+	template<class T>
+	using containerDataType_t = typename tagCheckContainer<T>::Data_Type;
 
 	template<class T>
 	using containerItrType_t = typename tagCheckContainer<T>::Itr_Type;
@@ -130,56 +133,9 @@ namespace NS_SSTL
 	using containerRItrType_t = typename tagCheckContainer<T>::RItr_Type;
 	template<class T>
 	using containerCRItrType_t = typename tagCheckContainer<T>::CRItr_Type;
-
-	template<class T>
-	using containerRefType_t = typename tagCheckContainer<T>::Ref_Type;
-
-	template<class T>
-	using containerDataType_t = typename tagCheckContainer<T>::Data_Type;
-
-	template<class T>
-	using checkContainer_t = containerDataType_t<T>;
-
+		
 	template<class T, typename DATA>
 	using checkContainerData_t = checkSameType_t<containerDataType_t<T>, DATA>;
-
-	struct tagCheckNotContainer
-	{
-		template <typename T, typename = checkContainer_t<T>>
-		static void check();
-
-		template <typename T>
-		static T check(...);
-	};
-	template<typename T>
-	using checkNotContainer_t = checkSameType_t<T, decltype(tagCheckNotContainer::check<T>())>;
-
-
-	/*template <class __C>
-	class CItrVisitor : private tagItrVisitor
-	{
-	public:
-		CItrVisitor(__C& container)
-			: m_container(container)
-		{
-		}
-
-	private:
-		__C& m_container;
-
-		typedef decltype(tagItrVisitor::begin(declval<__C&>())) __ITR;
-
-	public:
-		__ITR begin()
-		{
-			return tagItrVisitor::begin(m_container);
-		}
-
-		__ITR end()
-		{
-			return tagItrVisitor::end(m_container);
-		}
-	};*/
 };
 
 #endif // __Check_H
