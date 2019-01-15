@@ -76,7 +76,7 @@ namespace NS_SSTL
 			__Super::assign(initList);
 			return *this;
 		}
-
+		
 		template <typename T>
 		SArrayT& operator=(const T&t)
 		{
@@ -226,7 +226,7 @@ namespace NS_SSTL
 			return -1;
 		}
 
-		int find(__CB_ConstRef_bool cb, size_t stratPos = 0) const
+		int find(__CB_ConstRef_bool cb, size_t startPos = 0) const
 		{
 			int iRetPos = -1;
 

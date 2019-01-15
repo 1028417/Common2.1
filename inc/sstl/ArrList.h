@@ -177,7 +177,7 @@ namespace NS_SSTL
 		}
 
 	public:
-		int find(__CB_ConstRef_bool cb, size_t stratPos = 0) const
+		int find(__CB_ConstRef_bool cb, size_t startPos = 0) const
 		{
 			int iRetPos = -1;
 
@@ -269,16 +269,26 @@ namespace NS_SSTL
 
 		ArrListT& sort()
 		{
-			__Super::sort();
-			m_ptrArray.assign(m_data); // TODO
-
-			return *this;
+			tagTrySort<__DataType> trySort;
+			return qsort([&](__DataType& lhs, __DataType& rhs) {
+				return trySort(lhs, rhs);
+			});
 		}
 
 		ArrListT& sort(__CB_Sort_T<__DataType> cb)
 		{
-			__Super::sort(cb);
-			m_ptrArray.assign(m_data); // TODO
+			//__Super::sort(cb);
+			//m_ptrArray.assign(m_data);
+
+			m_ptrArray.qsort([&](__DataType& lhs, __DataType& rhs) {
+				if (cb(lhs, rhs))
+				{
+					std::swap(lhs, rhs);
+					return true;
+				}
+
+				return false;
+			});
 
 			return *this;
 		}

@@ -327,7 +327,7 @@ namespace NS_SSTL
 			_forEach(cb);
 		}
 
-		int find(__CB_RefType_bool cb, size_t stratPos = 0) const
+		int find(__CB_RefType_bool cb, size_t startPos = 0) const
 		{
 			int iRetPos = -1;
 
