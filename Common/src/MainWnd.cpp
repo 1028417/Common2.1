@@ -46,7 +46,10 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 
 void CMainWnd::Show()
 {
-	this->CenterWindow();
+	if (!m_WndInfo.bSizeable)
+	{
+		(void)this->ModifyStyle(WS_THICKFRAME, 0);
+	}
 
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
@@ -54,12 +57,8 @@ void CMainWnd::Show()
 	}
 	else
 	{
+		this->CenterWindow();
 		(void)this->ShowWindow(SW_SHOW);
-	}
-
-	if (!m_WndInfo.bSizeable)
-	{
-		(void)this->ModifyStyle(WS_THICKFRAME, 0);
 	}
 }
 
