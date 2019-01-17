@@ -6,6 +6,75 @@ static const char *g_lplocaleName_CN = "Chinese_china";
 static const locale g_locale_CN = locale(g_lplocaleName_CN);
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
+bool util::saveFile(const string& strFile, const string& strData, bool bTrunc)
+{
+	std::ofstream fs;
+	if (bTrunc)
+	{
+		fs.open(strFile, ios_base::trunc);
+	}
+	else
+	{
+		fs.open(strFile);
+	}
+
+	if (!fs.is_open())
+	{
+		return false;
+	}
+	fs << strData;
+	fs.close();
+
+	return true;
+}
+
+bool util::loadFile(const string& strFile, string& strData)
+{
+	std::ifstream fs;
+	fs.open(strFile);
+	if (!fs.is_open())
+	{
+		return false;
+	}
+
+	while (!fs.eof())
+	{
+		char lpBuff[256] = { 0 };
+		fs.read(lpBuff, sizeof(lpBuff) - 1);
+
+		strData.append(lpBuff);
+	}
+
+	fs.close();
+
+	return true;
+}
+
+bool util::loadFile(const string& strFile, SVector<string>& vecLineData, char cDelim)
+{
+	string strData;
+	if (!loadFile(strFile, strData))
+	{
+		return false;
+	}
+
+	size_t prePos = 0;
+	size_t pos = strData.find(cDelim, prePos);
+	while (string::npos != pos)
+	{
+		vecLineData.add(strData.substr(prePos, pos-prePos));
+		prePos = pos+1;
+		pos = strData.find(cDelim, prePos);
+	}
+
+	if (prePos < strData.size())
+	{
+		vecLineData.add(strData.substr(prePos));
+	}
+
+	return true;
+}
+
 bool util::toSysTime(time_t time, SYSTEMTIME& sysTime)
 {
 	tm atm;
@@ -148,10 +217,10 @@ wstring util::rtrim(const wstring& strText, wchar_t chr)
 
 void util::SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
 {
-	wstring::size_type startPos = 0;
+	size_t startPos = 0;
 	while (true)
 	{
-		wstring::size_type pos = strText.find(wcSplitor, startPos);
+		auto pos = strText.find(wcSplitor, startPos);
 		if (wstring::npos == pos)
 		{
 			break;
@@ -159,7 +228,7 @@ void util::SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring
 
 		if (pos > startPos)
 		{
-			wstring strSub = strText.substr(startPos, pos - startPos);
+			auto strSub = strText.substr(startPos, pos - startPos);
 			if (bTrim)
 			{
 				trim(strSub);
@@ -181,7 +250,7 @@ void util::SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring
 	{
 		if (bTrim)
 		{
-			wstring strTail = strText.substr(startPos);
+			auto strTail = strText.substr(startPos);
 			trim(strTail);
 
 			if (!strTail.empty())
@@ -214,7 +283,7 @@ int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
 		return -1;
 	}
 
-	wstring::size_type pos = StrLowerCase(str).find(StrLowerCase(strToFind));
+	size_t pos = StrLowerCase(str).find(StrLowerCase(strToFind));
 	if (wstring::npos == pos)
 	{
 		return -1;

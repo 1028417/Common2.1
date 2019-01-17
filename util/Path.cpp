@@ -16,7 +16,7 @@ void CPath::SetDir(const wstring& strDir)
 
 wstring CPath::GetName() const
 {
-	if (NULL != m_pParentPath)
+	if (NULL != m_pParentDir)
 	{
 		return m_strName;
 	}
@@ -28,9 +28,9 @@ wstring CPath::GetName() const
 
 wstring CPath::GetPath() const
 {
-	if (NULL != m_pParentPath)
+	if (NULL != m_pParentDir)
 	{
-		return m_pParentPath->GetPath() + __BackSlant + m_strName;
+		return m_pParentDir->GetPath() + __BackSlant + m_strName;
 	}
 
 	return m_strName;
