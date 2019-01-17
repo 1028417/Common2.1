@@ -98,7 +98,7 @@ BOOL CMainApp::InitInstance()
 
 	if (!pMainWnd->IsWindowVisible())
 	{
-		pMainWnd->Show();
+		pMainWnd->ShowWindow(SW_SHOW);
 	}
 
 	return TRUE;

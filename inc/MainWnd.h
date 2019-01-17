@@ -62,8 +62,6 @@ private:
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
 
-	virtual void Show();
-
 	BOOL CreateStatusBar(UINT uParts, ...);
 	
 	BOOL SetStatusText(UINT uPart, const CString& cstrText);
@@ -95,6 +93,9 @@ private:
 
 	BOOL HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam);
 	void setDockSize(CDockView &wndTargetView, UINT x, UINT y);
+
+	UINT getMaxWidth();
+	UINT getMaxHeight();
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);

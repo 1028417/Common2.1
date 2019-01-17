@@ -18,23 +18,26 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 		, 0, ::GetSysColorBrush(CTLCOLOR_DLG), m_WndInfo.hIcon);
 	__AssertReturn(lpszClassName, FALSE);
 
-	DWORD dwStyle = WS_POPUP | WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
-	//if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
-	//{
-	//	dwStyle |= WS_MAXIMIZE;
-	//}
+	DWORD dwStyle = WS_OVERLAPPED | WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+	if (m_WndInfo.bSizeable)
+	{
+		dwStyle  = dwStyle | WS_MAXIMIZEBOX | WS_THICKFRAME;
+	}
 
 	UINT uWidth = m_WndInfo.uWidth;
 	UINT uHeight = m_WndInfo.uHeight;
-	if (0 == uWidth || 0 == uHeight)
+	if (0 == uWidth)
 	{
-		uWidth = 800;
-		uHeight = 600;
+		uWidth = getMaxWidth();
+	}
+	if (0 == uHeight)
+	{
+		uHeight = getMaxHeight();
 	}
 
 	__AssertReturn(this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName, m_WndInfo.strText.c_str()
 		, dwStyle, 0, 0, uWidth, uHeight, NULL, m_WndInfo.hMenu), FALSE);
-
+	
 	//if (NULL != m_WndInfo.hIcon)
 	//{
 	//	this->SetIcon(m_WndInfo.hIcon, TRUE);
@@ -44,22 +47,15 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	return TRUE;
 }
 
-void CMainWnd::Show()
+UINT CMainWnd::getMaxWidth()
 {
-	if (!m_WndInfo.bSizeable)
-	{
-		(void)this->ModifyStyle(WS_THICKFRAME, 0);
-	}
+	return UINT(::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME)*2);
+}
 
-	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
-	{
-		(void)this->ShowWindow(SW_SHOWMAXIMIZED);
-	}
-	else
-	{
-		this->CenterWindow();
-		(void)this->ShowWindow(SW_SHOW);
-	}
+UINT CMainWnd::getMaxHeight()
+{
+	return UINT(::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYDLGFRAME)*2
+		+ ::GetSystemMetrics(SM_CYCAPTION));
 }
 
 void CMainWnd::OnSize(UINT nType, int cx, int cy)
@@ -72,7 +68,7 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 	{
 		if (!m_WndInfo.bSizeable && ::IsWindowVisible(m_hWnd))
 		{
-			(void)this->ShowWindow(SW_MAXIMIZE);
+			(void)this->ShowWindow(SW_SHOWMAXIMIZED);
 			return;
 		}
 	}
@@ -220,10 +216,6 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 
 	int nResult = this->MessageBox(cstrText, pszTitle, uType);
 
-	//(void)this->SetFocus();
-
-	//(void)::DoEvents();
-
 	return nResult;
 }
 
@@ -236,20 +228,12 @@ void CMainWnd::Sync(const CB_Sync& cb)
 
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
-	if (m_WndInfo.bSizeable)
+	if (0 != m_WndInfo.uMinWidth && 0 != m_WndInfo.uMinHeight)
 	{
-		if (0 != m_WndInfo.uMinWidth && 0 != m_WndInfo.uMinHeight)
-		{
-			lpMMI->ptMinTrackSize = { (LONG)m_WndInfo.uMinWidth, (LONG)m_WndInfo.uMinHeight };
-		}
+		lpMMI->ptMinTrackSize = { (LONG)m_WndInfo.uMinWidth, (LONG)m_WndInfo.uMinHeight };
 	}
-	else
-	{
-		if (0 != m_WndInfo.uWidth && 0 != m_WndInfo.uHeight)
-		{
-			lpMMI->ptMaxSize = { (LONG)m_WndInfo.uWidth, (LONG)m_WndInfo.uHeight };
-		}
-	}
+
+	lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = { (LONG)getMaxWidth(), (LONG)getMaxHeight() };
 }
 
 CDockView* CMainWnd::hittestView(const CPoint& ptPos)
@@ -388,7 +372,7 @@ BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 
 		return TRUE;
 	}
-
+	
 	if (HandleResizeViewMessage(message, wParam, lParam))
 	{
 		return TRUE;
