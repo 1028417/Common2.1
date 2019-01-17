@@ -40,12 +40,12 @@ public:
 		}
 	}
 
-	CPath(const tagFindData& findData, CPath *pParentPath)
+	CPath(const tagFindData& findData, CPath *pParentDir)
 		: m_bDir(findData.isDir())
 		, m_strName(findData.getFileName())
 		, m_uFileSize(findData.data.nFileSizeLow)
 		, m_modifyTime(findData.data.ftLastWriteTime)
-		, m_pParentPath(pParentPath)
+		, m_pParentDir(pParentDir)
 	{
 	}
 	
@@ -61,7 +61,7 @@ public:
 
 	FILETIME m_modifyTime = { 0,0 };
 
-	CPath *m_pParentPath = NULL;
+	CPath *m_pParentDir = NULL;
 
 protected:
 	wstring m_strName;
@@ -71,9 +71,9 @@ protected:
 	bool m_bExists = false;
 
 protected:
-	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentPath) const
+	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentDir)
 	{
-		return new CPath(findData, pParentPath);
+		return new CPath(findData, pParentDir);
 	}
 	
 private:
@@ -164,8 +164,8 @@ public:
 	{
 	}
 
-	CPathObject(const tagFindData& findData, CPath *pParentPath)
-		: CPath(findData, pParentPath)
+	CPathObject(const tagFindData& findData, CPath *pParentDir)
+		: CPath(findData, pParentDir)
 	{
 	}
 
@@ -174,9 +174,9 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath) const override
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
 	{
-		return new CPathObject(findData, pParentPath);
+		return new CPathObject(findData, pParentDir);
 	}
 
 public:
@@ -208,8 +208,8 @@ public:
 	{
 	}
 
-	CDirObject(const tagFindData& findData, CPath *pParentPath)
-		: CPathObject(findData, pParentPath)
+	CDirObject(const tagFindData& findData, CPath *pParentDir)
+		: CPathObject(findData, pParentDir)
 	{
 	}
 
@@ -218,11 +218,11 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentPath) const override
+	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
 	{
 		__EnsureReturn(findData.isDir(), NULL);
 
-		return new CDirObject(findData, pParentPath);
+		return new CDirObject(findData, pParentDir);
 	}
 
 public:
