@@ -64,14 +64,6 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 	{
 		return;
 	}
-	else if (SIZE_RESTORED == nType)
-	{
-		if (!m_WndInfo.bSizeable && ::IsWindowVisible(m_hWnd))
-		{
-			(void)this->ShowWindow(SW_SHOWMAXIMIZED);
-			return;
-		}
-	}
 
 	CRect rcClient;
 	this->GetClientRect(rcClient);
