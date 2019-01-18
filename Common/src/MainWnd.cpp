@@ -49,12 +49,12 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 
 UINT CMainWnd::getMaxWidth()
 {
-	return UINT(::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME)*2);
+	return UINT(::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME));
 }
 
 UINT CMainWnd::getMaxHeight()
 {
-	return UINT(::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYDLGFRAME)*2
+	return UINT(::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYDLGFRAME)
 		+ ::GetSystemMetrics(SM_CYCAPTION));
 }
 
