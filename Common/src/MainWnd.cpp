@@ -3,7 +3,7 @@
 
 #include <MainWnd.h>
 
-#define WM_Sync WM_USER + 1
+#define WM_Async WM_USER + 1
 
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
@@ -211,11 +211,31 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 	return nResult;
 }
 
-void CMainWnd::Sync(const CB_Sync& cb)
+void CMainWnd::Async(const CB_Async& cb, UINT uDelayTime)
 {
-	m_cbSync = cb;
+	CB_Async cbPrev = m_cbAsync;
+	m_cbAsync = [=]()
+	{
+		if (cbPrev)
+		{
+			cbPrev();
+		}
 
-	this->SendMessage(WM_Sync);
+		cb();
+	};
+
+	if (0 == uDelayTime)
+	{
+		this->PostMessage(WM_Async);
+	}
+	else
+	{
+		thread thr([=]() {
+			::Sleep(uDelayTime);
+			this->PostMessage(WM_Async);
+		});
+		thr.detach();
+	}
 }
 
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
@@ -355,16 +375,18 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 
 BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	if (WM_Sync == message)
+	if (WM_Async == message)
 	{
-		if (m_cbSync)
+		if (m_cbAsync)
 		{
-			m_cbSync();
+			CB_Async cb = m_cbAsync;
+			m_cbAsync = NULL;
+			cb();
 		}
 
 		return TRUE;
 	}
-	
+
 	if (HandleResizeViewMessage(message, wParam, lParam))
 	{
 		return TRUE;

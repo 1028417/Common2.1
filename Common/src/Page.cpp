@@ -144,23 +144,7 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 }
 
 void CPage::Async(const CB_Async& cb, UINT uDelayTime)
-{
-	if (!cb)
-	{
-		return;
-	}
-
-	/*CB_Async cbPrev = m_cbAsync;
-	m_cbAsync = [=]()
-	{
-		if (cbPrev)
-		{
-			cbPrev();
-		}
-
-		cb();
-	};*/
-	
+{	
 	m_cbAsync = cb;
 
 	if (0 == uDelayTime)

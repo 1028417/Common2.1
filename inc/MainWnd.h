@@ -56,8 +56,8 @@ private:
 	int m_cy = 0;
 
 	SMap<E_DockViewType, CDockView*> m_mapDockViews;
-	
-	CB_Sync m_cbSync;
+
+	CB_Async m_cbAsync;
 
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
@@ -80,7 +80,7 @@ public:
 		return MsgBox(cstrText, L"", uType);
 	}
 
-	void Sync(const CB_Sync& cb);
+	void Async(const CB_Async& cb, UINT uDelayTime=0);
 
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);

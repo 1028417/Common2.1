@@ -5,55 +5,26 @@
 
 #include "MainWnd.h"
 
-
-#define WM_AppAsync WM_USER + 1
-
-
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
 static UINT g_uTimerID = 0;
 
-struct tagTimer
-{
-	UINT uTimerID;
-	CB_Timer cb;
-	bool bDynamicallyKill = true;
-};
-
-static SMap<HWND, SMap<UINT, tagTimer>> g_mapTimer;
+static SMap<UINT, CB_Timer> g_mapTimer;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	g_mapTimer.del_if(hwnd, [&](auto& pr) {
-		auto& mapTimer = pr.second;
-		if (0 != mapTimer.del_ex([&](const auto& pr) {
-			const auto& timer = pr.second;
-			if (timer.uTimerID == idEvent)
-			{
-				if (!timer.cb())
-				{
-					::KillTimer(hwnd, idEvent);
-					return E_DelConfirm::DC_YesAbort;
-				}
-
-				return E_DelConfirm::DC_Abort;
-			}
-
-			return E_DelConfirm::DC_No;
-		}))
+	g_mapTimer.del_if(idEvent, [&](auto& pr) {
+		if (!pr.second())
 		{
-			if (!mapTimer)
-			{
-				return true;
-			}
+			::KillTimer(hwnd, idEvent);
+			return true;
 		}
-
+		
 		return false;
 	});
 }
-
 
 BOOL CMainApp::InitInstance()
 {
@@ -91,7 +62,6 @@ BOOL CMainApp::InitInstance()
 	{
 		if (!(*itModule)->OnReady(*pMainWnd))
 		{
-			AfxPostQuitMessage(0);
 			return FALSE;
 		}
 	}
@@ -104,86 +74,21 @@ BOOL CMainApp::InitInstance()
 	return TRUE;
 }
 
-bool CMainApp::SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse)
+UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
 {
-	__AssertReturn(uElapse, false);
-	
-	bool bExists = false;
-	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		if (mapTimer.includes(uElapse))
-		{
-			bExists = true;
-		}
-	});
-	__EnsureReturn(!bExists, false);
-
-
-	tagTimer timer;
-	timer.uTimerID = ++g_uTimerID;
-	timer.cb = cb;
-
-	if (!g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		mapTimer.set(uElapse, timer);
-	}))
-	{
-		g_mapTimer.insert(hWnd).set(uElapse, timer);
-	}
-
-	UINT_PTR idEvent = ::SetTimer(hWnd, g_uTimerID, uElapse, TimerProc);
-
-	return true;
+	UINT_PTR idEvent = ::SetTimer(NULL, ++g_uTimerID, uElapse, TimerProc);
+	g_mapTimer.insert(idEvent, cb);
+	return idEvent;
 }
 
-bool CMainApp::KillTimer(HWND hWnd, UINT uElapse)
+void CMainApp::killTimer(UINT_PTR idEvent)
 {
-	bool bRet = false;
-	g_mapTimer.get(hWnd, [&](auto& mapTimer) {
-		mapTimer.del(uElapse, [&](auto& pr) {
-			::KillTimer(hWnd, pr.second.uTimerID);
-			bRet = true;
-		});
-	});
-
-	return bRet;
-}
-
-void CMainApp::Async(const CB_Async& cb, UINT uDelayTime)
-{
-	if (!cb)
-	{
-		return;
-	}
-
-	m_cbAsync = cb;
-
-	if (0 == uDelayTime)
-	{
-		this->PostThreadMessage(WM_AppAsync, 0, 0);
-	}
-	else
-	{
-		thread thr([=]() {
-			::Sleep(uDelayTime);
-			this->PostThreadMessage(WM_AppAsync, 0, 0);
-		});
-		thr.detach();
-	}
+	g_mapTimer.del(idEvent);
+	::KillTimer(NULL, idEvent);
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_AppAsync == pMsg->message && NULL == pMsg->hwnd)
-	{
-		if (m_cbAsync)
-		{
-			CB_Async cb = m_cbAsync;
-			m_cbAsync = NULL;
-			cb();
-		}
-
-		return TRUE;
-	}
-
 	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
 	{
 		switch (pMsg->message)

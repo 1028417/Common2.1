@@ -122,8 +122,6 @@ private:
 	BOOL OnCommand(UINT uID);
 
 public:
-	void Async(const CB_Async& cb, UINT uDelayTime = 0);
-
 	BOOL Quit();
 
 public:
@@ -133,8 +131,8 @@ public:
 
 	static bool peekMsg(UINT uMsg, MSG msg, bool bPeekAll);
 
-	static bool SetTimer(const CB_Timer& cb, HWND hWnd, UINT uElapse);
-	static bool KillTimer(HWND hWnd, UINT uElapse);
+	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
+	static void killTimer(UINT_PTR idEvent);
 
 	static bool getKeyState(UINT uKey)
 	{
