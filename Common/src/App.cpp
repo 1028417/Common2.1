@@ -9,21 +9,37 @@ static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
-static UINT g_uTimerID = 0;
-
 static SMap<UINT, CB_Timer> g_mapTimer;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	g_mapTimer.del_if(idEvent, [&](auto& pr) {
-		if (!pr.second())
+	g_mapTimer.get(idEvent, [&](auto& cb) {
+		if (!cb())
 		{
-			::KillTimer(hwnd, idEvent);
-			return true;
+			CMainApp::killTimer(idEvent);
 		}
-		
+	});
+}
+
+UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
+{
+	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
+	g_mapTimer.insert(idEvent, cb);
+	return idEvent;
+}
+
+void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
+{
+	(void)setTimer(uDelayTime, [=]() {
+		cb();
 		return false;
 	});
+}
+
+void CMainApp::killTimer(UINT_PTR idEvent)
+{
+	::KillTimer(NULL, idEvent);
+	g_mapTimer.del(idEvent);
 }
 
 BOOL CMainApp::InitInstance()
@@ -72,19 +88,6 @@ BOOL CMainApp::InitInstance()
 	}
 
 	return TRUE;
-}
-
-UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
-{
-	UINT_PTR idEvent = ::SetTimer(NULL, ++g_uTimerID, uElapse, TimerProc);
-	g_mapTimer.insert(idEvent, cb);
-	return idEvent;
-}
-
-void CMainApp::killTimer(UINT_PTR idEvent)
-{
-	g_mapTimer.del(idEvent);
-	::KillTimer(NULL, idEvent);
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)

@@ -211,11 +211,12 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 	return nResult;
 }
 
-void CMainWnd::Async(const CB_Async& cb, UINT uDelayTime)
+void CMainWnd::setAsyncCB(const CB_Async& cb)
 {
+	m_ccsLock.lock();
+
 	CB_Async cbPrev = m_cbAsync;
-	m_cbAsync = [=]()
-	{
+	m_cbAsync = [=]() {
 		if (cbPrev)
 		{
 			cbPrev();
@@ -224,18 +225,21 @@ void CMainWnd::Async(const CB_Async& cb, UINT uDelayTime)
 		cb();
 	};
 
-	if (0 == uDelayTime)
-	{
-		this->PostMessage(WM_Async);
-	}
-	else
-	{
-		thread thr([=]() {
-			::Sleep(uDelayTime);
-			this->PostMessage(WM_Async);
-		});
-		thr.detach();
-	}
+	m_ccsLock.unlock();
+}
+
+void CMainWnd::Async(const CB_Async& cb)
+{
+	setAsyncCB(cb);
+
+	this->PostMessage(WM_Async);
+}
+
+void CMainWnd::Sync(const CB_Sync& cb)
+{
+	setAsyncCB(cb);
+
+	this->SendMessage(WM_Async);
 }
 
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
@@ -377,10 +381,13 @@ BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 {
 	if (WM_Async == message)
 	{
-		if (m_cbAsync)
+		m_ccsLock.lock();
+		CB_Async cb = m_cbAsync;
+		m_cbAsync = NULL;
+		m_ccsLock.unlock();
+
+		if (cb)
 		{
-			CB_Async cb = m_cbAsync;
-			m_cbAsync = NULL;
 			cb();
 		}
 

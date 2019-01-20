@@ -143,22 +143,10 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	return CPropertyPage::PreTranslateMessage(pMsg);
 }
 
-void CPage::Async(const CB_Async& cb, UINT uDelayTime)
-{	
+void CPage::Async(const CB_Async& cb)
+{
 	m_cbAsync = cb;
-
-	if (0 == uDelayTime)
-	{
-		this->PostMessage(WM_PageAsync);
-	}
-	else
-	{
-		thread thr([=]() {
-			::Sleep(uDelayTime);
-			this->PostMessage(WM_PageAsync);
-		});
-		thr.detach();
-	}
+	this->PostMessage(WM_PageAsync);
 }
 
 void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
@@ -180,7 +168,7 @@ void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 
 void CPage::_AsyncLoop(UINT uDelayTime)
 {
-	Async([=]() {
+	CMainApp::async([=]() {
 		if (!m_cbAsyncLoop)
 		{
 			return;
