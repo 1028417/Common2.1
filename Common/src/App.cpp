@@ -136,7 +136,7 @@ BOOL CMainApp::InitInstance()
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_Async == pMsg->message)
+	if (g_cbAsync)
 	{
 		g_lckAsync.lock();
 		CB_Async cb = g_cbAsync;
