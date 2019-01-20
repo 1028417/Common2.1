@@ -15,7 +15,9 @@ void CPathList::PreSubclassWindow()
 BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns)
 {
 	__EnsureReturn(__super::InitFont(crText, uFontSize), FALSE);
-	return __super::InitColumn(lstColumns.empty() ? m_lstColumns : lstColumns);
+	__super::InitColumn(lstColumns.empty() ? m_lstColumns : lstColumns);
+
+	return true;
 }
 
 BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst, const TD_IconVec& vecIcons)

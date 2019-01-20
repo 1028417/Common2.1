@@ -50,7 +50,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 	m_para = para;
 	
 	__EnsureReturn(InitFont(m_para.crText, m_para.uFontSize), FALSE);
-	
+
 	if (-1 != (int)m_para.eViewType)
 	{
 		SetView(m_para.eViewType);
@@ -58,7 +58,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 
 	if (!m_para.lstColumns.empty())
 	{
-		__EnsureReturn(InitColumn(m_para.lstColumns, m_para.setUnderlineColumns), FALSE);
+		InitColumn(m_para.lstColumns, m_para.setUnderlineColumns);
 	}
 
 	if (0 != m_para.uHeaderHeight || 0 != m_para.uHeaderFontSize)
@@ -102,6 +102,10 @@ BOOL CObjectList::InitFont(COLORREF crText, UINT uFontSize)
 	{
 		__AssertReturn(m_fontGuard.setFontSize(*this, uFontSize), FALSE);
 	}
+
+	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {
+		logFont.lfUnderline = 1;
+	}), FALSE);
 
 	return TRUE;
 }
@@ -184,7 +188,7 @@ E_ListViewType CObjectList::GetView()
 	return m_para.eViewType;
 }
 
-BOOL CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns)
+void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns)
 {
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
@@ -197,23 +201,10 @@ BOOL CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& s
 
 	if (!setUnderlineColumns.empty())
 	{
-		__EnsureReturn(SetUnderlineColumn(setUnderlineColumns), FALSE);
+		m_para.setUnderlineColumns = setUnderlineColumns;
+
+		m_bCusomDrawNotify = true;
 	}
-
-	return TRUE;
-}
-
-BOOL CObjectList::SetUnderlineColumn(const set<UINT>& setUnderlineColumns)
-{
-	m_para.setUnderlineColumns = setUnderlineColumns;
-
-	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {
-		logFont.lfUnderline = 1;
-	}), FALSE);
-
-	m_bCusomDrawNotify = true;
-
-	return TRUE;
 }
 
 BOOL CObjectList::InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize)
@@ -877,21 +868,15 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 {
-	if (!m_para.setUnderlineColumns.empty())
+	bool bUnderline = false;
+	if (m_para.setUnderlineColumns.find(lvcd.iSubItem) != m_para.setUnderlineColumns.end())
 	{
-		if (m_para.setUnderlineColumns.find(lvcd.iSubItem) != m_para.setUnderlineColumns.end())
-		{
-			::SelectObject(lvcd.nmcd.hdc, m_fontUnderline);
-		}
-		else
-		{
-			::SelectObject(lvcd.nmcd.hdc, *this->GetFont());
-		}
+		::SelectObject(lvcd.nmcd.hdc, m_fontUnderline);
 	}
 
 	if (m_para.cbCustomDraw)
 	{
-		m_para.cbCustomDraw(*this, lvcd, bSkipDefault);
+		m_para.cbCustomDraw(lvcd, bSkipDefault);
 	}
 }
 
