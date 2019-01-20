@@ -16,8 +16,8 @@ class CPage;
 
 struct tagMainWndInfo
 {
-	wstring strText;
 	HICON hIcon = NULL;
+	wstring strText;
 	HMENU hMenu = NULL;
 
 	BOOL bSizeable = FALSE;
@@ -84,6 +84,8 @@ public:
 	void Async(const CB_Async& cb);
 	void Sync(const CB_Sync& cb);
 
+	void show();
+
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);
 
@@ -95,13 +97,13 @@ private:
 
 	BOOL HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam);
 	void setDockSize(CDockView &wndTargetView, UINT x, UINT y);
-
-	UINT getMaxWidth();
-	UINT getMaxHeight();
-
+	
 	void setAsyncCB(const CB_Async& cb);
 
+	void fixWorkArea();
+
 public:
+	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);

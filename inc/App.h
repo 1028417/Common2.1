@@ -17,8 +17,6 @@ public:
 public:
 	virtual CMainWnd* init() = 0;
 
-	virtual bool show() = 0;
-
 	virtual bool handleCommand(UINT uID)
 	{
 		return false;

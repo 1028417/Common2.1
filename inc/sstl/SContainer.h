@@ -492,9 +492,9 @@ namespace NS_SSTL
 			return includes<__InitList_Key>(initList);
 		}
 
-		bool del(__KeyConstRef key, bool bOnlyOne = false)
+		size_t del(__KeyConstRef key, bool bOnlyOne = false)
 		{
-			return 1==_del(key, [&](__DataRef data) {
+			return del(key, [&](__DataRef data) {
 				if (bOnlyOne)
 				{
 					return E_DelConfirm::DC_YesAbort;
