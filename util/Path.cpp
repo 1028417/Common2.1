@@ -5,7 +5,7 @@
 
 void CPath::SetDir(const wstring& strDir)
 {
-	ClearSubPath();
+	Clear();
 
 	m_bDir = true;
 	m_strName = strDir;
@@ -184,7 +184,7 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
 	return pPath;
 }
 
-void CPath::ClearSubPath()
+void CPath::Clear()
 {
 	if (NULL != m_plstSubPath)
 	{
