@@ -140,7 +140,7 @@ public:
 class __CommonExt CObjectList : public CListCtrl
 {
 public:
-	using CB_LVCostomDraw = function<void(class CObjectList& wndList, NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
+	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
 	using CB_ListViewChanged = function<void(E_ListViewType)>;
 
 	struct tagListPara
@@ -212,8 +212,7 @@ public:
 	void SetView(E_ListViewType eViewType, bool bArrange = false);
 	E_ListViewType GetView();
 
-	BOOL InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
-	BOOL SetUnderlineColumn(const set<UINT>& setUnderlineColumns);
+	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
 
 	BOOL InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize = 0);
 
