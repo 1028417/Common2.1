@@ -5,18 +5,23 @@
 
 #include "MainWnd.h"
 
+#define WM_Async WM_USER + 1
+
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
 static SMap<UINT, CB_Timer> g_mapTimer;
-static NS_mtutil::CCSLock g_ccsLock;
+static NS_mtutil::CCSLock g_lckTimer;
+
+static CB_Async g_cbAsync;
+static NS_mtutil::CCSLock g_lckAsync;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	g_ccsLock.lock();
+	g_lckTimer.lock();
 	g_mapTimer.get(idEvent, [&](auto& cb) {
-		g_ccsLock.unlock();
+		g_lckTimer.unlock();
 
 		if (!cb())
 		{
@@ -24,35 +29,63 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 		}
 	});
 
-	g_ccsLock.unlock();
+	g_lckTimer.unlock();
 }
 
 UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
 
-	g_ccsLock.lock();
+	g_lckTimer.lock();
 	g_mapTimer.insert(idEvent, cb);
-	g_ccsLock.unlock();
+	g_lckTimer.unlock();
 
 	return idEvent;
-}
-
-void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
-{
-	(void)setTimer(uDelayTime, [=]() {
-		cb();
-		return false;
-	});
 }
 
 void CMainApp::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
 
-	g_ccsLock.lock();
+	g_lckTimer.lock();
 	g_mapTimer.del(idEvent);
-	g_ccsLock.unlock();
+	g_lckTimer.unlock();
+}
+
+static void _async(const CB_Async& cb)
+{
+	g_lckAsync.lock();
+
+	CB_Async cbPrev = g_cbAsync;
+	g_cbAsync = [=]() {
+		if (cbPrev)
+		{
+			cbPrev();
+		}
+
+		cb();
+	};
+
+	g_lckAsync.unlock();
+
+	CMainApp::GetMainApp()->PostThreadMessage(WM_Async, 0, 0);
+}
+
+void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
+{
+	if (0 == uDelayTime)
+	{
+		_async(cb);
+	}
+	else
+	{
+		_async([=]() {
+			(void)setTimer(uDelayTime, [=]() {
+				cb();
+				return false;
+			});
+		});
+	}
 }
 
 BOOL CMainApp::InitInstance()
@@ -103,6 +136,21 @@ BOOL CMainApp::InitInstance()
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
+	if (WM_Async == pMsg->message)
+	{
+		g_lckAsync.lock();
+		CB_Async cb = g_cbAsync;
+		g_cbAsync = NULL;
+		g_lckAsync.unlock();
+
+		if (cb)
+		{
+			cb();
+		}
+
+		return TRUE;
+	}
+
 	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
 	{
 		switch (pMsg->message)

@@ -5,8 +5,6 @@
 
 #include "MainWnd.h"
 
-#define WM_PageAsync WM_USER+1
-
 //CPage
 
 CPage::CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle, bool bAutoActive)
@@ -143,60 +141,30 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	return CPropertyPage::PreTranslateMessage(pMsg);
 }
 
-void CPage::Async(const CB_Async& cb)
-{
-	m_cbAsync = cb;
-	this->PostMessage(WM_PageAsync);
-}
-
 void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 {
-	if (0 == uDelayTime)
-	{
-		return;
-	}
-
-	if (!cb)
-	{
-		return;
-	}
-
 	m_cbAsyncLoop = cb;
 
-	_AsyncLoop(uDelayTime);
-}
-
-void CPage::_AsyncLoop(UINT uDelayTime)
-{
-	CMainApp::async([=]() {
-		if (!m_cbAsyncLoop)
-		{
-			return;
-		}
-;
-		if (!m_cbAsyncLoop())
-		{
-			//m_cbAsyncLoop = NULL;
-			return;
-		}
-
-		_AsyncLoop(uDelayTime);
-	}, uDelayTime);
-}
-
-BOOL CPage::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
-{
-	if (WM_PageAsync == message)
+	if (0 == m_idTimer)
 	{
-		if (m_cbAsync)
-		{
-			CB_Async cb = m_cbAsync;
-			m_cbAsync = NULL;
-			cb();
-		}
+		m_idTimer = CMainApp::setTimer(uDelayTime, [=]() {
+			if (!onAsyncLoop())
+			{
+				m_idTimer = 0;
+				return false;
+			}
 
-		return TRUE;
+			return true;
+		});
+	}
+}
+
+bool CPage::onAsyncLoop()
+{
+	if (m_cbAsyncLoop)
+	{
+		return m_cbAsyncLoop();
 	}
 
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
+	return false;
 }

@@ -3,8 +3,6 @@
 
 #include <MainWnd.h>
 
-#define WM_Async WM_USER + 1
-
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
 	ON_WM_MOVE()
@@ -226,37 +224,6 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 	return nResult;
 }
 
-void CMainWnd::setAsyncCB(const CB_Async& cb)
-{
-	m_ccsLock.lock();
-
-	CB_Async cbPrev = m_cbAsync;
-	m_cbAsync = [=]() {
-		if (cbPrev)
-		{
-			cbPrev();
-		}
-
-		cb();
-	};
-
-	m_ccsLock.unlock();
-}
-
-void CMainWnd::Async(const CB_Async& cb)
-{
-	setAsyncCB(cb);
-
-	this->PostMessage(WM_Async);
-}
-
-void CMainWnd::Sync(const CB_Sync& cb)
-{
-	setAsyncCB(cb);
-
-	this->SendMessage(WM_Async);
-}
-
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
 	if (0 != m_WndInfo.uMinWidth && 0 != m_WndInfo.uMinHeight)
@@ -334,7 +301,7 @@ void CMainWnd::setDockSize(CDockView &wndTargetView, UINT x, UINT y)
 	resizeView(true);
 }
 
-BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	static CDockView* pTargetView = NULL;
 
@@ -350,7 +317,7 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 			{
 				setDockSize(*pTargetView, ptPos.x, ptPos.y);
 			}
-			
+
 			break;
 		}
 
@@ -358,7 +325,7 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 		__EnsureBreak(pView);
 
 		LPCWSTR pszCursorName = NULL;
-		
+
 		E_DockViewType eViewType = pView->getViewStyle().eViewType;
 		if (E_DockViewType::DVT_DockLeft == eViewType || E_DockViewType::DVT_DockRight == eViewType)
 		{
@@ -381,7 +348,7 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 			this->SetCapture();
 		}
 	}
-	
+
 	break;
 	case WM_LBUTTONUP:
 		ReleaseCapture();
@@ -389,43 +356,15 @@ BOOL CMainWnd::HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lPara
 		break;
 	case WM_CAPTURECHANGED:
 		pTargetView = NULL;
-		
+
 		break;
-	default:
-		return FALSE;
-	}
-	
-	return TRUE;
-}
-
-BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
-{
-	if (WM_Async == message)
-	{
-		m_ccsLock.lock();
-		CB_Async cb = m_cbAsync;
-		m_cbAsync = NULL;
-		m_ccsLock.unlock();
-
-		if (cb)
-		{
-			cb();
-		}
-
-		return TRUE;
-	}
-
-	if (HandleResizeViewMessage(message, wParam, lParam))
-	{
-		return TRUE;
-	}
-
-	if (WM_NCLBUTTONDBLCLK == message)
-	{
+	case WM_NCLBUTTONDBLCLK:
 		if (!m_WndInfo.bSizeable)
 		{
-			return true;
+			return TRUE;
 		}
+
+		break;
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
