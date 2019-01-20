@@ -46,15 +46,21 @@ public:
 
 	virtual int MsgBox(const CString& cstrText, UINT uType=MB_OK);
 
-	void Async(const CB_Async& cb, UINT uDelayTime=0);
-	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb);
-
 protected:
 	BOOL OnSetActive() override;
 	BOOL OnKillActive() override;
 
 	virtual void OnActive(BOOL bActive) {}
 
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
+
+	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+
+	virtual BOOL GetCtrlDragData(CWnd *pwndCtrl, const CPoint& point, LPVOID& pDragData)
+	{
+		return FALSE;
+	}
+	
 	BOOL RegDragableCtrl(CWnd& wndCtrl)
 	{
 		__AssertReturn(wndCtrl.GetSafeHwnd(), FALSE);
@@ -64,12 +70,6 @@ protected:
 		return TRUE;
 	}
 
-	virtual BOOL GetCtrlDragData(CWnd *pwndCtrl, const CPoint& point, LPVOID& pDragData)
-	{
-		return FALSE;
-	}
-	
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
-	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+	void Async(const CB_Async& cb);
+	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb);
 };

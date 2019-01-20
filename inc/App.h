@@ -108,8 +108,6 @@ private:
 	typedef vector<CModuleApp*> ModuleVector;
 	ModuleVector m_vctModules;
 
-	CB_Async m_cbAsync;
-
 protected:
 	virtual BOOL InitInstance() override;
 	
@@ -133,6 +131,8 @@ public:
 
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
 	static void killTimer(UINT_PTR idEvent);
+
+	static void async(const CB_Async& cb, UINT uDelayTime=0);
 
 	static bool getKeyState(UINT uKey)
 	{

@@ -6,6 +6,8 @@
 
 #include "Page.h"
 
+using CB_Sync = fn_voidvoid;
+
 //CMainWnd
 
 class CDockView;
@@ -26,8 +28,6 @@ struct tagMainWndInfo
 	ULONG uMinWidth = 0;
 	ULONG uMinHeight = 0;
 };
-
-using CB_Sync = fn_voidvoid;
 
 class __CommonExt CMainWnd: public CWnd
 {
@@ -58,6 +58,7 @@ private:
 	SMap<E_DockViewType, CDockView*> m_mapDockViews;
 
 	CB_Async m_cbAsync;
+	NS_mtutil::CCSLock m_ccsLock;
 
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
@@ -80,7 +81,8 @@ public:
 		return MsgBox(cstrText, L"", uType);
 	}
 
-	void Async(const CB_Async& cb, UINT uDelayTime=0);
+	void Async(const CB_Async& cb);
+	void Sync(const CB_Sync& cb);
 
 private:
 	BOOL _AddView(CDockView& View, CPage& Page);
@@ -96,6 +98,8 @@ private:
 
 	UINT getMaxWidth();
 	UINT getMaxHeight();
+
+	void setAsyncCB(const CB_Async& cb);
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
