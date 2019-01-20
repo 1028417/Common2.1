@@ -10,21 +10,31 @@ static map<UINT, LPVOID> g_mapInterfaces;
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
 static SMap<UINT, CB_Timer> g_mapTimer;
+static NS_mtutil::CCSLock g_ccsLock;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
+	g_ccsLock.lock();
 	g_mapTimer.get(idEvent, [&](auto& cb) {
+		g_ccsLock.unlock();
+
 		if (!cb())
 		{
 			CMainApp::killTimer(idEvent);
 		}
 	});
+
+	g_ccsLock.unlock();
 }
 
 UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
+
+	g_ccsLock.lock();
 	g_mapTimer.insert(idEvent, cb);
+	g_ccsLock.unlock();
+
 	return idEvent;
 }
 
@@ -39,7 +49,10 @@ void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
 void CMainApp::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
+
+	g_ccsLock.lock();
 	g_mapTimer.del(idEvent);
+	g_ccsLock.unlock();
 }
 
 BOOL CMainApp::InitInstance()
@@ -64,13 +77,16 @@ BOOL CMainApp::InitInstance()
 	m_strAppPath = fsutil::GetParentDir(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
 
+	__AssertReturn(getController().init(), FALSE);
+
 	CMainWnd *pMainWnd = getView().init();
 	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
 	m_pMainWnd = pMainWnd;
 
-	__AssertReturn(getController().init(), FALSE);
-
-	__AssertReturn(getView().show(), FALSE);
+	if (!pMainWnd->IsWindowVisible())
+	{
+		pMainWnd->show();
+	}
 
 	__AssertReturn(getController().start(), FALSE);
 
@@ -80,11 +96,6 @@ BOOL CMainApp::InitInstance()
 		{
 			return FALSE;
 		}
-	}
-
-	if (!pMainWnd->IsWindowVisible())
-	{
-		pMainWnd->ShowWindow(SW_SHOW);
 	}
 
 	return TRUE;

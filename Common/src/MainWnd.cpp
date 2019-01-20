@@ -7,6 +7,7 @@
 
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
+	ON_WM_MOVE()
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
@@ -24,19 +25,8 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 		dwStyle  = dwStyle | WS_MAXIMIZEBOX | WS_THICKFRAME;
 	}
 
-	UINT uWidth = m_WndInfo.uWidth;
-	UINT uHeight = m_WndInfo.uHeight;
-	if (0 == uWidth)
-	{
-		uWidth = getMaxWidth();
-	}
-	if (0 == uHeight)
-	{
-		uHeight = getMaxHeight();
-	}
-
 	__AssertReturn(this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName, m_WndInfo.strText.c_str()
-		, dwStyle, 0, 0, uWidth, uHeight, NULL, m_WndInfo.hMenu), FALSE);
+		, dwStyle, 0, 0, m_WndInfo.uWidth, m_WndInfo.uHeight, NULL, m_WndInfo.hMenu), FALSE);
 	
 	//if (NULL != m_WndInfo.hIcon)
 	//{
@@ -47,15 +37,30 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	return TRUE;
 }
 
-UINT CMainWnd::getMaxWidth()
+void CMainWnd::fixWorkArea()
 {
-	return UINT(::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME));
+	CRect rtWorkArea;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小
+
+	this->MoveWindow(rtWorkArea);
 }
 
-UINT CMainWnd::getMaxHeight()
+void CMainWnd::show()
 {
-	return UINT(::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYDLGFRAME)
-		+ ::GetSystemMetrics(SM_CYCAPTION));
+	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
+	{
+		fixWorkArea();
+	}
+
+	ShowWindow(SW_SHOW);
+}
+
+void CMainWnd::OnMove(int x, int y)
+{
+	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
+	{
+		fixWorkArea();
+	}
 }
 
 void CMainWnd::OnSize(UINT nType, int cx, int cy)
@@ -65,8 +70,18 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		return;
 	}
 
+	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
+	{
+		fixWorkArea();
+	}
+
 	CRect rcClient;
 	this->GetClientRect(rcClient);
+	if (m_cx == rcClient.right && m_cy == rcClient.bottom)
+	{
+		return;
+	}
+
 	m_cx = rcClient.right;
 	m_cy = rcClient.bottom;
 
@@ -249,7 +264,13 @@ void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 		lpMMI->ptMinTrackSize = { (LONG)m_WndInfo.uMinWidth, (LONG)m_WndInfo.uMinHeight };
 	}
 
-	lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = { (LONG)getMaxWidth(), (LONG)getMaxHeight() };
+	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
+	{
+		lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = {
+			::GetSystemMetrics(SM_CXFULLSCREEN)// +::GetSystemMetrics(SM_CXDLGFRAME);
+			, ::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION)// +::GetSystemMetrics(SM_CYDLGFRAME);
+		};
+	}
 }
 
 CDockView* CMainWnd::hittestView(const CPoint& ptPos)
