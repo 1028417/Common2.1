@@ -30,14 +30,14 @@ private:
 
 	bool m_bAutoActive = false;
 
-private:
 	set<HWND> m_setDragableCtrls;
 
-	CB_Async m_cbAsync;
+	UINT_PTR m_idTimer = 0;
 
 	CB_AsyncLoop m_cbAsyncLoop;
 
-	void _AsyncLoop(UINT uDelayTime);
+private:
+	virtual bool onAsyncLoop();
 
 public:
 	BOOL Active();
@@ -54,8 +54,6 @@ protected:
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
-	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
-
 	virtual BOOL GetCtrlDragData(CWnd *pwndCtrl, const CPoint& point, LPVOID& pDragData)
 	{
 		return FALSE;
@@ -70,6 +68,5 @@ protected:
 		return TRUE;
 	}
 
-	void Async(const CB_Async& cb);
-	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb);
+	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb=NULL);
 };

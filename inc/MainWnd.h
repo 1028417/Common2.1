@@ -57,9 +57,6 @@ private:
 
 	SMap<E_DockViewType, CDockView*> m_mapDockViews;
 
-	CB_Async m_cbAsync;
-	NS_mtutil::CCSLock m_ccsLock;
-
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
 
@@ -81,9 +78,6 @@ public:
 		return MsgBox(cstrText, L"", uType);
 	}
 
-	void Async(const CB_Async& cb);
-	void Sync(const CB_Sync& cb);
-
 	void show();
 
 private:
@@ -95,11 +89,8 @@ private:
 
 	CDockView* hittestView(const CPoint& ptPos);
 
-	BOOL HandleResizeViewMessage(UINT message, WPARAM wParam, LPARAM lParam);
 	void setDockSize(CDockView &wndTargetView, UINT x, UINT y);
 	
-	void setAsyncCB(const CB_Async& cb);
-
 	void fixWorkArea();
 
 public:

@@ -86,26 +86,25 @@ namespace NS_mtutil
 	private:
 		virtual bool onTask(UINT uTaskIdx, T&, R&) { return false; }
 	};
-
-	interface IAsyncCallback
-	{
-		virtual void onAsync() = 0;
-	};
-
+	
 	class __UtilExt CAsync
 	{
 	public:
-		static bool async(IAsyncCallback& cbAsync)
+		CAsync() {}
+
+		bool async()
 		{
-			return TRUE == QueueUserWorkItem(cbQueueUserWorkItem, &cbAsync, WT_EXECUTEDEFAULT);
+			return TRUE == QueueUserWorkItem(cbQueueUserWorkItem, this, WT_EXECUTEDEFAULT);
 		}
 
 	private:
+		virtual void onAsync() {};
+
 		static DWORD WINAPI cbQueueUserWorkItem(LPVOID lpPara)
 		{
 			if (NULL != lpPara)
 			{
-				((IAsyncCallback*)lpPara)->onAsync();
+				((CAsync*)lpPara)->onAsync();
 			}
 
 			return 0;

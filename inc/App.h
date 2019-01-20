@@ -131,7 +131,7 @@ public:
 	static void killTimer(UINT_PTR idEvent);
 
 	static void async(const CB_Async& cb, UINT uDelayTime=0);
-
+	
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;

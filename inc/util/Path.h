@@ -51,7 +51,7 @@ public:
 	
 	virtual ~CPath()
 	{
-		ClearSubPath();
+		Clear();
 	}
 
 public:
@@ -97,7 +97,7 @@ public:
 	
 	CPath *GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind = L"");
 	
-	void ClearSubPath();
+	virtual void Clear();
 
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
 
