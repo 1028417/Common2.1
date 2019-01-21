@@ -268,3 +268,16 @@ void CImglst::SetIcon(HICON hIcon, int iPosReplace)
 		(void)Add(hIcon);
 	}
 }
+
+void CImglst::SetToListCtrl(CListCtrl &wndListCtrl, E_ImglstType eImglstType)
+{
+	if (E_ImglstType::ILT_Both == eImglstType)
+	{
+		(void)wndListCtrl.SetImageList(this, (int)E_ImglstType::ILT_Normal);
+		(void)wndListCtrl.SetImageList(this, (int)E_ImglstType::ILT_Small);
+	}
+	else
+	{
+		(void)wndListCtrl.SetImageList(this, (int)eImglstType);
+	}
+}
