@@ -57,18 +57,24 @@ static void _async(const CB_Async& cb)
 	g_lckAsync.lock();
 
 	CB_Async cbPrev = g_cbAsync;
-	g_cbAsync = [=]() {
-		if (cbPrev)
-		{
+	if (cbPrev)
+	{
+		g_cbAsync = [=]() {
 			cbPrev();
-		}
 
-		cb();
-	};
+			cb();
+		};
 
-	g_lckAsync.unlock();
+		g_lckAsync.unlock();
+	}
+	else
+	{
+		g_cbAsync = cb;
 
-	CMainApp::GetMainApp()->PostThreadMessage(WM_Async, 0, 0);
+		g_lckAsync.unlock();
+
+		CMainApp::GetMainApp()->PostThreadMessage(WM_Async, 0, 0);
+	}
 }
 
 void CMainApp::async(const CB_Async& cb, UINT uDelayTime)

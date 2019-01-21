@@ -28,17 +28,7 @@ public:
 	{
 	}
 
-	CPath(const wstring& strName, bool bDir)
-	{
-		if (bDir)
-		{
-			SetDir(strName);
-		}
-		else
-		{
-			m_strName = strName;
-		}
-	}
+	CPath(const wstring& strName, bool bDir);
 
 	CPath(const tagFindData& findData, CPath *pParentDir)
 		: m_bDir(findData.isDir())
@@ -95,7 +85,7 @@ public:
 	
 	bool GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile=NULL, const wstring& strFind = L"");
 	
-	CPath *GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind = L"");
+	CPath *FindSubPath(wstring strSubPath, bool bDir);
 	
 	virtual void Clear();
 

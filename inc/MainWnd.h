@@ -6,8 +6,6 @@
 
 #include "Page.h"
 
-using CB_Sync = fn_voidvoid;
-
 //CMainWnd
 
 class CDockView;

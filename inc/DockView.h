@@ -5,7 +5,7 @@
 
 #include "Guard.h"
 
-#define __DXView 6
+#define __DXView 5
 
 enum class E_TabStyle
 {

@@ -39,6 +39,7 @@ void CMainWnd::fixWorkArea()
 {
 	CRect rtWorkArea;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小
+	rtWorkArea.InflateRect(3, 3, 3, 3);
 
 	this->MoveWindow(rtWorkArea);
 }
@@ -233,10 +234,8 @@ void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = {
-			::GetSystemMetrics(SM_CXFULLSCREEN)// +::GetSystemMetrics(SM_CXDLGFRAME);
-			, ::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION)// +::GetSystemMetrics(SM_CYDLGFRAME);
-		};
+		lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = {10000,10000}; /*{ ::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME)
+			, ::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION) + ::GetSystemMetrics(SM_CYDLGFRAME) };*/
 	}
 }
 

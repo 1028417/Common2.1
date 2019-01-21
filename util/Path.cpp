@@ -3,6 +3,18 @@
 
 #include <Path.h>
 
+CPath::CPath(const wstring& strName, bool bDir)
+{
+	if (bDir)
+	{
+		SetDir(strName);
+	}
+	else
+	{
+		m_strName = strName;
+	}
+}
+
 void CPath::SetDir(const wstring& strDir)
 {
 	Clear();
@@ -122,7 +134,7 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const 
 	return m_bExists;;
 }
 
-CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
+CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
 	__EnsureReturn(m_bDir, NULL);
 
@@ -151,7 +163,7 @@ CPath *CPath::GetSubPath(wstring strSubPath, bool bDir, const wstring& strFind)
 		wstring strName = lstSubDirs.back();
 		lstSubDirs.pop_back();
 
-		TD_PathList& lstSubPath = pPath->_findFile(strFind);
+		TD_PathList& lstSubPath = pPath->_findFile();
 
 		pPath = NULL;
 
