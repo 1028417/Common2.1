@@ -137,24 +137,50 @@ BOOL CMainApp::InitInstance()
 		}
 	}
 
-	return TRUE;
+	__super::Run();
+
+	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
+	{
+		__EnsureReturn((*itModule)->OnQuit(), FALSE);
+	}
+
+	//for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
+	//	; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
+	//{
+	//	if (itrHotkeyInfo->bGlobal)
+	//	{
+	//		(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
+	//	}
+	//}
+
+	getView().close();
+
+	getController().stop();
+
+	if (NULL != m_pMainWnd)
+	{
+		(void)m_pMainWnd->DestroyWindow();
+	}
+
+	return FALSE;
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (g_cbAsync)
+	if (WM_QUIT != pMsg->message)
 	{
-		g_lckAsync.lock();
-		CB_Async cb = g_cbAsync;
-		g_cbAsync = NULL;
-		g_lckAsync.unlock();
-
-		if (cb)
+		if (g_cbAsync)
 		{
-			cb();
-		}
+			g_lckAsync.lock();
+			CB_Async cb = g_cbAsync;
+			g_cbAsync = NULL;
+			g_lckAsync.unlock();
 
-		return TRUE;
+			if (cb)
+			{
+				cb();
+			}
+		}
 	}
 
 	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
@@ -331,34 +357,9 @@ bool CMainApp::_HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 	return bResult;
 }
 
-BOOL CMainApp::Quit()
+void CMainApp::Quit()
 {
-	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
-	{
-		__EnsureReturn((*itModule)->OnQuit(), FALSE);
-	}
-
-	//for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
-	//	; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
-	//{
-	//	if (itrHotkeyInfo->bGlobal)
-	//	{
-	//		(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
-	//	}
-	//}
-
-	getView().close();
-
-	getController().stop();
-	
-	if (NULL != m_pMainWnd)
-	{
-		(void)m_pMainWnd->DestroyWindow();
-	}
-
 	AfxPostQuitMessage(0);
-
-	return TRUE;
 }
 
 E_DoEventsResult CMainApp::DoEvents(bool bOnce)

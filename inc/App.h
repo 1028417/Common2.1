@@ -118,9 +118,8 @@ private:
 	BOOL OnCommand(UINT uID);
 
 public:
-	BOOL Quit();
+	void Quit();
 
-public:
 	static BOOL AddModule(CModuleApp& Module);
 
 	static E_DoEventsResult DoEvents(bool bOnce=false);
