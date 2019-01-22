@@ -50,7 +50,7 @@ bool util::loadFile(const string& strFile, string& strData)
 	return true;
 }
 
-bool util::loadFile(const string& strFile, SVector<string>& vecLineData, char cDelim)
+bool util::loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter)
 {
 	string strData;
 	if (!loadFile(strFile, strData))
@@ -59,12 +59,12 @@ bool util::loadFile(const string& strFile, SVector<string>& vecLineData, char cD
 	}
 
 	size_t prePos = 0;
-	size_t pos = strData.find(cDelim, prePos);
+	size_t pos = strData.find(cdelimiter, prePos);
 	while (string::npos != pos)
 	{
 		vecLineData.add(strData.substr(prePos, pos-prePos));
 		prePos = pos+1;
-		pos = strData.find(cDelim, prePos);
+		pos = strData.find(cdelimiter, prePos);
 	}
 
 	if (prePos < strData.size())
