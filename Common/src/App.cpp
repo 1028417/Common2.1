@@ -160,6 +160,8 @@ BOOL CMainApp::InitInstance()
 	if (NULL != m_pMainWnd)
 	{
 		(void)m_pMainWnd->DestroyWindow();
+		delete m_pMainWnd;
+		m_pMainWnd = NULL;
 	}
 
 	return FALSE;
@@ -167,15 +169,15 @@ BOOL CMainApp::InitInstance()
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_QUIT != pMsg->message)
+	if (g_cbAsync)
 	{
-		if (g_cbAsync)
-		{
-			g_lckAsync.lock();
-			CB_Async cb = g_cbAsync;
-			g_cbAsync = NULL;
-			g_lckAsync.unlock();
+		g_lckAsync.lock();
+		CB_Async cb = g_cbAsync;
+		g_cbAsync = NULL;
+		g_lckAsync.unlock();
 
+		if (WM_QUIT != pMsg->message)
+		{
 			if (cb)
 			{
 				cb();
