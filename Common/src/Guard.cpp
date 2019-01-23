@@ -78,27 +78,71 @@ BOOL CMenuGuard::Popup()
 	return pSubMenu->TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_Page);
 }
 
+bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
+{
+	if (NULL != m_hObject)
+	{
+		return false;
+	}
 
-bool CFontGuard::setFontSize(CWnd& wnd, ULONG uFontSize)
+	CFont *pFont = wnd.GetFont();
+	if (NULL == pFont)
+	{
+		return false;
+	}
+
+	LOGFONT logFont;
+	::ZeroMemory(&logFont, sizeof(logFont));
+	(void)pFont->GetLogFont(&logFont);
+
+	logFont.lfQuality = PROOF_QUALITY;
+	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
+
+	if (logFont.lfHeight > 0)
+	{
+		logFont.lfHeight += m_iFontSizeOffset;
+	}
+	else
+	{
+		logFont.lfHeight -= m_iFontSizeOffset;
+	}
+
+	if (cb)
+	{
+		cb(logFont);
+	}
+
+	if (!CreateFontIndirect(&logFont))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CCompatableFont::create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb)
+{
+	m_iFontSizeOffset = iFontSizeOffset;
+
+	return create(wnd, cb);
+}
+
+bool CFontGuard::setFont(CWnd& wnd, ULONG uFontSizeOffset, const CB_CompatableFont& cb)
 {
 	if (NULL == m_font.m_hObject)
 	{
-		if (!m_font.create(wnd, [uFontSize](LOGFONT& logFont) {
-			if (logFont.lfHeight < 0)
-			{
-				logFont.lfHeight -= uFontSize;
-			}
-			else
-			{
-				logFont.lfHeight += uFontSize;
-			}
-		}))
+		if (!m_font.create(wnd, uFontSizeOffset, cb))
 		{
 			return false;
 		}
 	}
 
-	wnd.SetFont(&m_font);
+	(void)wnd.SetFont(&m_font);
 
 	return true;
+}
+
+bool CFontGuard::setFont(CWnd& wnd, const CB_CompatableFont& cb)
+{
+	return setFont(wnd, 0, cb);
 }

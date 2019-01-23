@@ -66,37 +66,21 @@ public:
 
 using CB_CompatableFont = function<void(LOGFONT&)>;
 
-class CCompatableFont : public CFont
+class __CommonExt CCompatableFont : public CFont
 {
 public:
-	CCompatableFont()
+	CCompatableFont(int iFontSizeOffset=0)
+		: m_iFontSizeOffset(iFontSizeOffset)
 	{
 	}
 
-	bool create(CWnd& wnd, const CB_CompatableFont& cb)
-	{
-		CFont *pFont = wnd.GetFont();
-		if (NULL == pFont)
-		{
-			return false;
-		}
+private:
+	int m_iFontSizeOffset = 0;
 
-		LOGFONT logFont;
-		::ZeroMemory(&logFont, sizeof(logFont));
-		(void)pFont->GetLogFont(&logFont);
-		
-		logFont.lfQuality = PROOF_QUALITY;
-		wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
+public:
+	bool create(CWnd& wnd, const CB_CompatableFont& cb = NULL);
 
-		cb(logFont);
-
-		if (!CreateFontIndirect(&logFont))
-		{
-			return false;
-		}
-
-		return true;
-	}
+	bool create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb = NULL);
 };
 
 class __CommonExt CFontGuard
@@ -107,5 +91,7 @@ public:
 	CCompatableFont m_font;
 
 public:
-	bool setFontSize(CWnd& wnd, ULONG uFontSize);
+	bool setFont(CWnd& wnd, ULONG uFontSizeOffset, const CB_CompatableFont& cb=NULL);
+
+	bool setFont(CWnd& wnd, const CB_CompatableFont& cb);
 };

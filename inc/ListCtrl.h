@@ -21,7 +21,7 @@ private:
 	LRESULT OnLayout(WPARAM wParam, LPARAM lParam);
 
 public:
-	BOOL Init(UINT uHeight, UINT uFontSize = 0);
+	BOOL Init(UINT uHeight, int iFontSizeOffset = 0);
 };
 
 enum class E_ListViewType
@@ -203,7 +203,7 @@ private:
 public:
 	BOOL InitCtrl(const tagListPara& para);
 
-	BOOL InitFont(COLORREF crText, UINT uFontSize = 0);
+	BOOL InitFont(COLORREF crText, int iFontSizeOffset = 0);
 
 	BOOL InitImglst(const CSize& size, const CSize *pszSmall = NULL, const TD_IconVec& vecIcons = {});
 	BOOL InitImglst(CBitmap& Bitmap, CBitmap *pBitmapSmall=NULL);

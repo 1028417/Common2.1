@@ -75,11 +75,11 @@ void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
 	ModifyStyle(0, dwTabStyle);
 }
 
-BOOL CTabCtrlEx::SetFontSize(UINT uFontSize)
+BOOL CTabCtrlEx::SetFontSize(int iFontSizeOffset)
 {
-	__EnsureReturn(0 != uFontSize, FALSE);
+	__EnsureReturn(0 != iFontSizeOffset, FALSE);
 	
-	return m_fontGuard.setFontSize(*this, uFontSize);
+	return m_fontGuard.setFont(*this, iFontSizeOffset);
 }
 
 BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)

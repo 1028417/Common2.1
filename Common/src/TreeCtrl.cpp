@@ -31,11 +31,11 @@ BOOL CBaseTree::InitImglst(CBitmap& Bitmap)
 	return TRUE;
 }
 
-void CBaseTree::SetFont(ULONG uFontSize)
+void CBaseTree::SetFontSize(int iFontSizeOffset)
 {
-	if (0 < uFontSize)
+	if (0 != iFontSizeOffset)
 	{
-		(void)m_fontGuard.setFontSize(*this, uFontSize);
+		(void)m_fontGuard.setFont(*this, iFontSizeOffset);
 	}
 }
 

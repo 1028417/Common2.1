@@ -56,7 +56,7 @@ public:
 
 	void SetTabStyle(E_TabStyle eTabStyle);
 
-	BOOL SetFontSize(UINT uFontSize);
+	BOOL SetFontSize(int iFontSizeOffset);
 
 	BOOL SetTabHeight(UINT uTabHeight);
 

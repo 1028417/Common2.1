@@ -20,11 +20,11 @@ LRESULT CHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 	return lResult;
 }
 
-BOOL CHeader::Init(UINT uHeight, UINT uFontSize)
+BOOL CHeader::Init(UINT uHeight, int iFontSizeOffset)
 {
-	if (0 != uFontSize)
+	if (0 != iFontSizeOffset)
 	{
-		__EnsureReturn(m_fontGuard.setFontSize(*this, uFontSize), FALSE);
+		__EnsureReturn(m_fontGuard.setFont(*this, iFontSizeOffset), FALSE);
 	}
 
 	m_uHeight = uHeight;
@@ -94,13 +94,13 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 	return TRUE;
 }
 
-BOOL CObjectList::InitFont(COLORREF crText, UINT uFontSize)
+BOOL CObjectList::InitFont(COLORREF crText, int iFontSizeOffset)
 {
 	__AssertReturn(SetTextColor(crText), FALSE);
 
-	if (0 != uFontSize)
+	if (0 != iFontSizeOffset)
 	{
-		__AssertReturn(m_fontGuard.setFontSize(*this, uFontSize), FALSE);
+		__AssertReturn(m_fontGuard.setFont(*this, iFontSizeOffset), FALSE);
 	}
 
 	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {

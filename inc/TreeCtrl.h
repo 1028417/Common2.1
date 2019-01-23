@@ -30,8 +30,8 @@ public:
 		(void)__super::SetImageList(&imglst, TVSIL_NORMAL);
 	}
 
-	void SetFont(ULONG uFontSize);
-
+	void SetFontSize(int iFontSizeOffset);
+	
 	void GetAllItems(list<HTREEITEM>& lstItems);
 	
 protected:
