@@ -32,6 +32,8 @@ private:
 
 	set<HWND> m_setDragableCtrls;
 
+	bool m_bDragable = false;
+
 	UINT_PTR m_idTimer = 0;
 
 	CB_AsyncLoop m_cbAsyncLoop;
