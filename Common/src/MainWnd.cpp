@@ -17,7 +17,7 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 		, 0, ::GetSysColorBrush(CTLCOLOR_DLG), m_WndInfo.hIcon);
 	__AssertReturn(lpszClassName, FALSE);
 
-	DWORD dwStyle = WS_OVERLAPPED | WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+	DWORD dwStyle = WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 	if (m_WndInfo.bSizeable)
 	{
 		dwStyle  = dwStyle | WS_MAXIMIZEBOX | WS_THICKFRAME;

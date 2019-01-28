@@ -3,9 +3,11 @@
 
 #include <ModuleApp.h>
 
+using CB_Timer = function<bool()>;
+
 using CB_Async = fn_voidvoid;
 
-using CB_Timer = function<bool()>;
+using CB_Sync = fn_voidvoid;
 
 class IView
 {
@@ -130,7 +132,9 @@ public:
 	static void killTimer(UINT_PTR idEvent);
 
 	static void async(const CB_Async& cb, UINT uDelayTime=0);
-	
+
+	static void sync(const CB_Sync& cb);
+
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;

@@ -77,6 +77,23 @@ static void _async(const CB_Async& cb)
 	}
 }
 
+static VOID WINAPI APCFunc(ULONG_PTR dwParam)
+{
+}
+
+void CMainApp::sync(const CB_Sync& cb)
+{
+	HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, ::GetCurrentThreadId());
+
+	async([=]() {
+		cb();
+
+		QueueUserAPC(APCFunc, hThread, 0);
+	});
+	
+	::SleepEx(-1, TRUE);
+}
+
 void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
 {
 	if (0 == uDelayTime)
