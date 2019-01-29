@@ -1,12 +1,6 @@
 
 #pragma once
 
-#define __Dot L'.'
-
-#define	__Slant L'/'
-
-#define	__BackSlant L'\\'
-
 struct __UtilExt tagFindData : WIN32_FIND_DATAW
 {
 	tagFindData()
@@ -29,6 +23,10 @@ struct __UtilExt tagFindData : WIN32_FIND_DATAW
 class __UtilExt fsutil
 {
 public:
+	static const wchar_t dot = L'.';
+	static const wchar_t slant = L'/';
+	static const wchar_t backSlant = L'\\';
+
 	static int GetFileSize(const wstring& strFilePath);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
@@ -64,6 +62,7 @@ public:
 	static bool CopyFile(const wstring& strSrcFile, const wstring& strSnkFile);
 
 	static void ExplorePath(const list<wstring>& lstPath);
+	static void ExplorePath(const wstring& strPath);
 
 	static bool CreateDir(const wstring& strDir);
 

@@ -22,8 +22,8 @@ void CPath::SetDir(const wstring& strDir)
 	m_bDir = true;
 	m_strName = strDir;
 
-	util::rtrim(m_strName, __Slant);
-	util::rtrim(m_strName, __BackSlant);
+	util::rtrim(m_strName, fsutil::slant);
+	util::rtrim(m_strName, fsutil::backSlant);
 }
 
 wstring CPath::GetName() const
@@ -42,7 +42,7 @@ wstring CPath::GetPath() const
 {
 	if (NULL != m_pParentDir)
 	{
-		return m_pParentDir->GetPath() + __BackSlant + m_strName;
+		return m_pParentDir->GetPath() + fsutil::backSlant + m_strName;
 	}
 
 	return m_strName;

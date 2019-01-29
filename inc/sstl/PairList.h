@@ -16,7 +16,8 @@ namespace NS_SSTL
 
 		using __PairType = __Pair__;
 		using __PairRef = __PairType&;
-
+		using __PairConstRef = const __PairType&;
+		
 		using __AdpPairType = pair<__FirstType const, __SecondType>;
 		
 		using __FirstRef = __FirstType&;
@@ -24,6 +25,18 @@ namespace NS_SSTL
 
 		using __SecondRef = __SecondType&;
 		using __SecondConstRef = const __SecondType&;
+
+		using __CB_FirstRef_void = CB_T_void<__FirstRef>;
+		using __CB_FirstRef_bool = CB_T_bool<__FirstRef>;
+
+		using __CB_FirstConstRef_void = CB_T_void<__FirstConstRef>;
+		using __CB_FirstConstRef_bool = CB_T_bool<__FirstConstRef>;
+
+		using __CB_SecondRef_void = CB_T_void<__SecondRef>;
+		using __CB_SecondRef_bool = CB_T_bool<__SecondRef>;
+
+		using __CB_SecondConstRef_void = CB_T_void<__SecondConstRef>;
+		using __CB_SecondConstRef_bool = CB_T_bool<__SecondConstRef>;
 
 	public:
 		PairListT() = default;
@@ -119,7 +132,7 @@ namespace NS_SSTL
 
 		PairListT& operator=(const __AdpPairType& pr)
 		{
-			__Super::assign((const __PairType&)pr);
+			__Super::assign((__PairConstRef)pr);
 			return *this;
 		}
 
@@ -160,6 +173,72 @@ namespace NS_SSTL
 		}
 
 	public:
+		bool getFirst(size_t pos, __CB_FirstRef_void cb)
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				cb(pr.first);
+			});
+		}
+
+		bool getFirst(size_t pos, __CB_FirstConstRef_void cb) const
+		{
+			return __Super::get(pos, [&](auto& pr) {
+				cb(pr.first);
+			});
+		}
+
+		bool getFirst(size_t pos, __FirstRef& first) const
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				first = pr.first;
+			});
+		}
+
+		bool getSecond(size_t pos, __CB_SecondRef_void cb)
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				cb(pr.second);
+			});
+		}
+
+		bool getSecond(size_t pos, __CB_SecondConstRef_void cb) const
+		{
+			return __Super::get(pos, [&](auto& pr) {
+				cb(pr.second);
+			});
+		}
+
+		bool getSecond(size_t pos, __SecondRef& first) const
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				first = pr.second;
+			});
+		}
+
+		bool setFirst(size_t pos, __FirstConstRef first)
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				pr.first = first;
+			});
+		}
+
+		bool setSecond(size_t pos, __SecondConstRef second)
+		{
+			return __Super::get(pos, [&](__PairRef pr) {
+				pr.second = second;
+			});
+		}
+
+		bool set(size_t pos, __PairConstRef pr)
+		{
+			return __Super::set(pos, pr);
+		}
+
+		bool set(size_t pos, __FirstConstRef first, __SecondConstRef second)
+		{
+			return __Super::set(pos, { first, second });
+		}
+
 		template <typename CB>
 		void forFirst(const CB& cb, int startPos = 0, int endPos = -1)
 		{
@@ -189,14 +268,7 @@ namespace NS_SSTL
 			__Super::_add({ first, second });
 			return *this;
 		}
-
-		bool set(size_t pos, __FirstConstRef first, __SecondConstRef second)
-		{
-			return __Super::get([&](__DataRef m_data) {
-				m_data = { first, second };
-			});
-		}
-
+		
 	public:
 		template <typename CB>
 		SArray<__FirstType> firsts(const CB& cb) const
@@ -364,7 +436,7 @@ namespace NS_SSTL
 		PairListT& sortFirst()
 		{
 			tagTrySort<__FirstType> trySort;
-            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return trySort(pr1.first, pr2.first);
 			});
 
@@ -373,7 +445,7 @@ namespace NS_SSTL
 
 		PairListT& sortFirst(__CB_Sort_T<__FirstType> cb)
 		{
-            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return cb(pr1.first, pr2.first);
 			});
 
@@ -383,7 +455,7 @@ namespace NS_SSTL
 		PairListT& sortSecond()
 		{
 			tagTrySort<__SecondType> trySort;
-            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return trySort(pr1.second, pr2.second);
 			});
 
@@ -392,7 +464,7 @@ namespace NS_SSTL
 
 		PairListT& sortSecond(__CB_Sort_T<__SecondType> cb)
 		{
-            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return cb(pr1.second, pr2.second);
 			});
 
@@ -400,7 +472,7 @@ namespace NS_SSTL
 		}
 
 	private:
-		virtual void _toString(stringstream& ss, const __PairType& pr) const override
+		virtual void _toString(stringstream& ss, __PairConstRef pr) const override
 		{
 			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
 		}

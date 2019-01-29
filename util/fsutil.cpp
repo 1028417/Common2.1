@@ -17,12 +17,12 @@ int fsutil::GetFileSize(const wstring& strFilePath)
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int iPos = -1;
-	auto pos = strPath.find_last_of(__Slant);
+	auto pos = strPath.find_last_of(fsutil::slant);
 	if (wstring::npos != pos)
 	{
 		iPos = pos;
 	}
-	pos = strPath.find_last_of(__BackSlant);
+	pos = strPath.find_last_of(fsutil::backSlant);
 	if (wstring::npos != pos && (int)pos > iPos)
 	{
 		iPos = pos;
@@ -61,7 +61,7 @@ void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 {
 	wstring strName = GetFileName(strPath);
 
-	auto pos = strName.find_last_of(__Dot);
+	auto pos = strName.find_last_of(dot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
@@ -97,12 +97,12 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
-	if (__BackSlant == strNewPath.back() || __Slant == strNewPath.back())
+	if (fsutil::backSlant == strNewPath.back() || fsutil::slant == strNewPath.back())
 	{
 		strNewPath.pop_back();
 	}
 
-	int nPos = (int)strNewPath.rfind(__BackSlant);
+	int nPos = (int)strNewPath.rfind(fsutil::backSlant);
 	__EnsureReturn(0 <= nPos, L"");
 
 	return strNewPath.substr(0, nPos);
@@ -116,7 +116,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 
 	__EnsureReturn(0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size), false);
 
-	__EnsureReturn(__BackSlant == *strDir.rbegin() || __BackSlant == strSubPath[size], false);
+	__EnsureReturn(fsutil::backSlant == *strDir.rbegin() || fsutil::backSlant == strSubPath[size], false);
 
 	return true;
 }
@@ -159,7 +159,7 @@ bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const 
 
 	do
 	{
-		if (__Dot == FindFileData.cFileName[0])
+		if (fsutil::dot == FindFileData.cFileName[0])
 		{
 			continue;
 		}
@@ -314,6 +314,11 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	//snkfile.Close();
 	
 	return bResult;
+}
+
+void fsutil_win::ExplorePath(const wstring& strPath)
+{
+	ExplorePath(list<wstring>({ strPath }));
 }
 
 void fsutil_win::ExplorePath(const list<wstring>& lstPath)
