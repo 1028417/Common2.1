@@ -101,19 +101,12 @@ class __CommonExt CPathList: public CObjectList
 {
 public:
 	CPathList(){}
-
-private:
-	TD_ListColumn m_lstColumns = {
-		{_T("名称"), 400}
-		, {_T("大小"), 80}
-		, {_T("修改日期"), 150}
-	};
-	
+		
 private:
 	virtual void PreSubclassWindow() override;
 
 public:
-	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns = TD_ListColumn());
+	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns=TD_ListColumn());
 
 	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});
 

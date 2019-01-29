@@ -135,6 +135,14 @@ public:
 
 	static void sync(const CB_Sync& cb);
 
+	template <typename T>
+	static void sync(const function<void(T&)>& cb, T& para)
+	{
+		sync([&]() {
+			cb(para);
+		});
+	}
+
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;

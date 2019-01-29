@@ -15,21 +15,25 @@ void CPathList::PreSubclassWindow()
 BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns)
 {
 	__EnsureReturn(__super::InitFont(crText, uFontSize), FALSE);
-	__super::InitColumn(lstColumns.empty() ? m_lstColumns : lstColumns);
+
+	if (!lstColumns.empty())
+	{
+		__super::InitColumn(lstColumns);
+	}
 
 	return true;
 }
 
 BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst, const TD_IconVec& vecIcons)
 {
-	__EnsureReturn(this->InitCtrl(crText, uFontSize, m_lstColumns), FALSE);
+	__EnsureReturn(this->InitCtrl(crText, uFontSize), FALSE);
 
 	__EnsureReturn(__super::InitImglst(szImglst, pszSmallImglst, vecIcons), FALSE);
 
 	return TRUE;
 }
 
-BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
+/*BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
 {
 	__EnsureReturn(this->InitCtrl(crText, uFontSize, m_lstColumns), FALSE);
 
@@ -44,7 +48,7 @@ BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
 	(void)Bitmap.DeleteObject();
 
 	return TRUE;
-}
+}*/
 
 bool CPathList::SetPath(CPathObject* pPath)
 {
