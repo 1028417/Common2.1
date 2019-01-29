@@ -182,14 +182,14 @@ namespace NS_SSTL
 
 		bool getFirst(size_t pos, __CB_FirstConstRef_void cb) const
 		{
-			return __Super::get(pos, [&](auto& pr) {
+			return __Super::get(pos, [&](__PairConstRef pr) {
 				cb(pr.first);
 			});
 		}
 
 		bool getFirst(size_t pos, __FirstRef& first) const
 		{
-			return __Super::get(pos, [&](__PairRef pr) {
+			return __Super::get(pos, [&](__PairConstRef pr) {
 				first = pr.first;
 			});
 		}
@@ -203,7 +203,7 @@ namespace NS_SSTL
 
 		bool getSecond(size_t pos, __CB_SecondConstRef_void cb) const
 		{
-			return __Super::get(pos, [&](auto& pr) {
+			return __Super::get(pos, [&](__PairConstRef& pr) {
 				cb(pr.second);
 			});
 		}
