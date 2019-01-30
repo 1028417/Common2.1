@@ -3,6 +3,9 @@
 
 #pragma warning(disable: 4251)
 
+#include <stdint.h>
+#include <stddef.h>
+
 #include <Windows.h>
 
 #ifdef __UtilPrj
@@ -58,6 +61,8 @@ using fn_voidvoid = function<void()>;
 
 #include <sstl/sstl.h>
 using namespace NS_SSTL;
+
+typedef unsigned short WORD;
 
 class __UtilExt util
 {
