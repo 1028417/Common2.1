@@ -158,8 +158,8 @@ namespace NS_SSTL
 
 		bool set(size_t pos, __DataConstRef& data)
 		{
-			return get([&](__DataRef m_data) {
-				m_data = data;
+			return get(pos, [&](__DataRef t_data) {
+				t_data = data;
 			});
 		}
 
@@ -397,7 +397,7 @@ namespace NS_SSTL
 		{
 			SArrayT<T, __BaseType> arr;
 
-			for (auto&data : m_data)
+			for (auto& data : m_data)
 			{
 				arr.add(cb(data));
 			}
@@ -415,7 +415,7 @@ namespace NS_SSTL
 		{
 			SMap<__DataType, size_t> mapItemSum;
 
-			for (auto&data : m_data)
+			for (auto& data : m_data)
 			{
 				mapItemSum[data]++;
 			}
