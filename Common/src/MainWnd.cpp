@@ -7,6 +7,7 @@ BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
 	ON_WM_MOVE()
 	ON_WM_GETMINMAXINFO()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
@@ -367,4 +368,25 @@ BOOL CMainWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}
+
+void CMainWnd::OnDestroy()
+{
+	for (auto& pr : m_mapDockViews)
+	{
+		if (*pr.second)
+		{
+			pr.second->DestroyWindow();
+		}
+	}
+
+	__super::OnDestroy();
+}
+
+CMainWnd::~CMainWnd()
+{
+	for (auto& pr : m_mapDockViews)
+	{
+		delete pr.second;
+	}
 }

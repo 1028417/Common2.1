@@ -3,6 +3,23 @@
 
 #include <img.h>
 
+CImg::~CImg()
+{
+	Destroy();
+}
+
+void CImg::Destroy()
+{
+	RestoreMemDC();
+
+	if (m_MemDC)
+	{
+		(void)m_MemDC.DeleteDC();
+	}
+
+	__super::Destroy();
+}
+
 BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin)
 {
 	CRect rcDst(rcTarget);
@@ -92,11 +109,6 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 	this->ReleaseDC();
 
 	return bRet;
-}
-
-CDC *CImg::GetDC()
-{
-	return CDC::FromHandle(__super::GetDC());
 }
 
 BOOL CImg::InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin)

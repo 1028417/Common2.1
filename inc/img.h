@@ -24,10 +24,7 @@ public:
 	{
 	}
 
-	~CImg()
-	{
-		RestoreMemDC();
-	}
+	~CImg();
 
 private:
 	COLORREF m_crBkgrd = 0;
@@ -49,18 +46,23 @@ private:
 	void RestoreMemDC();
 
 public:
-	BOOL Load(const wstring& strFile);
-
-	CDC *GetDC();
-
-	BOOL InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin=NULL);
+	CDC *CImg::GetDC()
+	{
+		return CDC::FromHandle(__super::GetDC());
+	}
 
 	CDC& GetMemDC()
 	{
 		return m_MemDC;
 	}
 
+	BOOL InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin=NULL);
+
+	BOOL Load(const wstring& strFile);
+
 	BOOL LoadEx(const wstring& strFile, const function<E_ImgFixMode(UINT uWidth, UINT uHeight)>& cb=NULL);
+
+	void Destroy();
 
 	BOOL StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin = NULL);
 

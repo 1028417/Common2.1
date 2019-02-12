@@ -32,14 +32,8 @@ class __CommonExt CMainWnd: public CWnd
 public:
 	CMainWnd(){}
 
-	virtual ~CMainWnd()
-	{
-		for (auto& pr : m_mapDockViews)
-		{
-			delete pr.second;
-		}
-	}
-	
+	~CMainWnd();
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -91,11 +85,14 @@ private:
 	
 	void fixWorkArea();
 
-public:
+private:
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 
-	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	void OnDestroy();
+
+protected:
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 };
