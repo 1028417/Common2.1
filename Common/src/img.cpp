@@ -6,18 +6,13 @@
 CImg::~CImg()
 {
 	Destroy();
-}
 
-void CImg::Destroy()
-{
 	RestoreMemDC();
-
+	
 	if (m_MemDC)
 	{
 		(void)m_MemDC.DeleteDC();
 	}
-
-	__super::Destroy();
 }
 
 BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin)
@@ -144,6 +139,7 @@ BOOL CImg::InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy
 BOOL CImg::Load(const wstring& strFile)
 {
 	Destroy();
+
 	HRESULT hr = __super::Load(strFile.c_str());
 	__EnsureReturn(S_OK == hr, FALSE);
 

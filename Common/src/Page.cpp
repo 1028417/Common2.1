@@ -117,21 +117,22 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 			{
 				if (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam))
 				{
-					m_bDragable = false;
+					//m_bDragable = false;
 
 					CPoint point(pMsg->lParam);
-					//if (abs(point.x - ptLButtonDown.x) > 1 || abs(point.y - ptLButtonDown.y) > 1)
-					{
-						LPVOID pDragData = NULL;
-						if (GetCtrlDragData(CWnd::FromHandle(pMsg->hwnd), point, pDragData))
+					CWnd *pwndCtrl = CWnd::FromHandle(pMsg->hwnd);
+					CMainApp::async([=]() {
+						//if (abs(point.x - ptLButtonDown.x) > 1 || abs(point.y - ptLButtonDown.y) > 1)
 						{
-							(void)::SetFocus(pMsg->hwnd);
+							LPVOID pDragData = NULL;
+							if (GetCtrlDragData(pwndCtrl, point, pDragData))
+							{
+								(void)pwndCtrl->SetFocus();
 
-							(void)CDragDropMgr::DoDrag(pDragData);
-
-							return TRUE;
+								(void)CDragDropMgr::DoDrag(pDragData);
+							}
 						}
-					}
+					});
 				}
 			}
 		
