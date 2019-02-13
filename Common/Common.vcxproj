@@ -132,6 +132,7 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Dump.cpp" />
     <ClCompile Include="src\Guard.cpp" />
     <ClCompile Include="src\img.cpp" />
     <ClCompile Include="Main.cpp" />
