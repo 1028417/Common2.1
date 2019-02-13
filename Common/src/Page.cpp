@@ -103,31 +103,34 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	{
 		switch (pMsg->message)
 		{
+		/*case WM_LBUTTONUP:
+			m_bDragable = false;
+			
+			break;
 		case WM_LBUTTONDOWN:
 			m_bDragable = true;
 			ptLButtonDown = CPoint(pMsg->lParam);
 
-			break;
-		case WM_LBUTTONUP:
-			m_bDragable = false;
-			
-			break;
-		case WM_MOUSEMOVE:
-			if (m_bDragable && (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam)))
+			break;*/
+		case WM_LBUTTONDOWN:
+			//if (m_bDragable)
 			{
-				m_bDragable = false;
-
-				CPoint point(pMsg->lParam);
-				if (abs(point.x - ptLButtonDown.x) > 1 || abs(point.y - ptLButtonDown.y) > 1)
+				if (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam))
 				{
-					LPVOID pDragData = NULL;
-					if (GetCtrlDragData(CWnd::FromHandle(pMsg->hwnd), point, pDragData))
+					m_bDragable = false;
+
+					CPoint point(pMsg->lParam);
+					//if (abs(point.x - ptLButtonDown.x) > 1 || abs(point.y - ptLButtonDown.y) > 1)
 					{
-						(void)::SetFocus(pMsg->hwnd);
+						LPVOID pDragData = NULL;
+						if (GetCtrlDragData(CWnd::FromHandle(pMsg->hwnd), point, pDragData))
+						{
+							(void)::SetFocus(pMsg->hwnd);
 
-						(void)CDragDropMgr::DoDrag(pDragData);
+							(void)CDragDropMgr::DoDrag(pDragData);
 
-						return TRUE;
+							return TRUE;
+						}
 					}
 				}
 			}
