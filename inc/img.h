@@ -61,9 +61,7 @@ public:
 	BOOL Load(const wstring& strFile);
 
 	BOOL LoadEx(const wstring& strFile, const function<E_ImgFixMode(UINT uWidth, UINT uHeight)>& cb=NULL);
-
-	void Destroy();
-
+	
 	BOOL StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin = NULL);
 
 	BOOL StretchBltEx(CDC& dcTarget, const CRect& rcTarget);
