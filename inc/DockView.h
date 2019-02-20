@@ -145,6 +145,8 @@ private:
 	PageVector m_vctPages;
 
 public:
+	void SetTabStyle(E_TabStyle eTabStyle);
+
 	void setViewStyle(const tagViewStyle& ViewStyle);
 
 	const tagViewStyle& getViewStyle() const

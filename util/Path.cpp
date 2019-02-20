@@ -48,6 +48,16 @@ wstring CPath::GetPath() const
 	return m_strName;
 }
 
+wstring CPath::GetParentDir() const
+{
+	if (NULL != m_pParentDir)
+	{
+		return m_pParentDir->GetPath();
+	}
+
+	return L"";
+}
+
 TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData)
 {
 	m_plstSubPath = new TD_PathList();

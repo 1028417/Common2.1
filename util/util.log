@@ -1,10 +1,15 @@
-﻿  正在跳过...(未检测到相关更改)
+﻿  WorkThread.cpp
   util.cpp
-  fsdlg.cpp
-  WorkThread.cpp
   SQLiteDB.cpp
+  fsutil.cpp
   ProFile.cpp
   Path.cpp
+  fsdlg.cpp
+  正在生成代码...
+  sqlite3.c
+  shell.c
+  正在生成代码...
+  LINK : 缺少程序数据库 D:\dev\c++\Common2.1\build\utild\utild.pdb；正在执行完全链接
     正在创建库 ../lib/utild.lib 和对象 ../lib/utild.exp
-  util.vcxproj -> D:\dev\Common2.1\util\../bin/utild.dll
-  util.vcxproj -> ../build\util/utild.pdb (Full PDB)
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/utild.dll
+  util.vcxproj -> ../build\utild/utild.pdb (Full PDB)

@@ -56,6 +56,8 @@ public:
 	
 	BOOL SetStatusText(UINT uPart, const CString& cstrText);
 
+	CDockView *GetView(E_DockViewType eViewType);
+
 	BOOL AddView(CPage& Page, const tagViewStyle& ViewStyle);
 
 	BOOL AddPage(CPage& Page, E_DockViewType eViewType);

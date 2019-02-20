@@ -51,8 +51,6 @@ public:
 
 	FILETIME m_modifyTime = { 0,0 };
 
-	CPath *m_pParentDir = NULL;
-
 protected:
 	wstring m_strName;
 
@@ -60,15 +58,16 @@ protected:
 	
 	bool m_bExists = false;
 
+	CPath *m_pParentDir = NULL;
+
 protected:
+	virtual TD_PathList& _findFile(const wstring& strFind = L"");
+
 	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentDir)
 	{
 		return new CPath(findData, pParentDir);
 	}
 	
-private:
-	TD_PathList& _findFile(const wstring& strFind = L"");
-
 public:
 	void SetDir(const wstring& strDir);
 
@@ -80,6 +79,8 @@ public:
 	wstring GetName() const;
 
 	wstring GetPath() const;
+
+	wstring GetParentDir() const;
 
 	bool GetSubPath(TD_PathList& lstSubPath, const wstring& strFind=L"");
 	
