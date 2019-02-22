@@ -105,8 +105,14 @@ void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
 
 void CMainApp::sync(const CB_Sync& cb)
 {
-	HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, ::GetCurrentThreadId());
+	DWORD dwThreadID = ::GetCurrentThreadId();
+	if (dwThreadID == GetMainApp()->m_nThreadID)
+	{
+		cb();
+		return;
+	}
 
+	HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
 	async([=]() {
 		cb();
 

@@ -33,23 +33,6 @@ BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst,
 	return TRUE;
 }
 
-/*BOOL CPathList::InitCtrlEx(COLORREF crText, UINT uFontSize)
-{
-	__EnsureReturn(this->InitCtrl(crText, uFontSize, m_lstColumns), FALSE);
-
-	HBITMAP hBitmap = g_ResModule.loadBitmap(IDB_PATHCTRL_NORMAL);
-	__AssertReturn(hBitmap, FALSE);
-
-	CBitmap Bitmap;
-	Bitmap.Attach(hBitmap);
-
-	__EnsureReturn(__super::InitImglst(Bitmap, &Bitmap), FALSE);
-
-	(void)Bitmap.DeleteObject();
-
-	return TRUE;
-}*/
-
 bool CPathList::SetPath(CPathObject* pPath)
 {
 	TD_PathList lstSubPaths;
