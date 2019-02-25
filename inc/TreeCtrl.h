@@ -128,8 +128,16 @@ public:
 public:
 	BOOL InitCtrl();
 
+	void setCheckChangedCB(const function<void(E_CheckState)>& cbCheckChanged)
+	{
+		m_cbCheckChanged = cbCheckChanged;
+	}
+
 protected:
 	CImageList m_StateImageList;
+
+private:
+	function<void(E_CheckState)> m_cbCheckChanged;
 
 public:
 	HTREEITEM InsertObject(CTreeObject& Object, CTreeObject *pParentObject=NULL);

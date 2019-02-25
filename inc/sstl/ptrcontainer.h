@@ -262,7 +262,7 @@ namespace NS_SSTL
 		{
 			if (NULL == ptr)
 			{
-				return false;
+				return -1;
 			}
 
 			auto itr = __Super::begin();
