@@ -237,8 +237,22 @@ BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 	if (hItem)
 	{
-		UINT uState = this->GetItemCheckState(hItem);
-		this->SetItemCheckState(hItem, uState!=CS_Checked? CS_Checked:CS_Unchecked);
+		E_CheckState eCheckState = (E_CheckState)this->GetItemCheckState(hItem);
+		if (eCheckState != CS_Checked)
+		{
+			eCheckState = CS_Checked;
+		}
+		else
+		{
+			eCheckState = CS_Unchecked;
+		}
+
+		this->SetItemCheckState(hItem, eCheckState);
+
+		if (m_cbCheckChanged)
+		{
+			m_cbCheckChanged(eCheckState);
+		}
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
