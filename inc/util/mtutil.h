@@ -67,7 +67,9 @@ namespace NS_mtutil
 		vector<R> m_vecResult;
 
 	public:
-		vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&, R&)>& cb=NULL)
+		using CB_SubTask = function<bool(UINT uTaskIdx, T&, R&)>;
+
+		vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, const CB_SubTask& cb=NULL)
 		{
 			startMultiTask(alTask, uThreadCount, m_vecResult, cb);
 
