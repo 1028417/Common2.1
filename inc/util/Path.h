@@ -61,13 +61,16 @@ protected:
 	CPath *m_pParentDir = NULL;
 
 protected:
-	virtual TD_PathList& _findFile(const wstring& strFind = L"");
+	virtual TD_PathList& _findFile();
 
 	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentDir)
 	{
 		return new CPath(findData, pParentDir);
 	}
 	
+private:
+	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
+
 public:
 	void SetDir(const wstring& strDir);
 
@@ -82,12 +85,31 @@ public:
 
 	wstring GetParentDir() const;
 
-	bool GetSubPath(TD_PathList& lstSubPath, const wstring& strFind=L"");
+	void GetSubPath(TD_PathList& lstSubPath)
+	{
+		lstSubPath.add(_findFile());
+	}
 	
-	bool GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile=NULL, const wstring& strFind = L"");
-	
+	void GetSubPath(TD_PathList& lstSubDir, TD_PathList& lstSubFile)
+	{
+		_GetSubPath(&lstSubDir, &lstSubFile);
+	}
+
+	void GetSubDir(TD_PathList& lstSubDir)
+	{
+		_GetSubPath(&lstSubDir);
+	}
+
+	void GetSubFile(TD_PathList& lstSubFile)
+	{
+		_GetSubPath(NULL, &lstSubFile);
+	}
+
 	CPath *FindSubPath(wstring strSubPath, bool bDir);
-	
+
+	bool enumSubDir(const function<bool(CPath& subDir)>& cb);
+	bool enumSubFile(const function<bool(CPath& dir, const TD_PathList& lstSubFile)>& cb);
+
 	virtual void Clear();
 
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
