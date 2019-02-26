@@ -191,6 +191,7 @@ CDockView::CDockView(CWnd& wndParent, const tagViewStyle& ViewStyle)
 
 BEGIN_MESSAGE_MAP(CDockView, CPropertySheet)
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 void CDockView::setViewStyle(const tagViewStyle& ViewStyle)
@@ -224,6 +225,13 @@ BOOL CDockView::Create()
 	__AssertReturn(m_wndTabCtrl.init(m_ViewStyle.TabStyle), FALSE);
 
 	return TRUE;
+}
+
+void CDockView::OnDestroy()
+{
+	(void)m_wndTabCtrl.UnsubclassWindow();
+
+	__super::OnDestroy();
 }
 
 BOOL CDockView::AddPage(CPage& Page)

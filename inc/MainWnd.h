@@ -75,8 +75,6 @@ public:
 	void show();
 
 private:
-	BOOL _AddView(CDockView& View, CPage& Page);
-
 	void resizeView(bool bManual=false);
 
 	virtual void onViewResize(CDockView& view) {}

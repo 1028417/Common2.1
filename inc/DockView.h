@@ -169,6 +169,8 @@ public:
 
 private:
 	BOOL Create();
+	
+	void OnDestroy();
 
 	afx_msg void OnSize(UINT nType, int, int);
 
