@@ -108,7 +108,7 @@ public:
 	CPath *FindSubPath(wstring strSubPath, bool bDir);
 
 	bool enumSubDir(const function<bool(CPath& subDir)>& cb);
-	bool enumSubFile(const function<bool(CPath& dir, const TD_PathList& lstSubFile)>& cb);
+	bool enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb);
 
 	virtual void Clear();
 

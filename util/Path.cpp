@@ -259,20 +259,19 @@ bool CPath::enumSubDir(const function<bool(CPath& subDir)>& cb)
 	return true;
 }
 
-bool CPath::enumSubFile(const function<bool(CPath& dir, const TD_PathList& lstSubFile)>& cb)
+bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)
 {
-	return enumSubDir([&](CPath& subDir) {
-		TD_PathList lstSubFile;
-		subDir.GetSubFile(lstSubFile);
-
-		if (!lstSubFile.empty())
+	TD_PathList lstSubFile;
+	GetSubFile(lstSubFile);
+	if (lstSubFile)
+	{
+		if (!cb(*this, lstSubFile))
 		{
-			if (!cb(subDir, lstSubFile))
-			{
-				return false;
-			}
+			return false;
 		}
+	}
 
-		return true;
+	return enumSubDir([&](CPath& subDir) {
+		return subDir.enumSubFile(cb);
 	});
 }
