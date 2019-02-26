@@ -112,7 +112,7 @@ public:
 
 	BOOL InitCtrlEx(COLORREF crText, UINT uFontSize = 0);
 
-	bool SetPath(CPathObject* pPath);
+	void SetPath(CPathObject& dir);
 
 	BOOL IsFileItem(int nItem);
 	
