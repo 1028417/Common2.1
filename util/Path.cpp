@@ -73,7 +73,7 @@ TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData)
 	return *m_plstSubPath;
 }
 
-TD_PathList& CPath::_findFile(const wstring& strFind)
+TD_PathList& CPath::_findFile()
 {
 	if (NULL != m_plstSubPath)
 	{
@@ -82,8 +82,7 @@ TD_PathList& CPath::_findFile(const wstring& strFind)
 
 	m_plstSubPath = new TD_PathList();
 
-	m_bExists = fsutil_win::FindFile(this->GetPath() + L"\\" + (strFind.empty() ? L"*" : strFind)
-		, [&](const tagFindData& findData) {
+	m_bExists = fsutil_win::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
 		CPath *pSubPath = NewSubPath(findData, this);
 		if (pSubPath)
 		{
@@ -109,20 +108,9 @@ TD_PathList& CPath::_findFile(const wstring& strFind)
 	return *m_plstSubPath;
 }
 
-bool CPath::GetSubPath(TD_PathList& lstSubPath, const wstring& strFind)
+void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 {
-	__EnsureReturn(m_bDir, false);
-	
-	lstSubPath.add(_findFile(strFind));
-
-	return m_bExists;
-}
-
-bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const wstring& strFind)
-{
-	__EnsureReturn(m_bDir, false);
-
-	TD_PathList& lstSubPath = _findFile(strFind);
+	TD_PathList& lstSubPath = _findFile();
 
 	lstSubPath([&](CPath& SubPath) {
 		if (SubPath.m_bDir)
@@ -140,8 +128,6 @@ bool CPath::GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile, const 
 			}
 		}
 	});
-	
-	return m_bExists;;
 }
 
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
@@ -249,5 +235,44 @@ bool CPath::HasFile() const
 	__EnsureReturn(m_plstSubPath, FALSE);
 	return m_plstSubPath->any([](CPath& SubPath) {
 		return !SubPath.m_bDir;
+	});
+}
+
+bool CPath::enumSubDir(const function<bool(CPath& subDir)>& cb)
+{
+	TD_PathList lstSubDir;
+	GetSubDir(lstSubDir);
+
+	for (auto pSubDir : lstSubDir)
+	{
+		if (!cb(*pSubDir))
+		{
+			return false;
+		}
+
+		if (!pSubDir->enumSubDir(cb))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool CPath::enumSubFile(const function<bool(CPath& dir, const TD_PathList& lstSubFile)>& cb)
+{
+	return enumSubDir([&](CPath& subDir) {
+		TD_PathList lstSubFile;
+		subDir.GetSubFile(lstSubFile);
+
+		if (!lstSubFile.empty())
+		{
+			if (!cb(subDir, lstSubFile))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	});
 }
