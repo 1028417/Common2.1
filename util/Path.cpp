@@ -271,7 +271,10 @@ bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)
 		}
 	}
 
-	return enumSubDir([&](CPath& subDir) {
-		return subDir.enumSubFile(cb);
-	});
+	TD_PathList lstSubDir;
+	GetSubDir(lstSubDir);
+	for (auto pSubDir : lstSubDir)
+	{
+		pSubDir->enumSubFile(cb);
+	}
 }
