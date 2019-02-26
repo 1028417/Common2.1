@@ -36,12 +36,14 @@ BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst,
 bool CPathList::SetPath(CPathObject* pPath)
 {
 	TD_PathList lstSubPaths;
-	if (NULL == pPath || !pPath->GetSubPath(lstSubPaths))
+	if (NULL == pPath)
 	{
 		DeleteAllItems();
 		return false;
 	}
-		
+	
+	pPath->GetSubPath(lstSubPaths);
+
 	TD_ListObjectList lstObjects(lstSubPaths);
 
 	CRedrawLockGuard RedrawLockGuard(*this);
