@@ -126,13 +126,12 @@ public:
 
 	static E_DoEventsResult DoEvents(bool bOnce=false);
 
-	static bool peekMsg(UINT uMsg, MSG msg, bool bPeekAll);
+	static bool removeMsg(UINT uMsg);
 
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
 	static void killTimer(UINT_PTR idEvent);
 
-	static void async(const CB_Async& cb);
-	static void async(const CB_Async& cb, UINT uDelayTime);
+	static void async(const CB_Async& cb, UINT uDelayTime=0);
 
 	static void sync(const CB_Sync& cb);
 

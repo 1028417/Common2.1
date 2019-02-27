@@ -143,6 +143,8 @@ public:
 	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
 	using CB_ListViewChanged = function<void(E_ListViewType)>;
 
+	using CB_LButtonHover = function<void(const CPoint&)>;
+
 	struct tagListPara
 	{
 		COLORREF crText = 0;
@@ -166,6 +168,9 @@ public:
 		CB_LVCostomDraw cbCustomDraw;
 		CB_ListViewChanged cbViewChanged;
 		CB_TrackMouseEvent cbMouseEvent;
+
+		UINT uLButtonHoverTime = 0;
+		CB_LButtonHover cbLButtonHover;
 	};
 
 	CObjectList(){}
@@ -234,6 +239,8 @@ public:
 
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent=NULL);
 
+	void SetLButtonHover(UINT uLButtonHoverTime, const CB_LButtonHover& cbLButtonHover);
+
 private:
 	template <bool _clear_other>
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
@@ -299,6 +306,8 @@ protected:
 	virtual void GenListItem(CListObject& Object, vector<wstring>& vecText, int& iImage);
 
 	virtual void PreSubclassWindow() override;
+
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 
