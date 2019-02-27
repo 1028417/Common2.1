@@ -245,12 +245,6 @@ void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 	m_iTrackMouseFlag = 0;
 }
 
-void CObjectList::SetLButtonHover(UINT uLButtonHoverTime, const CB_LButtonHover& cbLButtonHover)
-{
-	m_para.uLButtonHoverTime = uLButtonHoverTime;
-	m_para.cbLButtonHover = cbLButtonHover;
-}
-
 template <bool _clear_other>
 void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
 {
@@ -894,7 +888,7 @@ void CObjectList::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint&
 	}
 }
 
-BOOL CObjectList::PreTranslateMessage(MSG* pMsg)
+/*BOOL CObjectList::PreTranslateMessage(MSG* pMsg)
 {
 	static UINT_PTR s_LButtonHoverTimerID = 0;
 	if (WM_LBUTTONDOWN == pMsg->message)
@@ -941,7 +935,7 @@ BOOL CObjectList::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	return __super::PreTranslateMessage(pMsg);
-}
+}*/
 
 BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
