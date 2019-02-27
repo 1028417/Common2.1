@@ -86,7 +86,7 @@ void CMainApp::async(const CB_Async& cb)
 	_async(cb);
 }
 
-void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
+void CMainApp::async(UINT uDelayTime, const CB_Async& cb)
 {
 	if (0 == uDelayTime)
 	{
@@ -213,38 +213,36 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-	if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
+	switch (pMsg->message)
 	{
-		switch (pMsg->message)
+	case WM_COMMAND:
+		if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
 		{
-		case WM_COMMAND:
-			{				
-				UINT uCode = HIWORD(pMsg->wParam);
-				UINT uID = LOWORD(pMsg->wParam);
+			UINT uCode = HIWORD(pMsg->wParam);
+			UINT uID = LOWORD(pMsg->wParam);
 
-				HWND hWndCtrl = (HWND)pMsg->lParam;
+			HWND hWndCtrl = (HWND)pMsg->lParam;
 
-				if (CN_COMMAND == uCode && !hWndCtrl)
+			if (CN_COMMAND == uCode && !hWndCtrl)
+			{
+				if (OnCommand(uID))
 				{
-					if (OnCommand(uID))
-					{
-						return TRUE;
-					}
+					return TRUE;
 				}
 			}
-
-			break;
-		case WM_HOTKEY:
-			(void)_HandleHotkey(pMsg->lParam);
-			
-			return TRUE;
-		default:
-			;
 		}
-	}
-	
-	if (WM_SYSKEYDOWN == pMsg->message)
-	{
+
+		break;
+	case WM_HOTKEY:
+		if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
+		{
+			(void)_HandleHotkey(pMsg->lParam);
+
+			return TRUE;
+		}
+
+		break;
+	case WM_SYSKEYDOWN:
 		for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
 			; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
 		{
@@ -265,9 +263,9 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 				}
 			}
 		}
-	}
-
-	if (WM_KEYDOWN == pMsg->message)
+	
+		break;
+	case WM_KEYDOWN:
 	{
 		UINT uKey = pMsg->wParam;
 		if (VK_CONTROL != uKey && VK_SHIFT != uKey && VK_MENU != uKey)
@@ -292,7 +290,10 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 			{
 				return TRUE;
 			}
-		}		
+		}
+	}
+
+	break;
 	}
 
 	return __super::PreTranslateMessage(pMsg);

@@ -36,12 +36,6 @@ BOOL CPage::Active()
 		auto pParent = GetParentSheet();
 		__EnsureReturn(pParent, FALSE);
 		pParent->SetActivePage(this);
-
-		//CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
-		//if (NULL != pDockView)
-		//{
-		//	pDockView->SetActivePage(*this);
-		//}
 	}
 
 	(void)this->SetFocus();
@@ -101,10 +95,6 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 {
 	switch (pMsg->message)
 	{
-	case WM_LBUTTONUP:
-		m_bDragable = false;
-		break;
-	
 	case WM_LBUTTONDOWN:
 		if (pMsg->hwnd != m_hWnd && m_setDragableCtrls.find(pMsg->hwnd) != m_setDragableCtrls.end())
 		{
@@ -116,8 +106,6 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	case WM_MOUSEMOVE:
 		if (m_bDragable)
 		{
-			m_bDragable = false;
-
 			if (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam))
 			{
 				CPoint point(pMsg->lParam);
@@ -134,6 +122,8 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 				}
 			}
 		}
+
+		m_bDragable = false;
 
 		break;
 	}

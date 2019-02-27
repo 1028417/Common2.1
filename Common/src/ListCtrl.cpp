@@ -890,6 +890,18 @@ void CObjectList::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint&
 
 BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
+	//static CAppTimer m_Timer;
+	//if (WM_LBUTTONDOWN == message)
+	//{
+	//	m_Timer.set(1000, []() {
+	//		return false;
+	//	});
+	//}
+	//else if (WM_MOUSEMOVE == message)
+	//{
+	//	m_Timer.kill();
+	//}
+
 	if (WM_MOUSEWHEEL == message)
 	{
 		if (m_bAutoChange)
