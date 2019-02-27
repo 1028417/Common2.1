@@ -81,26 +81,21 @@ static VOID WINAPI APCFunc(ULONG_PTR dwParam)
 {
 }
 
-void CMainApp::async(const CB_Async& cb)
+void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
 {
-	_async(cb);
-}
-
-void CMainApp::async(UINT uDelayTime, const CB_Async& cb)
-{
-	if (0 == uDelayTime)
-	{
-		_async(cb);
-	}
-	else
-	{
-		_async([=]() {
+	_async([=]() {
+		if (0 == uDelayTime)
+		{
+			_async(cb);
+		}
+		else
+		{
 			(void)setTimer(uDelayTime, [=]() {
 				cb();
 				return false;
 			});
-		});
-	}
+		}
+	});
 }
 
 void CMainApp::sync(const CB_Sync& cb)
@@ -404,13 +399,14 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 	return iRet ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
-bool CMainApp::peekMsg(UINT uMsg, MSG msg, bool bPeekAll)
+bool CMainApp::removeMsg(UINT uMsg)
 {
 	bool bRet = false;
+	MSG msg;
 	do
 	{
 		bRet = ::PeekMessage(&msg, NULL, uMsg, uMsg, PM_REMOVE);
-	} while (bPeekAll && bRet);
+	} while (bRet);
 
 	return bRet;
 }

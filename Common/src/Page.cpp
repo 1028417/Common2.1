@@ -106,6 +106,8 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	case WM_MOUSEMOVE:
 		if (m_bDragable)
 		{
+			m_bDragable = false;
+
 			if (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam))
 			{
 				CPoint point(pMsg->lParam);
@@ -117,14 +119,16 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 					{
 						(void)pwndCtrl->SetFocus();
 
+						BOOL bRet = CPropertyPage::PreTranslateMessage(pMsg);
+						
 						(void)CDragDropMgr::DoDrag(pDragData);
+				
+						return bRet;
 					}
 				}
 			}
 		}
-
-		m_bDragable = false;
-
+		
 		break;
 	}
 	

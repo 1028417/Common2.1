@@ -73,9 +73,7 @@ void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProg
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
-	MSG msg;
-	memset(&msg, 0, sizeof msg);
-	(void)CMainApp::peekMsg(WM_SetStatusText, msg, true);
+	(void)CMainApp::removeMsg(WM_SetStatusText);
 
 	CString cstrStatusText;
 	if (m_csLock.try_lock())
@@ -110,9 +108,7 @@ void CProgressDlg::ForwardProgress(UINT uOffSet)
 
 LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 {
-	MSG msg;
-	memset(&msg, 0, sizeof msg);
-	(void)CMainApp::peekMsg(WM_SetProgress, msg, true);
+	(void)CMainApp::removeMsg(WM_SetProgress);
 	
 	_updateProgress();
 	

@@ -245,6 +245,12 @@ void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 	m_iTrackMouseFlag = 0;
 }
 
+void CObjectList::SetLButtonHover(UINT uLButtonHoverTime, const CB_LButtonHover& cbLButtonHover)
+{
+	m_para.uLButtonHoverTime = uLButtonHoverTime;
+	m_para.cbLButtonHover = cbLButtonHover;
+}
+
 template <bool _clear_other>
 void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
 {
@@ -888,20 +894,57 @@ void CObjectList::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint&
 	}
 }
 
+BOOL CObjectList::PreTranslateMessage(MSG* pMsg)
+{
+	static UINT_PTR s_LButtonHoverTimerID = 0;
+	if (WM_LBUTTONDOWN == pMsg->message)
+	{
+		if (m_para.cbLButtonHover)
+		{
+			static CPoint s_ptLButtonHover;
+			GetCursorPos(&s_ptLButtonHover);
+			
+			CPoint ptPos(pMsg->lParam);
+			s_LButtonHoverTimerID = CMainApp::setTimer(m_para.uLButtonHoverTime, [&, ptPos]() {
+				s_LButtonHoverTimerID = 0;
+
+				CPoint ptLButtonHover;
+				GetCursorPos(&ptLButtonHover);
+				if (ptLButtonHover == s_ptLButtonHover)
+				{
+					(void)ReleaseCapture();
+
+					int iItem = HitTest(ptPos);
+					if (iItem >= 0 && this->GetItemState(iItem, LVIS_SELECTED))
+					{
+						m_para.cbLButtonHover(ptPos);
+					}
+					else
+					{
+						CMainApp::async([&, ptPos]() {
+							m_para.cbLButtonHover(ptPos);
+						});
+					}
+				}
+
+				return false;
+			});
+		}
+	}
+	else if (WM_MOUSEMOVE == pMsg->message)
+	{
+		if (0 != s_LButtonHoverTimerID)
+		{
+			CMainApp::killTimer(s_LButtonHoverTimerID);
+			s_LButtonHoverTimerID = 0;
+		}
+	}
+	
+	return __super::PreTranslateMessage(pMsg);
+}
+
 BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	//static CAppTimer m_Timer;
-	//if (WM_LBUTTONDOWN == message)
-	//{
-	//	m_Timer.set(1000, []() {
-	//		return false;
-	//	});
-	//}
-	//else if (WM_MOUSEMOVE == message)
-	//{
-	//	m_Timer.kill();
-	//}
-
 	if (WM_MOUSEWHEEL == message)
 	{
 		if (m_bAutoChange)
