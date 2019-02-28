@@ -104,32 +104,29 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 		
 		break;
 	case WM_MOUSEMOVE:
-		if (m_bDragable)
-		{
-			m_bDragable = false;
+	{
+		__EnsureBreak(m_bDragable);
 
-			if (MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam))
-			{
-				CPoint point(pMsg->lParam);
-				CWnd *pwndCtrl = CWnd::FromHandle(pMsg->hwnd);
-				if (abs(point.x - g_ptLButtonDown.x) > 1 || abs(point.y - g_ptLButtonDown.y) > 1)
-				{
-					LPVOID pDragData = NULL;
-					if (GetCtrlDragData(pwndCtrl, point, pDragData))
-					{
-						(void)pwndCtrl->SetFocus();
+		m_bDragable = false;
 
-						BOOL bRet = CPropertyPage::PreTranslateMessage(pMsg);
-						
-						(void)CDragDropMgr::DoDrag(pDragData);
-				
-						return bRet;
-					}
-				}
-			}
-		}
-		
-		break;
+		__EnsureBreak(MK_LBUTTON & GET_FLAGS_LPARAM(pMsg->wParam));
+
+		CPoint point(pMsg->lParam);
+		__EnsureBreak(abs(point.x - g_ptLButtonDown.x) > 1 || abs(point.y - g_ptLButtonDown.y) > 1);
+
+		LPVOID pDragData = NULL;
+		__EnsureBreak(GetCtrlDragData(pMsg->hwnd, point, pDragData));
+
+		(void)::SetFocus(pMsg->hwnd);
+
+		BOOL bRet = CPropertyPage::PreTranslateMessage(pMsg);
+
+		(void)CDragDropMgr::DoDrag(pDragData);
+
+		return bRet;
+	}
+	
+	break;
 	}
 	
 	return CPropertyPage::PreTranslateMessage(pMsg);
