@@ -3,16 +3,89 @@
 
 #include <img.h>
 
+void CCompDC::getBitmap(const function<void(CBitmap&)>& cb)
+{
+	if (m_CompBitmap.m_hObject)
+	{
+		if (NULL != m_hbmpPrev)
+		{
+			(void)m_CompDC.SelectObject(m_hbmpPrev);
+			m_hbmpPrev = NULL;
+		}
+
+		cb(m_CompBitmap);
+
+		m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(m_CompBitmap);
+	}
+}
+
+bool CCompDC::create(CDC *pDC, UINT cx, UINT cy)
+{
+	__AssertReturn(m_CompDC.CreateCompatibleDC(pDC), false);
+
+	__AssertReturn(m_CompBitmap.CreateCompatibleBitmap(pDC, cx, cy), FALSE);
+
+	m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(m_CompBitmap);
+
+	m_cx = cx;
+	m_cy = cy;
+
+	return true;
+}
+
+bool CCompDC::create(CDC *pDC, HBITMAP hBitmap)
+{
+	__AssertReturn(m_CompDC.CreateCompatibleDC(pDC), false);
+
+	m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(hBitmap);
+
+	BITMAP bitmap;
+	GetObject(hBitmap, sizeof(BITMAP), &bitmap);
+
+	m_cx = bitmap.bmWidth;
+	m_cy = bitmap.bmHeight;
+
+	return true;
+}
+
+bool CCompDC::create(CDC *pDC, HICON hIcon)
+{
+	ICONINFO iconInfo;
+	GetIconInfo(hIcon, &iconInfo);
+
+	if (!create(pDC, iconInfo.hbmColor))
+	{
+		return false;
+	}
+
+	//::DeleteObject(iconInfo.hbmColor);
+	::DeleteObject(iconInfo.hbmMask);
+
+	return true;
+}
+
+void CCompDC::destroy()
+{
+	if (m_CompDC)
+	{
+		if (NULL != m_hbmpPrev)
+		{
+			(void)m_CompDC.SelectObject(m_hbmpPrev);
+			m_hbmpPrev = NULL;
+		}
+
+		(void)m_CompDC.DeleteDC();
+	}
+
+	if (m_CompBitmap.m_hObject)
+	{
+		m_CompBitmap.DeleteObject();
+	}
+}
+
 CImg::~CImg()
 {
 	Destroy();
-
-	RestoreMemDC();
-	
-	if (m_MemDC)
-	{
-		(void)m_MemDC.DeleteDC();
-	}
 }
 
 BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin)
@@ -106,7 +179,7 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 	return bRet;
 }
 
-BOOL CImg::InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin)
+BOOL CImg::InitCompDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin)
 {
 	m_eFixMode = eFixMode;
 
@@ -119,13 +192,11 @@ BOOL CImg::InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy
 	CDC *pDC = CDC::FromHandle(::GetDC(NULL));
 	__AssertReturn(pDC, FALSE);
 
-	__AssertReturn(m_MemDC.CreateCompatibleDC(pDC), FALSE);
-
-	__AssertReturn(m_MemBitmap.CreateCompatibleBitmap(pDC, m_rcDst.Width(), m_rcDst.Height()), FALSE);
+	__AssertReturn(m_CompDC.create(pDC, cx, cy), FALSE);
 
 	if (NULL != prcMargin)
 	{
-		m_MemDC.FillSolidRect(m_rcDst, __Color_White);
+		m_CompDC->FillSolidRect(m_rcDst, __Color_White);
 
 		m_rcDst.left = prcMargin->left;
 		m_rcDst.top = prcMargin->top;
@@ -143,11 +214,6 @@ BOOL CImg::Load(const wstring& strFile)
 	HRESULT hr = __super::Load(strFile.c_str());
 	__EnsureReturn(S_OK == hr, FALSE);
 
-	if (NULL == m_pbmpPrev && m_MemBitmap.m_hObject)
-	{
-		m_pbmpPrev = (CBitmap*)m_MemDC.SelectObject(&m_MemBitmap);
-	}
-
 	return TRUE;
 }
 
@@ -161,7 +227,7 @@ BOOL CImg::LoadEx(const wstring& strFile, const function<E_ImgFixMode(UINT uWidt
 		eFixMode = cb((UINT)CImage::GetWidth(), (UINT)CImage::GetHeight());
 	}
 
-	__EnsureReturn(StretchBltFix(eFixMode, m_MemDC, m_rcDst, m_bHalfToneMode), FALSE);
+	__EnsureReturn(StretchBltFix(eFixMode, m_CompDC.getDC(), m_rcDst, m_bHalfToneMode), FALSE);
 
 	return TRUE;
 }
@@ -169,27 +235,12 @@ BOOL CImg::LoadEx(const wstring& strFile, const function<E_ImgFixMode(UINT uWidt
 BOOL CImg::StretchBltEx(CDC& dcTarget, const CRect& rcTarget)
 {
 	return dcTarget.StretchBlt(rcTarget.left, rcTarget.top, rcTarget.Width(), rcTarget.Height()
-		, &m_MemDC, 0, 0, m_cx, m_cy, SRCCOPY);
+		, &m_CompDC.getDC(), 0, 0, m_cx, m_cy, SRCCOPY);
 }
 
 BOOL CImg::StretchBltEx(CImg& imgTarget)
 {
-	return StretchBltEx(imgTarget.m_MemDC, CRect(0, 0, m_cx, m_cy));
-}
-
-void CImg::RestoreMemDC()
-{
-	if (NULL != m_pbmpPrev)
-	{
-		(void)m_MemDC.SelectObject(m_pbmpPrev);
-		m_pbmpPrev = NULL;
-	}
-}
-
-CBitmap& CImg::FetchMemBitmap()
-{
-	RestoreMemDC();
-	return m_MemBitmap;
+	return StretchBltEx(imgTarget.m_CompDC.getDC(), CRect(0, 0, m_cx, m_cy));
 }
 
 BOOL CImglst::Init(UINT cx, UINT cy)
@@ -202,9 +253,7 @@ BOOL CImglst::Init(UINT cx, UINT cy)
 	CDC *pDC = CDC::FromHandle(::GetDC(NULL));
 	__AssertReturn(pDC, FALSE);
 
-	__AssertReturn(m_MemDC.CreateCompatibleDC(pDC), FALSE);
-
-	__AssertReturn(m_MemBitmap.CreateCompatibleBitmap(pDC, cx, cy), FALSE);
+	__AssertReturn(m_CompDC.create(pDC, cx, cy), FALSE);
 	
 	return TRUE;
 }
@@ -244,13 +293,11 @@ BOOL CImglst::SetFile(const wstring& strFile, bool bHalfToneMode, LPCRECT prcMar
 
 void CImglst::SetImg(CImg& img, bool bHalfToneMode, LPCRECT prcMargin, int iPosReplace)
 {
-	CBitmap *pbmpPrev = (CBitmap*)m_MemDC.SelectObject(&m_MemBitmap);
+	img.StretchBltFix(E_ImgFixMode::IFM_Inner, m_CompDC.getDC(), CRect(0, 0, m_cx, m_cy), bHalfToneMode, prcMargin);
 
-	img.StretchBltFix(E_ImgFixMode::IFM_Inner, m_MemDC, CRect(0, 0, m_cx, m_cy), bHalfToneMode, prcMargin);
-
-	(void)m_MemDC.SelectObject(pbmpPrev);
-
-	SetBitmap(m_MemBitmap, iPosReplace);
+	m_CompDC.getBitmap([&](CBitmap& bitmap) {
+		SetBitmap(bitmap, iPosReplace);
+	});
 }
 
 void CImglst::SetBitmap(CBitmap& bitmap, int iPosReplace)
@@ -288,4 +335,26 @@ void CImglst::SetToListCtrl(CListCtrl &wndListCtrl, E_ImglstType eImglstType)
 	{
 		(void)wndListCtrl.SetImageList(this, (int)eImglstType);
 	}
+}
+
+HBITMAP CImglst::GetBitmap(UINT uPos, const function<void(CDC&)>& cb)
+{
+	IMAGEINFO ImageInfo;
+	memset(&ImageInfo, 0, sizeof(ImageInfo));
+
+	if (!GetImageInfo(uPos, &ImageInfo))
+	{
+		return NULL;
+	}
+
+	if (cb)
+	{
+		auto prev = m_CompDC->SelectObject(ImageInfo.hbmImage);
+
+		cb(m_CompDC.getDC());
+
+		(void)m_CompDC->SelectObject(prev);
+	}
+
+	return ImageInfo.hbmImage;
 }
