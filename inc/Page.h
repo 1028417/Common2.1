@@ -56,16 +56,16 @@ protected:
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
-	virtual BOOL GetCtrlDragData(CWnd *pwndCtrl, const CPoint& point, LPVOID& pDragData)
+	virtual BOOL GetCtrlDragData(HWND hwndCtrl, const CPoint& point, LPVOID& pDragData)
 	{
 		return FALSE;
 	}
 	
 	BOOL RegDragableCtrl(CWnd& wndCtrl)
 	{
-		__AssertReturn(wndCtrl.GetSafeHwnd(), FALSE);
+		__AssertReturn(wndCtrl.m_hWnd, FALSE);
 
-		m_setDragableCtrls.insert(wndCtrl.GetSafeHwnd());
+		m_setDragableCtrls.insert(wndCtrl.m_hWnd);
 		
 		return TRUE;
 	}
