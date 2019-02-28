@@ -3,6 +3,49 @@
 
 #include <atlimage.h>
 
+class __CommonExt CCompDC
+{
+public:
+	CCompDC()
+	{
+	}
+
+	~CCompDC()
+	{
+		destroy();
+	}
+
+	UINT m_cx = 0;
+	UINT m_cy = 0;
+
+private:
+	CDC m_CompDC;
+	CBitmap m_CompBitmap;
+
+	HBITMAP m_hbmpPrev = NULL;
+
+public:
+	CDC* operator ->()
+	{
+		return &m_CompDC;
+	}
+
+	CDC& getDC()
+	{
+		return m_CompDC;
+	}
+
+	void getBitmap(const function<void(CBitmap&)>& cb);
+
+	bool create(CDC *pDC, UINT cx, UINT cy);
+
+	bool create(CDC *pDC, HBITMAP hBitmap);
+
+	bool create(CDC *pDC, HICON hIcon);
+
+	void destroy();
+};
+
 #define __Color_White RGB(255, 255, 255)
 #define __Color_Black ((COLORREF)0)
 
@@ -37,26 +80,20 @@ private:
 	UINT m_cy = 0;
 	CRect m_rcDst;
 
-	CDC m_MemDC;
-	CBitmap m_MemBitmap;
-	
-	CBitmap *m_pbmpPrev = NULL;
-
-private:
-	void RestoreMemDC();
+	CCompDC m_CompDC;
 
 public:
-	CDC *CImg::GetDC()
+	CDC *GetDC()
 	{
 		return CDC::FromHandle(__super::GetDC());
 	}
 
-	CDC& GetMemDC()
+	CDC& GetCompDC()
 	{
-		return m_MemDC;
+		return m_CompDC.getDC();
 	}
 
-	BOOL InitMemDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin=NULL);
+	BOOL InitCompDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin=NULL);
 
 	BOOL Load(const wstring& strFile);
 
@@ -67,8 +104,6 @@ public:
 	BOOL StretchBltEx(CDC& dcTarget, const CRect& rcTarget);
 
 	BOOL StretchBltEx(CImg& imgTarget);
-
-	CBitmap& FetchMemBitmap();
 };
 
 enum class E_ImglstType
@@ -89,8 +124,7 @@ private:
 	UINT m_cx = 0;
 	UINT m_cy = 0;
 
-	CDC m_MemDC;
-	CBitmap m_MemBitmap;
+	CCompDC m_CompDC;
 
 public:
 	BOOL Init(UINT cx, UINT cy);
@@ -113,4 +147,6 @@ public:
 	{
 		(void)wndTreeCtrl.SetImageList(this, TVSIL_NORMAL);
 	}
+
+	HBITMAP GetBitmap(UINT uPos, const function<void(CDC&)>& cb=NULL);
 };
