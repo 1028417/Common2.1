@@ -58,7 +58,7 @@ bool CCompDC::create(CDC *pDC, HICON hIcon)
 		return false;
 	}
 
-	//::DeleteObject(iconInfo.hbmColor);
+	::DeleteObject(iconInfo.hbmColor);
 	::DeleteObject(iconInfo.hbmMask);
 
 	return true;
