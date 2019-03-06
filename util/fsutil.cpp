@@ -3,6 +3,111 @@
 
 #include <fsutil.h>
 
+bool fsutil::saveFile(const string& strFile, bool bTrunc, const function<bool(string&)>& cb)
+{
+	std::ofstream fs;
+	if (bTrunc)
+	{
+		fs.open(strFile, ios_base::trunc);
+	}
+	else
+	{
+		fs.open(strFile);
+	}
+
+	if (!fs.is_open())
+	{
+		return false;
+	}
+
+	while (true)
+	{
+		string strData;
+		bool bRet = cb(strData);
+
+		if (!strData.empty())
+		{
+			fs << strData;
+		}
+
+		if (!bRet)
+		{
+			break;
+		}
+	}
+
+	fs.close();
+
+	return true;
+}
+
+bool fsutil::saveFile(const string& strFile, bool bTrunc, const string& strData)
+{
+	return saveFile(strFile, bTrunc, [&](string& t_strData) {
+		t_strData = strData;
+		return false;
+	});
+}
+
+bool fsutil::loadFile(const string& strFile, string& strData)
+{
+	std::ifstream fs;
+	fs.open(strFile);
+	if (!fs.is_open())
+	{
+		return false;
+	}
+
+	while (!fs.eof())
+	{
+		char lpBuff[256] = { 0 };
+		fs.read(lpBuff, sizeof(lpBuff) - 1);
+
+		strData.append(lpBuff);
+	}
+
+	fs.close();
+
+	return true;
+}
+
+bool fsutil::loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter)
+{
+	string strData;
+	if (!loadFile(strFile, strData))
+	{
+		return false;
+	}
+
+	size_t prePos = 0;
+	size_t pos = strData.find(cdelimiter, prePos);
+	while (string::npos != pos)
+	{
+		if (!cb(strData.substr(prePos, pos - prePos)))
+		{
+			return true;
+		}
+		
+		prePos = pos + 1;
+		pos = strData.find(cdelimiter, prePos);
+	}
+
+	if (prePos < strData.size())
+	{
+		cb(strData.substr(prePos));
+	}
+
+	return true;
+}
+
+bool fsutil::loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter)
+{
+	return loadFile(strFile, [&](const string& strData) {
+		vecLineData.add(strData);
+		return true;
+	}, cdelimiter);
+}
+
 int fsutil::GetFileSize(const wstring& strFilePath)
 {
 	struct _stat fileStat;

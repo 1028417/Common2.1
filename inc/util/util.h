@@ -62,15 +62,9 @@ using fn_voidvoid = function<void()>;
 #include <sstl/sstl.h>
 using namespace NS_SSTL;
 
-typedef unsigned short WORD;
-
 class __UtilExt util
 {
 public:
-	static bool saveFile(const string& strFile, const string& strData, bool bTrunc);
-	static bool loadFile(const string& strFile, string& strData);
-	static bool loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter ='\n');
-
 	static bool toSysTime(time_t time, SYSTEMTIME& sysTime);
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	

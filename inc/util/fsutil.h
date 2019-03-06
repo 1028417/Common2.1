@@ -27,6 +27,14 @@ public:
 	static const wchar_t slant = L'/';
 	static const wchar_t backSlant = L'\\';
 
+	static bool saveFile(const string& strFile, bool bTrunc, const function<bool(string&)>& cb);
+	static bool saveFile(const string& strFile, bool bTrunc, const string& strData);
+
+	static bool loadFile(const string& strFile, string& strData);
+
+	static bool loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
+	static bool loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
+
 	static int GetFileSize(const wstring& strFilePath);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
