@@ -3,19 +3,17 @@
 
 #include <fsutil.h>
 
-bool fsutil::saveFile(const string& strFile, bool bTrunc, const function<bool(string&)>& cb)
+bool fsutil::saveFile(const string& strFile, bool bAppend, const function<bool(string&)>& cb)
 {
-	std::ofstream fs;
-	if (bTrunc)
+	FILE* file = NULL;
+	string strMode;
+	if (bAppend)
 	{
-		fs.open(strFile, ios_base::trunc);
+		strMode.append("a");
 	}
-	else
-	{
-		fs.open(strFile);
-	}
+	strMode.append("w+,ccs=UTF-8");
 
-	if (!fs.is_open())
+	if (0 != fopen_s(&file, strFile.c_str(), strMode.c_str()) || NULL == file)
 	{
 		return false;
 	}
@@ -27,7 +25,7 @@ bool fsutil::saveFile(const string& strFile, bool bTrunc, const function<bool(st
 
 		if (!strData.empty())
 		{
-			fs << strData;
+			fwrite(strData.c_str(), strData.size(), 1, file);
 		}
 
 		if (!bRet)
@@ -36,7 +34,7 @@ bool fsutil::saveFile(const string& strFile, bool bTrunc, const function<bool(st
 		}
 	}
 
-	fs.close();
+	fclose(file);
 
 	return true;
 }

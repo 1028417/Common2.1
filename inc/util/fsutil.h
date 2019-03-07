@@ -27,8 +27,8 @@ public:
 	static const wchar_t slant = L'/';
 	static const wchar_t backSlant = L'\\';
 
-	static bool saveFile(const string& strFile, bool bTrunc, const function<bool(string&)>& cb);
-	static bool saveFile(const string& strFile, bool bTrunc, const string& strData);
+	static bool saveFile(const string& strFile, bool bAppend, const function<bool(string&)>& cb);
+	static bool saveFile(const string& strFile, bool bAppend, const string& strData);
 
 	static bool loadFile(const string& strFile, string& strData);
 
