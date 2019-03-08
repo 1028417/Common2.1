@@ -24,7 +24,7 @@ class __UtilExt fsutil
 {
 public:
 	static const wchar_t dot = L'.';
-	static const wchar_t slant = L'/';
+	//static const wchar_t slant = L'/';
 	static const wchar_t backSlant = L'\\';
 
 	static bool saveFile(const string& strFile, bool bAppend, const function<bool(string&)>& cb);
