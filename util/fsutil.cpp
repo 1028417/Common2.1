@@ -3,41 +3,50 @@
 
 #include <fsutil.h>
 
-bool fsutil::saveFile(const wstring& strFile, bool bAppend
-	, const function<void(const function<void(const wstring&)>& fnWrite)>& cb)
+bool fsutil::saveFile(const wstring& strFile
+	, const function<void(const function<void(const wstring&)>& fnWrite)>& cb, bool bTrunc, bool bToUTF8)
 {
-	wstring strMode;
-	if (bAppend)
+	wstring strMode(bTrunc?L"w":L"a");
+	if (bToUTF8)
 	{
-		strMode.append(L"a");
+		strMode.append(L",ccs=UTF-8");
 	}
-	strMode.append(L"w+,ccs=UTF-8");
+	else
+	{
+		strMode.append(L"b");
+	}
 
-	FILE* file = NULL;
-	if (0 != _wfopen_s(&file, strFile.c_str(), strMode.c_str()) || NULL == file)
+	FILE* pFile = NULL;
+	if (0 != _wfopen_s(&pFile, strFile.c_str(), strMode.c_str()) || NULL == pFile)
 	{
 		return false;
+	}
+
+	if (!bToUTF8)
+	{
+		BYTE chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
+		fwrite(chUnicodeHead, sizeof(chUnicodeHead), 1, pFile);
 	}
 
 	auto fnWrite = [&](const wstring& strData) {
 		if (!strData.empty())
 		{
-			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, file);
+			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, pFile);
 		}
 	};
 
 	cb(fnWrite);
 
-	fclose(file);
+	fclose(pFile);
 
 	return true;
 }
 
-bool fsutil::saveFile(const wstring& strFile, bool bTrunc, const wstring& strData)
+bool fsutil::saveFile(const wstring& strFile, const wstring& strData, bool bTrunc, bool bToUTF8)
 {
-	return saveFile(strFile, bTrunc, [&](auto& cb) {
+	return saveFile(strFile, [&](auto& cb) {
 		cb(strData);
-	});
+	}, bTrunc, bToUTF8);
 }
 
 bool fsutil::loadFile(const string& strFile, string& strData)
@@ -342,9 +351,7 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	ifstream srcStream;
 	try
 	{
-		srcStream.open(strSrcFile.c_str(), ios::in | ios::binary);
-		//pfSrc = fopen(strSrcFile.c_str(), "r");
-		//bResult = srcfile.Open(util::StrToWStr(strSrcFile), CFile::modeRead| CFile::shareDenyNone);
+		srcStream.open(strSrcFile.c_str(), ios::binary);
 	}
 	catch (...)
 	{
@@ -354,8 +361,7 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	ofstream snkStream;
 	try
 	{
-		snkStream.open(strSnkFile.c_str(), ios::out | ios::binary | ios::trunc);
-		//bResult = snkfile.Open(util::StrToWStr(strSnkFile), CFile::modeCreate| CFile::modeWrite);
+		snkStream.open(strSnkFile.c_str(), ios::binary | ios::trunc);
 	}
 	catch (...)
 	{
@@ -363,8 +369,7 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	if (!snkStream)
 	{
 		srcStream.close();
-		//(void)fclose(pfSrc);
-		//srcfile.Close();
+
 		return false;
 	}
 
@@ -373,14 +378,9 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 	{
 		while (true)
 		{
-			//nReadedSize = fread(lpBuffer, 1, MAX_BUFFER, pfSrc)
-
 			srcStream.read(lpBuffer, MAX_BUFFER);
 			auto nReadedSize = srcStream.gcount();
 			
-			//fwrite(lpBuffer, nReadedSize, 1, pfSnk);
-			//snkfile.Write(lpBuffer, nReadedSize);
-
 			if (0 < nReadedSize)
 			{
 				snkStream.write(lpBuffer, nReadedSize);
@@ -398,12 +398,7 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 
 	srcStream.close();
 	snkStream.close();
-	//fclose(pfSrc);
-	//fclose(pfSnk);
 
-	//srcfile.Close();
-	//snkfile.Close();
-	
 	return bResult;
 }
 
