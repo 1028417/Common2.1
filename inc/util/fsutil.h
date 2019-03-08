@@ -27,12 +27,11 @@ public:
 	//static const wchar_t slant = L'/';
 	static const wchar_t backSlant = L'\\';
 
-	static bool saveFile(const wstring& strFile, bool bAppend
-		, const function<void(const function<void(const wstring&)>& fnWrite)>& cb);
-	static bool saveFile(const wstring& strFile, bool bAppend, const wstring& strData);
+	static bool saveFile(const wstring& strFile
+		, const function<void(const function<void(const wstring&)>& fnWrite)>& cb, bool bTrunc=true, bool bToUTF8=false);
+	static bool saveFile(const wstring& strFile, const wstring& strData, bool bTrunc=true, bool bToUTF8 = false);
 	
 	static bool loadFile(const string& strFile, string& strData);
-
 	static bool loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
 	static bool loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
 
