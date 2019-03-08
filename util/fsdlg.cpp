@@ -235,47 +235,52 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 
 	m_ofn.Flags = OFN_EXPLORER;
 
-	if (opt.bMultiSel)
-	{
-		m_ofn.Flags |= OFN_ALLOWMULTISELECT;
-	}
-
 	if (opt.bMustExist)
 	{
 		m_ofn.Flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 	}
 }
 
-wstring CFileDlg::Show(list<wstring>& lstFiles)
+bool CFileDlg::_show(bool bSaveFile)
 {
-	BOOL bRet = ::GetOpenFileName(&m_ofn);
+	if (bSaveFile)
+	{
+		if (!::GetSaveFileName(&m_ofn))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!::GetOpenFileName(&m_ofn))
+		{
+			return false;
+		}
+	}
 
-	//(void)::EnableWindow(m_ofn.hwndOwner, TRUE);
+	return true;
+}
 
-	//(void)::SetFocus(m_ofn.hwndOwner);
+wstring CFileDlg::ShowSingle(bool bSaveFile)
+{
+	if (!_show(bSaveFile))
+	{
+		return L"";
+	}
+	
+	return m_lpstrFileName;
+}
 
-	if (!bRet)
+wstring CFileDlg::ShowMulti(list<wstring>& lstFiles, bool bSaveFile)
+{
+	m_ofn.Flags |= OFN_ALLOWMULTISELECT;
+
+	if (!_show(bSaveFile))
 	{
 		return L"";
 	}
 
-	if (m_ofn.Flags & OFN_ALLOWMULTISELECT)
-	{
-		return _getMultSel(lstFiles);
-	}
-	else
-	{
-		lstFiles.push_back(m_lpstrFileName);
-
-		return fsutil::GetParentDir(m_lpstrFileName);
-	}
-}
-
-wstring CFileDlg::Show(const tagFileDlgOpt& opt, list<wstring>& lstFiles)
-{
-	_setOpt(opt);
-
-	return Show(lstFiles);
+	return _getMultSel(lstFiles);
 }
 
 wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
