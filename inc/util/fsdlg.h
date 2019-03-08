@@ -40,9 +40,7 @@ struct tagFileDlgOpt
 	wstring strFileName;
 	
 	wstring strFilter;
-
-	bool bMultiSel = false;
-	
+		
 	bool bMustExist = false;
 
 	HWND hWndOwner = NULL;
@@ -60,6 +58,8 @@ public:
 
 private:
 	void _setOpt(const tagFileDlgOpt& opt);
+	
+	bool _show(bool bSaveFile);
 
 	wstring _getMultSel(list<wstring>& lstFiles);
 
@@ -75,7 +75,6 @@ private:
 	TCHAR m_lpstrFileName[10240];
 
 public:
-	wstring Show(list<wstring>& lstFiles);
-
-	wstring Show(const tagFileDlgOpt& opt, list<wstring>& lstFiles);
+	wstring ShowSingle(bool bSaveFile = false);
+	wstring ShowMulti(list<wstring>& lstFiles, bool bSaveFile = false);
 };
