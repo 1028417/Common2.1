@@ -120,13 +120,8 @@ int fsutil::GetFileSize(const wstring& strFilePath)
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int iPos = -1;
-	auto pos = strPath.find_last_of(fsutil::slant);
+	auto pos = strPath.find_last_of(fsutil::backSlant);
 	if (wstring::npos != pos)
-	{
-		iPos = pos;
-	}
-	pos = strPath.find_last_of(fsutil::backSlant);
-	if (wstring::npos != pos && (int)pos > iPos)
 	{
 		iPos = pos;
 	}
@@ -200,7 +195,7 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
-	if (fsutil::backSlant == strNewPath.back() || fsutil::slant == strNewPath.back())
+	if (fsutil::backSlant == strNewPath.back())
 	{
 		strNewPath.pop_back();
 	}
