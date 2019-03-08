@@ -121,7 +121,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 
 				HWND hWndStatic = NULL;
 				RECT rcStatic{0,0,0,0};
-				while (TRUE)
+				while (true)
 				{
 					hWndStatic = ::FindWindowEx(hWnd, hWndStatic, L"Static", NULL);
 					if (!hWndStatic)
@@ -213,11 +213,13 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 	m_ofn.lpstrFilter = m_lpstrFilter;
 	if (!opt.strFilter.empty())
 	{
+		m_ofn.nFilterIndex = 1;
+
 		::lstrcat(m_lpstrFilter, opt.strFilter.c_str());
 
 		LPTSTR pch = m_lpstrFilter;
 
-		while (TRUE)
+		while (true)
 		{
 			pch = wcschr(pch, '|');
 			if (!pch)
@@ -234,7 +236,7 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 	m_ofn.hwndOwner = opt.hWndOwner;
 
 	m_ofn.Flags = OFN_EXPLORER;
-
+	
 	if (opt.bMustExist)
 	{
 		m_ofn.Flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
@@ -261,21 +263,33 @@ bool CFileDlg::_show(bool bSaveFile)
 	return true;
 }
 
-wstring CFileDlg::ShowSingle(bool bSaveFile)
+wstring CFileDlg::ShowSave()
 {
-	if (!_show(bSaveFile))
+	m_ofn.Flags |= OFN_OVERWRITEPROMPT;
+
+	if (!_show(true))
 	{
 		return L"";
 	}
-	
+
 	return m_lpstrFileName;
 }
 
-wstring CFileDlg::ShowMulti(list<wstring>& lstFiles, bool bSaveFile)
+wstring CFileDlg::ShowOpenSingle()
+{
+	if (!_show(false))
+	{
+		return L"";
+	}
+
+	return m_lpstrFileName;
+}
+
+wstring CFileDlg::ShowOpenMulti(list<wstring>& lstFiles)
 {
 	m_ofn.Flags |= OFN_ALLOWMULTISELECT;
 
-	if (!_show(bSaveFile))
+	if (!_show(false))
 	{
 		return L"";
 	}
@@ -297,20 +311,22 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 			lstFiles.push_back(p + 1);
 		}
 	}
+
 	if (lstFiles.empty())
 	{
-		lstFiles.push_back(m_lpstrFileName);
-	
-		return fsutil::GetParentDir(m_lpstrFileName);
+		return L"";
 	}
-	else
-	{
-		wstring strDir = m_lpstrFileName;
-		for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
-		{
-			*itrFile = strDir + fsutil::backSlant + *itrFile;
-		}
 
-		return strDir;
+	wstring strDir = m_lpstrFileName;
+	for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
+	{
+		*itrFile = strDir + fsutil::backSlant + *itrFile;
 	}
+
+	return strDir;
+}
+
+UINT CFileDlg::GetSelFilterIndex() const
+{
+	return m_ofn.nFilterIndex;
 }

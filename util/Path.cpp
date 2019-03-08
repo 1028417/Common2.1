@@ -237,27 +237,6 @@ bool CPath::HasFile() const
 	});
 }
 
-bool CPath::enumSubDir(const function<bool(CPath& subDir)>& cb)
-{
-	TD_PathList lstSubDir;
-	GetSubDir(lstSubDir);
-
-	for (auto pSubDir : lstSubDir)
-	{
-		if (!cb(*pSubDir))
-		{
-			return false;
-		}
-
-		if (!pSubDir->enumSubDir(cb))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
 bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)
 {
 	TD_PathList lstSubFile;

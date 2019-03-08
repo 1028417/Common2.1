@@ -3,47 +3,40 @@
 
 #include <fsutil.h>
 
-bool fsutil::saveFile(const string& strFile, bool bAppend, const function<bool(string&)>& cb)
+bool fsutil::saveFile(const wstring& strFile, bool bAppend
+	, const function<void(const function<void(const wstring&)>& fnWrite)>& cb)
 {
-	FILE* file = NULL;
-	string strMode;
+	wstring strMode;
 	if (bAppend)
 	{
-		strMode.append("a");
+		strMode.append(L"a");
 	}
-	strMode.append("w+,ccs=UTF-8");
+	strMode.append(L"w+,ccs=UTF-8");
 
-	if (0 != fopen_s(&file, strFile.c_str(), strMode.c_str()) || NULL == file)
+	FILE* file = NULL;
+	if (0 != _wfopen_s(&file, strFile.c_str(), strMode.c_str()) || NULL == file)
 	{
 		return false;
 	}
 
-	while (true)
-	{
-		string strData;
-		bool bRet = cb(strData);
-
+	auto fnWrite = [&](const wstring& strData) {
 		if (!strData.empty())
 		{
-			fwrite(strData.c_str(), strData.size(), 1, file);
+			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, file);
 		}
+	};
 
-		if (!bRet)
-		{
-			break;
-		}
-	}
+	cb(fnWrite);
 
 	fclose(file);
 
 	return true;
 }
 
-bool fsutil::saveFile(const string& strFile, bool bTrunc, const string& strData)
+bool fsutil::saveFile(const wstring& strFile, bool bTrunc, const wstring& strData)
 {
-	return saveFile(strFile, bTrunc, [&](string& t_strData) {
-		t_strData = strData;
-		return false;
+	return saveFile(strFile, bTrunc, [&](auto& cb) {
+		cb(strData);
 	});
 }
 
