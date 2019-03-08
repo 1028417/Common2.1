@@ -178,7 +178,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 				}
 			}
 
-			if (util::StrCompareIgnoreCase(SubPath.m_strName, strName))
+			if (util::StrMatchIgnoreCase(SubPath.m_strName, strName))
 			{
 				pPath = &SubPath;
 				return false;

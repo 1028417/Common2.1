@@ -202,7 +202,7 @@ int util::StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs)
 		, rhs.c_str(), rhs.c_str() + rhs.size());
 }
 
-bool util::StrCompareIgnoreCase(const wstring& str1, const wstring& str2)
+bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 {
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 }

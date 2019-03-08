@@ -88,7 +88,7 @@ public:
 	static void SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim=false);
 
 	static int StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs);
-	static bool StrCompareIgnoreCase(const wstring& str1, const wstring& str2);
+	static bool StrMatchIgnoreCase(const wstring& str1, const wstring& str2);
 
 	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
 
