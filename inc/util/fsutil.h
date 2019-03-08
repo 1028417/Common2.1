@@ -27,9 +27,10 @@ public:
 	//static const wchar_t slant = L'/';
 	static const wchar_t backSlant = L'\\';
 
-	static bool saveFile(const string& strFile, bool bAppend, const function<bool(string&)>& cb);
-	static bool saveFile(const string& strFile, bool bAppend, const string& strData);
-
+	static bool saveFile(const wstring& strFile, bool bAppend
+		, const function<void(const function<void(const wstring&)>& fnWrite)>& cb);
+	static bool saveFile(const wstring& strFile, bool bAppend, const wstring& strData);
+	
 	static bool loadFile(const string& strFile, string& strData);
 
 	static bool loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');

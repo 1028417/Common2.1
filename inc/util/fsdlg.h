@@ -75,6 +75,10 @@ private:
 	TCHAR m_lpstrFileName[10240];
 
 public:
-	wstring ShowSingle(bool bSaveFile = false);
-	wstring ShowMulti(list<wstring>& lstFiles, bool bSaveFile = false);
+	wstring ShowSave();
+
+	wstring ShowOpenSingle();
+	wstring ShowOpenMulti(list<wstring>& lstFiles);
+
+	UINT GetSelFilterIndex() const;
 };
