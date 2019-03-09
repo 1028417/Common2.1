@@ -127,9 +127,9 @@ public:
 	{
 	}
 
-	virtual wstring GetRenameText() const
+	virtual bool GetRenameText(wstring& strRenameText) const
 	{
-		return L"";
+		return true;
 	}
 
 	virtual void OnListItemRename(const wstring& strNewName)

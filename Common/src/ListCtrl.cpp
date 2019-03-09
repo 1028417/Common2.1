@@ -790,20 +790,35 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	{
 		CEdit *pwndEdit = this->GetEditControl();
 		__AssertBreak(pwndEdit);
-
+		
 		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
+		auto& item = pLVDispInfo->item;
 
-		CListObject *pObject = this->GetItemObject(pLVDispInfo->item.iItem);
+		bool bRet = false;
+		wstring strRenameText;
+		if (NULL != item.pszText)
+		{
+			strRenameText = item.pszText;
+		}
+
+		CListObject *pObject = this->GetItemObject(item.iItem);
 		if (pObject)
 		{
-			m_cstrRenameText = pObject->GetRenameText().c_str();
+			bRet = pObject->GetRenameText(strRenameText);
 		}
 		else
 		{
-			m_cstrRenameText = pLVDispInfo->item.pszText;
-			getRenameText(pLVDispInfo->item.iItem, m_cstrRenameText);
+			bRet = GetRenameText(item.iItem, strRenameText);
 		}
 
+		if (!bRet)
+		{
+			pwndEdit->ShowWindow(SW_HIDE);
+			*pResult = 1;
+			return TRUE;
+		}
+
+		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
 		pwndEdit->SetSel(0, m_cstrRenameText.GetLength(), TRUE);
 	}
