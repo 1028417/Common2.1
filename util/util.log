@@ -1,11 +1,10 @@
-﻿  util.cpp
-  fsutil.cpp
+﻿  正在跳过...(未检测到相关更改)
+  util.cpp
   fsdlg.cpp
   WorkThread.cpp
   SQLiteDB.cpp
   ProFile.cpp
-  正在生成代码...
-  正在跳过...(未检测到相关更改)
   Path.cpp
-  util.vcxproj -> D:\dev\Common2.1\util\../bin/utild.dll
+    正在创建库 ../lib/utild.lib 和对象 ../lib/utild.exp
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/utild.dll
   util.vcxproj -> ../build\utild/utild.pdb (Full PDB)

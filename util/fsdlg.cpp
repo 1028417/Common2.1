@@ -132,9 +132,26 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 					(void)::GetWindowRect(hWndStatic, &rcStatic);
 					ScreenToClient(hWnd, (LPPOINT)&rcStatic.left);
 					ScreenToClient(hWnd, (LPPOINT)&rcStatic.right);
+					rcStatic.top = rcStatic.left;
+					rcStatic.bottom = rcStatic.top + 50;
 					(void)::MoveWindow(hWndStatic, rcStatic.left, rcStatic.left
 						, rcStatic.right - rcStatic.left + nWidthOff, rcStatic.bottom - rcStatic.left, FALSE);
 				}
+
+
+				RECT rcOkButton{ 0,0,0,0 };
+				::GetWindowRect(hWndOkButton, &rcOkButton);
+				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.left);
+				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.right);
+				::MoveWindow(hWndOkButton, rcOkButton.left, rcOkButton.top + nHeightOff
+					, rcOkButton.right - rcOkButton.left, rcOkButton.bottom - rcOkButton.top, FALSE);
+
+				RECT rcCancelButton{ 0,0,0,0 };
+				::GetWindowRect(hWndCancelButton, &rcCancelButton);
+				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.left);
+				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.right);
+				::MoveWindow(hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
+					, rcCancelButton.right - rcCancelButton.left, rcCancelButton.bottom - rcCancelButton.top, FALSE);
 
 
 				HWND hWndTreeCtrl = ::FindWindowEx(hWnd, NULL, L"SysTreeView32", NULL);
@@ -143,24 +160,11 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
 				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.left);
 				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.right);
+				rcTreeCtrl.top = rcStatic.bottom;
+				rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
 				::MoveWindow(hWndTreeCtrl, rcTreeCtrl.left, rcTreeCtrl.top
-					, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top + nHeightOff, FALSE);
-
-
-				RECT rcOkButton{0,0,0,0};
-				::GetWindowRect(hWndOkButton, &rcOkButton);
-				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.left);
-				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.right);
-				::MoveWindow(hWndOkButton, rcOkButton.left + nWidthOff, rcOkButton.top + nHeightOff
-					, rcOkButton.right - rcOkButton.left , rcOkButton.bottom - rcOkButton.top, FALSE);
-
-				RECT rcCancelButton{0,0,0,0};
-				::GetWindowRect(hWndCancelButton, &rcCancelButton);
-				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.left);
-				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.right);
-				::MoveWindow(hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
-					, rcCancelButton.right - rcCancelButton.left, rcCancelButton.bottom - rcCancelButton.top, FALSE);
-
+					, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom-rcTreeCtrl.top, FALSE);
+				
 				break;
 			}
 		case BFFM_SELCHANGED:
