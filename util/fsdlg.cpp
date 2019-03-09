@@ -318,7 +318,9 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 
 	if (lstFiles.empty())
 	{
-		return L"";
+		lstFiles.push_back(m_lpstrFileName);
+
+		return fsutil::GetParentDir(m_lpstrFileName);
 	}
 
 	wstring strDir = m_lpstrFileName;
