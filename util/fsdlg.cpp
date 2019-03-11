@@ -139,20 +139,16 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				}
 
 
-				RECT rcOkButton{ 0,0,0,0 };
-				::GetWindowRect(hWndOkButton, &rcOkButton);
-				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.left);
-				::ScreenToClient(hWnd, (LPPOINT)&rcOkButton.right);
-				::MoveWindow(hWndOkButton, rcOkButton.left, rcOkButton.top + nHeightOff
-					, rcOkButton.right - rcOkButton.left, rcOkButton.bottom - rcOkButton.top, FALSE);
-
 				RECT rcCancelButton{ 0,0,0,0 };
 				::GetWindowRect(hWndCancelButton, &rcCancelButton);
 				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.left);
 				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.right);
+				auto nBtnWidth = rcCancelButton.right - rcCancelButton.left;
 				::MoveWindow(hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
-					, rcCancelButton.right - rcCancelButton.left, rcCancelButton.bottom - rcCancelButton.top, FALSE);
+					, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
 
+				::MoveWindow(hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 25, rcCancelButton.top + nHeightOff
+					, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
 
 				HWND hWndTreeCtrl = ::FindWindowEx(hWnd, NULL, L"SysTreeView32", NULL);
 				
