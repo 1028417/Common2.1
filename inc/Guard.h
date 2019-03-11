@@ -45,23 +45,39 @@ private:
 	CWnd& m_wnd;
 };
 
-class __CommonExt CMenuGuard : public CMenu
+struct tagMenuItemInfo
+{
+	BOOL bEnable = TRUE;
+
+	BOOL bDelete = FALSE;
+
+	CString strText;
+};
+
+class __CommonExt CMenuGuard
 {
 public:
-	CMenuGuard(CPage& Page, UINT uIDMenu);
+	CMenuGuard(UINT uIDMenu);
 
 private:
-	CPage& m_Page;
-	UINT m_uIDMenu;
+	UINT m_uIDMenu = 0;
 
-	map<UINT, pair<BOOL, CString>> m_mapMenuItemInfos;
+	map<UINT, tagMenuItemInfo> m_mapMenuItemInfos;
 
 public:
 	void EnableItem(UINT uIDItem, BOOL bEnable);
+	void EnableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable);
+
+	void DisableItem(UINT uIDItem);
+	void DisableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable);
+
+	void DeleteItem(UINT uIDItem);
+	void DeleteItem(const std::initializer_list<UINT>& ilIDItems);
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 
-	BOOL Popup();
+	BOOL Popup(CPage& Page, BOOL bShowDisable = TRUE);
+	BOOL Popup(CResModule& resModule, CWnd *pWnd);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;

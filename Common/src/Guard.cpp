@@ -24,58 +24,146 @@ void CRedrawLockGuard::Unlock()
 }
 
 
-CMenuGuard::CMenuGuard(CPage& Page, UINT uIDMenu)
-	: m_Page(Page)
-	, m_uIDMenu(uIDMenu)
+CMenuGuard::CMenuGuard(UINT uIDMenu)
+	: m_uIDMenu(uIDMenu)
 {
 }
 
 void CMenuGuard::EnableItem(UINT uIDItem, BOOL bEnable)
 {
-	m_mapMenuItemInfos[uIDItem].first = bEnable;
+	m_mapMenuItemInfos[uIDItem].bEnable = TRUE==bEnable;
+}
+
+void CMenuGuard::EnableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable)
+{
+	for (auto& uIDItem : ilIDItems)
+	{
+		EnableItem(uIDItem, bEnable);
+	}
+}
+
+void CMenuGuard::DisableItem(UINT uIDItem)
+{
+	EnableItem(uIDItem, FALSE);
+}
+
+void CMenuGuard::DisableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable)
+{
+	EnableItem(ilIDItems, FALSE);
+}
+
+void CMenuGuard::DeleteItem(UINT uIDItem)
+{
+	m_mapMenuItemInfos[uIDItem].bDelete = true;
+}
+
+void CMenuGuard::DeleteItem(const std::initializer_list<UINT>& ilIDItems)
+{
+	for (auto& uIDItem : ilIDItems)
+	{
+		DeleteItem(uIDItem);
+	}
 }
 
 void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 {
-	m_mapMenuItemInfos[uIDItem].second = cstrText;
+	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
-BOOL CMenuGuard::Popup()
+static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 {
-	if (!*this)
+	int iCnt = 0;
+
+	for (int iSrc = 0, iDst = GetMenuItemCount(hDst); iSrc<GetMenuItemCount(hSrc); iSrc++)
 	{
-		CResGuard ResGuard (m_Page.m_resModule);
+		CString szMenuStr(L'\0', 256);
+		MENUITEMINFO mInfo = { 0 };
+		mInfo.cbSize = sizeof(mInfo);
+		mInfo.fMask = 0
+			| MIIM_CHECKMARKS //Retrieves or sets the hbmpChecked and hbmpUnchecked members. 
+			| MIIM_DATA //Retrieves or sets the dwItemData member. 
+			| MIIM_ID //Retrieves or sets the wID member. 
+			| MIIM_STATE //Retrieves or sets the fState member. 
+			| MIIM_SUBMENU //Retrieves or sets the hSubMenu member. 
+			| MIIM_TYPE //Retrieves or sets the fType and dwTypeData members. 
+			| 0;
+		mInfo.dwTypeData = (LPTSTR)(LPCTSTR)szMenuStr;
+		mInfo.cch = szMenuStr.GetLength();
 
-		__AssertReturn(__super::LoadMenu(m_uIDMenu), FALSE);
-	}
+		VERIFY(GetMenuItemInfo(hSrc, iSrc, TRUE, &mInfo));
 
-	CMenu *pSubMenu = __super::GetSubMenu(0);
-	__AssertReturn(pSubMenu, FALSE);
+		szMenuStr.Trim();
 
-	UINT uIDItem = 0;
-	BOOL bEnable = FALSE;
-	CString *pcstrText = NULL;
-	for (map<UINT, pair<BOOL, CString>>::iterator itrMenuItemInfo = m_mapMenuItemInfos.begin()
-		; itrMenuItemInfo != m_mapMenuItemInfos.end(); ++itrMenuItemInfo)
-	{
-		uIDItem = itrMenuItemInfo->first;
-		bEnable = itrMenuItemInfo->second.first;
-		pcstrText = &itrMenuItemInfo->second.second;
-
-		if (!pcstrText->IsEmpty())
+		if (mInfo.hSubMenu)
 		{
-			__AssertReturn(pSubMenu->ModifyMenu(uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, *pcstrText), FALSE);
+			HMENU hSub = CreatePopupMenu();
+			clonePopupMenu(hSub, mInfo.hSubMenu);
+			mInfo.hSubMenu = hSub;
 		}
 
-		(void)pSubMenu->EnableMenuItem(uIDItem, bEnable ? MF_ENABLED : MF_GRAYED);
+		InsertMenuItem(hDst, iDst++, TRUE, &mInfo);
+		iCnt++;
+	}
+
+	return iCnt;
+}
+
+BOOL CMenuGuard::Popup(CResModule& resModule, CWnd *pWnd)
+{
+	CResGuard ResGuard(resModule);
+	CMenu menu;
+	__AssertReturn(menu.LoadMenu(m_uIDMenu), FALSE);
+
+	CMenu popupMenu;
+	if (!popupMenu.CreatePopupMenu())
+	{
+		return FALSE;
+	}
+
+	(void)clonePopupMenu(popupMenu.m_hMenu, menu.m_hMenu);
+
+	CPoint ptCursor(0, 0);
+	(void)::GetCursorPos(&ptCursor);
+	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
+}
+
+BOOL CMenuGuard::Popup(CPage& Page, BOOL bShowDisable)
+{
+	CResGuard ResGuard(Page.m_resModule);
+	CMenu menu;
+	__AssertReturn(menu.LoadMenu(m_uIDMenu), FALSE);
+	
+	CMenu *pSubMenu = menu.GetSubMenu(0);
+	__AssertReturn(pSubMenu, FALSE);
+
+	for (auto& pr : m_mapMenuItemInfos)
+	{
+		auto& uIDItem = pr.first;
+		auto& MenuItemInfo = pr.second;
+		
+		if (!MenuItemInfo.strText.IsEmpty())
+		{
+			__AssertReturn(pSubMenu->ModifyMenu(uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, MenuItemInfo.strText), FALSE);
+		}
+
+		if (!MenuItemInfo.bEnable)
+		{
+			if (!bShowDisable)
+			{
+				(void)pSubMenu->RemoveMenu(uIDItem, MF_BYCOMMAND);
+			}
+			else
+			{
+				(void)pSubMenu->EnableMenuItem(uIDItem, MF_GRAYED);
+			}
+		}
 	}
 
 	m_mapMenuItemInfos.clear();
 
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
-
-	return pSubMenu->TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_Page);
+	return pSubMenu->TrackPopupMenu(0, ptCursor.x, ptCursor.y, &Page);
 }
 
 bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
