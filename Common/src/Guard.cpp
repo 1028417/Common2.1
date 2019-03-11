@@ -161,6 +161,29 @@ BOOL CMenuGuard::Popup(CPage& Page, BOOL bShowDisable)
 
 	m_mapMenuItemInfos.clear();
 
+	int iCount = pSubMenu->GetMenuItemCount();
+	if (iCount > 0)
+	{
+		if (0 == pSubMenu->GetMenuItemID(0))
+		{
+			(void)pSubMenu->RemoveMenu(0, MF_BYPOSITION);
+			iCount--;
+		}
+
+		if (iCount > 0)
+		{
+			if (0 == pSubMenu->GetMenuItemID(iCount - 1))
+			{
+				(void)pSubMenu->RemoveMenu(iCount - 1, MF_BYPOSITION);
+			}
+		}
+	}
+	
+	if (iCount <= 0)
+	{
+		return TRUE;
+	}
+
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
 	return pSubMenu->TrackPopupMenu(0, ptCursor.x, ptCursor.y, &Page);
