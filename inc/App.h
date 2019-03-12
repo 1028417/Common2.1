@@ -143,25 +143,18 @@ public:
 		});
 	}
 
-	static void thread(const CB_Sync& cb)
+	using CB_Thread = function<CB_Sync()>;
+	static void thread(const CB_Thread& cb)
 	{
 		std::thread([=]() {
-			cb();
-		}).detach();
-	}
-
-	template <typename PARA>
-	static void thread(const function<bool(PARA&)>& cbThread, const function<void(const PARA&)>& cbSync)
-	{
-		cb([=]() {
-			PARA para;
-			if (cbThread(para))
+			auto ret = cb();
+			if (ret)
 			{
 				sync([&]() {
-					cbSync(para);
+					ret();
 				});
 			}
-		});
+		}).detach();
 	}
 
 	static bool getKeyState(UINT uKey)
