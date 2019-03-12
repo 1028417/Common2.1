@@ -136,17 +136,24 @@ public:
 	static void sync(const CB_Sync& cb);
 
 	template <typename T>
-	static void thread(const function<void(T&)>& cb, T& para)
+	static void sync(const function<void(T&)>& cb, T& para)
 	{
 		sync([&]() {
 			cb(para);
 		});
 	}
 
+	static void thread(const CB_Sync& cb)
+	{
+		std::thread([=]() {
+			cb();
+		}).detach();
+	}
+
 	template <typename PARA>
 	static void thread(const function<bool(PARA&)>& cbThread, const function<void(const PARA&)>& cbSync)
 	{
-		thread([=]() {
+		cb([=]() {
 			PARA para;
 			if (cbThread(para))
 			{
@@ -154,7 +161,7 @@ public:
 					cbSync(para);
 				});
 			}
-		}).detach();
+		});
 	}
 
 	static bool getKeyState(UINT uKey)
