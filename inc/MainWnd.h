@@ -27,9 +27,14 @@ struct tagMainWndInfo
 	ULONG uMinHeight = 0;
 };
 
-class __CommonExt CMainWnd: public CWnd
+class __CommonExt CMainWnd : public CWnd
 {
 public:
+	static CMainWnd* getMainWnd()
+	{
+		return (CMainWnd*)AfxGetMainWnd();
+	}
+
 	CMainWnd(){}
 
 	~CMainWnd();

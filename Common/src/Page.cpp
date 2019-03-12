@@ -26,7 +26,7 @@ BOOL CPage::Active()
 {
 	if (NULL == this->m_hWnd)
 	{
-		CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+		CMainWnd *pMainWnd = CMainWnd::getMainWnd();
 		__EnsureReturn(pMainWnd, FALSE);
 
 		__EnsureReturn(pMainWnd->ActivePage(*this), FALSE);
@@ -51,7 +51,7 @@ BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 		return pDockView->SetPageTitle(*this, cstrTitle, iImage);
 	}
 
-	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+	CMainWnd *pMainWnd = CMainWnd::getMainWnd();
 	__EnsureReturn(pMainWnd, FALSE);
 
 	return pMainWnd->SetPageTitle(*this, cstrTitle, iImage);
@@ -59,7 +59,7 @@ BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 
 int CPage::MsgBox(const CString& cstrText, UINT uType)
 {
-	CMainWnd *pMainWnd = (CMainWnd*)AfxGetMainWnd();
+	CMainWnd *pMainWnd = CMainWnd::getMainWnd();
 	__EnsureReturn(pMainWnd, FALSE);
 
 	return pMainWnd->MsgBox(cstrText, m_cstrTitle, uType);
