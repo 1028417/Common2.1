@@ -64,8 +64,10 @@ public:
 
 private:
 	void OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point);
-
+	
 	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+
+	void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 };
 
 enum class E_DockViewType
@@ -147,6 +149,11 @@ private:
 public:
 	void SetTabStyle(E_TabStyle eTabStyle);
 
+	void SetTabPadding(UINT cx, UINT cy)
+	{
+		m_wndTabCtrl.SetPadding({ (int)cx, (int)cy });
+	}
+	
 	void setViewStyle(const tagViewStyle& ViewStyle);
 
 	const tagViewStyle& getViewStyle() const

@@ -63,7 +63,7 @@ public:
 
 	CDockView *GetView(E_DockViewType eViewType);
 
-	BOOL AddView(CPage& Page, const tagViewStyle& ViewStyle);
+	CDockView* CreateView(CPage& Page, const tagViewStyle& ViewStyle);
 
 	BOOL AddPage(CPage& Page, E_DockViewType eViewType);
 

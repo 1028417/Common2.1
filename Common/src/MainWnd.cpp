@@ -164,23 +164,23 @@ BOOL CMainWnd::SetStatusText(UINT uPart, const CString& cstrText)
 	return m_ctlStatusBar.SetText(cstrText, (int)uPart, 0);
 }
 
-BOOL CMainWnd::AddView(CPage& Page, const tagViewStyle& ViewStyle)
+CDockView* CMainWnd::CreateView(CPage& Page, const tagViewStyle& ViewStyle)
 {
-	__AssertReturn(!m_mapDockViews.includes(ViewStyle.eViewType), FALSE);
+	__AssertReturn(!m_mapDockViews.includes(ViewStyle.eViewType), NULL);
 
 	CDockView *pView = new CDockView(*this, ViewStyle);
 
 	if (!pView->AddPage(Page))
 	{
 		delete pView;
-		return FALSE;
+		return NULL;
 	}
 
 	m_mapDockViews.set(ViewStyle.eViewType, pView);
 
 	this->resizeView();
 
-	return TRUE;
+	return pView;
 }
 
 BOOL CMainWnd::AddPage(CPage& Page, E_DockViewType eViewType)

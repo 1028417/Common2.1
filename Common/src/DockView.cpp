@@ -22,6 +22,8 @@ UINT CTabCtrlEx::getItemHeight() const
 
 BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 {
+	SetPadding({ 5,0 });
+
 	SetTabStyle(TabStyle.eTabStyle);
 
 	if (0 != TabStyle.uTabFontSize)
@@ -48,13 +50,14 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 			__EnsureReturn(SetTabHeight(TabStyle.uTabHeight), FALSE);
 		}
 	}
-
+	
 	return TRUE;
 }
 
 void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
 {
-	DWORD dwTabStyle = TCS_FOCUSNEVER;
+	DWORD dwTabStyle = TCS_FOCUSNEVER | TCS_FORCEICONLEFT;
+	//dwTabStyle |= TCS_FLATBUTTONS | TCS_OWNERDRAWFIXED;
 
 	switch (m_eTabStyle = eTabStyle)
 	{
@@ -123,6 +126,13 @@ BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
 	return TRUE;
 }
 
+void CTabCtrlEx::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
+{
+	m_cbMouseEvent = cbMouseEvent;
+
+	m_iTrackMouseFlag = 0;
+}
+
 void CTabCtrlEx::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
 {
 	m_iTrackMouseFlag = 0;
@@ -131,13 +141,6 @@ void CTabCtrlEx::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& 
 	{
 		m_cbMouseEvent(eMouseEvent, point);
 	}
-}
-
-void CTabCtrlEx::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
-{
-	m_cbMouseEvent = cbMouseEvent;
-
-	m_iTrackMouseFlag = 0;
 }
 
 BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
@@ -173,6 +176,30 @@ BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}
+
+void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	CDC dc;
+	dc.Attach(lpDrawItemStruct->hDC);
+
+	CRect rcItem(lpDrawItemStruct->rcItem);
+
+	auto bkColor = RGB(255, 255, 255);
+	dc.FillSolidRect(rcItem, bkColor);
+	
+	TC_ITEMW tci;
+	memset(&tci, 0, sizeof tci);
+	tci.mask = TCIF_TEXT | TCIF_IMAGE;
+	wchar_t szTabText[256]{ 0 };
+	tci.pszText = szTabText;
+	tci.cchTextMax = sizeof(szTabText) - 1;
+	GetItem(lpDrawItemStruct->itemID, &tci);
+
+	::SetBkColor(lpDrawItemStruct->hDC, bkColor);
+	dc.DrawText(tci.pszText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+
+	dc.Detach();
 }
 
 
