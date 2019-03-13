@@ -122,8 +122,6 @@ public:
 
 	static BOOL AddModule(CModuleApp& Module);
 
-	static E_DoEventsResult DoEvents(bool bOnce=false);
-
 	static bool removeMsg(UINT uMsg);
 
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
@@ -141,9 +139,10 @@ public:
 		});
 	}
 
-	static void thread(const function<void()>& cb);
-	static bool threadEx(const function<bool()>& cb);
+	void thread(const function<void()>& cb);
 	
+	E_DoEventsResult DoEvents(bool bOnce=false);
+
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;

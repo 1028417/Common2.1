@@ -176,7 +176,7 @@ void CProgressDlg::OnCancel()
 
 	while (0 != this->GetActiveCount())
 	{
-		(void)::DoEvents(); // 必须的
+		(void)CMainApp::GetMainApp()->DoEvents(); // 必须的
 	}
 
 	__super::OnCancel();

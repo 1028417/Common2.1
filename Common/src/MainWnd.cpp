@@ -3,6 +3,8 @@
 
 #include <MainWnd.h>
 
+#include <app.h>
+
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
 	ON_WM_MOVE()
@@ -106,7 +108,7 @@ void CMainWnd::resizeView(bool bManual)
 
 	g_bResizing = true;
 
-	(void)::DoEvents();
+	(void)CMainApp::GetMainApp()->DoEvents();
 
 	g_bResizing = false;
 

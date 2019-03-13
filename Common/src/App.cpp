@@ -117,47 +117,53 @@ void CMainApp::sync(const CB_Sync& cb)
 
 void CMainApp::thread(const function<void()>& cb)
 {
-	DWORD dwThreadID = ::GetCurrentThreadId();
-
 	bool bExit = false;
 	std::thread([&]() {
 		cb();
 
 		bExit = true;
 
-		::PostThreadMessage(dwThreadID, WM_NULL, 0, 0);
+		this->PostThreadMessage(WM_NULL,0,0);
 	}).detach();
-
-	auto pMainApp = GetMainApp();
-	if (dwThreadID != pMainApp->m_nThreadID)
-	{
-		pMainApp = NULL;
-	}
 
 	MSG msg;
 	while (!bExit && ::GetMessage(&msg, NULL, 0, 0))
 	{
-		if (NULL != pMainApp)
+		if (!AfxPreTranslateMessage(&msg))
 		{
-			if (!pMainApp->PreTranslateMessage(&msg))
-			{
-				continue;
-			}
+			(void)::TranslateMessage(&msg);
+			(void)::DispatchMessage(&msg);
 		}
-
-		(void)::TranslateMessage(&msg);
-		(void)::DispatchMessage(&msg);
 	}
 }
 
-bool CMainApp::threadEx(const function<bool()>& cb)
+E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 {
-	bool bRet = false;
-	thread([&]() {
-		bRet = cb();
-	});
+	bool bFlag = false;
 
-	return bRet;
+	MSG msg;
+	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		bFlag = true;
+
+		if (!AfxPreTranslateMessage(&msg))
+		{
+			(void)::TranslateMessage(&msg);
+			(void)::DispatchMessage(&msg);
+		}
+
+		if (msg.message == WM_QUIT)
+		{
+			return E_DoEventsResult::DER_Quit;
+		}
+
+		if (bOnce)
+		{
+			break;
+		}
+	}
+
+	return bFlag ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
 BOOL CMainApp::InitInstance()
@@ -429,17 +435,6 @@ bool CMainApp::_HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 void CMainApp::Quit()
 {
 	AfxPostQuitMessage(0);
-}
-
-E_DoEventsResult CMainApp::DoEvents(bool bOnce)
-{
-	int iRet = ::DoEvents(bOnce);
-	if (-1 == iRet)
-	{
-		return E_DoEventsResult::DER_Quit;
-	}
-
-	return iRet ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
 bool CMainApp::removeMsg(UINT uMsg)
