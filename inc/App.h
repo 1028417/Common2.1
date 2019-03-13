@@ -5,8 +5,6 @@
 
 using CB_Timer = function<bool()>;
 
-using CB_Async = fn_voidvoid;
-
 using CB_Sync = fn_voidvoid;
 
 class IView
@@ -131,7 +129,7 @@ public:
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
 	static void killTimer(UINT_PTR idEvent);
 
-	static void async(const CB_Async& cb, UINT uDelayTime=0);
+	static void async(const CB_Sync& cb, UINT uDelayTime=0);
 
 	static void sync(const CB_Sync& cb);
 
@@ -143,20 +141,9 @@ public:
 		});
 	}
 
-	using CB_Thread = function<CB_Sync()>;
-	static void thread(const CB_Thread& cb)
-	{
-		std::thread([=]() {
-			auto ret = cb();
-			if (ret)
-			{
-				sync([&]() {
-					ret();
-				});
-			}
-		}).detach();
-	}
-
+	static void thread(const function<void()>& cb);
+	static bool threadEx(const function<bool()>& cb);
+	
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;

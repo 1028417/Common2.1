@@ -5,7 +5,7 @@
 
 #include "MainWnd.h"
 
-#define WM_Async WM_USER + 1
+#define WM_Async WM_USER+1
 
 static map<UINT, LPVOID> g_mapInterfaces;
 
@@ -14,7 +14,7 @@ static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 static SMap<UINT, CB_Timer> g_mapTimer;
 static NS_mtutil::CCSLock g_lckTimer;
 
-static CB_Async g_cbAsync;
+static CB_Sync g_cbAsync;
 static NS_mtutil::CCSLock g_lckAsync;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -52,11 +52,11 @@ void CMainApp::killTimer(UINT_PTR idEvent)
 	g_lckTimer.unlock();
 }
 
-static void _async(const CB_Async& cb)
+static void _async(const CB_Sync& cb)
 {
 	g_lckAsync.lock();
 
-	CB_Async cbPrev = g_cbAsync;
+	CB_Sync cbPrev = g_cbAsync;
 	if (cbPrev)
 	{
 		g_cbAsync = [=]() {
@@ -77,11 +77,9 @@ static void _async(const CB_Async& cb)
 	}
 }
 
-static VOID WINAPI APCFunc(ULONG_PTR dwParam)
-{
-}
+static VOID WINAPI APCFunc(ULONG_PTR dwParam){}
 
-void CMainApp::async(const CB_Async& cb, UINT uDelayTime)
+void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
 {
 	_async([=]() {
 		if (0 == uDelayTime)
@@ -115,6 +113,51 @@ void CMainApp::sync(const CB_Sync& cb)
 	});
 
 	::SleepEx(-1, TRUE);
+}
+
+void CMainApp::thread(const function<void()>& cb)
+{
+	DWORD dwThreadID = ::GetCurrentThreadId();
+
+	bool bExit = false;
+	std::thread([&]() {
+		cb();
+
+		bExit = true;
+
+		::PostThreadMessage(dwThreadID, WM_NULL, 0, 0);
+	}).detach();
+
+	auto pMainApp = GetMainApp();
+	if (dwThreadID != pMainApp->m_nThreadID)
+	{
+		pMainApp = NULL;
+	}
+
+	MSG msg;
+	while (!bExit && ::GetMessage(&msg, NULL, 0, 0))
+	{
+		if (NULL != pMainApp)
+		{
+			if (!pMainApp->PreTranslateMessage(&msg))
+			{
+				continue;
+			}
+		}
+
+		(void)::TranslateMessage(&msg);
+		(void)::DispatchMessage(&msg);
+	}
+}
+
+bool CMainApp::threadEx(const function<bool()>& cb)
+{
+	bool bRet = false;
+	thread([&]() {
+		bRet = cb();
+	});
+
+	return bRet;
 }
 
 BOOL CMainApp::InitInstance()
@@ -195,7 +238,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	if (g_cbAsync)
 	{
 		g_lckAsync.lock();
-		CB_Async cb = g_cbAsync;
+		CB_Sync cb = g_cbAsync;
 		g_cbAsync = NULL;
 		g_lckAsync.unlock();
 
