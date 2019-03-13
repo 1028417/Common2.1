@@ -22,8 +22,6 @@ UINT CTabCtrlEx::getItemHeight() const
 
 BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 {
-	SetPadding({ 5,0 });
-
 	SetTabStyle(TabStyle.eTabStyle);
 
 	if (0 != TabStyle.uTabFontSize)
@@ -56,7 +54,7 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 
 void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
 {
-	DWORD dwTabStyle = TCS_FOCUSNEVER | TCS_FORCEICONLEFT;
+	DWORD dwTabStyle = TCS_FOCUSNEVER;
 	//dwTabStyle |= TCS_FLATBUTTONS | TCS_OWNERDRAWFIXED;
 
 	switch (m_eTabStyle = eTabStyle)
