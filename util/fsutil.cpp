@@ -3,6 +3,8 @@
 
 #include <fsutil.h>
 
+#include <sys/utime.h>
+
 bool fsutil::saveFile(const wstring& strFile
 	, const function<void(const function<void(const wstring&)>& fnWrite)>& cb, bool bTrunc, bool bToUTF8)
 {
@@ -116,6 +118,17 @@ int fsutil::GetFileSize(const wstring& strFilePath)
 		return fileStat.st_size;
 	}
 	
+	return -1;
+}
+
+__time64_t fsutil::GetFileModifyTime(const wstring& strFilePath)
+{
+	struct _stat fileStat;
+	if (0 == _wstat(strFilePath.c_str(), &fileStat))
+	{
+		return fileStat.st_mtime;
+	}
+
 	return -1;
 }
 
@@ -343,7 +356,7 @@ bool fsutil_win::DeletePath(const wstring& strPath, HWND hwndParent, const wstri
 	return false;
 }
 
-bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
+bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, bool bSyncModifyTime)
 {
 #define MAX_BUFFER 1024
 	char lpBuffer[MAX_BUFFER];
@@ -398,6 +411,16 @@ bool fsutil_win::CopyFile(const wstring& strSrcFile, const wstring& strSnkFile)
 
 	srcStream.close();
 	snkStream.close();
+
+	if (bResult)
+	{
+		struct _stat fileStat;
+		if (0 == _wstat(strSrcFile.c_str(), &fileStat))
+		{
+			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
+			(void)_wutime(strSnkFile.c_str(), &timbuf);
+		}
+	}
 
 	return bResult;
 }

@@ -35,6 +35,7 @@ public:
 	static bool loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
 
 	static int GetFileSize(const wstring& strFilePath);
+	static __time64_t GetFileModifyTime(const wstring& strFilePath);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
 
@@ -66,7 +67,7 @@ public:
 	
 	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
-	static bool CopyFile(const wstring& strSrcFile, const wstring& strSnkFile);
+	static bool copyFile(const wstring& strSrcFile, const wstring& strSnkFile, bool bSyncModifyTime=false);
 
 	static void ExplorePath(const list<wstring>& lstPath);
 	static void ExplorePath(const wstring& strPath);
