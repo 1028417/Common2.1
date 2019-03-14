@@ -31,6 +31,8 @@ struct tagViewTabStyle
 
 class CTabCtrlEx : public CTabCtrl
 {
+	DECLARE_MESSAGE_MAP()
+
 public:
 	CTabCtrlEx()
 	{
@@ -38,7 +40,7 @@ public:
 
 private:
 	CFontGuard m_fontGuard;
-	
+
 	E_TabStyle m_eTabStyle = E_TabStyle::TS_HideTab;
 
 	CImageList m_Imglst;
@@ -67,7 +69,9 @@ private:
 	
 	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 
-	void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	void OnPaint();
+
+	void _drawItem(CDC& dc, int nItem, CRect& rcItem);
 };
 
 enum class E_DockViewType

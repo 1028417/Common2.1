@@ -757,9 +757,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	case NM_CUSTOMDRAW:
 	{
 		__EnsureBreak(m_bCusomDrawNotify);
-
 		LPNMLVCUSTOMDRAW pLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(&NMHDR);
-
 		if (CDDS_PREPAINT == pLVCD->nmcd.dwDrawStage)
 		{
 			*pResult = CDRF_NOTIFYITEMDRAW;

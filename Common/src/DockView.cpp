@@ -105,7 +105,7 @@ BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
 	UINT cy = 1;
 	if (E_TabStyle::TS_Top == m_eTabStyle || E_TabStyle::TS_Bottom == m_eTabStyle)
 	{
-		cy = uTabHeight;
+	cy = uTabHeight;
 	}
 	else if (E_TabStyle::TS_Left == m_eTabStyle || E_TabStyle::TS_Right == m_eTabStyle)
 	{
@@ -176,28 +176,80 @@ BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
-void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+BEGIN_MESSAGE_MAP(CTabCtrlEx, CTabCtrl)
+	ON_WM_PAINT()
+END_MESSAGE_MAP()
+
+void CTabCtrlEx::OnPaint()
 {
-	CDC dc;
-	dc.Attach(lpDrawItemStruct->hDC);
+	if (E_TabStyle::TS_Top != m_eTabStyle && E_TabStyle::TS_Bottom != m_eTabStyle)
+	{
+		__super::OnPaint();
+		return;
+	}
 
-	CRect rcItem(lpDrawItemStruct->rcItem);
+	CPaintDC dc(this);
 
-	auto bkColor = RGB(255, 255, 255);
-	dc.FillSolidRect(rcItem, bkColor);
-	
+	//调用默认的OnPaint(),把图形画在内存DC表上
+	DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, (LPARAM)0);
+
+	CRect rcClient;
+	GetClientRect(&rcClient);
+	dc.FillSolidRect(&rcClient, RGB(240, 240, 240));
+
+	dc.SetBkMode(TRANSPARENT);
+
+	CRect rcItem;
+
+	auto nItemCount = GetItemCount();
+	for (int nItem = 0; nItem < nItemCount; nItem++)
+	{
+		GetItemRect(nItem, rcItem);
+		if (E_TabStyle::TS_Bottom == m_eTabStyle)
+		{
+			rcItem.top -= 2;
+			rcItem.bottom = rcClient.bottom;
+		}
+		else if (E_TabStyle::TS_Top == m_eTabStyle)
+		{
+			rcItem.bottom += 2;
+		}
+
+		_drawItem(dc, nItem, rcItem);
+	}
+}
+
+void CTabCtrlEx::_drawItem(CDC& dc, int nItem, CRect& rcItem)
+{
+	if (GetCurSel() == nItem)
+	{
+		dc.FillSolidRect(rcItem, RGB(255, 255, 255));
+	}
+
 	TC_ITEMW tci;
 	memset(&tci, 0, sizeof tci);
 	tci.mask = TCIF_TEXT | TCIF_IMAGE;
 	wchar_t szTabText[256]{ 0 };
 	tci.pszText = szTabText;
 	tci.cchTextMax = sizeof(szTabText) - 1;
-	GetItem(lpDrawItemStruct->itemID, &tci);
+	GetItem(nItem, &tci);
 
-	::SetBkColor(lpDrawItemStruct->hDC, bkColor);
+	CImageList *pImgLst = GetImageList();
+	if (NULL != pImgLst)
+	{
+		IMAGEINFO ImageInfo;
+		memset(&ImageInfo, 0, sizeof ImageInfo);
+		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
+		{
+			int nSize = rcItem.Height();
+			int nLeft = rcItem.left + (nSize - (ImageInfo.rcImage.right - ImageInfo.rcImage.left)) / 2;
+			int nTop = rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
+			pImgLst->Draw(&dc, tci.iImage, { nLeft, nTop }, ILD_TRANSPARENT);
+			rcItem.left += nSize;
+		}
+	}
+
 	dc.DrawText(tci.pszText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
-
-	dc.Detach();
 }
 
 
