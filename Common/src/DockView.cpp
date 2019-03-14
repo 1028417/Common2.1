@@ -195,36 +195,76 @@ void CTabCtrlEx::OnPaint()
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
-	dc.FillSolidRect(&rcClient, RGB(240, 240, 240));
+
+	if (E_TabStyle::TS_Bottom == m_eTabStyle)
+	{
+		rcClient.top -= 2;
+		rcClient.bottom += 1;
+	}
+	else if (E_TabStyle::TS_Top == m_eTabStyle)
+	{
+		rcClient.bottom += 2;
+		rcClient.top -= 1;
+	}
+	dc.FillSolidRect(&rcClient, RGB(255, 255, 255));
 
 	dc.SetBkMode(TRANSPARENT);
 
 	CRect rcItem;
-
 	auto nItemCount = GetItemCount();
 	for (int nItem = 0; nItem < nItemCount; nItem++)
 	{
 		GetItemRect(nItem, rcItem);
 		if (E_TabStyle::TS_Bottom == m_eTabStyle)
 		{
-			rcItem.top -= 2;
 			rcItem.bottom = rcClient.bottom;
 		}
 		else if (E_TabStyle::TS_Top == m_eTabStyle)
 		{
-			rcItem.bottom += 2;
+			rcItem.top = rcClient.top;
 		}
 
 		_drawItem(dc, nItem, rcItem);
 	}
 }
 
+#define __Offset 8
+
+#define BkgColor_Hit RGB(229, 243, 255)
+
 void CTabCtrlEx::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 {
 	if (GetCurSel() == nItem)
 	{
-		dc.FillSolidRect(rcItem, RGB(255, 255, 255));
+		POINT pt[]{ { rcItem.left, rcItem.bottom }
+			, { rcItem.left-__Offset, rcItem.top }
+			, { rcItem.right- __Offset, rcItem.top }
+			, { rcItem.right+__Offset, rcItem.bottom }
+		};
+		if (nItem > 0)
+		{
+			pt[0].x += __Offset;
+		}
+		CRgn rgn;
+		if (!rgn.CreatePolygonRgn(pt, sizeof(pt)/sizeof(pt[0]), ALTERNATE))
+		{
+			return;
+		}
+
+		CBrush brsh(BkgColor_Hit);
+		dc.FillRgn(&rgn, &brsh);
 	}
+
+	Graphics graphics(dc.m_hDC);
+	Pen pen(Color(225, 225, 225), 1);
+
+	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
+	graphics.DrawLine(&pen, rcItem.left-__Offset, rcItem.top, rcItem.right-__Offset, rcItem.top);
+	if (nItem > 0)
+	{
+		graphics.DrawLine(&pen, rcItem.left-__Offset, rcItem.top, rcItem.left+__Offset, rcItem.bottom);
+	}
+	graphics.DrawLine(&pen, rcItem.right-__Offset, rcItem.top, rcItem.right+__Offset, rcItem.bottom);
 
 	TC_ITEMW tci;
 	memset(&tci, 0, sizeof tci);
@@ -242,10 +282,15 @@ void CTabCtrlEx::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
 		{
 			int nSize = rcItem.Height();
+
+			rcItem.left += 8;
 			int nLeft = rcItem.left + (nSize - (ImageInfo.rcImage.right - ImageInfo.rcImage.left)) / 2;
-			int nTop = rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
-			pImgLst->Draw(&dc, tci.iImage, { nLeft, nTop }, ILD_TRANSPARENT);
 			rcItem.left += nSize;
+
+			int nTop = rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
+			nTop = max(nTop, 1);
+
+			pImgLst->Draw(&dc, tci.iImage, { nLeft, nTop }, ILD_TRANSPARENT);
 		}
 	}
 

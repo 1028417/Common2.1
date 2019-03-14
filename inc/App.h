@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include <gdiplus.h>
+using namespace Gdiplus;
+
 #include <ModuleApp.h>
 
 using CB_Timer = function<bool()>;

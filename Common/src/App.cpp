@@ -5,6 +5,8 @@
 
 #include "MainWnd.h"
 
+#pragma comment(lib, "gdiplus.lib")
+
 #define WM_Async WM_USER+1
 
 static map<UINT, LPVOID> g_mapInterfaces;
@@ -180,6 +182,10 @@ BOOL CMainApp::InitInstance()
 	//(void)::OleInitialize(NULL);
 
 	AfxEnableControlContainer();
+
+    GdiplusStartupInput gdiplusStartupInput;
+    ULONG_PTR gdiplusToken = 0;
+    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	srand(GetTickCount());
 
