@@ -60,8 +60,6 @@ public:
 
 	BOOL SetFontSize(int iFontSizeOffset);
 
-	BOOL SetTabHeight(UINT uTabHeight);
-
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent);
 
 private:
@@ -71,7 +69,7 @@ private:
 
 	void OnPaint();
 
-	void _drawItem(CDC& dc, int nItem, CRect& rcItem);
+	void _drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem);
 };
 
 enum class E_DockViewType

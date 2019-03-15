@@ -3,6 +3,8 @@
 
 #include <DockView.h>
 
+#define __Offset 8
+
 UINT CTabCtrlEx::getItemHeight() const
 {
 	switch (m_eTabStyle)
@@ -45,7 +47,25 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 		}
 		else
 		{
-			__EnsureReturn(SetTabHeight(TabStyle.uTabHeight), FALSE);
+			UINT cx = 1;
+			UINT cy = 1;
+			if (E_TabStyle::TS_Top == m_eTabStyle || E_TabStyle::TS_Bottom == m_eTabStyle)
+			{
+				cy = TabStyle.uTabHeight;
+			}
+			else if (E_TabStyle::TS_Left == m_eTabStyle || E_TabStyle::TS_Right == m_eTabStyle)
+			{
+				cx = TabStyle.uTabHeight;
+			}
+			else
+			{
+				return TRUE;
+			}
+
+			__EnsureReturn(m_Imglst.Create(cx, cy, ILC_COLOR, 0, 0), FALSE);
+			SetImageList(&m_Imglst);
+
+			(void)GetItemRect(0, m_rcTabItem);
 		}
 	}
 	
@@ -81,47 +101,6 @@ BOOL CTabCtrlEx::SetFontSize(int iFontSizeOffset)
 	__EnsureReturn(0 != iFontSizeOffset, FALSE);
 	
 	return m_fontGuard.setFont(*this, iFontSizeOffset);
-}
-
-BOOL CTabCtrlEx::SetTabHeight(UINT uTabHeight)
-{
-	__EnsureReturn(0 != uTabHeight, FALSE);
-
-	auto pImglst = GetImageList();
-	if (NULL != pImglst)
-	{
-		if (pImglst != &m_Imglst)
-		{
-			return FALSE;
-		}
-	}
-
-	if (m_Imglst)
-	{
-		__EnsureReturn(m_Imglst.DeleteImageList(), FALSE);
-	}
-
-	UINT cx = 1;
-	UINT cy = 1;
-	if (E_TabStyle::TS_Top == m_eTabStyle || E_TabStyle::TS_Bottom == m_eTabStyle)
-	{
-	cy = uTabHeight;
-	}
-	else if (E_TabStyle::TS_Left == m_eTabStyle || E_TabStyle::TS_Right == m_eTabStyle)
-	{
-		cx = uTabHeight;
-	}
-	else
-	{
-		return FALSE;
-	}
-
-	__EnsureReturn(m_Imglst.Create(cx, cy, ILC_COLOR, 0, 0), FALSE);
-	SetImageList(&m_Imglst);
-
-	(void)GetItemRect(0, m_rcTabItem);
-
-	return TRUE;
 }
 
 void CTabCtrlEx::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
@@ -196,75 +175,89 @@ void CTabCtrlEx::OnPaint()
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
-	if (E_TabStyle::TS_Bottom == m_eTabStyle)
+	if (E_TabStyle::TS_Top == m_eTabStyle)
 	{
 		rcClient.top -= 2;
-		rcClient.bottom += 1;
 	}
-	else if (E_TabStyle::TS_Top == m_eTabStyle)
+	else if (E_TabStyle::TS_Bottom == m_eTabStyle)
 	{
 		rcClient.bottom += 2;
-		rcClient.top -= 1;
 	}
-	dc.FillSolidRect(&rcClient, RGB(255, 255, 255));
+	dc.FillSolidRect(&rcClient, __Color_White);
 
 	dc.SetBkMode(TRANSPARENT);
+
+	Graphics graphics(dc.m_hDC);
 
 	CRect rcItem;
 	auto nItemCount = GetItemCount();
 	for (int nItem = 0; nItem < nItemCount; nItem++)
 	{
 		GetItemRect(nItem, rcItem);
-		if (E_TabStyle::TS_Bottom == m_eTabStyle)
+
+		if (0 == nItem)
 		{
-			rcItem.bottom = rcClient.bottom;
+			rcItem.left = rcClient.left;
 		}
-		else if (E_TabStyle::TS_Top == m_eTabStyle)
+
+		if (E_TabStyle::TS_Top == m_eTabStyle)
 		{
 			rcItem.top = rcClient.top;
 		}
+		else if (E_TabStyle::TS_Bottom != m_eTabStyle)
+		{
+			rcItem.bottom = rcClient.bottom;
+		}
 
-		_drawItem(dc, nItem, rcItem);
+		_drawItem(dc, graphics, nItem, rcItem);
 	}
 }
 
-#define __Offset 8
+static const Color g_ckSel(255, 255, 255);
+static const Color g_crUnsel(242, 242, 242);
 
-#define BkgColor_Hit RGB(229, 243, 255)
-
-void CTabCtrlEx::_drawItem(CDC& dc, int nItem, CRect& rcItem)
+void CTabCtrlEx::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 {
-	if (GetCurSel() == nItem)
-	{
-		POINT pt[]{ { rcItem.left, rcItem.bottom }
-			, { rcItem.left-__Offset, rcItem.top }
-			, { rcItem.right- __Offset, rcItem.top }
-			, { rcItem.right+__Offset, rcItem.bottom }
-		};
-		if (nItem > 0)
-		{
-			pt[0].x += __Offset;
-		}
-		CRgn rgn;
-		if (!rgn.CreatePolygonRgn(pt, sizeof(pt)/sizeof(pt[0]), ALTERNATE))
-		{
-			return;
-		}
+	bool bSel = GetCurSel() == nItem;
 
-		CBrush brsh(BkgColor_Hit);
-		dc.FillRgn(&rgn, &brsh);
-	}
+	Point pt[]{ { rcItem.left, rcItem.bottom }
+		, { rcItem.left, rcItem.top }
+		, { rcItem.right - __Offset, rcItem.top }
+		, { rcItem.right, rcItem.bottom }
+	};
 
-	Graphics graphics(dc.m_hDC);
-	Pen pen(Color(225, 225, 225), 1);
-
-	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
-	graphics.DrawLine(&pen, rcItem.left-__Offset, rcItem.top, rcItem.right-__Offset, rcItem.top);
 	if (nItem > 0)
 	{
-		graphics.DrawLine(&pen, rcItem.left-__Offset, rcItem.top, rcItem.left+__Offset, rcItem.bottom);
+		pt[0].X += +__Offset;
 	}
-	graphics.DrawLine(&pen, rcItem.right-__Offset, rcItem.top, rcItem.right+__Offset, rcItem.bottom);
+
+	if (E_TabStyle::TS_Bottom == m_eTabStyle)
+	{
+		std::swap(pt[0].X, pt[1].X);
+		std::swap(pt[2].X, pt[3].X);
+	}
+
+	//if (!rgn.CreatePolygonRgn(pt, sizeof(pt)/sizeof(pt[0]), ALTERNATE))
+	//{
+	//	return;
+	//}
+	//CBrush brsh(bSel ? __Color_White : BkgColor_Unselect);
+	//dc.FillRgn(&rgn, &brsh);
+	
+	SolidBrush whiteBrush(bSel ? g_ckSel : g_crUnsel);
+	graphics.FillPolygon(&whiteBrush, pt, sizeof(pt) / sizeof(pt[0]));
+
+	static const Pen s_pen(Color(225, 225, 225), 1);
+	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
+	if (nItem > 0)
+	{
+		graphics.DrawLine(&s_pen, pt[0].X, pt[0].Y + 1, pt[1].X, pt[1].Y + 1);
+	}
+	if (!bSel)
+	{
+		graphics.DrawLine(&s_pen, pt[1].X, pt[1].Y+1, pt[2].X, pt[2].Y+1);
+	}
+	graphics.DrawLine(&s_pen, pt[2].X, pt[2].Y, pt[3].X, pt[3].Y);
 
 	TC_ITEMW tci;
 	memset(&tci, 0, sizeof tci);
@@ -283,12 +276,11 @@ void CTabCtrlEx::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 		{
 			int nSize = rcItem.Height();
 
-			rcItem.left += 8;
+			rcItem.left += __Offset;
 			int nLeft = rcItem.left + (nSize - (ImageInfo.rcImage.right - ImageInfo.rcImage.left)) / 2;
 			rcItem.left += nSize;
 
-			int nTop = rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
-			nTop = max(nTop, 1);
+			int nTop = 2+rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
 
 			pImgLst->Draw(&dc, tci.iImage, { nLeft, nTop }, ILD_TRANSPARENT);
 		}
