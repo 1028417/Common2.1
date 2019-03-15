@@ -249,15 +249,17 @@ void CTabCtrlEx::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem
 
 	static const Pen s_pen(Color(225, 225, 225), 1);
 	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
-	if (nItem > 0)
-	{
-		graphics.DrawLine(&s_pen, pt[0].X, pt[0].Y + 1, pt[1].X, pt[1].Y + 1);
-	}
 	if (!bSel)
 	{
-		graphics.DrawLine(&s_pen, pt[1].X, pt[1].Y+1, pt[2].X, pt[2].Y+1);
+		if (nItem > 0)
+		{
+			graphics.DrawLine(&s_pen, pt[0].X, pt[0].Y + 1, pt[1].X, pt[1].Y + 1);
+		}
+
+		graphics.DrawLine(&s_pen, pt[1].X, pt[1].Y + 1, pt[2].X, pt[2].Y + 1);
+
+		graphics.DrawLine(&s_pen, pt[2].X, pt[2].Y, pt[3].X, pt[3].Y);
 	}
-	graphics.DrawLine(&s_pen, pt[2].X, pt[2].Y, pt[3].X, pt[3].Y);
 
 	TC_ITEMW tci;
 	memset(&tci, 0, sizeof tci);
