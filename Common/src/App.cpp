@@ -114,7 +114,7 @@ void CMainApp::sync(const CB_Sync& cb)
 		QueueUserAPC(APCFunc, hThread, 0);
 	});
 
-	::SleepEx(-1, TRUE);
+::SleepEx(-1, TRUE);
 }
 
 void CMainApp::thread(const function<void()>& cb)
@@ -125,7 +125,7 @@ void CMainApp::thread(const function<void()>& cb)
 
 		bExit = true;
 
-		this->PostThreadMessage(WM_NULL,0,0);
+		this->PostThreadMessage(WM_NULL, 0, 0);
 	}).detach();
 
 	MSG msg;
@@ -183,9 +183,9 @@ BOOL CMainApp::InitInstance()
 
 	AfxEnableControlContainer();
 
-    GdiplusStartupInput gdiplusStartupInput;
-    ULONG_PTR gdiplusToken = 0;
-    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken = 0;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	srand(GetTickCount());
 
@@ -193,7 +193,7 @@ BOOL CMainApp::InitInstance()
 	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
 	m_strAppPath = fsutil::GetParentDir(pszPath);
 	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
-
+	
 	__AssertReturn(getController().init(), FALSE);
 
 	CMainWnd *pMainWnd = getView().init();
@@ -342,7 +342,6 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-
 	break;
 	}
 

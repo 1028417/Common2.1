@@ -2,6 +2,16 @@
 
 #include <Page.h>
 
+template <class T>
+class CTouchWnd : public T
+{
+public:
+	CTouchWnd() {}
+
+protected:
+	virtual ULONG GetGestureStatus(CPoint ptTouch) override { return 0; }
+};
+
 class __CommonExt CResGuard
 {
 public:

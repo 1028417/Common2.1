@@ -5,7 +5,7 @@
 
 #include <Guard.h>
 
-class __CommonExt CBaseTree: public CTreeCtrl
+class __CommonExt CBaseTree: public CTouchWnd<CTreeCtrl>
 {
 public:
 	~CBaseTree()

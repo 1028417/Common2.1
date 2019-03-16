@@ -137,7 +137,7 @@ public:
 	}
 };
 
-class __CommonExt CObjectList : public CListCtrl
+class __CommonExt CObjectList : public CTouchWnd<CListCtrl>
 {
 public:
 	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
