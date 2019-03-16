@@ -109,9 +109,12 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				RECT rcPreClient{ 0,0,0,0 };
 				::GetClientRect(hWnd, &rcPreClient);
 
-				::MoveWindow(hWnd, 0, 0, pInstance->m_nWidth, pInstance->m_nHeight, FALSE);
-				//::CenterWindow(hWnd);
-
+				RECT rcWnd{0,0,0,0};
+				GetWindowRect(hWnd, &rcWnd);
+				(void)::MoveWindow(hWnd, (rcWnd.left + rcWnd.right)/2 - pInstance->m_nWidth / 2
+					, (rcWnd.top+ rcWnd.bottom)/2 - pInstance->m_nHeight / 2
+					, pInstance->m_nWidth, pInstance->m_nHeight, TRUE);
+				
 				RECT rcClient{0,0,0,0};
 				::GetClientRect(hWnd, &rcClient);
 				
