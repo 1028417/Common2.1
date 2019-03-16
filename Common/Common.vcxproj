@@ -142,7 +142,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\DragDrop.cpp" />
-    <ClCompile Include="src\LogList.cpp" />
     <ClCompile Include="src\ListCtrl.cpp" />
     <ClCompile Include="src\PathCtrl.cpp" />
     <ClCompile Include="src\ProgressDlg.cpp" />
@@ -163,7 +162,6 @@
     <ClInclude Include="..\inc\DragDrop.h" />
     <ClInclude Include="..\inc\Guard.h" />
     <ClInclude Include="..\inc\img.h" />
-    <ClInclude Include="..\inc\LogList.h" />
     <ClInclude Include="..\inc\MainWnd.h" />
     <ClInclude Include="..\inc\ListCtrl.h" />
     <ClInclude Include="..\inc\ModuleApp.h" />

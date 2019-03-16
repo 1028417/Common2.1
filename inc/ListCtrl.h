@@ -5,12 +5,12 @@
 
 #include <Guard.h>
 
-class CHeader : public CHeaderCtrl
+class CListHeader : public CHeaderCtrl
 {
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CHeader(){}
+	CListHeader(){}
 	
 private:
 	UINT m_uHeight = 0;
@@ -188,7 +188,7 @@ private:
 
 	CFontGuard m_fontGuard;
 
-	CHeader m_wndHeader;
+	CListHeader m_wndHeader;
 
 	UINT m_uColumnCount = 1;
 

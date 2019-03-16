@@ -29,12 +29,12 @@ struct tagViewTabStyle
 	UINT uTabWidth = 0;
 };
 
-class CTabCtrlEx : public CTabCtrl
+class CViewTab : public CTabCtrl
 {
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CTabCtrlEx()
+	CViewTab()
 	{
 	}
 
@@ -143,7 +143,7 @@ public:
 private:
 	tagViewStyle m_ViewStyle;
 	
-	CTabCtrlEx m_wndTabCtrl;
+	CViewTab m_wndTabCtrl;
 
 	typedef vector<CPage*> PageVector;
 	PageVector m_vctPages;

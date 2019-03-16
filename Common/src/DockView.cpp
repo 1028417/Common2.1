@@ -5,7 +5,7 @@
 
 #define __Offset 8
 
-UINT CTabCtrlEx::getItemHeight() const
+UINT CViewTab::getItemHeight() const
 {
 	switch (m_eTabStyle)
 	{
@@ -22,7 +22,7 @@ UINT CTabCtrlEx::getItemHeight() const
 	}
 }
 
-BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
+BOOL CViewTab::init(const tagViewTabStyle& TabStyle)
 {
 	SetTabStyle(TabStyle.eTabStyle);
 
@@ -72,7 +72,7 @@ BOOL CTabCtrlEx::init(const tagViewTabStyle& TabStyle)
 	return TRUE;
 }
 
-void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
+void CViewTab::SetTabStyle(E_TabStyle eTabStyle)
 {
 	DWORD dwTabStyle = TCS_FOCUSNEVER;
 	//dwTabStyle |= TCS_FLATBUTTONS | TCS_OWNERDRAWFIXED;
@@ -96,21 +96,21 @@ void CTabCtrlEx::SetTabStyle(E_TabStyle eTabStyle)
 	ModifyStyle(0, dwTabStyle);
 }
 
-BOOL CTabCtrlEx::SetFontSize(int iFontSizeOffset)
+BOOL CViewTab::SetFontSize(int iFontSizeOffset)
 {
 	__EnsureReturn(0 != iFontSizeOffset, FALSE);
 	
 	return m_fontGuard.setFont(*this, iFontSizeOffset);
 }
 
-void CTabCtrlEx::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
+void CViewTab::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 {
 	m_cbMouseEvent = cbMouseEvent;
 
 	m_iTrackMouseFlag = 0;
 }
 
-void CTabCtrlEx::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
+void CViewTab::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
 {
 	m_iTrackMouseFlag = 0;
 
@@ -120,7 +120,7 @@ void CTabCtrlEx::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& 
 	}
 }
 
-BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	switch (message)
 	{
@@ -155,11 +155,11 @@ BOOL CTabCtrlEx::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
-BEGIN_MESSAGE_MAP(CTabCtrlEx, CTabCtrl)
+BEGIN_MESSAGE_MAP(CViewTab, CTabCtrl)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
-void CTabCtrlEx::OnPaint()
+void CViewTab::OnPaint()
 {
 	if (E_TabStyle::TS_Top != m_eTabStyle && E_TabStyle::TS_Bottom != m_eTabStyle)
 	{
@@ -216,7 +216,7 @@ void CTabCtrlEx::OnPaint()
 static const Color g_ckSel(255, 255, 255);
 static const Color g_crUnsel(242, 242, 242);
 
-void CTabCtrlEx::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
+void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 {
 	bool bSel = GetCurSel() == nItem;
 

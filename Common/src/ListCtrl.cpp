@@ -3,11 +3,11 @@
 
 #include <ListCtrl.h>
 
-BEGIN_MESSAGE_MAP(CHeader, CHeaderCtrl)
+BEGIN_MESSAGE_MAP(CListHeader, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 END_MESSAGE_MAP()
 
-LRESULT CHeader::OnLayout(WPARAM wParam, LPARAM lParam)
+LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 {
 	LRESULT lResult = CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
 
@@ -20,7 +20,7 @@ LRESULT CHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 	return lResult;
 }
 
-BOOL CHeader::Init(UINT uHeight, int iFontSizeOffset)
+BOOL CListHeader::Init(UINT uHeight, int iFontSizeOffset)
 {
 	if (0 != iFontSizeOffset)
 	{

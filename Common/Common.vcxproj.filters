@@ -32,17 +32,11 @@
     <ClCompile Include="src\ListCtrl.cpp">
       <Filter>src\ctrl</Filter>
     </ClCompile>
-    <ClCompile Include="src\LogList.cpp">
-      <Filter>src\ctrl</Filter>
-    </ClCompile>
     <ClCompile Include="src\PathCtrl.cpp">
       <Filter>src\ctrl</Filter>
     </ClCompile>
     <ClCompile Include="src\TreeCtrl.cpp">
       <Filter>src\ctrl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DragDrop.cpp">
-      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ProgressDlg.cpp">
       <Filter>src</Filter>
@@ -54,6 +48,9 @@
       <Filter>src\app</Filter>
     </ClCompile>
     <ClCompile Include="Dump.cpp" />
+    <ClCompile Include="src\DragDrop.cpp">
+      <Filter>src\ctrl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -82,13 +79,7 @@
     <ClInclude Include="..\inc\TreeCtrl.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\LogList.h">
-      <Filter>src\ctrl</Filter>
-    </ClInclude>
     <ClInclude Include="..\inc\CDispatch.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\DragDrop.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\ProgressDlg.h">
@@ -102,6 +93,9 @@
     </ClInclude>
     <ClInclude Include="..\inc\ModuleApp.h">
       <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\DragDrop.h">
+      <Filter>src\ctrl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

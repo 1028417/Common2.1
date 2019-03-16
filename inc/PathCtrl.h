@@ -110,8 +110,6 @@ public:
 
 	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});
 
-	BOOL InitCtrlEx(COLORREF crText, UINT uFontSize = 0);
-
 	void SetPath(CPathObject& dir);
 
 	BOOL IsFileItem(int nItem);

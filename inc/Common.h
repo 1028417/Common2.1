@@ -77,13 +77,11 @@ using CB_TrackMouseEvent = function<void(E_TrackMouseEvent, const CPoint&)>;
 
 #include <Guard.h>
 
-#include <ListCtrl.h>
-
 #include <TreeCtrl.h>
 
-#include <PathCtrl.h>
+#include <ListCtrl.h>
 
-#include <LogList.h>
+#include <PathCtrl.h>
 
 #include <DragDrop.h>
 
