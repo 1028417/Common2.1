@@ -64,6 +64,72 @@ struct tagMenuItemInfo
 	CString strText;
 };
 
+class __CommonExt CMenuEx : public CMenu
+{
+public:
+	CMenuEx(UINT uItemHeight, UINT uItemWidth, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
+		: m_uItemHeight(uItemHeight)
+		, m_uItemWidth(uItemWidth)
+	{
+		if (NULL != hMenuAttach)
+		{
+			Attach(hMenuAttach, bTopMenu);
+		}
+	}
+
+	CMenuEx(CMenuEx& other)
+		: m_uItemHeight(other.m_uItemHeight)
+		, m_uItemWidth(other.m_uItemWidth)
+	{
+		(void)Attach(other);
+	}
+
+	CMenuEx(CMenuEx&& other)
+		: m_uItemHeight(other.m_uItemHeight)
+		, m_uItemWidth(other.m_uItemWidth)
+	{
+		(void)Attach(other);
+	}
+
+	~CMenuEx()
+	{
+		Detach();
+	}
+
+	operator bool () const
+	{
+		return NULL != m_hMenuAttach;
+	}
+
+private:
+	UINT m_uItemHeight = 0;
+	UINT m_uItemWidth = 0;
+
+	HMENU m_hMenuAttach = NULL;
+	BOOL m_bTopMenu = FALSE;
+
+	list<CMenuEx> m_lstSubMenu;
+
+private:
+	void _setOwerDraw();
+
+public:
+	HMENU Detach();
+
+	BOOL Attach(HMENU hMenu, BOOL bTopMenu);
+
+	BOOL Attach(CMenuEx& other)
+	{
+		(void)Detach();
+
+		return Attach(other.Detach(), m_bTopMenu);
+	}
+
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) override;
+
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override;
+};
+
 class __CommonExt CMenuGuard
 {
 public:

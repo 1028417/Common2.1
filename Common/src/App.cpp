@@ -168,10 +168,8 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 	return bFlag ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
-BOOL CMainApp::InitInstance()
+static void _init()
 {
-	__AssertReturn(__super::InitInstance(), FALSE);
-
 	INITCOMMONCONTROLSEX InitCtrls;
 	InitCtrls.dwSize = sizeof(InitCtrls);
 
@@ -188,6 +186,13 @@ BOOL CMainApp::InitInstance()
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	srand(GetTickCount());
+}
+
+BOOL CMainApp::InitInstance()
+{
+	__AssertReturn(__super::InitInstance(), FALSE);
+
+	_init();
 
 	TCHAR pszPath[MAX_PATH];
 	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
