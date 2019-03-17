@@ -109,16 +109,11 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	CRect rcItem = lpDrawItemStruct->rcItem;
 	
-	auto crBk = RGB(251, 251, 251);
-	if (m_bTopMenu)
-	{
-		crBk = GetSysColor(COLOR_MENU);
-	}
+	auto crBk = m_bTopMenu? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
 	if (0 != lpDrawItemStruct->itemID && lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
-		crBk = RGB(229, 243, 255);
+		crBk = m_bTopMenu ? RGB(204, 232, 255) : RGB(229, 243, 255);
 	}
-
 	dc.FillSolidRect(&rcItem, crBk);
 
 	if (0 != lpDrawItemStruct->itemID)
