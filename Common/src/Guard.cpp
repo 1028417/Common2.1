@@ -152,7 +152,7 @@ BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uItemWidth)
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
 	__AssertReturn(hMenu, FALSE);
 	
-	CMenuEx SubMenu(uItemHeight, uItemWidth);
+	CMenuEx SubMenu(uItemHeight+2, uItemWidth);
 	if (!SubMenu.Attach(::GetSubMenu(hMenu, 0)))
 	{
 		(void)::DestroyMenu(hMenu);
