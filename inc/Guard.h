@@ -67,10 +67,22 @@ struct tagMenuItemInfo
 class __CommonExt CMenuGuard
 {
 public:
-	CMenuGuard(UINT uIDMenu);
+	CMenuGuard(CWnd& wndTarget, CResModule& resModule, UINT uIDMenu, BOOL bShowDisable=FALSE)
+		: m_wndTarget(wndTarget)
+		, m_uIDMenu(uIDMenu)
+		, m_resModule(resModule)
+		, m_bShowDisable(bShowDisable)
+	{
+	}
 
 private:
+	CWnd& m_wndTarget;
+
+	CResModule& m_resModule;
+
 	UINT m_uIDMenu = 0;
+	
+	BOOL m_bShowDisable = FALSE;
 
 	map<UINT, tagMenuItemInfo> m_mapMenuItemInfos;
 
@@ -85,9 +97,10 @@ public:
 	void DeleteItem(const std::initializer_list<UINT>& ilIDItems);
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
+	
+	BOOL Popup(UINT uItemHeight, UINT uItemWidth=200);
 
-	BOOL Popup(CPage& Page, BOOL bShowDisable = TRUE);
-	BOOL Popup(CResModule& resModule, CWnd *pWnd);
+	BOOL PopupEx();
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;

@@ -24,10 +24,69 @@ void CRedrawLockGuard::Unlock()
 }
 
 
-CMenuGuard::CMenuGuard(UINT uIDMenu)
-	: m_uIDMenu(uIDMenu)
+class CMenuEx : public CMenu
 {
-}
+public:
+	CMenuEx(UINT uItemHeight, UINT uItemWidth)
+		: m_uItemHeight(uItemHeight)
+		, m_uItemWidth(uItemWidth)
+	{
+	}
+
+private:
+	UINT m_uItemHeight = 0;
+	UINT m_uItemWidth = 0;
+
+public:
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override
+	{
+		CDC dc;
+		dc.Attach(lpDrawItemStruct->hDC);
+
+		CRect rcItem = lpDrawItemStruct->rcItem;
+		
+		auto crBk = RGB(251, 251, 251);
+		if (0 != lpDrawItemStruct->itemID && lpDrawItemStruct->itemState & ODS_SELECTED)
+		{
+			crBk = RGB(229, 243, 255);
+		}
+
+		dc.FillSolidRect(&rcItem, crBk);
+
+		if (0 != lpDrawItemStruct->itemID)
+		{
+			dc.SetBkMode(TRANSPARENT);
+
+			CString str;
+			this->GetMenuString(lpDrawItemStruct->itemID, str, MF_BYCOMMAND);
+			dc.DrawText(str, &rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		}
+		else
+		{
+			CRect rcLine;
+			rcLine.left = rcItem.left+10;
+			rcLine.right = rcItem.right-10;
+			rcLine.top = (rcItem.top + rcItem.bottom) / 2;
+			rcLine.bottom = rcLine.top + 1;
+
+			dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
+		}
+
+		dc.Detach();
+	}
+
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) override
+	{
+		__super::MeasureItem(lpMeasureItemStruct);
+
+		if (0 != lpMeasureItemStruct->itemID)
+		{			
+			lpMeasureItemStruct->itemHeight = m_uItemHeight;
+
+			lpMeasureItemStruct->itemWidth = m_uItemWidth;
+		}
+	}
+};
 
 void CMenuGuard::EnableItem(UINT uIDItem, BOOL bEnable)
 {
@@ -70,6 +129,96 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
+static void MenuToOwerDraw(CMenu& Menu)
+{
+	int iItemCount = Menu.GetMenuItemCount();
+	for (int iItem = 0; iItem < iItemCount; iItem++)
+	{
+		UINT id = Menu.GetMenuItemID(iItem);
+
+		CString str;
+		Menu.GetMenuString(iItem, str, MF_BYPOSITION);
+		(void)Menu.ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, id, (LPCTSTR)str);
+		
+		if (id == -1)//子菜单
+		{
+			MenuToOwerDraw(*Menu.GetSubMenu(iItem)); //递归调用
+		}
+	}
+}
+
+BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uItemWidth)
+{
+	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
+	__AssertReturn(hMenu, FALSE);
+	
+	CMenuEx SubMenu(uItemHeight, uItemWidth);
+	if (!SubMenu.Attach(::GetSubMenu(hMenu, 0)))
+	{
+		(void)::DestroyMenu(hMenu);
+		return FALSE;
+	}
+
+	for (auto& pr : m_mapMenuItemInfos)
+	{
+		auto& uIDItem = pr.first;
+		auto& MenuItemInfo = pr.second;
+		
+		if (!MenuItemInfo.strText.IsEmpty())
+		{
+			(void)SubMenu.ModifyMenu(uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, MenuItemInfo.strText);
+		}
+
+		if (!MenuItemInfo.bEnable)
+		{
+			if (!m_bShowDisable)
+			{
+				(void)SubMenu.RemoveMenu(uIDItem, MF_BYCOMMAND);
+			}
+			else
+			{
+				(void)SubMenu.EnableMenuItem(uIDItem, MF_GRAYED);
+			}
+		}
+	}
+
+	m_mapMenuItemInfos.clear();
+
+	int iCount = SubMenu.GetMenuItemCount();
+	if (iCount > 0)
+	{
+		if (0 == SubMenu.GetMenuItemID(0))
+		{
+			(void)SubMenu.RemoveMenu(0, MF_BYPOSITION);
+			iCount--;
+		}
+
+		if (iCount > 0)
+		{
+			if (0 == SubMenu.GetMenuItemID(iCount - 1))
+			{
+				(void)SubMenu.RemoveMenu(iCount - 1, MF_BYPOSITION);
+			}
+		}
+	}
+	
+	BOOL bRet = FALSE;
+	if (iCount > 0)
+	{
+		MenuToOwerDraw(SubMenu);
+
+		CPoint ptCursor(0, 0);
+		(void)::GetCursorPos(&ptCursor);
+		bRet = SubMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_wndTarget);
+	}
+
+	SubMenu.Detach();
+
+	(void)::DestroyMenu(hMenu);
+
+	return bRet;
+}
+
 static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 {
 	int iCnt = 0;
@@ -108,85 +257,24 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 	return iCnt;
 }
 
-BOOL CMenuGuard::Popup(CResModule& resModule, CWnd *pWnd)
+BOOL CMenuGuard::PopupEx()
 {
-	CResGuard ResGuard(resModule);
-	CMenu menu;
-	__AssertReturn(menu.LoadMenu(m_uIDMenu), FALSE);
-
 	CMenu popupMenu;
 	if (!popupMenu.CreatePopupMenu())
 	{
 		return FALSE;
 	}
 
-	(void)clonePopupMenu(popupMenu.m_hMenu, menu.m_hMenu);
+	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
+	__AssertReturn(hMenu, FALSE);
+
+	(void)clonePopupMenu(popupMenu.m_hMenu, hMenu);
+
+	(void)::DestroyMenu(hMenu);
 
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
-	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
-}
-
-BOOL CMenuGuard::Popup(CPage& Page, BOOL bShowDisable)
-{
-	CResGuard ResGuard(Page.m_resModule);
-	CMenu menu;
-	__AssertReturn(menu.LoadMenu(m_uIDMenu), FALSE);
-	
-	CMenu *pSubMenu = menu.GetSubMenu(0);
-	__AssertReturn(pSubMenu, FALSE);
-
-	for (auto& pr : m_mapMenuItemInfos)
-	{
-		auto& uIDItem = pr.first;
-		auto& MenuItemInfo = pr.second;
-		
-		if (!MenuItemInfo.strText.IsEmpty())
-		{
-			__AssertReturn(pSubMenu->ModifyMenu(uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, MenuItemInfo.strText), FALSE);
-		}
-
-		if (!MenuItemInfo.bEnable)
-		{
-			if (!bShowDisable)
-			{
-				(void)pSubMenu->RemoveMenu(uIDItem, MF_BYCOMMAND);
-			}
-			else
-			{
-				(void)pSubMenu->EnableMenuItem(uIDItem, MF_GRAYED);
-			}
-		}
-	}
-
-	m_mapMenuItemInfos.clear();
-
-	int iCount = pSubMenu->GetMenuItemCount();
-	if (iCount > 0)
-	{
-		if (0 == pSubMenu->GetMenuItemID(0))
-		{
-			(void)pSubMenu->RemoveMenu(0, MF_BYPOSITION);
-			iCount--;
-		}
-
-		if (iCount > 0)
-		{
-			if (0 == pSubMenu->GetMenuItemID(iCount - 1))
-			{
-				(void)pSubMenu->RemoveMenu(iCount - 1, MF_BYPOSITION);
-			}
-		}
-	}
-	
-	if (iCount <= 0)
-	{
-		return TRUE;
-	}
-
-	CPoint ptCursor(0, 0);
-	(void)::GetCursorPos(&ptCursor);
-	return pSubMenu->TrackPopupMenu(0, ptCursor.x, ptCursor.y, &Page);
+	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_wndTarget);
 }
 
 bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
