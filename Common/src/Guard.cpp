@@ -36,7 +36,7 @@ void CMenuEx::_setOwerDraw()
 			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //µÝ¹éµ÷ÓÃ
 		}
 
-		if (!m_bTopMenu)
+		//if (!m_bTopMenu)
 		{
 			CString strText;
 			this->GetMenuString(iItem, strText, MF_BYPOSITION);
@@ -95,6 +95,10 @@ void CMenuEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 		lpMeasureItemStruct->itemHeight = m_uItemHeight;
 
 		lpMeasureItemStruct->itemWidth = m_uItemWidth;
+		if (m_bTopMenu)
+		{
+			lpMeasureItemStruct->itemWidth += 6;
+		}
 	}
 }
 
@@ -104,8 +108,12 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.Attach(lpDrawItemStruct->hDC);
 
 	CRect rcItem = lpDrawItemStruct->rcItem;
-		
+	
 	auto crBk = RGB(251, 251, 251);
+	if (m_bTopMenu)
+	{
+		crBk = GetSysColor(COLOR_MENU);
+	}
 	if (0 != lpDrawItemStruct->itemID && lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		crBk = RGB(229, 243, 255);
