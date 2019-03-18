@@ -124,6 +124,10 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 {
 	switch (message)
 	{
+	case WM_ERASEBKGND:
+		return TRUE;
+
+		break;
 	case WM_MOUSEMOVE:
 		if (0 == m_iTrackMouseFlag)
 		{

@@ -38,24 +38,21 @@ void CMenuEx::_setOwerDraw()
 			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //µÝ¹éµ÷ÓÃ
 		}
 
-		//if (!m_bTopMenu)
-		{
-			CString strText;
-			this->GetMenuString(iItem, strText, MF_BYPOSITION);
+		CString strText;
+		this->GetMenuString(iItem, strText, MF_BYPOSITION);
 
-			tagMENUITEMINFOW mmi;
-			memset(&mmi, 0, sizeof(mmi));
-			mmi.cbSize = sizeof(mmi);
-			mmi.fMask = MIIM_SUBMENU;
-			if (CMenu::GetMenuItemInfo(iItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
-			{
-				(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP
-					, (UINT)mmi.hSubMenu, (LPCTSTR)strText);
-			}
-			else
-			{
-				(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, (LPCTSTR)strText);
-			}
+		tagMENUITEMINFOW mmi;
+		memset(&mmi, 0, sizeof(mmi));
+		mmi.cbSize = sizeof(mmi);
+		mmi.fMask = MIIM_SUBMENU;
+		if (CMenu::GetMenuItemInfo(iItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
+		{
+			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP
+				, (UINT)mmi.hSubMenu, (LPCTSTR)strText);
+		}
+		else
+		{
+			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, (LPCTSTR)strText);
 		}
 	}
 }
@@ -125,8 +122,8 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (0 != lpDrawItemStruct->itemID)
 	{
 		CFont *pFontPrev = NULL;
-
 		CCompatableFont font(m_uFontSize);
+		
 		auto pFont = m_wndTarget.GetFont();
 		if (NULL == pFont)
 		{
@@ -139,7 +136,7 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				pFontPrev = dc.SelectObject(&font);
 			}
 		}
-
+	
 		dc.SetBkMode(TRANSPARENT);
 
 		CString strText;
