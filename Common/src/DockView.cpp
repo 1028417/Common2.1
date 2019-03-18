@@ -132,6 +132,7 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 		if (0 == m_iTrackMouseFlag)
 		{
 			TRACKMOUSEEVENT tme;
+			memset(&tme, 0, sizeof tme);
 			tme.cbSize = sizeof(tme);
 			tme.hwndTrack = m_hWnd;
 			tme.dwFlags = TME_LEAVE | TME_HOVER;
@@ -161,13 +162,7 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 
 BEGIN_MESSAGE_MAP(CViewTab, CTabCtrl)
 	ON_WM_PAINT()
-	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
-
-BOOL CViewTab::OnEraseBkgnd(CDC*)
-{
-	return TRUE;
-}
 
 void CViewTab::OnPaint()
 {

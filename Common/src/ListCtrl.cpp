@@ -932,6 +932,7 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 			if (0 == m_iTrackMouseFlag)
 			{
 				TRACKMOUSEEVENT tme;
+				memset(&tme, 0, sizeof tme);
 				tme.cbSize = sizeof(tme);
 				tme.hwndTrack = m_hWnd;
 				tme.dwFlags = TME_LEAVE | TME_HOVER;

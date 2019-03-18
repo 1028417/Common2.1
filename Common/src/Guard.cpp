@@ -275,9 +275,10 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 	for (int iSrc = 0, iDst = GetMenuItemCount(hDst); iSrc<GetMenuItemCount(hSrc); iSrc++)
 	{
 		CString szMenuStr(L'\0', 256);
-		MENUITEMINFO mInfo = { 0 };
-		mInfo.cbSize = sizeof(mInfo);
-		mInfo.fMask = 0
+		MENUITEMINFO mii;
+		memset(&mii, 0, sizeof mii);
+		mii.cbSize = sizeof(mii);
+		mii.fMask = 0
 			| MIIM_CHECKMARKS //Retrieves or sets the hbmpChecked and hbmpUnchecked members. 
 			| MIIM_DATA //Retrieves or sets the dwItemData member. 
 			| MIIM_ID //Retrieves or sets the wID member. 
@@ -285,21 +286,21 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 			| MIIM_SUBMENU //Retrieves or sets the hSubMenu member. 
 			| MIIM_TYPE //Retrieves or sets the fType and dwTypeData members. 
 			| 0;
-		mInfo.dwTypeData = (LPTSTR)(LPCTSTR)szMenuStr;
-		mInfo.cch = szMenuStr.GetLength();
+		mii.dwTypeData = (LPTSTR)(LPCTSTR)szMenuStr;
+		mii.cch = szMenuStr.GetLength();
 
-		VERIFY(GetMenuItemInfo(hSrc, iSrc, TRUE, &mInfo));
+		VERIFY(GetMenuItemInfo(hSrc, iSrc, TRUE, &mii));
 
 		szMenuStr.Trim();
 
-		if (mInfo.hSubMenu)
+		if (mii.hSubMenu)
 		{
 			HMENU hSub = CreatePopupMenu();
-			clonePopupMenu(hSub, mInfo.hSubMenu);
-			mInfo.hSubMenu = hSub;
+			clonePopupMenu(hSub, mii.hSubMenu);
+			mii.hSubMenu = hSub;
 		}
 
-		InsertMenuItem(hDst, iDst++, TRUE, &mInfo);
+		InsertMenuItem(hDst, iDst++, TRUE, &mii);
 		iCnt++;
 	}
 
