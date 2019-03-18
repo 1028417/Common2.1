@@ -4,6 +4,8 @@
 
 #include "App.h"
 
+#include <afxglobals.h>
+
 // CRedrawLockGuard
 
 CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd)
@@ -32,7 +34,7 @@ void CMenuEx::_setOwerDraw()
 		
 		if (-1 == uItemID)//×Ó²Ëµ¥
 		{
-			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uItemWidth));
+			m_lstSubMenu.push_back(CMenuEx(m_wndTarget, m_uItemHeight, m_uMenuWidth, m_uFontSize));
 			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //µÝ¹éµ÷ÓÃ
 		}
 
@@ -94,11 +96,15 @@ void CMenuEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	{
 		lpMeasureItemStruct->itemHeight = m_uItemHeight;
 
-		lpMeasureItemStruct->itemWidth = m_uItemWidth;
+		lpMeasureItemStruct->itemWidth = m_uMenuWidth;
 		if (m_bTopMenu)
 		{
 			lpMeasureItemStruct->itemWidth += 6;
 		}
+	}
+	else
+	{
+		lpMeasureItemStruct->itemHeight = 5;
 	}
 }
 
@@ -118,11 +124,32 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (0 != lpDrawItemStruct->itemID)
 	{
+		CFont *pFontPrev = NULL;
+
+		CCompatableFont font(m_uFontSize);
+		auto pFont = m_wndTarget.GetFont();
+		if (NULL == pFont)
+		{
+			pFont = dc.GetCurrentFont();
+		}
+		if (NULL != pFont)
+		{
+			if (font.create(*pFont))
+			{
+				pFontPrev = dc.SelectObject(&font);
+			}
+		}
+
 		dc.SetBkMode(TRANSPARENT);
 
 		CString strText;
 		this->GetMenuString(lpDrawItemStruct->itemID, strText, MF_BYCOMMAND);
 		dc.DrawText(strText, &rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+		if (NULL != pFontPrev)
+		{
+			(void)dc.SelectObject(pFontPrev);
+		}
 	}
 	else
 	{
@@ -179,7 +206,7 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
-BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uItemWidth)
+BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uFontSize)
 {
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
 	__AssertReturn(hMenu, FALSE);
@@ -232,7 +259,7 @@ BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uItemWidth)
 	BOOL bRet = FALSE;
 	if (iCount > 0)
 	{
-		CMenuEx SubMenu(uItemHeight + 2, uItemWidth, hSubMenu);
+		CMenuEx SubMenu(m_wndTarget, uItemHeight + 2, m_uMenuWidth, uFontSize, hSubMenu);
 
 		CPoint ptCursor(0, 0);
 		(void)::GetCursorPos(&ptCursor);
@@ -302,22 +329,19 @@ BOOL CMenuGuard::PopupEx()
 	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_wndTarget);
 }
 
-bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
+bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 {
 	if (NULL != m_hObject)
 	{
 		return false;
 	}
 
-	CFont *pFont = wnd.GetFont();
-	if (NULL == pFont)
+	LOGFONT logFont;
+	::ZeroMemory(&logFont, sizeof(logFont));
+	if (0 == font.GetLogFont(&logFont))
 	{
 		return false;
 	}
-
-	LOGFONT logFont;
-	::ZeroMemory(&logFont, sizeof(logFont));
-	(void)pFont->GetLogFont(&logFont);
 
 	logFont.lfQuality = PROOF_QUALITY;
 	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
@@ -342,6 +366,28 @@ bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
 	}
 
 	return true;
+}
+
+bool CCompatableFont::create(CDC& dc, const CB_CompatableFont& cb)
+{
+	auto pFont = dc.GetCurrentFont();
+	if (NULL == pFont)
+	{
+		return false;
+	}
+
+	return create(*pFont, cb);
+}
+
+bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
+{
+	CFont *pFont = wnd.GetFont();
+	if (NULL == pFont)
+	{
+		return false;
+	}
+
+	return create(*pFont, cb);
 }
 
 bool CCompatableFont::create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb)

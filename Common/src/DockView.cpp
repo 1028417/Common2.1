@@ -68,7 +68,7 @@ BOOL CViewTab::init(const tagViewTabStyle& TabStyle)
 			(void)GetItemRect(0, m_rcTabItem);
 		}
 	}
-	
+
 	return TRUE;
 }
 
@@ -157,7 +157,13 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 
 BEGIN_MESSAGE_MAP(CViewTab, CTabCtrl)
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
+
+BOOL CViewTab::OnEraseBkgnd(CDC*)
+{
+	return TRUE;
+}
 
 void CViewTab::OnPaint()
 {
@@ -170,7 +176,7 @@ void CViewTab::OnPaint()
 	CPaintDC dc(this);
 
 	//调用默认的OnPaint(),把图形画在内存DC表上
-	DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, (LPARAM)0);
+	DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
@@ -183,7 +189,6 @@ void CViewTab::OnPaint()
 	{
 		rcClient.bottom += 2;
 	}
-	dc.FillSolidRect(&rcClient, __Color_White);
 
 	dc.SetBkMode(TRANSPARENT);
 
@@ -207,6 +212,11 @@ void CViewTab::OnPaint()
 		else if (E_TabStyle::TS_Bottom != m_eTabStyle)
 		{
 			rcItem.bottom = rcClient.bottom;
+		}
+
+		if (0 == nItem)
+		{
+			dc.FillSolidRect(CRect(rcClient.left, rcItem.top-2, rcClient.right, rcItem.bottom+2), __Color_White);
 		}
 
 		_drawItem(dc, graphics, nItem, rcItem);
@@ -237,13 +247,6 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 		std::swap(pt[2].X, pt[3].X);
 	}
 
-	//if (!rgn.CreatePolygonRgn(pt, sizeof(pt)/sizeof(pt[0]), ALTERNATE))
-	//{
-	//	return;
-	//}
-	//CBrush brsh(bSel ? __Color_White : BkgColor_Unselect);
-	//dc.FillRgn(&rgn, &brsh);
-	
 	SolidBrush whiteBrush(bSel ? g_ckSel : g_crUnsel);
 	graphics.FillPolygon(&whiteBrush, pt, sizeof(pt) / sizeof(pt[0]));
 
@@ -483,7 +486,7 @@ void CDockView::OnSize(UINT nType, int cx, int cy)
 {
 	if (m_wndTabCtrl)
 	{
-		m_wndTabCtrl.MoveWindow(0, 0, cx, cy, g_bManualResize ? FALSE : TRUE);
+		m_wndTabCtrl.MoveWindow(0, 0, cx, cy);// , g_bManualResize ? FALSE : TRUE);
 
 		CPropertyPage *pPage = __super::GetActivePage();
 		if (NULL != pPage)

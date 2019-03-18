@@ -66,7 +66,8 @@ private:
 	void OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point);
 	
 	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
-
+	
+	BOOL OnEraseBkgnd(CDC*);
 	void OnPaint();
 
 	void _drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem);

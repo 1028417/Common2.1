@@ -67,9 +67,11 @@ struct tagMenuItemInfo
 class __CommonExt CMenuEx : public CMenu
 {
 public:
-	CMenuEx(UINT uItemHeight, UINT uItemWidth, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
-		: m_uItemHeight(uItemHeight)
-		, m_uItemWidth(uItemWidth)
+	CMenuEx(CWnd& wndTarget, UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
+		: m_wndTarget(wndTarget)
+		, m_uItemHeight(uItemHeight)
+		, m_uMenuWidth(uMenuWidth)
+		, m_uFontSize(uFontSize)
 	{
 		if (NULL != hMenuAttach)
 		{
@@ -78,15 +80,19 @@ public:
 	}
 
 	CMenuEx(CMenuEx& other)
-		: m_uItemHeight(other.m_uItemHeight)
-		, m_uItemWidth(other.m_uItemWidth)
+		: m_wndTarget(other.m_wndTarget)
+		, m_uItemHeight(other.m_uItemHeight)
+		, m_uMenuWidth(other.m_uMenuWidth)
+		, m_uFontSize(other.m_uFontSize)
 	{
 		(void)Attach(other);
 	}
 
 	CMenuEx(CMenuEx&& other)
-		: m_uItemHeight(other.m_uItemHeight)
-		, m_uItemWidth(other.m_uItemWidth)
+		: m_wndTarget(other.m_wndTarget)
+		, m_uItemHeight(other.m_uItemHeight)
+		, m_uMenuWidth(other.m_uMenuWidth)
+		, m_uFontSize(other.m_uFontSize)
 	{
 		(void)Attach(other);
 	}
@@ -102,9 +108,11 @@ public:
 	}
 
 private:
-	UINT m_uItemHeight = 0;
-	UINT m_uItemWidth = 0;
+	CWnd& m_wndTarget;
 
+	UINT m_uItemHeight = 0;
+	UINT m_uMenuWidth = 0;
+	UINT m_uFontSize = 0;
 	HMENU m_hMenuAttach = NULL;
 	BOOL m_bTopMenu = FALSE;
 
@@ -133,10 +141,11 @@ public:
 class __CommonExt CMenuGuard
 {
 public:
-	CMenuGuard(CWnd& wndTarget, CResModule& resModule, UINT uIDMenu, BOOL bShowDisable=FALSE)
+	CMenuGuard(CWnd& wndTarget, CResModule& resModule, UINT uIDMenu, UINT uMenuWidth, BOOL bShowDisable=FALSE)
 		: m_wndTarget(wndTarget)
 		, m_uIDMenu(uIDMenu)
 		, m_resModule(resModule)
+		, m_uMenuWidth(uMenuWidth)
 		, m_bShowDisable(bShowDisable)
 	{
 	}
@@ -149,6 +158,8 @@ private:
 	UINT m_uIDMenu = 0;
 	
 	BOOL m_bShowDisable = FALSE;
+
+	UINT m_uMenuWidth = 0;
 
 	map<UINT, tagMenuItemInfo> m_mapMenuItemInfos;
 
@@ -164,7 +175,7 @@ public:
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
-	BOOL Popup(UINT uItemHeight, UINT uItemWidth=200);
+	BOOL Popup(UINT uItemHeight, UINT uFontSize=0);
 
 	BOOL PopupEx();
 };
@@ -183,6 +194,10 @@ private:
 	int m_iFontSizeOffset = 0;
 
 public:
+	bool create(CFont& font, const CB_CompatableFont& cb = NULL);
+
+	bool create(CDC& dc, const CB_CompatableFont& cb = NULL);
+
 	bool create(CWnd& wnd, const CB_CompatableFont& cb = NULL);
 
 	bool create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb = NULL);
