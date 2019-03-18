@@ -29,12 +29,6 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	__AssertReturn(this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName, m_WndInfo.strText.c_str()
 		, dwStyle, 0, 0, m_WndInfo.uWidth, m_WndInfo.uHeight, NULL, m_WndInfo.hMenu), FALSE);
 	
-	//if (NULL != m_WndInfo.hIcon)
-	//{
-	//	this->SetIcon(m_WndInfo.hIcon, TRUE);
-	//	this->SetIcon(m_WndInfo.hIcon, FALSE);
-	//}
-
 	return TRUE;
 }
 

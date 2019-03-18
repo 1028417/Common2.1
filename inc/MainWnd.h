@@ -14,8 +14,9 @@ class CPage;
 
 struct tagMainWndInfo
 {
-	HICON hIcon = NULL;
 	wstring strText;
+
+	HICON hIcon = NULL;
 	HMENU hMenu = NULL;
 
 	BOOL bSizeable = FALSE;
