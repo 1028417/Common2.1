@@ -170,9 +170,9 @@ public:
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
-	BOOL Popup(CWnd& wndTarget, UINT uItemHeight, UINT uFontSize=0);
+	BOOL Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize=0);
 
-	BOOL PopupEx(CWnd& wndTarget);
+	BOOL PopupEx(CWnd *pWnd);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;

@@ -191,7 +191,7 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
-BOOL CMenuGuard::Popup(CWnd& wndTarget, UINT uItemHeight, UINT uFontSize)
+BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
 {
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
 	__AssertReturn(hMenu, FALSE);
@@ -248,7 +248,7 @@ BOOL CMenuGuard::Popup(CWnd& wndTarget, UINT uItemHeight, UINT uFontSize)
 
 		CPoint ptCursor(0, 0);
 		(void)::GetCursorPos(&ptCursor);
-		bRet = SubMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &wndTarget);
+		bRet = SubMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
 	}
 
 	(void)::DestroyMenu(hMenu);
@@ -295,7 +295,7 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 	return iCnt;
 }
 
-BOOL CMenuGuard::PopupEx(CWnd& wndTarget)
+BOOL CMenuGuard::PopupEx(CWnd *pWnd)
 {
 	CMenu popupMenu;
 	if (!popupMenu.CreatePopupMenu())
@@ -312,7 +312,7 @@ BOOL CMenuGuard::PopupEx(CWnd& wndTarget)
 
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
-	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &wndTarget);
+	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
 }
 
 bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
