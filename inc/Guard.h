@@ -67,9 +67,8 @@ struct tagMenuItemInfo
 class __CommonExt CMenuEx : public CMenu
 {
 public:
-	CMenuEx(CWnd& wndTarget, UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
-		: m_wndTarget(wndTarget)
-		, m_uItemHeight(uItemHeight)
+	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
+		: m_uItemHeight(uItemHeight)
 		, m_uMenuWidth(uMenuWidth)
 		, m_uFontSize(uFontSize)
 	{
@@ -80,8 +79,7 @@ public:
 	}
 
 	CMenuEx(CMenuEx& other)
-		: m_wndTarget(other.m_wndTarget)
-		, m_uItemHeight(other.m_uItemHeight)
+		: m_uItemHeight(other.m_uItemHeight)
 		, m_uMenuWidth(other.m_uMenuWidth)
 		, m_uFontSize(other.m_uFontSize)
 	{
@@ -89,8 +87,7 @@ public:
 	}
 
 	CMenuEx(CMenuEx&& other)
-		: m_wndTarget(other.m_wndTarget)
-		, m_uItemHeight(other.m_uItemHeight)
+		: m_uItemHeight(other.m_uItemHeight)
 		, m_uMenuWidth(other.m_uMenuWidth)
 		, m_uFontSize(other.m_uFontSize)
 	{
@@ -108,8 +105,6 @@ public:
 	}
 
 private:
-	CWnd& m_wndTarget;
-
 	UINT m_uItemHeight = 0;
 	UINT m_uMenuWidth = 0;
 	UINT m_uFontSize = 0;
@@ -175,9 +170,9 @@ public:
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
-	BOOL Popup(UINT uItemHeight, UINT uFontSize=0);
+	BOOL Popup(CWnd& wndTarget, UINT uItemHeight, UINT uFontSize=0);
 
-	BOOL PopupEx();
+	BOOL PopupEx(CWnd& wndTarget);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;

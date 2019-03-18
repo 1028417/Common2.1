@@ -34,7 +34,7 @@ void CMenuEx::_setOwerDraw()
 		
 		if (-1 == uItemID)//子菜单
 		{
-			m_lstSubMenu.push_back(CMenuEx(m_wndTarget, m_uItemHeight, m_uMenuWidth, m_uFontSize));
+			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uMenuWidth, m_uFontSize));
 			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //递归调用
 		}
 
@@ -121,32 +121,20 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (0 != lpDrawItemStruct->itemID)
 	{
-		CFont *pFontPrev = NULL;
-		CCompatableFont font(m_uFontSize);
-		
-		auto pFont = m_wndTarget.GetFont();
-		if (NULL == pFont)
-		{
-			pFont = dc.GetCurrentFont();
-		}
-		if (NULL != pFont)
-		{
-			if (font.create(*pFont))
-			{
-				pFontPrev = dc.SelectObject(&font);
-			}
-		}
-	
 		dc.SetBkMode(TRANSPARENT);
+
+		CFont *pFontPrev = dc.GetCurrentFont();
+		CCompatableFont font(m_uFontSize);
+		if (font.create(*pFontPrev))
+		{
+			(void)dc.SelectObject(&font);
+		}
 
 		CString strText;
 		this->GetMenuString(lpDrawItemStruct->itemID, strText, MF_BYCOMMAND);
 		dc.DrawText(strText, &rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
-		if (NULL != pFontPrev)
-		{
-			(void)dc.SelectObject(pFontPrev);
-		}
+		
+		(void)dc.SelectObject(pFontPrev);
 	}
 	else
 	{
@@ -203,7 +191,7 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
-BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uFontSize)
+BOOL CMenuGuard::Popup(CWnd& wndTarget, UINT uItemHeight, UINT uFontSize)
 {
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
 	__AssertReturn(hMenu, FALSE);
@@ -256,11 +244,11 @@ BOOL CMenuGuard::Popup(UINT uItemHeight, UINT uFontSize)
 	BOOL bRet = FALSE;
 	if (iCount > 0)
 	{
-		CMenuEx SubMenu(m_wndTarget, uItemHeight + 2, m_uMenuWidth, uFontSize, hSubMenu);
+		CMenuEx SubMenu(uItemHeight + 2, m_uMenuWidth, uFontSize, hSubMenu);
 
 		CPoint ptCursor(0, 0);
 		(void)::GetCursorPos(&ptCursor);
-		bRet = SubMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_wndTarget);
+		bRet = SubMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &wndTarget);
 	}
 
 	(void)::DestroyMenu(hMenu);
@@ -307,7 +295,7 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 	return iCnt;
 }
 
-BOOL CMenuGuard::PopupEx()
+BOOL CMenuGuard::PopupEx(CWnd& wndTarget)
 {
 	CMenu popupMenu;
 	if (!popupMenu.CreatePopupMenu())
@@ -324,7 +312,7 @@ BOOL CMenuGuard::PopupEx()
 
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
-	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &m_wndTarget);
+	return popupMenu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, &wndTarget);
 }
 
 bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
