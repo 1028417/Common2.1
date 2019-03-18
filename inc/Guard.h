@@ -136,9 +136,8 @@ public:
 class __CommonExt CMenuGuard
 {
 public:
-	CMenuGuard(CWnd& wndTarget, CResModule& resModule, UINT uIDMenu, UINT uMenuWidth, BOOL bShowDisable=FALSE)
-		: m_wndTarget(wndTarget)
-		, m_uIDMenu(uIDMenu)
+	CMenuGuard(CResModule& resModule, UINT uIDMenu, UINT uMenuWidth, BOOL bShowDisable=FALSE)
+		: m_uIDMenu(uIDMenu)
 		, m_resModule(resModule)
 		, m_uMenuWidth(uMenuWidth)
 		, m_bShowDisable(bShowDisable)
@@ -146,8 +145,6 @@ public:
 	}
 
 private:
-	CWnd& m_wndTarget;
-
 	CResModule& m_resModule;
 
 	UINT m_uIDMenu = 0;
@@ -158,6 +155,9 @@ private:
 
 	map<UINT, tagMenuItemInfo> m_mapMenuItemInfos;
 
+private:
+	BOOL _popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, UINT uFontSize);
+	
 public:
 	void EnableItem(UINT uIDItem, BOOL bEnable);
 	void EnableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable);
@@ -171,8 +171,7 @@ public:
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
 	BOOL Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize=0);
-
-	BOOL PopupEx(CWnd *pWnd);
+	BOOL PopupEx(CWnd *pWnd, UINT uItemHeight, UINT uFontSize=0);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;
