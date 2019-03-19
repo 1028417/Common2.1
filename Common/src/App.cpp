@@ -19,8 +19,16 @@ static NS_mtutil::CCSLock g_lckTimer;
 static CB_Sync g_cbAsync;
 static NS_mtutil::CCSLock g_lckAsync;
 
+set<UINT_PTR> g_setPendingEvent;
+
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
+	if (g_setPendingEvent.find(idEvent) != g_setPendingEvent.end())
+	{
+		return;
+	}
+	g_setPendingEvent.insert(idEvent);
+
 	g_lckTimer.lock();
 	g_mapTimer.get(idEvent, [&](auto& cb) {
 		g_lckTimer.unlock();
@@ -32,6 +40,8 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	});
 
 	g_lckTimer.unlock();
+	
+	g_setPendingEvent.erase(idEvent);
 }
 
 UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
