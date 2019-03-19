@@ -54,6 +54,8 @@ private:
 	int m_cy = 0;
 
 	SMap<E_DockViewType, CDockView*> m_mapDockViews;
+	
+	bool m_bFullScreen = false;
 
 public:
 	virtual BOOL Create(tagMainWndInfo& MainWndInfo);
@@ -80,6 +82,10 @@ public:
 
 	void show();
 
+	void fixWorkArea();
+
+	void fullScreen();
+
 private:
 	void resizeView(bool bManual=false);
 
@@ -89,8 +95,6 @@ private:
 
 	void setDockSize(CDockView &wndTargetView, UINT x, UINT y);
 	
-	void fixWorkArea();
-
 private:
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

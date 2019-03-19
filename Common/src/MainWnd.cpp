@@ -32,8 +32,23 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	return TRUE;
 }
 
+void CMainWnd::show()
+{
+	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
+	{
+		if (!m_bFullScreen)
+		{
+			fixWorkArea();
+		}
+	}
+
+	ShowWindow(SW_SHOW);
+}
+
 void CMainWnd::fixWorkArea()
 {
+	m_bFullScreen = false;
+	
 	CRect rtWorkArea;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小
 	rtWorkArea.InflateRect(3, 3, 3, 3);
@@ -41,21 +56,23 @@ void CMainWnd::fixWorkArea()
 	this->MoveWindow(rtWorkArea);
 }
 
-void CMainWnd::show()
+void CMainWnd::fullScreen()
 {
-	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
-	{
-		fixWorkArea();
-	}
-
-	ShowWindow(SW_SHOW);
+	m_bFullScreen = true;
+	
+	CRect rtPos(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+	rtPos.InflateRect(3, 3, 3, 3);
+	this->MoveWindow(rtPos);
 }
 
 void CMainWnd::OnMove(int x, int y)
 {
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		fixWorkArea();
+		if (!m_bFullScreen)
+		{
+			fixWorkArea();
+		}
 	}
 }
 
@@ -68,7 +85,10 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		fixWorkArea();
+		if (!m_bFullScreen)
+		{
+			fixWorkArea();
+		}
 	}
 
 	CRect rcClient;
