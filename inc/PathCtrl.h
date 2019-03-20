@@ -106,6 +106,11 @@ private:
 	virtual void PreSubclassWindow() override;
 
 public:
+	BOOL InitCtrl(const tagListPara& para)
+	{
+		return __super::InitCtrl(para);
+	}
+
 	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns=TD_ListColumn());
 
 	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});

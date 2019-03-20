@@ -278,19 +278,19 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 		memset(&ImageInfo, 0, sizeof ImageInfo);
 		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
 		{
-			int nSize = rcItem.Height();
-
 			rcItem.left += __Offset;
-			int nLeft = rcItem.left + (nSize - (ImageInfo.rcImage.right - ImageInfo.rcImage.left)) / 2;
-			rcItem.left += nSize;
 
-			int nTop = 2+rcItem.top + (nSize - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
+			int nTop = 2+rcItem.top + (rcItem.Height() - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
 
-			pImgLst->Draw(&dc, tci.iImage, { nLeft, nTop }, ILD_TRANSPARENT);
+			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_TRANSPARENT);
+
+			rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
 		}
 	}
 
-	dc.DrawText(tci.pszText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+	CString strText(tci.pszText);
+	strText.Trim();
+	dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 
 

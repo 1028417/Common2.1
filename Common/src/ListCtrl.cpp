@@ -48,8 +48,6 @@ void CObjectList::PreSubclassWindow()
 BOOL CObjectList::InitCtrl(const tagListPara& para)
 {
 	m_para = para;
-	
-	__EnsureReturn(InitFont(m_para.crText, m_para.uFontSize), FALSE);
 
 	if (-1 != (int)m_para.eViewType)
 	{
@@ -61,9 +59,16 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 		InitColumn(m_para.lstColumns, m_para.setUnderlineColumns);
 	}
 
-	if (0 != m_para.uHeaderHeight || 0 != m_para.uHeaderFontSize)
+	__EnsureReturn(InitFont(m_para.crText, m_para.uFontSize), FALSE);
+
+	UINT uHeaderFontSize = 0; 
+	if (m_para.uHeaderFontSize > m_para.uFontSize)
 	{
-		__EnsureReturn(InitHeader(m_para.uHeaderHeight, m_para.uHeaderFontSize), FALSE);
+		uHeaderFontSize = m_para.uHeaderFontSize - m_para.uFontSize;
+	}
+	if (0 != m_para.uHeaderHeight || 0 != uHeaderFontSize)
+	{
+		__EnsureReturn(InitHeader(m_para.uHeaderHeight, uHeaderFontSize), FALSE);
 	}
 
 	if (0 != m_para.uItemHeight)

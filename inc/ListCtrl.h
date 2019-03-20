@@ -147,15 +147,24 @@ public:
 
 	struct tagListPara
 	{
-		COLORREF crText = 0;
+		tagListPara()
+		{
+		}
 
-		UINT uFontSize = 0;
-		UINT uFontSizeHeader = 0;
+		tagListPara(const TD_ListColumn& t_lstColumns, const set<UINT>& t_setUnderlineColumns = {})
+			: eViewType(E_ListViewType::LVT_Report)
+			, lstColumns(t_lstColumns)
+			, setUnderlineColumns(t_setUnderlineColumns)
+		{
+		}
 
 		E_ListViewType eViewType = (E_ListViewType)-1;
 
 		TD_ListColumn lstColumns;
 		set<UINT> setUnderlineColumns;
+
+		COLORREF crText = 0;
+		UINT uFontSize = 0;
 
 		UINT uHeaderHeight = 0;
 		UINT uHeaderFontSize = 0;
@@ -202,10 +211,17 @@ private:
 	
 	CString m_cstrRenameText;
 
-public:
-	BOOL InitCtrl(const tagListPara& para);
+protected:
+	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
+
+	BOOL InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize = 0);
 
 	BOOL InitFont(COLORREF crText, int iFontSizeOffset = 0);
+
+	BOOL SetItemHeight(UINT uItemHeight);
+
+public:
+	BOOL InitCtrl(const tagListPara& para);
 
 	BOOL InitImglst(const CSize& size, const CSize *pszSmall = NULL, const TD_IconVec& vecIcons = {});
 	BOOL InitImglst(CBitmap& Bitmap, CBitmap *pBitmapSmall=NULL);
@@ -214,14 +230,8 @@ public:
 	void SetView(E_ListViewType eViewType, bool bArrange = false);
 	E_ListViewType GetView();
 
-	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
-
-	BOOL InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize = 0);
-
-	BOOL SetItemHeight(UINT uItemHeight);
-
 	void SetTileSize(ULONG cx, ULONG cy);
-	
+
 	void SetCusomDrawNotify(const CB_LVCostomDraw& cbCustomDraw = NULL)
 	{
 		m_bCusomDrawNotify = true;

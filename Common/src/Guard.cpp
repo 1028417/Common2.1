@@ -124,7 +124,7 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(TRANSPARENT);
 
 		CFont *pFontPrev = dc.GetCurrentFont();
-		CCompatableFont font(m_uFontSize);
+		CCompatableFont font(m_bTopMenu ? m_uTopFontSize : m_uFontSize);
 		if (font.create(*pFontPrev))
 		{
 			(void)dc.SelectObject(&font);

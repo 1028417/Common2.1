@@ -67,14 +67,28 @@ struct tagMenuItemInfo
 class __CommonExt CMenuEx : public CMenu
 {
 public:
-	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL, BOOL bTopMenu=FALSE)
+	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize, UINT uTopFontSize, HMENU hMenuAttach)
+		: m_uItemHeight(uItemHeight)
+		, m_uMenuWidth(uMenuWidth)
+		, m_uFontSize(uFontSize)
+		, m_uTopFontSize(uTopFontSize)
+	{
+		if (0 == m_uTopFontSize)
+		{
+			m_uTopFontSize = m_uFontSize;
+		}
+
+		Attach(hMenuAttach, TRUE);
+	}
+
+	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL)
 		: m_uItemHeight(uItemHeight)
 		, m_uMenuWidth(uMenuWidth)
 		, m_uFontSize(uFontSize)
 	{
 		if (NULL != hMenuAttach)
 		{
-			Attach(hMenuAttach, bTopMenu);
+			Attach(hMenuAttach, FALSE);
 		}
 	}
 
@@ -107,10 +121,14 @@ public:
 private:
 	UINT m_uItemHeight = 0;
 	UINT m_uMenuWidth = 0;
+
 	UINT m_uFontSize = 0;
-	HMENU m_hMenuAttach = NULL;
+	UINT m_uTopFontSize = 0;
+
 	BOOL m_bTopMenu = FALSE;
 
+	HMENU m_hMenuAttach = NULL;
+	
 	list<CMenuEx> m_lstSubMenu;
 
 private:
