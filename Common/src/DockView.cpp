@@ -26,9 +26,9 @@ BOOL CViewTab::init(const tagViewTabStyle& TabStyle)
 {
 	SetTabStyle(TabStyle.eTabStyle);
 
-	if (0 != TabStyle.uTabFontSize)
+	if (0 != TabStyle.fTabFontSize)
 	{
-		__EnsureReturn(SetFontSize(TabStyle.uTabFontSize), FALSE);
+		__EnsureReturn(SetFontSize(TabStyle.fTabFontSize), FALSE);
 	}
 
 	if (NULL != TabStyle.pImglst)
@@ -96,11 +96,9 @@ void CViewTab::SetTabStyle(E_TabStyle eTabStyle)
 	ModifyStyle(0, dwTabStyle);
 }
 
-BOOL CViewTab::SetFontSize(int iFontSizeOffset)
-{
-	__EnsureReturn(0 != iFontSizeOffset, FALSE);
-	
-	return m_fontGuard.setFont(*this, iFontSizeOffset);
+BOOL CViewTab::SetFontSize(float fFontSizeOffset)
+{	
+	return m_fontGuard.setFont(*this, fFontSizeOffset);
 }
 
 void CViewTab::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)

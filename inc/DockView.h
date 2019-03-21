@@ -20,7 +20,7 @@ struct tagViewTabStyle
 {
 	E_TabStyle eTabStyle = E_TabStyle::TS_HideTab;
 
-	UINT uTabFontSize = 0;
+	float fTabFontSize = 0;
 
 	CImageList *pImglst = NULL;
 
@@ -58,7 +58,7 @@ public:
 
 	void SetTabStyle(E_TabStyle eTabStyle);
 
-	BOOL SetFontSize(int iFontSizeOffset);
+	BOOL SetFontSize(float fFontSizeOffset);
 
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent);
 

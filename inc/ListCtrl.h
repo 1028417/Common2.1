@@ -21,7 +21,7 @@ private:
 	LRESULT OnLayout(WPARAM wParam, LPARAM lParam);
 
 public:
-	BOOL Init(UINT uHeight, int iFontSizeOffset = 0);
+	BOOL Init(UINT uHeight, float fFontSizeOffset = 0);
 };
 
 enum class E_ListViewType
@@ -164,10 +164,10 @@ public:
 		set<UINT> setUnderlineColumns;
 
 		COLORREF crText = 0;
-		UINT uFontSize = 0;
+		float fFontSize = 0;
 
 		UINT uHeaderHeight = 0;
-		UINT uHeaderFontSize = 0;
+		float fHeaderFontSize = 0;
 
 		UINT uItemHeight = 0;
 
@@ -214,9 +214,9 @@ private:
 protected:
 	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
 
-	BOOL InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize = 0);
+	BOOL InitHeader(UINT uHeaderHeight, float fHeaderFontSize = 0);
 
-	BOOL InitFont(COLORREF crText, int iFontSizeOffset = 0);
+	BOOL InitFont(COLORREF crText, float fFontSizeOffset = 0);
 
 	BOOL SetItemHeight(UINT uItemHeight);
 

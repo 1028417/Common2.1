@@ -67,24 +67,24 @@ struct tagMenuItemInfo
 class __CommonExt CMenuEx : public CMenu
 {
 public:
-	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize, UINT uTopFontSize, HMENU hMenuAttach)
+	CMenuEx(UINT uItemHeight, UINT uMenuWidth, float fFontSize, float fTopFontSize, HMENU hMenuAttach)
 		: m_uItemHeight(uItemHeight)
 		, m_uMenuWidth(uMenuWidth)
-		, m_uFontSize(uFontSize)
-		, m_uTopFontSize(uTopFontSize)
+		, m_fFontSize(fFontSize)
+		, m_fTopFontSize(fTopFontSize)
 	{
-		if (0 == m_uTopFontSize)
+		if (0 == m_fTopFontSize)
 		{
-			m_uTopFontSize = m_uFontSize;
+			m_fTopFontSize = m_fFontSize;
 		}
 
 		Attach(hMenuAttach, TRUE);
 	}
 
-	CMenuEx(UINT uItemHeight, UINT uMenuWidth, UINT uFontSize=0, HMENU hMenuAttach=NULL)
+	CMenuEx(UINT uItemHeight, UINT uMenuWidth, float fFontSize=0, HMENU hMenuAttach=NULL)
 		: m_uItemHeight(uItemHeight)
 		, m_uMenuWidth(uMenuWidth)
-		, m_uFontSize(uFontSize)
+		, m_fFontSize(fFontSize)
 	{
 		if (NULL != hMenuAttach)
 		{
@@ -95,7 +95,8 @@ public:
 	CMenuEx(CMenuEx& other)
 		: m_uItemHeight(other.m_uItemHeight)
 		, m_uMenuWidth(other.m_uMenuWidth)
-		, m_uFontSize(other.m_uFontSize)
+		, m_fFontSize(other.m_fFontSize)
+		, m_fTopFontSize(other.m_fTopFontSize)
 	{
 		(void)Attach(other);
 	}
@@ -103,7 +104,8 @@ public:
 	CMenuEx(CMenuEx&& other)
 		: m_uItemHeight(other.m_uItemHeight)
 		, m_uMenuWidth(other.m_uMenuWidth)
-		, m_uFontSize(other.m_uFontSize)
+		, m_fFontSize(other.m_fFontSize)
+		, m_fTopFontSize(other.m_fTopFontSize)
 	{
 		(void)Attach(other);
 	}
@@ -122,8 +124,8 @@ private:
 	UINT m_uItemHeight = 0;
 	UINT m_uMenuWidth = 0;
 
-	UINT m_uFontSize = 0;
-	UINT m_uTopFontSize = 0;
+	float m_fFontSize = 0;
+	float m_fTopFontSize = 0;
 
 	BOOL m_bTopMenu = FALSE;
 
@@ -174,7 +176,7 @@ private:
 	map<UINT, tagMenuItemInfo> m_mapMenuItemInfos;
 
 private:
-	BOOL _popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, UINT uFontSize);
+	BOOL _popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, float fFontSize);
 	
 public:
 	void EnableItem(UINT uIDItem, BOOL bEnable);
@@ -188,8 +190,8 @@ public:
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
-	BOOL Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize=0);
-	BOOL PopupEx(CWnd *pWnd, UINT uItemHeight, UINT uFontSize=0);
+	BOOL Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize=0);
+	BOOL PopupEx(CWnd *pWnd, UINT uItemHeight, float fFontSize=0);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;
@@ -197,13 +199,13 @@ using CB_CompatableFont = function<void(LOGFONT&)>;
 class __CommonExt CCompatableFont : public CFont
 {
 public:
-	CCompatableFont(int iFontSizeOffset=0)
-		: m_iFontSizeOffset(iFontSizeOffset)
+	CCompatableFont(float fFontSizeOffset=0)
+		: m_fFontSizeOffset(fFontSizeOffset)
 	{
 	}
 
 private:
-	int m_iFontSizeOffset = 0;
+	float m_fFontSizeOffset = 0;
 
 public:
 	bool create(CFont& font, const CB_CompatableFont& cb = NULL);
@@ -212,7 +214,7 @@ public:
 
 	bool create(CWnd& wnd, const CB_CompatableFont& cb = NULL);
 
-	bool create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb = NULL);
+	bool create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb = NULL);
 };
 
 class __CommonExt CFontGuard
@@ -223,7 +225,7 @@ public:
 	CCompatableFont m_font;
 
 public:
-	bool setFont(CWnd& wnd, ULONG uFontSizeOffset, const CB_CompatableFont& cb=NULL);
+	bool setFont(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb=NULL);
 
 	bool setFont(CWnd& wnd, const CB_CompatableFont& cb);
 };

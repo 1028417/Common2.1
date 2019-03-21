@@ -31,12 +31,9 @@ BOOL CBaseTree::InitImglst(CBitmap& Bitmap)
 	return TRUE;
 }
 
-void CBaseTree::SetFontSize(int iFontSizeOffset)
+void CBaseTree::SetFontSize(float fFontSizeOffset)
 {
-	if (0 != iFontSizeOffset)
-	{
-		(void)m_fontGuard.setFont(*this, iFontSizeOffset);
-	}
+	(void)m_fontGuard.setFont(*this, fFontSizeOffset);
 }
 
 HTREEITEM CBaseTree::InsertItem(HTREEITEM hParentItem, LPCTSTR lpszItem, DWORD_PTR dwData, int nImage)

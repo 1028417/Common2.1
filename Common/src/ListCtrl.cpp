@@ -20,11 +20,11 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 	return lResult;
 }
 
-BOOL CListHeader::Init(UINT uHeight, int iFontSizeOffset)
+BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 {
-	if (0 != iFontSizeOffset)
+	if (0 != fFontSizeOffset)
 	{
-		__EnsureReturn(m_fontGuard.setFont(*this, iFontSizeOffset), FALSE);
+		__EnsureReturn(m_fontGuard.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	m_uHeight = uHeight;
@@ -59,18 +59,17 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 		InitColumn(m_para.lstColumns, m_para.setUnderlineColumns);
 	}
 
-	__EnsureReturn(InitFont(m_para.crText, m_para.uFontSize), FALSE);
-
-	UINT uHeaderFontSize = 0; 
-	if (m_para.uHeaderFontSize > m_para.uFontSize)
+	if (0 != m_para.uHeaderHeight || 0 != m_para.fHeaderFontSize)
 	{
-		uHeaderFontSize = m_para.uHeaderFontSize - m_para.uFontSize;
-	}
-	if (0 != m_para.uHeaderHeight || 0 != uHeaderFontSize)
-	{
-		__EnsureReturn(InitHeader(m_para.uHeaderHeight, uHeaderFontSize), FALSE);
+		__EnsureReturn(InitHeader(m_para.uHeaderHeight, m_para.fHeaderFontSize), FALSE);
 	}
 
+	auto pFont = CListCtrl::GetHeaderCtrl()->GetFont();
+	
+	__EnsureReturn(InitFont(m_para.crText, m_para.fFontSize), FALSE);
+
+	CListCtrl::GetHeaderCtrl()->SetFont(pFont);
+	
 	if (0 != m_para.uItemHeight)
 	{
 		__EnsureReturn(SetItemHeight(m_para.uItemHeight), FALSE);
@@ -99,13 +98,13 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 	return TRUE;
 }
 
-BOOL CObjectList::InitFont(COLORREF crText, int iFontSizeOffset)
+BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 {
 	__AssertReturn(SetTextColor(crText), FALSE);
 
-	if (0 != iFontSizeOffset)
+	if (0 != fFontSizeOffset)
 	{
-		__AssertReturn(m_fontGuard.setFont(*this, iFontSizeOffset), FALSE);
+		__AssertReturn(m_fontGuard.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {
@@ -212,15 +211,15 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& s
 	}
 }
 
-BOOL CObjectList::InitHeader(UINT uHeaderHeight, UINT uHeaderFontSize)
+BOOL CObjectList::InitHeader(UINT uHeaderHeight, float fHeaderFontSize)
 {
 	if (!m_wndHeader)
 	{
 		__AssertReturn(m_wndHeader.SubclassWindow(CListCtrl::GetHeaderCtrl()->GetSafeHwnd()), FALSE);
-		m_wndHeader.SetFont(this->GetFont());
+		//m_wndHeader.SetFont(this->GetFont());
 	}
 
-	__EnsureReturn(m_wndHeader.Init(uHeaderHeight, uHeaderFontSize), FALSE);
+	__EnsureReturn(m_wndHeader.Init(uHeaderHeight, fHeaderFontSize), FALSE);
 	
 	return TRUE;
 }

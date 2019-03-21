@@ -34,7 +34,7 @@ void CMenuEx::_setOwerDraw()
 		
 		if (-1 == uItemID)//×Ó²Ëµ¥
 		{
-			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uMenuWidth, m_uFontSize));
+			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uMenuWidth, m_fFontSize));
 			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //µÝ¹éµ÷ÓÃ
 		}
 
@@ -124,7 +124,7 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(TRANSPARENT);
 
 		CFont *pFontPrev = dc.GetCurrentFont();
-		CCompatableFont font(m_bTopMenu ? m_uTopFontSize : m_uFontSize);
+		CCompatableFont font(m_bTopMenu ? m_fTopFontSize : m_fFontSize);
 		if (font.create(*pFontPrev))
 		{
 			(void)dc.SelectObject(&font);
@@ -191,16 +191,16 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
-BOOL CMenuGuard::_popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
+BOOL CMenuGuard::_popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
 	CPoint ptCursor(0, 0);
 	(void)::GetCursorPos(&ptCursor);
 
-	CMenuEx menu(uItemHeight + 2, m_uMenuWidth, uFontSize, hMenu);
+	CMenuEx menu(uItemHeight + 2, m_uMenuWidth, fFontSize, hMenu);
 	return menu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
 }
 
-BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
+BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
 	__AssertReturn(hMenu, FALSE);
@@ -253,7 +253,7 @@ BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
 	BOOL bRet = FALSE;
 	if (iCount > 0)
 	{
-		bRet = _popup(hSubMenu, pWnd, uItemHeight, uFontSize);
+		bRet = _popup(hSubMenu, pWnd, uItemHeight, fFontSize);
 	}
 
 	(void)::DestroyMenu(hMenu);
@@ -300,7 +300,7 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 	return iCnt;
 }
 
-BOOL CMenuGuard::PopupEx(CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
+BOOL CMenuGuard::PopupEx(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
 	HMENU hPopupMenu = ::CreatePopupMenu();
 	if (NULL == hPopupMenu)
@@ -318,7 +318,7 @@ BOOL CMenuGuard::PopupEx(CWnd *pWnd, UINT uItemHeight, UINT uFontSize)
 
 	(void)::DestroyMenu(hMenu);
 
-	return _popup(hPopupMenu, pWnd, uItemHeight, uFontSize);
+	return _popup(hPopupMenu, pWnd, uItemHeight, fFontSize);
 }
 
 bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
@@ -338,13 +338,14 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 	logFont.lfQuality = ANTIALIASED_QUALITY;
 	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
 
-	if (logFont.lfHeight > 0)
+	int iOffset = (int)round(logFont.lfHeight*abs(m_fFontSizeOffset));
+	if (m_fFontSizeOffset > 0)
 	{
-		logFont.lfHeight += m_iFontSizeOffset;
+		logFont.lfHeight += iOffset;
 	}
-	else
+	else if (m_fFontSizeOffset < 0)
 	{
-		logFont.lfHeight -= m_iFontSizeOffset;
+		logFont.lfHeight -= iOffset;
 	}
 
 	if (cb)
@@ -382,18 +383,18 @@ bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
 	return create(*pFont, cb);
 }
 
-bool CCompatableFont::create(CWnd& wnd, int iFontSizeOffset, const CB_CompatableFont& cb)
+bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb)
 {
-	m_iFontSizeOffset = iFontSizeOffset;
+	m_fFontSizeOffset = fFontSizeOffset;
 
 	return create(wnd, cb);
 }
 
-bool CFontGuard::setFont(CWnd& wnd, ULONG uFontSizeOffset, const CB_CompatableFont& cb)
+bool CFontGuard::setFont(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb)
 {
 	if (NULL == m_font.m_hObject)
 	{
-		if (!m_font.create(wnd, uFontSizeOffset, cb))
+		if (!m_font.create(wnd, fFontSizeOffset, cb))
 		{
 			return false;
 		}
