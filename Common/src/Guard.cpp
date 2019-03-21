@@ -335,7 +335,7 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 		return false;
 	}
 
-	logFont.lfQuality = PROOF_QUALITY;
+	logFont.lfQuality = ANTIALIASED_QUALITY;
 	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
 
 	if (logFont.lfHeight > 0)

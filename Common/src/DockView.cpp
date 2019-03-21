@@ -285,9 +285,11 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_TRANSPARENT);
 
 			rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
+
+			rcItem.right -= __Offset / 2;
 		}
 	}
-
+	
 	CString strText(tci.pszText);
 	strText.Trim();
 	dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
