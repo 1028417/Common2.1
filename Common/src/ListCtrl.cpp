@@ -216,7 +216,6 @@ BOOL CObjectList::InitHeader(UINT uHeaderHeight, float fHeaderFontSize)
 	if (!m_wndHeader)
 	{
 		__AssertReturn(m_wndHeader.SubclassWindow(CListCtrl::GetHeaderCtrl()->GetSafeHwnd()), FALSE);
-		//m_wndHeader.SetFont(this->GetFont());
 	}
 
 	__EnsureReturn(m_wndHeader.Init(uHeaderHeight, fHeaderFontSize), FALSE);
@@ -885,10 +884,13 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 {
-	bool bUnderline = false;
 	if (m_para.setUnderlineColumns.find(lvcd.iSubItem) != m_para.setUnderlineColumns.end())
 	{
-		::SelectObject(lvcd.nmcd.hdc, m_fontUnderline);
+		(void)::SelectObject(lvcd.nmcd.hdc, m_fontUnderline);
+	}
+	else
+	{
+		(void)::SelectObject(lvcd.nmcd.hdc, m_fontGuard.m_font);
 	}
 
 	if (m_para.cbCustomDraw)
