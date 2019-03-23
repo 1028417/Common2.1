@@ -21,10 +21,9 @@ public:
 	{
 	}
 
-public:
+private:
 	list<tagWorkThreadInfo> m_lstThreadInfos;
 
-private:
 	bool m_bPause = false;
 
 	NS_mtutil::CWinEvent m_CancelEvent;

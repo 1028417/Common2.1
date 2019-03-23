@@ -172,8 +172,6 @@ void CProgressDlg::OnCancel()
 
 	this->Pause(false);
 
-	//CWaitCursor WaitCursor;
-
 	while (0 != this->GetActiveCount())
 	{
 		(void)CMainApp::GetMainApp()->DoEvents(); // ±ØÐëµÄ

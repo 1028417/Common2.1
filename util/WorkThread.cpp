@@ -56,19 +56,6 @@ BOOL CWorkThread::Run(UINT uThreadCount)
 void CWorkThread::Pause(BOOL bPause)
 {
 	m_bPause = bPause;
-
-	//for (list<tagWorkThreadInfo>::iterator itThreadInfo = m_lstThreadInfos.begin()
-	//	; itThreadInfo != m_lstThreadInfos.end(); ++itThreadInfo)
-	//{
-	//	if (bPause)
-	//	{
-	//		(void)::SuspendThread(itThreadInfo->hHandle);
-	//	}
-	//	else
-	//	{
-	//		(void)::ResumeThread(itThreadInfo->hHandle);
-	//	}
-	//}
 }
 
 void CWorkThread::Cancel()
