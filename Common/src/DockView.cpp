@@ -170,54 +170,56 @@ void CViewTab::OnPaint()
 		return;
 	}
 
-	CPaintDC dc(this);
-
-	//调用默认的OnPaint(),把图形画在内存DC表上
-	DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
-
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
-	if (E_TabStyle::TS_Top == m_eTabStyle)
-	{
-		rcClient.top -= 2;
-	}
-	else if (E_TabStyle::TS_Bottom == m_eTabStyle)
-	{
-		rcClient.bottom += 2;
-	}
+	CPaintDC dc(this);
+	CCompDC CompDC;
+	CompDC.create(&dc, rcClient.Width(), rcClient.Height());
+	CDC& MemDC = CompDC.getDC();
 
-	dc.SetBkMode(TRANSPARENT);
+	DefWindowProc(WM_PAINT, (WPARAM)MemDC.m_hDC, 0);
+	
+	MemDC.SetBkMode(TRANSPARENT);
 
-	Graphics graphics(dc.m_hDC);
+	Graphics graphics(MemDC.m_hDC);
 
 	CRect rcItem;
 	auto nItemCount = GetItemCount();
+	int nHeight = 0;
 	for (int nItem = 0; nItem < nItemCount; nItem++)
 	{
 		GetItemRect(nItem, rcItem);
 
 		if (0 == nItem)
 		{
-			rcItem.left = rcClient.left;
+			rcItem.left = 0;// rcClient.left;
 		}
 
 		if (E_TabStyle::TS_Top == m_eTabStyle)
 		{
-			rcItem.top = rcClient.top;
+			rcItem.top = 0;// rcClient.top;
 		}
-		else if (E_TabStyle::TS_Bottom != m_eTabStyle)
+		else
 		{
 			rcItem.bottom = rcClient.bottom;
 		}
 
 		if (0 == nItem)
 		{
-			dc.FillSolidRect(CRect(rcClient.left, rcItem.top-2, rcClient.right, rcItem.bottom+2), __Color_White);
+			MemDC.FillSolidRect(CRect(0, rcItem.top-2, rcClient.right, rcItem.bottom+2), __Color_White);
+			nHeight = rcItem.Height() + 2;
 		}
 
-		_drawItem(dc, graphics, nItem, rcItem);
+		_drawItem(MemDC, graphics, nItem, rcItem);
 	}
+	
+	int y = 0;
+	if (E_TabStyle::TS_Bottom == m_eTabStyle)
+	{
+		y = rcClient.bottom - nHeight;
+	}
+	dc.BitBlt(0, y, rcClient.right, nHeight, &MemDC, 0, y, SRCCOPY);
 }
 
 static const Color g_ckSel(255, 255, 255);
@@ -485,7 +487,8 @@ void CDockView::OnSize(UINT nType, int cx, int cy)
 {
 	if (m_wndTabCtrl)
 	{
-		m_wndTabCtrl.MoveWindow(0, 0, cx, cy);// , g_bManualResize ? FALSE : TRUE);
+		m_wndTabCtrl.MoveWindow(0, 0, cx, cy, FALSE);
+		m_wndTabCtrl.Invalidate();
 
 		CPropertyPage *pPage = __super::GetActivePage();
 		if (NULL != pPage)
