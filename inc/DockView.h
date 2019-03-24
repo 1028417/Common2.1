@@ -39,7 +39,7 @@ public:
 	}
 
 private:
-	CFontGuard m_fontGuard;
+	CCompatableFont m_CompatableFont;
 
 	E_TabStyle m_eTabStyle = E_TabStyle::TS_HideTab;
 

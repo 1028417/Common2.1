@@ -111,9 +111,9 @@ public:
 		return __super::InitCtrl(para);
 	}
 
-	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns=TD_ListColumn());
+	BOOL InitCtrl(COLORREF crText, float fFontSize, const TD_ListColumn& lstColumns=TD_ListColumn());
 
-	BOOL InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});
+	BOOL InitCtrl(COLORREF crText, float fFontSize, const CSize& szImglst, const CSize *pszSmallImglst = NULL, const TD_IconVec& vecIcons = {});
 
 	void SetPath(CPathObject& dir);
 

@@ -15,7 +15,7 @@ public:
 private:
 	UINT m_uHeight = 0;
 
-	CFontGuard m_fontGuard;
+	CCompatableFont m_CompatableFont;
 
 private:
 	LRESULT OnLayout(WPARAM wParam, LPARAM lParam);
@@ -195,7 +195,7 @@ public:
 private:
 	tagListPara m_para;
 
-	CFontGuard m_fontGuard;
+	CCompatableFont m_CompatableFont;
 
 	CListHeader m_wndHeader;
 

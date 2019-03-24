@@ -16,7 +16,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CFontGuard m_fontGuard;
+	CCompatableFont m_CompatableFont;
 
 	CImglst m_Imglst;
 

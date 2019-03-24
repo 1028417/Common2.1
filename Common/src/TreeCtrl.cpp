@@ -33,7 +33,7 @@ BOOL CBaseTree::InitImglst(CBitmap& Bitmap)
 
 void CBaseTree::SetFontSize(float fFontSizeOffset)
 {
-	(void)m_fontGuard.setFont(*this, fFontSizeOffset);
+	(void)m_CompatableFont.setFont(*this, fFontSizeOffset);
 }
 
 HTREEITEM CBaseTree::InsertItem(HTREEITEM hParentItem, LPCTSTR lpszItem, DWORD_PTR dwData, int nImage)

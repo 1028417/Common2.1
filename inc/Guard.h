@@ -215,17 +215,6 @@ public:
 	bool create(CWnd& wnd, const CB_CompatableFont& cb = NULL);
 
 	bool create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb = NULL);
-};
 
-class __CommonExt CFontGuard
-{
-public:
-	CFontGuard() {};
-
-	CCompatableFont m_font;
-
-public:
-	bool setFont(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb=NULL);
-
-	bool setFont(CWnd& wnd, const CB_CompatableFont& cb);
+	bool setFont(CWnd& wnd, float fFontSizeOffset);
 };

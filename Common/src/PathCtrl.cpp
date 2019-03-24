@@ -12,9 +12,9 @@ void CPathList::PreSubclassWindow()
 	(void)ModifyStyle(LVS_ALIGNLEFT, LVS_AUTOARRANGE);
 }
 
-BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& lstColumns)
+BOOL CPathList::InitCtrl(COLORREF crText, float fFontSize, const TD_ListColumn& lstColumns)
 {
-	__EnsureReturn(__super::InitFont(crText, uFontSize), FALSE);
+	__EnsureReturn(__super::InitFont(crText, fFontSize), FALSE);
 
 	if (!lstColumns.empty())
 	{
@@ -24,9 +24,9 @@ BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const TD_ListColumn& l
 	return true;
 }
 
-BOOL CPathList::InitCtrl(COLORREF crText, UINT uFontSize, const CSize& szImglst, const CSize *pszSmallImglst, const TD_IconVec& vecIcons)
+BOOL CPathList::InitCtrl(COLORREF crText, float fFontSize, const CSize& szImglst, const CSize *pszSmallImglst, const TD_IconVec& vecIcons)
 {
-	__EnsureReturn(this->InitCtrl(crText, uFontSize), FALSE);
+	__EnsureReturn(this->InitCtrl(crText, fFontSize), FALSE);
 
 	__EnsureReturn(__super::InitImglst(szImglst, pszSmallImglst, vecIcons), FALSE);
 

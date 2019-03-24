@@ -380,7 +380,12 @@ bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
 		return false;
 	}
 
-	return create(*pFont, cb);
+	if (!create(*pFont, cb))
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb)
@@ -390,22 +395,17 @@ bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, const CB_Compatab
 	return create(wnd, cb);
 }
 
-bool CFontGuard::setFont(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb)
+bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset)
 {
-	if (NULL == m_font.m_hObject)
+	if (NULL == m_hObject)
 	{
-		if (!m_font.create(wnd, fFontSizeOffset, cb))
+		if (!create(wnd, fFontSizeOffset))
 		{
 			return false;
 		}
 	}
 
-	(void)wnd.SetFont(&m_font);
+	(void)wnd.SetFont(this);
 
 	return true;
-}
-
-bool CFontGuard::setFont(CWnd& wnd, const CB_CompatableFont& cb)
-{
-	return setFont(wnd, 0, cb);
 }

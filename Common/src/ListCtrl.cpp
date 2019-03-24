@@ -24,7 +24,7 @@ BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 {
 	if (0 != fFontSizeOffset)
 	{
-		__EnsureReturn(m_fontGuard.setFont(*this, fFontSizeOffset), FALSE);
+		__EnsureReturn(m_CompatableFont.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	m_uHeight = uHeight;
@@ -104,7 +104,7 @@ BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 
 	if (0 != fFontSizeOffset)
 	{
-		__AssertReturn(m_fontGuard.setFont(*this, fFontSizeOffset), FALSE);
+		__AssertReturn(m_CompatableFont.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {
@@ -890,7 +890,7 @@ void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 	}
 	else
 	{
-		(void)::SelectObject(lvcd.nmcd.hdc, m_fontGuard.m_font);
+		(void)::SelectObject(lvcd.nmcd.hdc, m_CompatableFont);
 	}
 
 	if (m_para.cbCustomDraw)
