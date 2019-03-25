@@ -24,6 +24,10 @@ private:
 
 	HBITMAP m_hbmpPrev = NULL;
 
+	CGdiObject *m_prevBrush = NULL;
+	CGdiObject *m_prevPen = NULL;
+	CGdiObject *m_prevFont = NULL;
+
 public:
 	CDC* operator ->()
 	{

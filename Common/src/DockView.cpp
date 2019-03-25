@@ -175,7 +175,7 @@ void CViewTab::OnPaint()
 
 	CPaintDC dc(this);
 	CCompDC CompDC;
-	CompDC.create(&dc, rcClient.Width(), rcClient.Height());
+	(void)CompDC.create(&dc, rcClient.Width(), rcClient.Height());
 	CDC& MemDC = CompDC.getDC();
 
 	DefWindowProc(WM_PAINT, (WPARAM)MemDC.m_hDC, 0);

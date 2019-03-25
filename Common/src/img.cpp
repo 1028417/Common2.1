@@ -27,6 +27,10 @@ bool CCompDC::create(CDC *pDC, UINT cx, UINT cy)
 
 	m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(m_CompBitmap);
 
+	m_prevBrush = m_CompDC.SelectObject(pDC->GetCurrentBrush());
+	m_prevPen = m_CompDC.SelectObject(pDC->GetCurrentPen());
+	m_prevFont = m_CompDC.SelectObject(pDC->GetCurrentFont());
+
 	m_cx = cx;
 	m_cy = cy;
 
@@ -72,6 +76,22 @@ void CCompDC::destroy()
 		{
 			(void)m_CompDC.SelectObject(m_hbmpPrev);
 			m_hbmpPrev = NULL;
+		}
+
+		if (NULL != m_prevBrush)
+		{
+			(void)m_CompDC.SelectObject(m_prevBrush);
+			m_prevBrush = NULL;
+		}
+		if (NULL != m_prevPen)
+		{
+			(void)m_CompDC.SelectObject(m_prevPen);
+			m_prevPen = NULL;
+		}
+		if (NULL == m_prevFont)
+		{
+			(void)m_CompDC.SelectObject(m_prevFont);
+			m_prevFont = NULL;
 		}
 
 		(void)m_CompDC.DeleteDC();
