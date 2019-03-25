@@ -336,6 +336,9 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 	}
 
 	logFont.lfQuality = ANTIALIASED_QUALITY;
+
+	logFont.lfCharSet = DEFAULT_CHARSET;
+
 	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
 
 	int iOffset = (int)round(logFont.lfHeight*abs(m_fFontSizeOffset));
@@ -352,7 +355,7 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 	{
 		cb(logFont);
 	}
-
+		
 	if (!CreateFontIndirect(&logFont))
 	{
 		return false;
