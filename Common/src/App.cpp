@@ -124,7 +124,7 @@ void CMainApp::sync(const CB_Sync& cb)
 		QueueUserAPC(APCFunc, hThread, 0);
 	});
 
-::SleepEx(-1, TRUE);
+	::SleepEx(-1, TRUE);
 }
 
 void CMainApp::thread(const function<void()>& cb)
