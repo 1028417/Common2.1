@@ -49,8 +49,6 @@ public:
 
 	bool m_bExists = false;
 
-	ULONGLONG m_uFileSize = 0;
-
 	FILETIME m_modifyTime = { 0,0 };
 
 protected:
@@ -59,6 +57,8 @@ protected:
 	TD_PathList *m_plstSubPath = NULL;
 	
 	CPath *m_pParentDir = NULL;
+
+	ULONGLONG m_uFileSize = 0;
 
 protected:
 	virtual TD_PathList& _findFile();
