@@ -973,7 +973,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 	E_ListViewType lpViewType[] = {
 		E_ListViewType::LVT_Tile
 		, E_ListViewType::LVT_Report
-		, E_ListViewType::LVT_List
+		//, E_ListViewType::LVT_List
 		, E_ListViewType::LVT_SmallIcon
 		, E_ListViewType::LVT_Icon
 	};
