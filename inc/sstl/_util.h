@@ -183,6 +183,8 @@ namespace NS_SSTL
 
 		static bool _extract(FN_ExtractCB cb, bool bForward, __DataType&v)
 		{
+            (void)bForward;
+
 			return cb(v);
 		}
 	};

@@ -6,7 +6,7 @@ static const char *g_lplocaleName_CN = "Chinese_china";
 static const locale g_locale_CN = locale(g_lplocaleName_CN);
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
-bool util::toSysTime(time_t time, SYSTEMTIME& sysTime)
+bool util::toSysTime(__time64_t time, SYSTEMTIME& sysTime)
 {
 	tm atm;
 	if (0 != _localtime64_s(&atm, &time))
@@ -77,7 +77,7 @@ wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
 	return _FormatTime(atm, strFormat);
 }
 
-wstring util::FormatTime(time_t time, const wstring& strFormat)
+wstring util::FormatTime(__time64_t time, const wstring& strFormat)
 {
 	if (0 == time)
 	{

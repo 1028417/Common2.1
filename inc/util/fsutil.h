@@ -26,8 +26,9 @@ public:
 	static const wchar_t dot = L'.';
 	static const wchar_t backSlant = L'\\';
 
+	using FN_Write = const function<void(const wstring&)>&;
 	static bool saveFile(const wstring& strFile
-		, const function<void(const function<void(const wstring&)>& fnWrite)>& cb, bool bTrunc=true, bool bToUTF8=false);
+		, const function<void(FN_Write fnWrite)>& cb, bool bTrunc=true, bool bToUTF8=false);
 	static bool saveFile(const wstring& strFile, const wstring& strData, bool bTrunc=true, bool bToUTF8 = false);
 	
 	static bool loadFile(const string& strFile, string& strData);

@@ -65,14 +65,14 @@ using namespace NS_SSTL;
 class __UtilExt util
 {
 public:
-	static bool toSysTime(time_t time, SYSTEMTIME& sysTime);
+	static bool toSysTime(__time64_t time, SYSTEMTIME& sysTime);
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	
 	static void getCurrentTime(int& nHour, int& nMinute);
 	static void getCurrentTime(SYSTEMTIME& sysTime);
 
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
-	static wstring FormatTime(time_t time, const wstring& strFormat);
+	static wstring FormatTime(__time64_t time, const wstring& strFormat);
 
 	static bool checkWChar(const wstring& str);
 

@@ -494,14 +494,14 @@ namespace NS_SSTL
 
 		size_t del(__KeyConstRef key, bool bOnlyOne = false)
 		{
-			return del(key, [&](__DataRef data) {
-				if (bOnlyOne)
-				{
-					return E_DelConfirm::DC_YesAbort;
-				}
+            return _del(key, [&](__DataRef) {
+                if (bOnlyOne)
+                {
+                    return E_DelConfirm::DC_YesAbort;
+                }
 
-				return E_DelConfirm::DC_Yes;
-			});
+                 return E_DelConfirm::DC_Yes;
+             });
 		}
 
 		size_t del(__KeyConstRef key, __CB_Ref_void cb)
@@ -772,7 +772,7 @@ namespace NS_SSTL
 			m_data.swap(container);
 		}
 
-		virtual void _onErase(const __CItrType& itr) {}
+        virtual void _onErase(const __CItrType&) {}
 
 		virtual void _add(__DataConstRef data)
 		{
@@ -797,9 +797,9 @@ namespace NS_SSTL
 			return true;
 		}
 
-		virtual size_t _del(__KeyConstRef key, CB_Del cb) { return 0; }
+        virtual size_t _del(__KeyConstRef, CB_Del) { return 0; }
 
-		virtual bool _includes(__KeyConstRef key) const { return false; }
+        virtual bool _includes(__KeyConstRef) const { return false; }
 
 		virtual void _toString(stringstream& ss, __DataConstRef data) const
 		{

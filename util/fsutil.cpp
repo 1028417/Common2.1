@@ -4,9 +4,10 @@
 #include <fsutil.h>
 
 #include <sys/utime.h>
+#include <sys/stat.h>
 
 bool fsutil::saveFile(const wstring& strFile
-	, const function<void(const function<void(const wstring&)>& fnWrite)>& cb, bool bTrunc, bool bToUTF8)
+	, const function<void(FN_Write fnWrite)>& cb, bool bTrunc, bool bToUTF8)
 {
 	wstring strMode(bTrunc?L"w":L"a");
 	if (bToUTF8)
@@ -46,7 +47,7 @@ bool fsutil::saveFile(const wstring& strFile
 
 bool fsutil::saveFile(const wstring& strFile, const wstring& strData, bool bTrunc, bool bToUTF8)
 {
-	return saveFile(strFile, [&](auto& cb) {
+	return saveFile(strFile, [&](FN_Write cb) {
 		cb(strData);
 	}, bTrunc, bToUTF8);
 }
@@ -293,7 +294,7 @@ bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const 
 
 bool fsutil_win::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
 {
-	return fsutil_win::FindFile(strFindPath, [&](auto& FindData) {
+	return fsutil_win::FindFile(strFindPath, [&](const tagFindData& FindData) {
 		arrFindData.add(FindData);
 		return true;
 	});
@@ -364,7 +365,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	ifstream srcStream;
 	try
 	{
-		srcStream.open(strSrcFile.c_str(), ios::binary);
+		srcStream.open(strSrcFile, ios::binary);
 	}
 	catch (...)
 	{
@@ -374,7 +375,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	ofstream snkStream;
 	try
 	{
-		snkStream.open(strSnkFile.c_str(), ios::binary | ios::trunc);
+		snkStream.open(strSnkFile, ios::binary | ios::trunc);
 	}
 	catch (...)
 	{

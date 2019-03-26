@@ -117,13 +117,13 @@ public:
 
 	bool HasFile() const;
 
-	TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData);
+	TD_PathList& assignSubPath(const SArray<tagFindData>& arrFindData);
 };
 
 class __UtilExt CListObject
 {
 public:
-	virtual void GenListItem(bool bReport, vector<wstring>& vecText, int& iImage)
+	virtual void GenListItem(bool bReportView, vector<wstring>& vecText, int& iImage)
 	{
 	}
 
@@ -192,7 +192,7 @@ protected:
 	}
 
 public:
-	void GenListItem(bool bReport, vector<wstring>& vecText, int& iImage) override
+	void GenListItem(bool bReportView, vector<wstring>& vecText, int& iImage) override
 	{
 		vecText.push_back(m_strName);
 
