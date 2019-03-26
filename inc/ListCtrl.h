@@ -26,11 +26,11 @@ public:
 
 enum class E_ListViewType
 {
+	LVT_Icon = LV_VIEW_ICON,
+	LVT_Report = LV_VIEW_DETAILS,
+	LVT_SmallIcon = LV_VIEW_SMALLICON,
+	LVT_List = LV_VIEW_LIST,
 	LVT_Tile = LV_VIEW_TILE,
-	LVT_Icon = LVS_ICON,
-	LVT_SmallIcon = LVS_SMALLICON,
-	LVT_List = LVS_LIST,
-	LVT_Report = LVS_REPORT
 };
 
 // CObjectList
@@ -323,7 +323,7 @@ protected:
 
 	virtual BOOL handleNMNotify(NMHDR& NMHDR, LRESULT* pResult);
 
-	void ChangeListCtrlView(short zDelta=0);
+	void ChangeListCtrlView(short zDelta);
 
 	virtual void OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault);
 };

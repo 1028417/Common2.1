@@ -922,7 +922,7 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 
 				if (500 < dwTime - dwLastTime)
 				{
-					ChangeListCtrlView();
+					ChangeListCtrlView((short)HIWORD(wParam));
 
 					dwLastTime = dwTime;
 				}
@@ -974,24 +974,36 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 		E_ListViewType::LVT_Tile
 		, E_ListViewType::LVT_Report
 		, E_ListViewType::LVT_List
-		//, LVT_SmallIcon
+		, E_ListViewType::LVT_SmallIcon
 		, E_ListViewType::LVT_Icon
 	};
 
-	E_ListViewType nPreViewType = this->GetView();
+	E_ListViewType eViewType = this->GetView();
 
-	for (UINT uIndex = 0; uIndex < sizeof(lpViewType) / sizeof(E_ListViewType); ++uIndex)
+	int iMax = sizeof(lpViewType) / sizeof(E_ListViewType);
+	for (int nIndex = 0; nIndex < iMax; ++nIndex)
 	{
-		if (lpViewType[uIndex] == nPreViewType)
+		if (lpViewType[nIndex] == eViewType)
 		{
-			uIndex++;
-
-			if (sizeof(lpViewType) / sizeof(E_ListViewType) <= uIndex)
+			if (zDelta < 0)
 			{
-				uIndex = 0;
+				nIndex++;
+
+				if (nIndex >= iMax)
+				{
+					nIndex = 0;
+				}
 			}
-			
-			m_para.eViewType = lpViewType[uIndex];
+			else
+			{
+				nIndex--;
+				if (nIndex < 0)
+				{
+					nIndex = iMax-1;
+				}
+			}
+
+			m_para.eViewType = lpViewType[nIndex];
 			this->SetView(m_para.eViewType);
 
 			if (m_para.cbViewChanged)
