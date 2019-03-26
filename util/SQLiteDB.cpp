@@ -1,7 +1,7 @@
 
-#include <util.h>
+#include "util.h"
 
-#include <SQLiteDB.h>
+#include "SQLiteDB.h"
 
 #include "sqlite/sqlite3.h"
 

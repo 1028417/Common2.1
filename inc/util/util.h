@@ -59,7 +59,7 @@ using fn_voidvoid = function<void()>;
 
 #include <fstream>
 
-#include <sstl/sstl.h>
+#include "sstl/sstl.h"
 using namespace NS_SSTL;
 
 class __UtilExt util
@@ -114,7 +114,7 @@ public:
 	static wstring ContainerToStr(const _C& container, const wstring& strSplitor)
 	{
 		wstringstream ssResult;
-		for (_C::const_iterator it = container.begin(); ; )
+        for (typename _C::const_iterator it = container.begin(); ; )
 		{
 			ssResult << *it;
 			

@@ -1,7 +1,7 @@
 
-#include <util.h>
+#include "util.h"
 
-#include <Path.h>
+#include "Path.h"
 
 CPath::CPath(const wstring& strName, bool bDir)
 {
@@ -61,7 +61,7 @@ TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData)
 {
 	m_plstSubPath = new TD_PathList();
 
-	arrFindData([&](auto& findData) {
+    arrFindData([&](const tagFindData& findData) {
 		CPath *pSubPath = NewSubPath(findData, this);
 		if (pSubPath)
 		{
