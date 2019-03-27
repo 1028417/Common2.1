@@ -31,22 +31,22 @@ namespace NS_SSTL
 	};
 
 	template <typename T> struct tagTryCompare {
-		static bool compare(const T&t1, const T&t2)
+        static bool compare(const T& t1, const T& t2)
 		{
-			return &t1 == &t2 || _compare(t1, t2);
+            return &t1 == &t2 || _compare(&t1, &t2);
 		}
 
 		template <typename A, typename B>
-		static bool _compare(const pair<A,B>&t1, const pair<A, B>&t2)
+        static bool _compare(const pair<A,B> *pr1, const pair<A, B> *pr2)
 		{
-			return tagTryCompare<A>::compare(t1.first, t2.first)
-				&& tagTryCompare<B>::compare(t1.second, t2.second);
+            return tagTryCompare<A>::compare(pr1->first, pr2->first)
+                && tagTryCompare<B>::compare(pr1->second, pr2->second);
 		}
 
 		template <typename U, typename RET = decltype(declval<const U&>() == declval<const U&>())>
-		static RET _compare(const U&t1, const U&t2)
+        static RET _compare(const U *p1, const U *p2)
 		{
-			return t1 == t2;
+            return *p1 == *p2;
 		}
 
 		static bool _compare(...)
