@@ -42,7 +42,7 @@ private:
 	virtual bool onAsyncLoop();
 
 public:
-	BOOL Active();
+	BOOL Active(bool bForceFocus=true);
 
 	BOOL SetTitle(const CString& cstrTitle, int iImage = -1);
 

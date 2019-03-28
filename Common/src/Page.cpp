@@ -22,7 +22,7 @@ void CPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 }
 
-BOOL CPage::Active()
+BOOL CPage::Active(bool bForceFocus)
 {
 	if (NULL == this->m_hWnd)
 	{
@@ -36,9 +36,13 @@ BOOL CPage::Active()
 		auto pParent = GetParentSheet();
 		__EnsureReturn(pParent, FALSE);
 		pParent->SetActivePage(this);
-	}
 
-	(void)this->SetFocus();
+		(void)this->SetFocus();
+	}
+	else if (bForceFocus)
+	{
+		(void)this->SetFocus();
+	}
 
 	return TRUE;
 }
