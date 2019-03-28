@@ -54,9 +54,9 @@ bool fsutil::saveFile(const wstring& strFile, const wstring& strData, bool bTrun
 
 bool fsutil::loadFile(const string& strFile, string& strData)
 {
-	std::ifstream fs;
+	ifstream fs;
 	fs.open(strFile);
-	if (!fs.is_open())
+	if (!fs || !fs.is_open())
 	{
 		return false;
 	}
@@ -370,7 +370,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	catch (...)
 	{
 	}	
-	__EnsureReturn(srcStream, false);
+	__EnsureReturn(srcStream && srcStream.is_open(), false);
 
 	ofstream snkStream;
 	try
@@ -380,7 +380,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	catch (...)
 	{
 	}
-	if (!snkStream)
+	if (!snkStream || !snkStream.is_open())
 	{
 		srcStream.close();
 
