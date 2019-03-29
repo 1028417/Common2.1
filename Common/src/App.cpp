@@ -13,46 +13,68 @@ static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
-static SMap<UINT, CB_Timer> g_mapTimer;
+struct tagTimerInfo
+{
+	bool bPending = false;
+	
+	CB_Timer cb;
+};
+
+static map<UINT, tagTimerInfo> g_mapTimer;
 static NS_mtutil::CCSLock g_lckTimer;
 
 static CB_Sync g_cbAsync;
 static NS_mtutil::CCSLock g_lckAsync;
 
-set<UINT_PTR> g_setPendingEvent;
-
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	if (g_setPendingEvent.find(idEvent) != g_setPendingEvent.end())
-	{
-		return;
-	}
-	g_setPendingEvent.insert(idEvent);
-
+	CB_Timer cb;
 	g_lckTimer.lock();
-	g_mapTimer.get(idEvent, [&](auto& cb) {
-		g_lckTimer.unlock();
+	auto itr = g_mapTimer.find(idEvent);
+	if (itr != g_mapTimer.end())
+	{
+		tagTimerInfo& TimerInfo = itr->second;
+		if (TimerInfo.bPending)
+		{
+			g_lckTimer.unlock();
+			return;
+		}
 
+		TimerInfo.bPending = true;
+		cb = TimerInfo.cb;
+	}
+	g_lckTimer.unlock();
+
+	if (cb)
+	{
 		if (!cb())
 		{
 			CMainApp::killTimer(idEvent);
+			return;
 		}
-	});
+	}
 
+	g_lckTimer.lock();
+	g_mapTimer[idEvent].bPending = false;
 	g_lckTimer.unlock();
-	
-	g_setPendingEvent.erase(idEvent);
 }
 
 UINT_PTR CMainApp::setTimer(UINT uElapse, const CB_Timer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
 
-	g_lckTimer.lock();
-	g_mapTimer.insert(idEvent, cb);
-	g_lckTimer.unlock();
-
+	resetTimer(idEvent, cb);
+	
 	return idEvent;
+}
+
+void CMainApp::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
+{
+	g_lckTimer.lock();
+	auto& TimerInfo = g_mapTimer[idEvent];
+	TimerInfo.bPending = false;
+	TimerInfo.cb = cb;
+	g_lckTimer.unlock();
 }
 
 void CMainApp::killTimer(UINT_PTR idEvent)
@@ -60,7 +82,7 @@ void CMainApp::killTimer(UINT_PTR idEvent)
 	::KillTimer(NULL, idEvent);
 
 	g_lckTimer.lock();
-	g_mapTimer.del(idEvent);
+	(void)g_mapTimer.erase(idEvent);
 	g_lckTimer.unlock();
 }
 

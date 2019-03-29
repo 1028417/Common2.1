@@ -140,17 +140,22 @@ void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 {
 	m_cbAsyncLoop = cb;
 
+	auto fn = [=]() {
+		if (!onAsyncLoop())
+		{
+			m_idTimer = 0;
+			return false;
+		}
+
+		return true;
+	};
 	if (0 == m_idTimer)
 	{
-		m_idTimer = CMainApp::setTimer(uDelayTime, [=]() {
-			if (!onAsyncLoop())
-			{
-				m_idTimer = 0;
-				return false;
-			}
-
-			return true;
-		});
+		m_idTimer = CMainApp::setTimer(uDelayTime, fn);
+	}
+	else
+	{
+		CMainApp::resetTimer(m_idTimer, fn);
 	}
 }
 

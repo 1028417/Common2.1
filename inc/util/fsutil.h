@@ -26,14 +26,16 @@ public:
 	static const wchar_t dot = L'.';
 	static const wchar_t backSlant = L'\\';
 
-	using FN_Write = const function<void(const wstring&)>&;
-	static bool saveFile(const wstring& strFile
-		, const function<void(FN_Write fnWrite)>& cb, bool bTrunc=true, bool bToUTF8=false);
-	static bool saveFile(const wstring& strFile, const wstring& strData, bool bTrunc=true, bool bToUTF8 = false);
+	using FN_WriteTxt = const function<void(const wstring&)>&;
+	static bool saveTxt(const wstring& strFile
+		, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc=true, bool bToUTF8=false);
+	static bool saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc=true, bool bToUTF8 = false);
+
+	static bool loadBinary(const wstring& strFile, vector<char>& vecstrData, UINT uReadSize = 0);
 	
-	static bool loadFile(const string& strFile, string& strData);
-	static bool loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
-	static bool loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
+	static bool loadTxt(const wstring& strFile, string& strData);
+	static bool loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
+	static bool loadTxt(const wstring& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
 
 	static int GetFileSize(const wstring& strFilePath);
 	static __time64_t GetFileModifyTime(const wstring& strFilePath);

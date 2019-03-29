@@ -128,6 +128,8 @@ public:
 	static bool removeMsg(UINT uMsg);
 
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
+	static void resetTimer(UINT_PTR idEvent, const CB_Timer& cb);
+
 	static void killTimer(UINT_PTR idEvent);
 
 	static void async(const CB_Sync& cb, UINT uDelayTime=0);
@@ -215,5 +217,5 @@ public:
 	}
 
 private:
-	UINT m_idTimer = 0;
+	UINT_PTR m_idTimer = 0;
 };

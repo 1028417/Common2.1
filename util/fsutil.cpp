@@ -6,8 +6,8 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
-bool fsutil::saveFile(const wstring& strFile
-	, const function<void(FN_Write fnWrite)>& cb, bool bTrunc, bool bToUTF8)
+bool fsutil::saveTxt(const wstring& strFile
+	, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc, bool bToUTF8)
 {
 	wstring strMode(bTrunc?L"w":L"a");
 	if (bToUTF8)
@@ -45,17 +45,58 @@ bool fsutil::saveFile(const wstring& strFile
 	return true;
 }
 
-bool fsutil::saveFile(const wstring& strFile, const wstring& strData, bool bTrunc, bool bToUTF8)
+bool fsutil::saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc, bool bToUTF8)
 {
-	return saveFile(strFile, [&](FN_Write cb) {
+	return saveTxt(strFile, [&](FN_WriteTxt cb) {
 		cb(strData);
 	}, bTrunc, bToUTF8);
 }
 
-bool fsutil::loadFile(const string& strFile, string& strData)
+bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
 	ifstream fs;
-	fs.open(strFile);
+	fs.open(strFile, ios::binary);
+	if (!fs || !fs.is_open())
+	{
+		return false;
+	}
+
+	if (0 != uReadSize)
+	{
+		vecData.resize(uReadSize);
+		fs.read(&vecData.front(), vecData.size());
+		size_t size = (size_t)fs.gcount();
+		if (size < uReadSize)
+		{
+			vecData.resize(size);
+		}
+	}
+	else
+	{
+		while (!fs.eof())
+		{
+			char lpBuff[256] = { 0 };
+			fs.read(lpBuff, sizeof(lpBuff));
+			size_t size = (size_t)fs.gcount();
+			if (size > 0)
+			{
+				size_t prevSize = vecData.size();
+				vecData.reserve(size);
+
+				memcpy(&vecData[prevSize], lpBuff, size);
+			}
+		}
+	}
+
+	fs.close();
+
+	return true;
+}
+
+bool fsutil::loadTxt(const wstring& strFile, string& strData)
+{
+	ifstream fs;
+	fs.open(strFile, ios::binary);
 	if (!fs || !fs.is_open())
 	{
 		return false;
@@ -74,10 +115,10 @@ bool fsutil::loadFile(const string& strFile, string& strData)
 	return true;
 }
 
-bool fsutil::loadFile(const string& strFile, const function<bool(const string&)>& cb, char cdelimiter)
+bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter)
 {
 	string strData;
-	if (!loadFile(strFile, strData))
+	if (!loadTxt(strFile, strData))
 	{
 		return false;
 	}
@@ -103,9 +144,9 @@ bool fsutil::loadFile(const string& strFile, const function<bool(const string&)>
 	return true;
 }
 
-bool fsutil::loadFile(const string& strFile, SVector<string>& vecLineData, char cdelimiter)
+bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineData, char cdelimiter)
 {
-	return loadFile(strFile, [&](const string& strData) {
+	return loadTxt(strFile, [&](const string& strData) {
 		vecLineData.add(strData);
 		return true;
 	}, cdelimiter);
@@ -359,9 +400,6 @@ bool fsutil_win::DeletePath(const wstring& strPath, HWND hwndParent, const wstri
 
 bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, bool bSyncModifyTime)
 {
-#define MAX_BUFFER 1024
-	char lpBuffer[MAX_BUFFER];
-
 	ifstream srcStream;
 	try
 	{
@@ -388,20 +426,18 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	}
 
 	bool bResult = true;
+
+	char lpBuffer[1024]{0};
+
 	try
 	{
-		while (true)
+		while (!srcStream.eof())
 		{
-			srcStream.read(lpBuffer, MAX_BUFFER);
-			auto nReadedSize = srcStream.gcount();
-			
-			if (0 < nReadedSize)
+			srcStream.read(lpBuffer, sizeof lpBuffer);
+			auto size = srcStream.gcount();			
+			if (size > 0)
 			{
-				snkStream.write(lpBuffer, nReadedSize);
-			}
-			if (nReadedSize < MAX_BUFFER)
-			{
-				break;
+				snkStream.write(lpBuffer, size);
 			}
 		}
 	}
