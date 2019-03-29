@@ -428,7 +428,6 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	bool bResult = true;
 
 	char lpBuffer[1024]{0};
-
 	try
 	{
 		while (!srcStream.eof())
