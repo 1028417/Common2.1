@@ -37,10 +37,7 @@ private:
 	UINT_PTR m_idTimer = 0;
 
 	CB_AsyncLoop m_cbAsyncLoop;
-
-private:
-	virtual bool onAsyncLoop();
-
+	
 public:
 	BOOL Active(bool bForceFocus=true);
 

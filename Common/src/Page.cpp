@@ -141,30 +141,20 @@ void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 	m_cbAsyncLoop = cb;
 
 	auto fn = [=]() {
-		if (!onAsyncLoop())
+		if (m_cbAsyncLoop && m_cbAsyncLoop())
 		{
-			m_idTimer = 0;
-			return false;
+			return true;
 		}
-
-		return true;
+		
+		m_idTimer = 0;
+		return false;
 	};
-	if (0 == m_idTimer)
-	{
-		m_idTimer = CMainApp::setTimer(uDelayTime, fn);
-	}
-	else
+	if (0 != m_idTimer)
 	{
 		CMainApp::resetTimer(m_idTimer, fn);
 	}
-}
-
-bool CPage::onAsyncLoop()
-{
-	if (m_cbAsyncLoop)
+	else
 	{
-		return m_cbAsyncLoop();
+		m_idTimer = CMainApp::setTimer(uDelayTime, fn);
 	}
-
-	return false;
 }
