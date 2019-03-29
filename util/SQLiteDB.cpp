@@ -5,7 +5,6 @@
 
 #include "sqlite/sqlite3.h"
 
-
 //CSQLiteDBResult
 
 CSQLiteDBResult::~CSQLiteDBResult()
@@ -14,8 +13,6 @@ CSQLiteDBResult::~CSQLiteDBResult()
 	{
 		sqlite3_free_table(m_pData);
 	}
-
-	delete this;
 }
 
 bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
@@ -199,7 +196,6 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 	__EnsureReturn(SQLITE_OK == iRet && pData, NULL);
 	
 	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
-
 	pSQLiteDBResult->m_uColumnCount = (UINT)nColumnCount;
 	pSQLiteDBResult->m_uRowCount = (UINT)nRowCount;
 
