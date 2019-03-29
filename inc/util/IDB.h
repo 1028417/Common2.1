@@ -11,6 +11,8 @@ using namespace NS_SSTL;
 class IDBResult
 {
 public:
+	virtual ~IDBResult(){}
+
 	virtual const UINT& GetColumnCount() = 0;
 	virtual const UINT& GetRowCount() = 0;
 
