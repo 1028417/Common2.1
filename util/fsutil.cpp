@@ -299,6 +299,11 @@ bool fsutil_win::ExistsFile(const wstring& strFile)
 
 bool fsutil_win::ExistsPath(const wstring& strDir)
 {
+	if (strDir.empty())
+	{
+		return false;
+	}
+
 	return (-1 != ::GetFileAttributesW(strDir.c_str()));
 }
 
