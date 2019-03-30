@@ -36,20 +36,9 @@ public:
 class IController
 {
 public:
-	IController(IView& view)
-		: m_view(view)
-	{
-	}
-
-private:
-	IView& m_view;
+	IController(){}
 
 public:
-	IView& getView()
-	{
-		return m_view;
-	}
-
 	virtual bool init()
 	{
 		return true;
@@ -87,7 +76,7 @@ enum class E_DoEventsResult
 	, DER_Quit
 };
 
-class __CommonExt CMainApp : public CModuleApp
+class __CommonExt CMainApp : public CModuleApp, public IController
 {
 public:
 	static CMainApp* GetMainApp()
@@ -96,7 +85,11 @@ public:
 	}
 
 	virtual IView& getView() = 0;
-	virtual IController& getController() = 0;
+
+	virtual IController& getController()
+	{
+		return *this;
+	}
 
 	wstring GetAppPath(const wstring& strPath)
 	{
