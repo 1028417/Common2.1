@@ -50,9 +50,8 @@ void CMainWnd::fixWorkArea()
 	m_bFullScreen = false;
 	
 	CRect rtWorkArea;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小
+	CMainApp::getWorkArea(rtWorkArea);
 	rtWorkArea.InflateRect(3, 3, 3, 3);
-
 	this->MoveWindow(rtWorkArea);
 }
 

@@ -8,7 +8,7 @@ typedef unsigned int UINT;
 #include "sstl/sstl.h"
 using namespace NS_SSTL;
 
-class IDBResult
+class __UtilExt IDBResult
 {
 public:
 	virtual ~IDBResult(){}
