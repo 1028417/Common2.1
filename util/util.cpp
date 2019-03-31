@@ -32,15 +32,25 @@ void util::toSysTime(const tm& atm, SYSTEMTIME& sysTime)
 void util::getCurrentTime(int& nHour, int& nMinute)
 {
 	SYSTEMTIME sysTime;
-	getCurrentTime(sysTime);
+	toSysTime(time(0), sysTime);
 	
 	nHour = sysTime.wHour;
 	nMinute = sysTime.wMinute;
 }
 
-void util::getCurrentTime(SYSTEMTIME& sysTime)
+wstring util::getCurrentTime()
 {
+	SYSTEMTIME sysTime;
 	toSysTime(time(0), sysTime);
+
+	wchar_t pszRet[64];
+	memset(pszRet, 0, sizeof pszRet);
+	
+	wsprintf(pszRet, L"%u.%02u.%02u_%02u.%02u.%02u"
+		, sysTime.wYear, sysTime.wMonth, sysTime.wDay
+		, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+
+	return pszRet;
 }
 
 static wstring _FormatTime(const tm& atm, const wstring& strFormat)

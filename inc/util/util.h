@@ -77,7 +77,7 @@ public:
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	
 	static void getCurrentTime(int& nHour, int& nMinute);
-	static void getCurrentTime(SYSTEMTIME& sysTime);
+	static wstring getCurrentTime();
 
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
 	static wstring FormatTime(__time64_t time, const wstring& strFormat);
