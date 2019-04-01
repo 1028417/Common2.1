@@ -157,3 +157,5 @@ struct __UtilExt tagCNSortor
 #include "fsdlg.h"
 
 #include "Path.h"
+
+#include "timer.h"

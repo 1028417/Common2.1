@@ -16,6 +16,7 @@
     <ClCompile Include="SQLiteDB.cpp">
       <Filter>db</Filter>
     </ClCompile>
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -37,6 +38,7 @@
       <Filter>db</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\util\mtutil.h" />
+    <ClInclude Include="..\inc\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

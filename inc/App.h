@@ -6,8 +6,6 @@ using namespace Gdiplus;
 
 #include <ModuleApp.h>
 
-using CB_Timer = function<bool()>;
-
 using CB_Sync = fn_voidvoid;
 
 class IView
@@ -120,11 +118,6 @@ public:
 
 	static bool removeMsg(UINT uMsg);
 
-	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
-	static void resetTimer(UINT_PTR idEvent, const CB_Timer& cb);
-
-	static void killTimer(UINT_PTR idEvent);
-
 	static void async(const CB_Sync& cb, UINT uDelayTime=0);
 
 	static void sync(const CB_Sync& cb);
@@ -194,7 +187,7 @@ public:
 	{
 		kill();
 
-		m_idTimer = CMainApp::setTimer(uElapse, [&, cb]() {
+		m_idTimer = CTimer::setTimer(uElapse, [&, cb]() {
 			if (!cb())
 			{
 				m_idTimer = 0;
@@ -209,7 +202,7 @@ public:
 	{
 		if (0 != m_idTimer)
 		{
-			CMainApp::killTimer(m_idTimer);
+			CTimer::killTimer(m_idTimer);
 			m_idTimer = 0;
 		}
 	}

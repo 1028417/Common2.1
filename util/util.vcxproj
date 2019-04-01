@@ -22,10 +22,12 @@
     <ClCompile Include="SQLiteDB.cpp" />
     <ClCompile Include="sqlite\shell.c" />
     <ClCompile Include="sqlite\sqlite3.c" />
+    <ClCompile Include="timer.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="WorkThread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\inc\timer.h" />
     <ClInclude Include="..\inc\util\fsdlg.h" />
     <ClInclude Include="..\inc\util\fsutil.h" />
     <ClInclude Include="..\inc\util\IDB.h" />
