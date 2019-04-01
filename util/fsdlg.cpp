@@ -37,9 +37,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 	
 	m_nWidth = uWidth;
 	m_nHeight = uHeight;
-
-	//(void)::EnableWindow(WndOwner.m_hWnd, FALSE);
-
+	
 	BROWSEINFO browseInfo;
 	::ZeroMemory(&browseInfo, sizeof browseInfo);
 	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_STATUSTEXT | BIF_BROWSEFORCOMPUTER;
@@ -49,9 +47,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 	browseInfo.lParam = (LPARAM)this;
 
 	LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
-
-	//(void)::EnableWindow(hWndOwner, TRUE);
-
+	
 	if(lpItemIDList)
 	{
 		TCHAR pszPath[512];
