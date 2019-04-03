@@ -51,17 +51,17 @@ void CMainWnd::fixWorkArea()
 	
 	CRect rtWorkArea;
 	CMainApp::getWorkArea(rtWorkArea);
-	rtWorkArea.InflateRect(3, 3, 3, 3);
-	this->MoveWindow(rtWorkArea);
+	
+	::SetWindowPos(m_hWnd, HWND_TOP, rtWorkArea.left-3, rtWorkArea.top-3
+		, rtWorkArea.Width() + 6, rtWorkArea.Height() + 6, SWP_SHOWWINDOW);
 }
 
 void CMainWnd::fullScreen()
 {
 	m_bFullScreen = true;
 	
-	CRect rtPos(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-	rtPos.InflateRect(3, 3, 3, 3);
-	this->MoveWindow(rtPos);
+	::SetWindowPos(m_hWnd, HWND_TOPMOST, -3, -3, GetSystemMetrics(SM_CXSCREEN)+6
+		, GetSystemMetrics(SM_CYSCREEN)+6, SWP_SHOWWINDOW);
 }
 
 void CMainWnd::OnMove(int x, int y)
@@ -72,6 +72,10 @@ void CMainWnd::OnMove(int x, int y)
 		{
 			fixWorkArea();
 		}
+		//else
+		//{
+		//	this->fullScreen();
+		//}
 	}
 }
 
@@ -88,6 +92,10 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		{
 			fixWorkArea();
 		}
+		//else
+		//{
+		//	this->fullScreen();
+		//}
 	}
 
 	CRect rcClient;
@@ -243,8 +251,9 @@ void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = {10000,10000}; /*{ ::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME)
-			, ::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION) + ::GetSystemMetrics(SM_CYDLGFRAME) };*/
+		lpMMI->ptMaxTrackSize = lpMMI->ptMaxSize = {10000,10000}; 
+		//{ ::GetSystemMetrics(SM_CXFULLSCREEN) + ::GetSystemMetrics(SM_CXDLGFRAME)
+		//	, ::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION) + ::GetSystemMetrics(SM_CYDLGFRAME) };
 	}
 }
 
