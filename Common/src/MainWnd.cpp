@@ -53,7 +53,7 @@ void CMainWnd::fixWorkArea()
 	CMainApp::getWorkArea(rtWorkArea);
 	
 	::SetWindowPos(m_hWnd, HWND_TOP, rtWorkArea.left-3, rtWorkArea.top-3
-		, rtWorkArea.Width() + 6, rtWorkArea.Height() + 6, SWP_SHOWWINDOW);
+		, rtWorkArea.Width() + 6, rtWorkArea.Height() + 6, SWP_NOACTIVATE);
 }
 
 void CMainWnd::fullScreen()
