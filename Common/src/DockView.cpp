@@ -393,6 +393,8 @@ BOOL CDockView::AddPage(CPage& Page)
 	if (Page.m_bAutoActive)
 	{
 		m_wndTabCtrl.SetTrackMouse([&](E_TrackMouseEvent eMouseEvent, const CPoint& point) {
+			__Ensure(::GetActiveWindow() == this->GetTopLevelParent()->GetSafeHwnd());
+			
 			__Ensure(E_TrackMouseEvent::LME_MouseHover == eMouseEvent);
 
 			tagTCHITTESTINFO htInfo;

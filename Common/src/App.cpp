@@ -171,6 +171,10 @@ BOOL CMainApp::InitInstance()
 	{
 		pMainWnd->show();
 	}
+	else
+	{
+		pMainWnd->SetActiveWindow();
+	}
 
 	__AssertReturn(getController().start(), FALSE);
 
