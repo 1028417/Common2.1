@@ -51,11 +51,22 @@ enum class E_HotkeyFlag
 
 struct tagHotkeyInfo
 {
-	tagHotkeyInfo(UINT t_uKey, E_HotkeyFlag eHotkeyFlag = E_HotkeyFlag::HKF_Null, UINT t_uIDMenuItem = 0)
+	tagHotkeyInfo(UINT t_uKey, E_HotkeyFlag eHotkeyFlag, int t_uIDMenuItem, bool t_bGlobal = false)
 		: uKey(t_uKey)
 		, eFlag(eHotkeyFlag)
 		, lParam(MAKELPARAM(eHotkeyFlag, uKey))
-		, uIDMenuItem(t_uIDMenuItem)
+		, uIDMenuItem((UINT)t_uIDMenuItem)
+		, bGlobal(t_bGlobal)
+	{
+		bHandling = false;
+	}
+
+	tagHotkeyInfo(UINT t_uKey, E_HotkeyFlag eHotkeyFlag, bool t_bGlobal = false)
+		: uKey(t_uKey)
+		, eFlag(eHotkeyFlag)
+		, lParam(MAKELPARAM(eHotkeyFlag, uKey))
+		, uIDMenuItem(0)
+		, bGlobal(t_bGlobal)
 	{
 		bHandling = false;
 	}
@@ -65,6 +76,8 @@ struct tagHotkeyInfo
 	LPARAM lParam;
 	
 	UINT uIDMenuItem;
+	
+	bool bGlobal;
 
 	bool bHandling;
 

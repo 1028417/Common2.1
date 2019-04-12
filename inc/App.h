@@ -106,6 +106,8 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 private:
+	static BOOL _RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo);
+	
 	bool _HandleHotkey(LPARAM lParam);
 	bool _HandleHotkey(tagHotkeyInfo &HotkeyInfo);
 
@@ -144,7 +146,7 @@ public:
 		return ::GetKeyState(uKey) < 0;
 	}
 
-	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo, bool bGlobal=false);
+	static BOOL RegHotkey(const tagHotkeyInfo &HotkeyInfo);
 
 	static BOOL RegisterInterface(UINT uIndex, LPVOID lpInterface);
 	static LPVOID GetInterface(UINT uIndex);

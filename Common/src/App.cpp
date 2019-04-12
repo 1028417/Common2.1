@@ -164,8 +164,20 @@ BOOL CMainApp::InitInstance()
 	__AssertReturn(getController().init(), FALSE);
 
 	CMainWnd *pMainWnd = getView().init();
-	__EnsureReturn(NULL != pMainWnd->GetSafeHwnd(), FALSE);
+	HWND hwndMain = pMainWnd->GetSafeHwnd();
+	__EnsureReturn(NULL != hwndMain, FALSE);
 	m_pMainWnd = pMainWnd;
+
+	for (auto& HotkeyInfo : g_vctHotkeyInfos)
+	{
+		if (HotkeyInfo.bGlobal)
+		{
+			if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
+			{
+				return FALSE;
+			}
+		}
+	}
 
 	if (!pMainWnd->IsWindowVisible())
 	{
@@ -501,20 +513,29 @@ LPVOID CMainApp::GetInterface(UINT uIndex)
 	return NULL;
 }
 
-BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo, bool bGlobal)
+BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 {
 	if (!util::ContainerFind(g_vctHotkeyInfos, HotkeyInfo))
 	{
 		g_vctHotkeyInfos.push_back(HotkeyInfo);
 
-		if (bGlobal)
+		if (HotkeyInfo.bGlobal)
 		{
-			if (!::RegisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey))
+			auto hwndMain = AfxGetMainWnd()->GetSafeHwnd();
+			if (NULL != hwndMain)
 			{
-				return FALSE;
+				if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
+				{
+					return FALSE;
+				}
 			}
 		}
 	}
 
 	return TRUE;
+}
+
+BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
+{
+	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
