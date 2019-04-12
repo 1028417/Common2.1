@@ -227,7 +227,7 @@ static const Color g_crUnsel(242, 242, 242);
 
 void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 {
-	bool bSel = GetCurSel() == nItem;
+	int nSelItem = GetCurSel();
 
 	Point pt[]{ { rcItem.left, rcItem.bottom }
 		, { rcItem.left, rcItem.top }
@@ -246,12 +246,27 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 		std::swap(pt[2].X, pt[3].X);
 	}
 
-	SolidBrush whiteBrush(bSel ? g_ckSel : g_crUnsel);
+	/*if (nItem != nSelItem)
+	{
+		if (nItem - 1 != nSelItem)
+		{
+			pt[0].X -= __Offset / 2 - 1;
+			pt[1].X -= __Offset / 2 - 1;
+		}
+
+		if (nItem + 1 != nSelItem)
+		{
+			pt[2].X += __Offset / 2 - 1;
+			pt[3].X += __Offset / 2 - 1;
+		}
+	}*/
+
+	SolidBrush whiteBrush(nItem == nSelItem ? g_ckSel : g_crUnsel);
 	graphics.FillPolygon(&whiteBrush, pt, sizeof(pt) / sizeof(pt[0]));
 
 	static const Pen s_pen(Color(225, 225, 225), 1);
 	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
-	if (!bSel)
+	if (nItem != nSelItem)
 	{
 		if (nItem > 0)
 		{
