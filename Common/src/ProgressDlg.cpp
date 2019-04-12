@@ -157,9 +157,7 @@ void CProgressDlg::OnCancel()
 		__super::OnOK();
 		return;
 	}
-
-	//__Ensure(this->IsWindowVisible());
-	
+		
 	this->Pause(true);
 
 	if (IDYES != this->showMsgBox(L"确认取消?", MB_YESNO))
