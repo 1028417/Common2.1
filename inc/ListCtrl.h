@@ -305,8 +305,9 @@ public:
 	void SelectItem(UINT uItem, BOOL bSetFocus=TRUE);
 	void SelectObject(const CListObject *pObject, BOOL bSetFocus=TRUE);
 	void SelectItems(UINT uItem, UINT uSelectCount);
-	void SelectAllItems();
-	void DeselectAllItems();
+	
+	void SelectAll();
+	void DeselectAll();
 
 	UINT GetHeaderHeight();
 
