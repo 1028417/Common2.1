@@ -349,7 +349,7 @@ void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts, int nPos, co
 
 	int nMaxItem = GetItemCount() - 1;
 
-	DeselectAllItems();
+	DeselectAll();
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
@@ -390,7 +390,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos, cons
 
 	int nMaxItem = GetItemCount()-1;
 
-	DeselectAllItems();
+	DeselectAll();
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
@@ -704,7 +704,7 @@ void CObjectList::SelectObject(const CListObject *pObject, BOOL bSetFocus)
 
 void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 {
-	DeselectAllItems();
+	DeselectAll();
 
 	for (UINT uIndex = 0; uIndex < uSelectCount; ++uIndex)
 	{
@@ -712,7 +712,7 @@ void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 	}
 }
 
-void CObjectList::SelectAllItems()
+void CObjectList::SelectAll()
 {
 	CRedrawLockGuard RedrawLockGuard(*this);
 
@@ -723,7 +723,7 @@ void CObjectList::SelectAllItems()
 	}
 }
 
-void CObjectList::DeselectAllItems()
+void CObjectList::DeselectAll()
 {
 	int nItem = 0;
 
@@ -858,8 +858,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		{
 			if (0 == (this->GetStyle() & LVS_SINGLESEL))
 			{
-				this->DeselectAllItems();
-				this->SelectAllItems();
+				DeselectAll();
+				SelectAll();
 			}
 		}
 
