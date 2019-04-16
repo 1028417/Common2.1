@@ -71,7 +71,7 @@ private:
 
 	TD_ListColumn m_lstColumn;
 
-	list<pair<tagListColumn*, double>> m_lstPercentWidth;
+	list<pair<tagListColumn*, double>> m_lstDblWidth;
 
 	UINT m_uFixWidth = 0;
 
@@ -85,11 +85,11 @@ public:
 		return *this;
 	}
 
-	CListColumnGuard& add(const CString& cstrText, double fPercentWidth, UINT uFormat = LVCFMT_LEFT)
+	CListColumnGuard& add(const CString& cstrText, double dbWidth, UINT uFormat = LVCFMT_LEFT)
 	{
 		m_lstColumn.push_back({ cstrText, 0, uFormat });
 
-		m_lstPercentWidth.push_back({ &m_lstColumn.back(), fPercentWidth });
+		m_lstDblWidth.push_back({ &m_lstColumn.back(), dbWidth });
 		
 		return *this;
 	}
@@ -101,12 +101,12 @@ public:
 
 	const TD_ListColumn& getListColumn(UINT uTotalWidth)
 	{
-		if (!m_lstPercentWidth.empty())
+		if (!m_lstDblWidth.empty())
 		{
 			if (m_uFixWidth < uTotalWidth)
 			{
 				UINT uRamainWidth = uTotalWidth - m_uFixWidth;
-				for (auto& pr : m_lstPercentWidth)
+				for (auto& pr : m_lstDblWidth)
 				{
 					pr.first->uWidth = UINT(uRamainWidth*pr.second);
 				}
