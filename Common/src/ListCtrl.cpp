@@ -821,7 +821,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
-		pwndEdit->SetSel(0, m_cstrRenameText.GetLength(), TRUE);
+		pwndEdit->SetSel(0, -1);
 	}
 
 	break;
