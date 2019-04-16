@@ -2,8 +2,8 @@
 #include "util.h"
 
 #include <locale>
-static const char *g_lplocaleName_CN = "Chinese_china";
-static const locale g_locale_CN = locale(g_lplocaleName_CN);
+//static const locale g_locale_CN("Chinese_china");
+static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
 bool util::toSysTime(__time64_t time, SYSTEMTIME& sysTime)
