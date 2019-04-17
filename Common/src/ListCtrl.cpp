@@ -761,19 +761,34 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	{
 		__EnsureBreak(m_bCusomDrawNotify);
 		LPNMLVCUSTOMDRAW pLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(&NMHDR);
-		if (CDDS_PREPAINT == pLVCD->nmcd.dwDrawStage)
-		{
-			*pResult = CDRF_NOTIFYITEMDRAW;
-		}
-		else if (CDDS_ITEMPREPAINT == pLVCD->nmcd.dwDrawStage)
-		{
-			*pResult = CDRF_NOTIFYITEMDRAW;
-		}
+		auto& nmcd = pLVCD->nmcd;
 
-		if (pLVCD->nmcd.dwDrawStage & CDDS_ITEM)
+		if (CDDS_PREPAINT == nmcd.dwDrawStage)
 		{
-			if (pLVCD->nmcd.dwDrawStage & CDDS_SUBITEM)
+			*pResult = CDRF_NOTIFYITEMDRAW;
+		}
+		else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
+		{
+			*pResult = CDRF_NOTIFYSUBITEMDRAW;
+		}
+		else
+		{
+			/*#define BkgColor_Select RGB(204, 232, 255)
+						pLVCD->clrTextBk = BkgColor_Select;*/
+
+			if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 			{
+				if (m_para.setUnderlineColumns.find(pLVCD->iSubItem) != m_para.setUnderlineColumns.end())
+				{
+					(void)::SelectObject(nmcd.hdc, m_fontUnderline);
+				}
+				else
+				{
+					(void)::SelectObject(nmcd.hdc, m_CompatableFont);
+				}
+
+				*pResult = CDRF_NEWFONT;
+
 				bool bSkipDefault = false;
 				OnCustomDraw(*pLVCD, bSkipDefault);
 				if (bSkipDefault)
@@ -782,10 +797,10 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 				}
 			}
 		}
-
-		return TRUE;
 	}
-
+	
+	return TRUE;
+	
 	break;
 	case LVN_BEGINLABELEDIT:
 	{
@@ -884,15 +899,6 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
 {
-	if (m_para.setUnderlineColumns.find(lvcd.iSubItem) != m_para.setUnderlineColumns.end())
-	{
-		(void)::SelectObject(lvcd.nmcd.hdc, m_fontUnderline);
-	}
-	else
-	{
-		(void)::SelectObject(lvcd.nmcd.hdc, m_CompatableFont);
-	}
-
 	if (m_para.cbCustomDraw)
 	{
 		m_para.cbCustomDraw(lvcd, bSkipDefault);
