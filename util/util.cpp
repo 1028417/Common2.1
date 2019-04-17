@@ -1,4 +1,4 @@
-
+ï»¿
 #include "util.h"
 
 #include <locale>
@@ -327,17 +327,17 @@ bool util::IsUTF8Str(const string& strText)
 
 	const char* str = strText.c_str();
 
-	UINT nBytes = 0;//UFT8¿ÉÓÃ1-6¸ö×Ö½Ú±àÂë,ASCIIÓÃÒ»¸ö×Ö½Ú
+	UINT nBytes = 0;//UFT8å¯ç”¨1-6ä¸ªå­—èŠ‚ç¼–ç ,ASCIIç”¨ä¸€ä¸ªå­—èŠ‚
 	unsigned char chr = *str;
 	bool bAllAscii = true;
 	for (UINT uIndex = 0; str[uIndex] != '\0'; ++uIndex) {
 		chr = *(str + uIndex);
-		//ÅÐ¶ÏÊÇ·ñASCII±àÂë,Èç¹û²»ÊÇ,ËµÃ÷ÓÐ¿ÉÄÜÊÇUTF8,ASCIIÓÃ7Î»±àÂë,×î¸ßÎ»±ê¼ÇÎª0,0xxxxxxx
+		//åˆ¤æ–­æ˜¯å¦ASCIIç¼–ç ,å¦‚æžœä¸æ˜¯,è¯´æ˜Žæœ‰å¯èƒ½æ˜¯UTF8,ASCIIç”¨7ä½ç¼–ç ,æœ€é«˜ä½æ ‡è®°ä¸º0,0xxxxxxx
 		if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
 		}
 		if (nBytes == 0) {
-			//Èç¹û²»ÊÇASCIIÂë,Ó¦¸ÃÊÇ¶à×Ö½Ú·û,¼ÆËã×Ö½ÚÊý
+			//å¦‚æžœä¸æ˜¯ASCIIç ,åº”è¯¥æ˜¯å¤šå­—èŠ‚ç¬¦,è®¡ç®—å­—èŠ‚æ•°
 			if (chr >= 0x80) {
 				if (chr >= 0xFC && chr <= 0xFD) {
 					nBytes = 6;
@@ -361,19 +361,19 @@ bool util::IsUTF8Str(const string& strText)
 			}
 		}
 		else {
-			//¶à×Ö½Ú·ûµÄ·ÇÊ××Ö½Ú,Ó¦Îª 10xxxxxx
+			//å¤šå­—èŠ‚ç¬¦çš„éžé¦–å­—èŠ‚,åº”ä¸º 10xxxxxx
 			if ((chr & 0xC0) != 0x80) {
 				return false;
 			}
-			//¼õµ½ÎªÁãÎªÖ¹
+			//å‡åˆ°ä¸ºé›¶ä¸ºæ­¢
 			nBytes--;
 		}
 	}
-	//Î¥·µUTF8±àÂë¹æÔò
+	//è¿è¿”UTF8ç¼–ç è§„åˆ™
 	if (nBytes != 0) {
 		return false;
 	}
-	if (bAllAscii) { //Èç¹ûÈ«²¿¶¼ÊÇASCII, Ò²ÊÇUTF8
+	if (bAllAscii) { //å¦‚æžœå…¨éƒ¨éƒ½æ˜¯ASCII, ä¹Ÿæ˜¯UTF8
 		return true;
 	}
 	return true;
