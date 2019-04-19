@@ -120,31 +120,11 @@ namespace NS_SSTL
 				return 0;
 			}
 
-			size_t uRet = 0;
-			do
-			{
-				E_DelConfirm eRet = cb(*itr);
-				if (E_DelConfirm::DC_Abort == eRet)
-				{
-					break;
-				}
-				else if (E_DelConfirm::DC_No == eRet)
-				{
-					++itr;
-				}
-				else
-				{
-					itr = m_data.erase(itr);
-					uRet++;
+			cb(*itr);
 
-					if (E_DelConfirm::DC_YesAbort == eRet)
-					{
-						break;
-					}
-				}
-			} while (itr != m_data.end() && *itr == data);
+			m_data.erase(itr);
 
-			return uRet;
+			return 1;
 		}
 
 		bool _includes(__DataConstRef data) const override

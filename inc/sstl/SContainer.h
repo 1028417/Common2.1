@@ -109,35 +109,33 @@ namespace NS_SSTL
 			return *this;
 		}
 		template <typename T>
-		SContainerT& operator<< (const T&t)
+		SContainerT& operator<< (const T& t)
 		{
 			add(t);
 			return *this;
 		}
 
-		template <typename T>
-		SContainerT& operator+= (const T& rhs)
+		SContainerT& operator+= (__InitList initList)
 		{
-			add(rhs);
+			add(initList);
 			return *this;
 		}
-
-		SContainerT& operator+= (__InitList rhs)
-		{
-			add(rhs);
-			return *this;
-		}
-
 		template <typename T>
-		SContainerT& operator-= (const T& t)
+		SContainerT& operator+= (const T& t)
 		{
-			del(t);
+			add(t);
 			return *this;
 		}
 
 		SContainerT& operator-= (__InitList_Key keys)
 		{
 			del(keys);
+			return *this;
+		}
+		template <typename T>
+		SContainerT& operator-= (const T& t)
+		{
+			del(t);
 			return *this;
 		}
 

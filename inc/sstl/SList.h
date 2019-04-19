@@ -247,21 +247,17 @@ namespace NS_SSTL
 			return map<RET>(cb);
 		}
 
-		SMap<__DataType, size_t> itemSum() const
+		void sum(SMap<__DataType, size_t>& mapItemSum) const
 		{
-			SMap<__DataType, size_t> mapItemSum;
-
 			for (auto&data : m_data)
 			{
 				mapItemSum[data]++;
 			}
-
-			return mapItemSum;
 		}
 
 		void sum(SMap<__DataType, size_t>& mapItemSum, SMap<size_t, SListT>& mapSumItem) const
 		{
-			mapItemSum = itemSum();
+			sum(mapItemSum);
 
 			for (auto& pr : mapItemSum)
 			{
@@ -269,12 +265,10 @@ namespace NS_SSTL
 			}
 		}
 
-		SMap<size_t, SListT> sumItem() const
+		void sum(SMap<size_t, SListT>& mapSumItem) const
 		{
 			SMap<__DataType, size_t> mapItemSum;
-			SMap<size_t, SListT> mapSumItem;
 			sum(mapItemSum, mapSumItem);
-			return mapSumItem;
 		}
 
 	protected:
