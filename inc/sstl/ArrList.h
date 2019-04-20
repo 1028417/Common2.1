@@ -267,7 +267,7 @@ namespace NS_SSTL
 			return __Super::popBack(data);
 		}
 
-		ArrListT& sort()
+		ArrListT& qsort()
 		{
 			tagTrySort<__DataType> trySort;
 			return qsort([&](__DataType& lhs, __DataType& rhs) {
@@ -275,7 +275,7 @@ namespace NS_SSTL
 			});
 		}
 
-		ArrListT& sort(__CB_Sort_T<__DataType> cb)
+		ArrListT& qsort(__CB_Sort_T<__DataType> cb)
 		{
 			//__Super::sort(cb);
 			//m_ptrArray.assign(m_data);

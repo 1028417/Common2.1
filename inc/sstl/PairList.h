@@ -426,14 +426,14 @@ namespace NS_SSTL
 			return false;
 		}
 
-		PairListT& sort(__CB_Sort_T<__PairType> cb)
+		PairListT& qsort(__CB_Sort_T<__PairType> cb)
 		{
-			__Super::sort(cb);
+			__Super::qsort(cb);
 
 			return *this;
 		}
 
-		PairListT& sortFirst()
+		PairListT& qsortFirst()
 		{
 			tagTrySort<__FirstType> trySort;
             __Super::sort([&](__PairRef pr1, __PairRef pr2) {
@@ -443,7 +443,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		PairListT& sortFirst(__CB_Sort_T<__FirstType> cb)
+		PairListT& qsortFirst(__CB_Sort_T<__FirstType> cb)
 		{
             __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return cb(pr1.first, pr2.first);
@@ -452,19 +452,19 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		PairListT& sortSecond()
+		PairListT& qsortSecond()
 		{
 			tagTrySort<__SecondType> trySort;
-            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
+            __Super::qsort([&](__PairRef pr1, __PairRef pr2) {
                 return trySort(pr1.second, pr2.second);
 			});
 
 			return *this;
 		}
 
-		PairListT& sortSecond(__CB_Sort_T<__SecondType> cb)
+		PairListT& qsortSecond(__CB_Sort_T<__SecondType> cb)
 		{
-            __Super::sort([&](__PairRef pr1, __PairRef pr2) {
+            __Super::qsort([&](__PairRef pr1, __PairRef pr2) {
                 return cb(pr1.second, pr2.second);
 			});
 
