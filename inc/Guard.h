@@ -45,7 +45,7 @@ private:
 class __CommonExt CRedrawLockGuard
 {
 public:
-	CRedrawLockGuard(CWnd& wnd);
+	CRedrawLockGuard(CWnd& wnd, bool bFlag = true);
 
 	~CRedrawLockGuard();
 
@@ -53,6 +53,10 @@ public:
 
 private:
 	CWnd& m_wnd;
+
+	BOOL m_bFlag = FALSE;
+
+	BOOL m_bLocked = FALSE;
 };
 
 struct tagMenuItemInfo

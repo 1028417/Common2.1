@@ -27,7 +27,7 @@
     <ClCompile Include="WorkThread.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\timer.h" />
+    <ClInclude Include="..\inc\util\timer.h" />
     <ClInclude Include="..\inc\util\fsdlg.h" />
     <ClInclude Include="..\inc\util\fsutil.h" />
     <ClInclude Include="..\inc\util\IDB.h" />

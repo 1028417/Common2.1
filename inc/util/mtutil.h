@@ -240,13 +240,13 @@ namespace NS_mtutil
 		void wait()
 		{
 			std::unique_lock<mutex> lock(m_mtx);
-			__super::wait(lock);
+            condition_variable::wait(lock);
 		}
 
 		void notify()
 		{
 			std::unique_lock<mutex> lock(m_mtx);
-			__super::notify_all();
+            condition_variable::notify_all();
 		}
 
 	private:

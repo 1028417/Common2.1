@@ -38,7 +38,7 @@
       <Filter>db</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\util\mtutil.h" />
-    <ClInclude Include="..\inc\timer.h" />
+    <ClInclude Include="..\inc\util\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

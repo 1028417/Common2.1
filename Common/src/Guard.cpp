@@ -6,12 +6,20 @@
 
 #include <afxglobals.h>
 
-// CRedrawLockGuard
 
-CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd)
+CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	: m_wnd(wnd)
+	, m_bFlag(bFlag)
 {
-	m_wnd.SetRedraw(FALSE);
+	if (m_bFlag)
+	{
+		m_bLocked = wnd.LockWindowUpdate();
+	}
+	else
+	{
+		m_wnd.SetRedraw(FALSE);
+		m_bLocked = TRUE;
+	}
 }
 
 CRedrawLockGuard::~CRedrawLockGuard()
@@ -21,8 +29,20 @@ CRedrawLockGuard::~CRedrawLockGuard()
 
 void CRedrawLockGuard::Unlock()
 {
-	m_wnd.SetRedraw(TRUE);
-	m_wnd.RedrawWindow();
+	if (m_bLocked)
+	{
+		m_bLocked = FALSE;
+
+		if (m_bFlag)
+		{
+			m_wnd.UnlockWindowUpdate();
+		}
+		else
+		{
+			m_wnd.SetRedraw(TRUE);
+			m_wnd.RedrawWindow();
+		}
+	}
 }
 
 void CMenuEx::_setOwerDraw()
