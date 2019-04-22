@@ -235,18 +235,16 @@ BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 	int iCount = ::GetMenuItemCount(hSubMenu);
 	if (iCount > 0)
 	{
-		if (0 == ::GetMenuItemID(hSubMenu, 0))
+		while (iCount > 0 && 0 == ::GetMenuItemID(hSubMenu, 0))
 		{
 			(void)::RemoveMenu(hSubMenu, 0, MF_BYPOSITION);
 			iCount--;
 		}
 
-		if (iCount > 0)
+		while (iCount > 0 && 0 == ::GetMenuItemID(hSubMenu, iCount - 1))
 		{
-			if (0 == ::GetMenuItemID(hSubMenu, iCount - 1))
-			{
-				(void)::RemoveMenu(hSubMenu, iCount - 1, MF_BYPOSITION);
-			}
+			(void)::RemoveMenu(hSubMenu, iCount - 1, MF_BYPOSITION);
+			iCount--;
 		}
 	}
 	
