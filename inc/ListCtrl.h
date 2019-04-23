@@ -277,7 +277,12 @@ public:
 	void UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& lstColumn);
 
 	void UpdateItems();
+
 	void UpdateColumns(const list<UINT>& lstColumn);
+	void UpdateColumn(UINT uColumn)
+	{
+		UpdateColumns({ uColumn });
+	}
 
 	void SetColumnText(UINT uColumn, const wstring& strText);
 

@@ -11,14 +11,17 @@ CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	: m_wnd(wnd)
 	, m_bFlag(bFlag)
 {
-	if (m_bFlag)
+	if (wnd)
 	{
-		m_bLocked = wnd.LockWindowUpdate();
-	}
-	else
-	{
-		m_wnd.SetRedraw(FALSE);
-		m_bLocked = TRUE;
+		if (m_bFlag)
+		{
+			m_bLocked = wnd.LockWindowUpdate();
+		}
+		else
+		{
+			m_wnd.SetRedraw(FALSE);
+			m_bLocked = TRUE;
+		}
 	}
 }
 
