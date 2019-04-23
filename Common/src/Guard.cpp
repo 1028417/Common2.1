@@ -108,6 +108,9 @@ BOOL CMenuEx::Attach(HMENU hMenu, BOOL bTopMenu)
 	return TRUE;
 }
 
+#define __CXOffsetTopMenu 6
+#define __CYSplitor 5
+
 void CMenuEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
 	__super::MeasureItem(lpMeasureItemStruct);
@@ -119,12 +122,12 @@ void CMenuEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 		lpMeasureItemStruct->itemWidth = m_uMenuWidth;
 		if (m_bTopMenu)
 		{
-			lpMeasureItemStruct->itemWidth += 6;
+			lpMeasureItemStruct->itemWidth += __CXOffsetTopMenu;
 		}
 	}
 	else
 	{
-		lpMeasureItemStruct->itemHeight = 5;
+		lpMeasureItemStruct->itemHeight = __CYSplitor;
 	}
 }
 
