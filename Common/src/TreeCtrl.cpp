@@ -378,7 +378,7 @@ void CObjectTree::UpdateImage(CTreeObject& Object)
 CTreeObject *CObjectTree::GetSelectedObject()
 {
 	HTREEITEM hItem = this->GetSelectedItem();
-	if (!hItem)
+	if (NULL == hItem)
 	{
 		return NULL;
 	}
@@ -388,6 +388,11 @@ CTreeObject *CObjectTree::GetSelectedObject()
 
 CTreeObject *CObjectTree::GetItemObject(HTREEITEM hItem)
 {
+	if (NULL == hItem)
+	{
+		return NULL;
+	}
+
 	return (CTreeObject*)__super::GetItemData(hItem);
 }
 
