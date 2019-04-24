@@ -1,7 +1,9 @@
 
 #pragma once
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4251)
+#endif
 
 #include <stdint.h>
 #include <stddef.h>
