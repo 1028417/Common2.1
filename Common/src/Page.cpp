@@ -66,7 +66,7 @@ int CPage::MsgBox(const CString& cstrText, UINT uType)
 	CMainWnd *pMainWnd = CMainWnd::getMainWnd();
 	__EnsureReturn(pMainWnd, FALSE);
 
-	return pMainWnd->MsgBox(cstrText, m_cstrTitle, uType);
+	return pMainWnd->MessageBox(cstrText, m_cstrTitle, uType);
 }
 
 BOOL CPage::OnSetActive()

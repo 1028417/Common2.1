@@ -228,7 +228,7 @@ BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 	});
 }
 
-int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uType)
+int CMainWnd::MessageBox(const CString& cstrText, const CString& cstrTitle, UINT uType)
 {
 	LPCTSTR pszTitle = NULL;
 	if (!cstrTitle.IsEmpty())
@@ -240,7 +240,7 @@ int CMainWnd::MsgBox(const CString& cstrText, const CString& cstrTitle, UINT uTy
 		pszTitle = m_WndInfo.strText.c_str();
 	}
 
-	int nResult = this->MessageBox(cstrText, pszTitle, uType);
+	int nResult = __super::MessageBox(cstrText, pszTitle, uType);
 
 	return nResult;
 }
