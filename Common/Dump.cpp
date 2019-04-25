@@ -38,11 +38,6 @@ static inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCSTR strFileName)
 		::MiniDumpWriteDump(::GetCurrentProcess(), ::GetCurrentProcessId(), hFile, dumpType, (pep != 0) ? &mdei : 0, NULL, NULL);
 
 		CloseHandle(hFile);
-
-		//StopStream(g_hDlgMain, [](int ec, const std::string&ei) {
-		//	CloseDevice(g_hDlgMain);
-		//	MessageBox(NULL, L"程序出现异常，请将crash.dmp提交给开发人员，帮助改善", L"", MB_OK);
-		//});
 	}
 }
 
