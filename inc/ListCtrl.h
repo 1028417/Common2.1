@@ -220,6 +220,8 @@ protected:
 
 	BOOL SetItemHeight(UINT uItemHeight);
 
+	virtual bool GetRenameText(UINT uItem, wstring& strRenameText);
+
 public:
 	BOOL InitCtrl(const tagListPara& para);
 
@@ -250,8 +252,6 @@ private:
 	template <bool _clear_other>
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 
-	virtual bool GetRenameText(UINT uItem, wstring& strRenameText);
-	
 	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {};
 
 public:

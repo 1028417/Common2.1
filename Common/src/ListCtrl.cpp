@@ -758,7 +758,10 @@ bool CObjectList::GetRenameText(UINT uItem, wstring& strRenameText)
 	CListObject *pObject = this->GetItemObject(uItem);
 	if (NULL != pObject)
 	{
-		return pObject->GetRenameText(strRenameText);
+		if (!pObject->GetRenameText(strRenameText))
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -833,10 +836,22 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			*pResult = 1;
 			return TRUE;
 		}
-
+		
 		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
 		pwndEdit->SetSel(0, -1);
+
+		CMainApp::async([=]() {
+			CEdit *pwndEdit = this->GetEditControl();
+			if (NULL != pwndEdit)
+			{
+				CRect rcPos;
+				pwndEdit->GetWindowRect(rcPos);
+				this->ScreenToClient(rcPos);
+				rcPos.bottom += 3;
+				pwndEdit->MoveWindow(rcPos);
+			}
+		});
 	}
 
 	break;
