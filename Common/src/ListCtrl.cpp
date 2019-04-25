@@ -841,7 +841,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		pwndEdit->SetWindowText(m_cstrRenameText);
 		pwndEdit->SetSel(0, -1);
 
-		CMainApp::async([=]() {
+		/*CMainApp::async([=]() {
 			CEdit *pwndEdit = this->GetEditControl();
 			if (NULL != pwndEdit)
 			{
@@ -851,7 +851,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 				rcPos.bottom += 3;
 				pwndEdit->MoveWindow(rcPos);
 			}
-		});
+		});*/
 	}
 
 	break;
