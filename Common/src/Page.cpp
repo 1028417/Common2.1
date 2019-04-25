@@ -50,15 +50,17 @@ BOOL CPage::Active(bool bForceFocus)
 BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
 	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
-	if (NULL != pDockView)
+	if (NULL == pDockView)
 	{
-		return pDockView->SetPageTitle(*this, cstrTitle, iImage);
+		/*CMainWnd *pMainWnd = CMainWnd::getMainWnd();
+		__EnsureReturn(pMainWnd, FALSE);
+
+		return pMainWnd->SetPageTitle(*this, cstrTitle, iImage);*/
+
+		return FALSE;
 	}
 
-	CMainWnd *pMainWnd = CMainWnd::getMainWnd();
-	__EnsureReturn(pMainWnd, FALSE);
-
-	return pMainWnd->SetPageTitle(*this, cstrTitle, iImage);
+	return pDockView->SetPageTitle(*this, cstrTitle, iImage);
 }
 
 int CPage::MsgBox(const CString& cstrText, UINT uType)

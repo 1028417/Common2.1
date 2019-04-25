@@ -221,12 +221,12 @@ BOOL CMainWnd::ActivePage(CPage& Page)
 	});
 }
 
-BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
+/*BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 {
 	return m_mapDockViews.any([&](auto& pr) {
 		return pr.second->SetPageTitle(Page, cstrTitle, iImage);
 	});
-}
+}*/
 
 /*int CMainWnd::MessageBox(const CString& cstrText, const CString& cstrTitle, UINT uType)
 {

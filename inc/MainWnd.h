@@ -72,7 +72,7 @@ public:
 
 	BOOL ActivePage(CPage& Page);
 
-	BOOL SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage = -1);
+	//BOOL SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage = -1);
 
 	/*int MessageBox(const CString& cstrText, const CString& cstrTitle, UINT uType = MB_OK);
 	int MessageBox(const CString& cstrText, UINT uType = MB_OK)
