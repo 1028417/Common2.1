@@ -753,6 +753,17 @@ BOOL CObjectList::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRES
 	return __super::OnChildNotify(message, wParam, lParam, pResult);
 }
 
+bool CObjectList::GetRenameText(UINT uItem, wstring& strRenameText)
+{
+	CListObject *pObject = this->GetItemObject(uItem);
+	if (NULL != pObject)
+	{
+		return pObject->GetRenameText(strRenameText);
+	}
+
+	return true;
+}
+
 BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 {
 	switch (NMHDR.code)
@@ -810,24 +821,13 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
 		auto& item = pLVDispInfo->item;
 
-		bool bRet = false;
 		wstring strRenameText;
 		if (NULL != item.pszText)
 		{
 			strRenameText = item.pszText;
 		}
-
-		CListObject *pObject = this->GetItemObject(item.iItem);
-		if (pObject)
-		{
-			bRet = pObject->GetRenameText(strRenameText);
-		}
-		else
-		{
-			bRet = GetRenameText(item.iItem, strRenameText);
-		}
-
-		if (!bRet)
+		
+		if (!GetRenameText(item.iItem, strRenameText))
 		{
 			pwndEdit->ShowWindow(SW_HIDE);
 			*pResult = 1;
