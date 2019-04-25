@@ -14,6 +14,8 @@ using CB_AsyncLoop = function<bool()>;
 
 class __CommonExt CPage: public CPropertyPage
 {
+	friend class CDockView;
+
 public:
 	CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
@@ -23,10 +25,10 @@ public:
 
 	CResModule& m_resModule;
 
-	bool m_bAutoActive = false;
-
 private:
 	CString m_cstrTitle;
+
+	bool m_bAutoActive = false;
 
 	set<HWND> m_setDragableCtrls;
 
