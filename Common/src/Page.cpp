@@ -63,14 +63,6 @@ BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 	return pDockView->SetPageTitle(*this, cstrTitle, iImage);
 }
 
-int CPage::MsgBox(const CString& cstrText, UINT uType)
-{
-	CMainWnd *pMainWnd = CMainWnd::getMainWnd();
-	__EnsureReturn(pMainWnd, FALSE);
-
-	return pMainWnd->MessageBox(cstrText, m_cstrTitle, uType);
-}
-
 BOOL CPage::OnSetActive()
 {
 	BOOL bRet = __super::OnSetActive();

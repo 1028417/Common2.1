@@ -43,12 +43,10 @@ public:
 
 	BOOL SetTitle(const CString& cstrTitle, int iImage = -1);
 
-	const CString& GetTitle() const
+	virtual const CString& GetTitle() const
 	{
 		return m_cstrTitle;
 	}
-
-	virtual int MsgBox(const CString& cstrText, UINT uType=MB_OK);
 
 protected:
 	BOOL OnSetActive() override;
