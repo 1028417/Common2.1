@@ -49,6 +49,8 @@ BOOL CPage::Active(bool bForceFocus)
 
 BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
+	m_cstrTitle = cstrTitle;
+
 	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
 	if (NULL == pDockView)
 	{

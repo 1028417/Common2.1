@@ -386,7 +386,7 @@ BOOL CDockView::AddPage(CPage& Page)
 	{
 		TCITEM tci = {0};
 		tci.mask = TCIF_TEXT;
-		tci.pszText = (LPTSTR)(LPCTSTR)Page.m_cstrTitle;
+		tci.pszText = (LPTSTR)(LPCTSTR)Page.GetTitle();
 		(void)m_wndTabCtrl.SetItem(m_wndTabCtrl.GetItemCount()-1, &tci);
 	}
 
@@ -440,8 +440,6 @@ BOOL CDockView::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 	
 	__AssertReturn(m_wndTabCtrl.GetItemCount() > nPage, TRUE);
 
-	Page.m_cstrTitle = cstrTitle;
-
 	TCITEM tci;
 	tci.mask = TCIF_TEXT;
 	//if (-1 != iImage)
@@ -449,7 +447,7 @@ BOOL CDockView::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 		tci.mask |= TCIF_IMAGE;
 		tci.iImage = iImage;
 	}
-	tci.pszText = (LPTSTR)(LPCTSTR)Page.m_cstrTitle;
+	tci.pszText = (LPTSTR)(LPCTSTR)Page.GetTitle();
 	(void)m_wndTabCtrl.SetItem(nPage, &tci);
 
 	return TRUE;
