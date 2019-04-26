@@ -35,6 +35,7 @@ public:
 		, m_strName(findData.getFileName())
 		, m_uFileSize(findData.data.nFileSizeLow)
 		, m_modifyTime(findData.data.ftLastWriteTime)
+		, m_createTime(findData.data.ftCreationTime)
 		, m_pParentDir(pParentDir)
 	{
 	}
@@ -50,6 +51,7 @@ public:
 	bool m_bExists = false;
 
 	FILETIME m_modifyTime = { 0,0 };
+	FILETIME m_createTime = { 0,0 };
 
 protected:
 	wstring m_strName;
@@ -197,19 +199,7 @@ public:
 		vecText.push_back(m_strName);
 
 		vecText.push_back(to_wstring(m_uFileSize));
-
-		//vecText.push_back((LPCTSTR)GetFileModifyTime());
 	}
-
-	//wstring GetFileModifyTime()
-	//{
-	//	if (m_bDir)
-	//	{
-	//		return L"";
-	//	}
-
-	//	return CTime(m_modifyTime).Format(_T("%y-%m-%d %H:%M"));
-	//}
 };
 
 class __UtilExt CDirObject : public CPathObject, public CTreeObject
