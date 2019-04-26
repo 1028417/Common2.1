@@ -661,9 +661,9 @@ namespace NS_SSTL
 			return m_data.addFront(initList);
 		}
 
-		bool getFront(__CB_RefType_void cb) const
+		bool front(__CB_RefType_void cb) const
 		{
-			return __Super::getFront([&](__PtrType ptr) {
+			return __Super::front([&](__PtrType ptr) {
 				if (NULL != ptr)
 				{
 					cb(*ptr);
@@ -671,9 +671,9 @@ namespace NS_SSTL
 			});
 		}
 
-		bool getBack(__CB_RefType_void cb) const
+		bool back(__CB_RefType_void cb) const
 		{
-			return __Super::getBack([&](__PtrType ptr) {
+			return __Super::back([&](__PtrType ptr) {
 				if (NULL != ptr)
 				{
 					cb(*ptr);

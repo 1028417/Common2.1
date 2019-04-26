@@ -366,7 +366,7 @@ namespace NS_SSTL
 			}
 		}
 
-		bool getFront(__CB_Ref_void cb)
+		bool front(__CB_Ref_void cb)
 		{
 			if (m_data.empty())
 			{
@@ -378,7 +378,7 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool getFront(__CB_ConstRef_void cb) const
+		bool front(__CB_ConstRef_void cb) const
 		{
 			if (m_data.empty())
 			{
@@ -390,7 +390,7 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool getFront(__DataRef data) const
+		bool front(__DataRef data) const
 		{
 			if (m_data.empty())
 			{
@@ -402,7 +402,7 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool getBack(__CB_Ref_void cb)
+		bool back(__CB_Ref_void cb)
 		{
 			if (m_data.empty())
 			{
@@ -414,7 +414,7 @@ namespace NS_SSTL
 			return true;
 		}
 
-		bool getBack(__CB_ConstRef_void cb) const
+		bool back(__CB_ConstRef_void cb) const
 		{
 			if (m_data.empty())
 			{
@@ -424,7 +424,7 @@ namespace NS_SSTL
 			cb(*m_data.rbegin());
 		}
 
-		bool getBack(__DataRef data) const
+		bool back(__DataRef data) const
 		{
 			if (m_data.empty())
 			{
