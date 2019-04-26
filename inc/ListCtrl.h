@@ -74,23 +74,24 @@ private:
 	list<pair<tagListColumn*, double>> m_lstDblWidth;
 
 	UINT m_uFixWidth = 0;
-
+	
 public:
-	CListColumnGuard& add(const CString& cstrText, UINT uWidth, UINT uFormat=LVCFMT_LEFT)
+	CListColumnGuard& addFix(const CString& cstrText, UINT uWidth, bool bCenter=false)
 	{
-		m_lstColumn.push_back({ cstrText, uWidth, uFormat });
-		
+		UINT uFormat = bCenter ? LVCFMT_CENTER : LVCFMT_LEFT;
+		m_lstColumn.push_back({ cstrText, uWidth,  uFormat });
+
 		m_uFixWidth += uWidth;
 
 		return *this;
 	}
 
-	CListColumnGuard& add(const CString& cstrText, double dbWidth, UINT uFormat = LVCFMT_LEFT)
+	CListColumnGuard& addDynamic(const CString& cstrText, double dbWidth, bool bCenter = false)
 	{
-		m_lstColumn.push_back({ cstrText, 0, uFormat });
+		addFix(cstrText, 0, bCenter);
 
 		m_lstDblWidth.push_back({ &m_lstColumn.back(), dbWidth });
-		
+
 		return *this;
 	}
 
