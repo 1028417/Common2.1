@@ -286,6 +286,8 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 	tci.cchTextMax = sizeof(szTabText) - 1;
 	GetItem(nItem, &tci);
 
+	rcItem.left += __Offset/2;
+
 	CImageList *pImgLst = GetImageList();
 	if (NULL != pImgLst)
 	{
@@ -293,17 +295,20 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 		memset(&ImageInfo, 0, sizeof ImageInfo);
 		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
 		{
-			rcItem.left += __Offset;
+			if (nItem>0)
+			{
+				rcItem.left += __Offset/2;
+			}
 
 			int nTop = 2+rcItem.top + (rcItem.Height() - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
 
 			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_TRANSPARENT);
 
 			rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
-
-			rcItem.right -= __Offset / 2;
 		}
 	}
+
+	rcItem.right -= __Offset / 2;
 	
 	CString strText(tci.pszText);
 	strText.Trim();
