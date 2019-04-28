@@ -1,17 +1,9 @@
 
 #pragma once
 
-// CWorkThread
+#include <thread>
 
 class CWorkThread;
-
-struct tagWorkThreadInfo
-{
-	UINT uIndex = 0;
-	HANDLE hHandle = INVALID_HANDLE_VALUE;
-	bool bActive = false;
-	CWorkThread *pThread = NULL;
-};
 
 class __UtilExt CWorkThread
 {
@@ -22,7 +14,7 @@ public:
 	}
 
 private:
-	list<tagWorkThreadInfo> m_lstThreadInfos;
+	vector<BOOL> m_vecThreadStatus;
 
 	bool m_bPause = false;
 
@@ -41,7 +33,7 @@ protected:
 	UINT GetActiveCount();
 
 private:
-	virtual void WorkThreadProc(tagWorkThreadInfo& ThreadInfo) = 0;
+	virtual void WorkThreadProc(UINT uWorkThreadIndex) = 0;
 
 	static DWORD WINAPI ThreadProc(LPVOID lpThreadParam);
 };

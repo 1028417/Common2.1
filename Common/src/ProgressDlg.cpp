@@ -44,7 +44,7 @@ BOOL CProgressDlg::OnInitDialog()
 	return TRUE;
 }
 
-void CProgressDlg::WorkThreadProc(tagWorkThreadInfo& ThreadInfo)
+void CProgressDlg::WorkThreadProc(UINT uWorkThreadIndex)
 {
 	if (m_fnWork)
 	{
