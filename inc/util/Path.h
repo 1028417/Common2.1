@@ -87,6 +87,9 @@ public:
 
 	wstring GetParentDir() const;
 
+	UINT GetSubPathCount() const;
+	CPath *GetSubPath(UINT uIdx) const;
+
 	void GetSubPath(TD_PathList& lstSubPath)
 	{
 		lstSubPath.add(_findFile());
@@ -114,8 +117,6 @@ public:
 	virtual void Clear();
 
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
-
-	UINT GetSubPathCount() const;
 
 	bool HasFile() const;
 

@@ -191,6 +191,31 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	return pPath;
 }
 
+UINT CPath::GetSubPathCount() const
+{
+	if (NULL == m_plstSubPath)
+	{
+		return 0;
+	}
+
+	return m_plstSubPath->size();
+}
+
+CPath *CPath::GetSubPath(UINT uIdx) const
+{
+	if (NULL == m_plstSubPath)
+	{
+		return NULL;
+	}
+
+	CPath *pSubPath = NULL;
+	m_plstSubPath->get(uIdx, [&](CPath& SubPath) {
+		pSubPath = &SubPath;
+	});
+
+	return pSubPath;
+}
+
 void CPath::Clear()
 {
 	if (NULL != m_plstSubPath)
@@ -217,16 +242,6 @@ void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
 
 		return false;
 	});
-}
-
-UINT CPath::GetSubPathCount() const
-{
-	if (NULL == m_plstSubPath)
-	{
-		return 0;
-	}
-
-	return m_plstSubPath->size();
 }
 
 bool CPath::HasFile() const
