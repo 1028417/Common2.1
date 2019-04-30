@@ -69,6 +69,11 @@ private:
 	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
 
 public:
+	inline const tagFindData& GetFileInfo() const
+	{
+		return m_fileInfo;
+	}
+
 	void SetDir(const wstring& strDir);
 
 	void SetName(const wstring& strNewName)
@@ -78,12 +83,12 @@ public:
 
 	wstring GetName() const;
 
-	bool isDir() const
+	inline bool isDir() const
 	{
 		return m_bDir;
 	}
 
-	bool isExists() const
+	inline bool isExists() const
 	{
 		return m_bExists;
 	}
@@ -91,12 +96,7 @@ public:
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
-
-	const tagFindData& GetFileInfo() const
-	{
-		return m_fileInfo;
-	}
-
+	
 	UINT GetSubPathCount() const;
 	CPath *GetSubPath(UINT uIdx) const;
 
