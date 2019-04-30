@@ -44,16 +44,17 @@ public:
 	}
 
 private:
-	tagFindData m_fileInfo;
-
 	wstring m_strName;
 
 	bool m_bDir = false;
 
 	bool m_bExists = false;
 	
+protected:
+	tagFindData m_fileInfo;
+
 	TD_PathList *m_plstSubPath = NULL;
-	
+
 	CPath *m_pParentDir = NULL;
 
 protected:

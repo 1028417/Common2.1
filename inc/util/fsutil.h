@@ -47,29 +47,39 @@ struct __UtilExt tagFindData
 		memset(&data, 0, sizeof data);
 	}
 
-	wstring getFileName() const
+	inline wstring getFileName() const
 	{
 		return data.cFileName;
 	}
 
-	bool isDir() const
+	inline bool isDir() const
 	{
 		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 	}
 
-	unsigned long GetFileSize() const
+	inline unsigned long getFileSize() const
 	{
 		return data.nFileSizeLow;
 	}
 
-	time_t getModifyTime() const
+	inline time_t getModifyTime() const
 	{
 		return util::FileTimeToTime_t(data.ftLastWriteTime);
 	}
+	
+	inline wstring getModifyTime(const wstring& strFormat) const
+	{
+		return util::FormatTime(getModifyTime(), strFormat);
+	}
 
-	time_t getCreateTime() const
+	inline time_t getCreateTime() const
 	{
 		return util::FileTimeToTime_t(data.ftCreationTime);
+	}
+
+	inline wstring getCreateTime(const wstring& strFormat) const
+	{
+		return util::FormatTime(getCreateTime(), strFormat);
 	}
 };
 
