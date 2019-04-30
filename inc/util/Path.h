@@ -33,7 +33,7 @@ public:
 	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
 		: m_bDir(findData.isDir())
 		, m_strName(findData.getFileName())
-		, m_uFileSize(findData.data.nFileSizeLow)
+		, m_nFileSize(findData.data.nFileSizeLow)
 		, m_modifyTime(findData.data.ftLastWriteTime)
 		, m_createTime(findData.data.ftCreationTime)
 		, m_pParentDir(pParentDir)
@@ -60,7 +60,7 @@ protected:
 	
 	CPath *m_pParentDir = NULL;
 
-	ULONGLONG m_uFileSize = 0;
+	long long m_nFileSize = 0;
 
 protected:
 	virtual TD_PathList& _findFile();
@@ -86,6 +86,11 @@ public:
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
+
+	long long GetFileSize() const
+	{
+		return m_nFileSize;
+	}
 
 	UINT GetSubPathCount() const;
 	CPath *GetSubPath(UINT uIdx) const;
@@ -192,14 +197,6 @@ protected:
 	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
 	{
 		return new CPathObject(findData, pParentDir);
-	}
-
-public:
-	void GenListItem(bool bReportView, vector<wstring>& vecText, int& iImage) override
-	{
-		vecText.push_back(m_strName);
-
-		vecText.push_back(to_wstring(m_uFileSize));
 	}
 };
 
