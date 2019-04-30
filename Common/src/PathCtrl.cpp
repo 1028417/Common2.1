@@ -40,8 +40,6 @@ void CPathList::SetPath(CPathObject& dir)
 
 	TD_ListObjectList lstObjects(lstSubPaths);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
-	
 	DeleteAllItems();
 	
 	__super::SetObjects(lstObjects);
