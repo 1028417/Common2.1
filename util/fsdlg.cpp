@@ -122,7 +122,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				RECT rcStatic{0,0,0,0};
 				while (true)
 				{
-					hWndStatic = ::FindWindowEx(hWnd, hWndStatic, L"Static", NULL);
+					hWndStatic = ::FindWindowExA(hWnd, hWndStatic, "Static", NULL);
 					if (!hWndStatic)
 					{
 						break;
@@ -149,7 +149,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				::MoveWindow(hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 25, rcCancelButton.top + nHeightOff
 					, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
 
-				HWND hWndTreeCtrl = ::FindWindowEx(hWnd, NULL, L"SysTreeView32", NULL);
+				HWND hWndTreeCtrl = ::FindWindowExA(hWnd, NULL, "SysTreeView32", NULL);
 				
 				RECT rcTreeCtrl{0,0,0,0};
 				::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);

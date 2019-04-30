@@ -351,6 +351,8 @@ bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const 
 		}
 	} while (::FindNextFileW(hFindFile, &FindFileData));
 
+	(void)::FindClose(hFindFile);
+
 	return true;
 }
 
@@ -368,9 +370,9 @@ void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
 
 	TCHAR pszBuffer[256] = {0};
 
-	UINT uCount = ::GetLogicalDriveStrings(0, NULL);
+	UINT uCount = ::GetLogicalDriveStringsW(0, NULL);
 
-	(void)GetLogicalDriveStrings(uCount, pszBuffer);
+	(void)GetLogicalDriveStringsW(uCount, pszBuffer);
 
 	wstring strDriver;
 	int nDriveType = 0;
@@ -379,7 +381,7 @@ void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
 	{
 		strDriver = pszBuffer + uIndex*MAX_DRIVE;
 
-		nDriveType = ::GetDriveType(strDriver.c_str());
+		nDriveType = ::GetDriveTypeW(strDriver.c_str());
 		if (DRIVE_FIXED == nDriveType || DRIVE_REMOVABLE == nDriveType)
 		{
 			lstDrivers.push_back(strDriver.substr(0,2));
