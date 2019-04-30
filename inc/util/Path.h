@@ -30,7 +30,7 @@ public:
 
 	CPath(const wstring& strName, bool bDir);
 
-	CPath(const tagFindData& findData, CPath *pParentDir)
+	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
 		: m_bDir(findData.isDir())
 		, m_strName(findData.getFileName())
 		, m_uFileSize(findData.data.nFileSizeLow)
