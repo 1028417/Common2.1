@@ -52,7 +52,7 @@ BOOL CPathList::IsFileItem(int nItem)
 	CPathObject *pPath = (CPathObject*)GetItemObject(nItem);
 	__EnsureReturn(pPath, FALSE);
 		
-	return !pPath->isDir();
+	return !pPath->IsDir();
 }
 
 void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects)
@@ -69,7 +69,7 @@ void CPathList::GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir)
 	GetAllPathObjects(lstAllObjects);
 
 	lstAllObjects([&](CPathObject& PathObject) {
-		if (PathObject.isDir() == bDir)
+		if (PathObject.IsDir() == bDir)
 		{
 			lstPathObjects.add(PathObject);
 		}

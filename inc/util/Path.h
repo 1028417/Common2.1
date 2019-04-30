@@ -32,7 +32,7 @@ public:
 
 	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
 		: m_fileInfo(findData)
-		, m_bDir(findData.isDir())
+		, m_bDir(findData.IsDir())
 		, m_strName(findData.getFileName())
 		, m_pParentDir(pParentDir)
 	{
@@ -83,12 +83,12 @@ public:
 
 	wstring GetName() const;
 
-	inline bool isDir() const
+	inline bool IsDir() const
 	{
 		return m_bDir;
 	}
 
-	inline bool isExists() const
+	inline bool IsExists() const
 	{
 		return m_bExists;
 	}
@@ -225,7 +225,7 @@ public:
 protected:
 	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
 	{
-		__EnsureReturn(findData.isDir(), NULL);
+		__EnsureReturn(findData.IsDir(), NULL);
 
 		return new CDirObject(findData, pParentDir);
 	}

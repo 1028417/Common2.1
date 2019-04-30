@@ -52,7 +52,7 @@ struct __UtilExt tagFindData
 		return data.cFileName;
 	}
 
-	inline bool isDir() const
+	inline bool IsDir() const
 	{
 		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 	}
