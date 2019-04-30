@@ -50,9 +50,6 @@ public:
 
 	bool m_bExists = false;
 
-	FILETIME m_modifyTime = { 0,0 };
-	FILETIME m_createTime = { 0,0 };
-
 protected:
 	wstring m_strName;
 
@@ -61,6 +58,9 @@ protected:
 	CPath *m_pParentDir = NULL;
 
 	long long m_nFileSize = 0;
+
+	FILETIME m_modifyTime = { 0,0 };
+	FILETIME m_createTime = { 0,0 };
 
 protected:
 	virtual TD_PathList& _findFile();
@@ -90,6 +90,11 @@ public:
 	long long GetFileSize() const
 	{
 		return m_nFileSize;
+	}
+
+	const FILETIME& GetModifyTime() const
+	{
+		return m_modifyTime;
 	}
 
 	UINT GetSubPathCount() const;

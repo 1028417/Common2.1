@@ -75,6 +75,8 @@ using namespace NS_SSTL;
 class __UtilExt util
 {
 public:
+	static time_t FileTimeToTime_t(const FILETIME& ft);
+
 	static bool toSysTime(__time64_t time, SYSTEMTIME& sysTime);
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	

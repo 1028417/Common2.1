@@ -6,6 +6,15 @@
 static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
+time_t util::FileTimeToTime_t(const FILETIME& ft)
+{
+	ULARGE_INTEGER ui;
+	ui.LowPart = ft.dwLowDateTime;
+	ui.HighPart = ft.dwHighDateTime;
+
+	return ((LONGLONG)(ui.QuadPart - 116444736000000000) / 10000000);
+}
+
 bool util::toSysTime(__time64_t time, SYSTEMTIME& sysTime)
 {
 	tm atm;
