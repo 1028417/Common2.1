@@ -225,7 +225,7 @@ public:
 protected:
 	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
 	{
-		__EnsureReturn(findData.IsDir(), NULL);
+		__EnsureReturn(findData.isDir(), NULL);
 
 		return new CDirObject(findData, pParentDir);
 	}
