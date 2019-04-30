@@ -61,7 +61,7 @@ class __UtilExt fsutil_win
 {
 public:
 	static bool ExistsFile(const wstring& strFile);
-	static bool ExistsPath(const wstring& strDir);
+	static bool ExistsDir(const wstring& strDir);
 
 	static bool FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb);
 	static bool FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData);

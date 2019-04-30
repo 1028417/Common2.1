@@ -293,18 +293,34 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 
 bool fsutil_win::ExistsFile(const wstring& strFile)
 {
-	WIN32_FIND_DATA ffd;
-	return (INVALID_HANDLE_VALUE != FindFirstFileW(strFile.c_str(), &ffd));
+	if (strFile.empty())
+	{
+		return false;
+	}
+
+	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
+	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
+	{
+		return false;
+	}
+
+	return 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-bool fsutil_win::ExistsPath(const wstring& strDir)
+bool fsutil_win::ExistsDir(const wstring& strDir)
 {
 	if (strDir.empty())
 	{
 		return false;
 	}
 
-	return (-1 != ::GetFileAttributesW(strDir.c_str()));
+	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
+	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
+	{
+		return false;
+	}
+
+	return (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
@@ -476,17 +492,15 @@ void fsutil_win::ExplorePath(const list<wstring>& lstPath)
 	wstring strExplore;
 	for (auto& strPath : lstPath)
 	{
-		if (!ExistsPath(strPath))
+		if (ExistsFile(strPath) || ExistsDir(strPath))
 		{
-			continue;
-		}
+			if (!strExplore.empty())
+			{
+				strExplore.append(L",");
+			}
 
-		if (!strExplore.empty())
-		{
-			strExplore.append(L",");
+			strExplore.append(L'\"' + strPath + L'\"');
 		}
-
-		strExplore.append(L'\"' + strPath + L'\"');
 	}
 	if (strExplore.empty())
 	{
