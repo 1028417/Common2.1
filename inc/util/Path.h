@@ -31,11 +31,9 @@ public:
 	CPath(const wstring& strName, bool bDir);
 
 	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
-		: m_bDir(findData.isDir())
+		: m_fileInfo(findData)
+		, m_bDir(findData.isDir())
 		, m_strName(findData.getFileName())
-		, m_nFileSize(findData.data.nFileSizeLow)
-		, m_modifyTime(findData.data.ftLastWriteTime)
-		, m_createTime(findData.data.ftCreationTime)
 		, m_pParentDir(pParentDir)
 	{
 	}
@@ -45,22 +43,18 @@ public:
 		Clear();
 	}
 
-public:
+private:
+	tagFindData m_fileInfo;
+
+	wstring m_strName;
+
 	bool m_bDir = false;
 
 	bool m_bExists = false;
-
-protected:
-	wstring m_strName;
-
+	
 	TD_PathList *m_plstSubPath = NULL;
 	
 	CPath *m_pParentDir = NULL;
-
-	long long m_nFileSize = 0;
-
-	FILETIME m_modifyTime = { 0,0 };
-	FILETIME m_createTime = { 0,0 };
 
 protected:
 	virtual TD_PathList& _findFile();
@@ -83,18 +77,23 @@ public:
 
 	wstring GetName() const;
 
+	bool isDir() const
+	{
+		return m_bDir;
+	}
+
+	bool isExists() const
+	{
+		return m_bExists;
+	}
+
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
 
-	long long GetFileSize() const
+	const tagFindData& GetFileInfo() const
 	{
-		return m_nFileSize;
-	}
-
-	const FILETIME& GetModifyTime() const
-	{
-		return m_modifyTime;
+		return m_fileInfo;
 	}
 
 	UINT GetSubPathCount() const;
@@ -233,7 +232,7 @@ protected:
 public:
 	wstring GetTreeText() const override
 	{
-		return m_strName;
+		return CPath::GetName();
 	}
 
 	void GetTreeChilds(TD_TreeObjectList& lstChilds)

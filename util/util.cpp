@@ -76,7 +76,9 @@ static wstring _FormatTime(const tm& atm, const wstring& strFormat)
 
 wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
 {
-	SYSTEMTIME sysTime;
+	return FormatTime(FileTimeToTime_t(fileTime), strFormat);
+	
+	/*SYSTEMTIME sysTime;
 	SYSTEMTIME localTime;
 	if (!FileTimeToSystemTime(&fileTime, &sysTime)
 		|| !SystemTimeToTzSpecificLocalTime(nullptr, &sysTime, &localTime))
@@ -93,7 +95,7 @@ wstring util::FormatTime(const FILETIME& fileTime, const wstring& strFormat)
 	atm.tm_sec = 0;
 	atm.tm_isdst = -1;
 
-	return _FormatTime(atm, strFormat);
+	return _FormatTime(atm, strFormat);*/
 }
 
 wstring util::FormatTime(__time64_t time, const wstring& strFormat)

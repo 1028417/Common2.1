@@ -120,6 +120,5 @@ public:
 	BOOL IsFileItem(int nItem);
 	
 	void GetAllPathObjects(TD_PathObjectList& lstPathObjects);
-
 	void GetAllPathObjects(TD_PathObjectList& lstPathObjects, bool bDir);
 };

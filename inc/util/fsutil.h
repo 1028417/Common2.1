@@ -1,25 +1,6 @@
 
 #pragma once
 
-struct __UtilExt tagFindData : WIN32_FIND_DATAW
-{
-	tagFindData()
-	{
-	}
-
-	wstring getFileName() const
-	{
-		return data.cFileName;
-	}
-
-	bool isDir() const
-	{
-		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-	}
-
-	WIN32_FIND_DATAW data;
-};
-
 class __UtilExt fsutil
 {
 public:
@@ -55,6 +36,41 @@ public:
 	static bool CheckSubPath(const wstring& strDir, const wstring& strSubPath);
 
 	static wstring GetOppPath(const wstring& strPath, const wstring strBaseDir);
+};
+
+struct __UtilExt tagFindData
+{
+	WIN32_FIND_DATAW data;
+
+	tagFindData()
+	{
+		memset(&data, 0, sizeof data);
+	}
+
+	wstring getFileName() const
+	{
+		return data.cFileName;
+	}
+
+	bool isDir() const
+	{
+		return data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+	}
+
+	unsigned long GetFileSize() const
+	{
+		return data.nFileSizeLow;
+	}
+
+	time_t getModifyTime() const
+	{
+		return util::FileTimeToTime_t(data.ftLastWriteTime);
+	}
+
+	time_t getCreateTime() const
+	{
+		return util::FileTimeToTime_t(data.ftCreationTime);
+	}
 };
 
 class __UtilExt fsutil_win

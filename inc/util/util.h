@@ -75,13 +75,13 @@ using namespace NS_SSTL;
 class __UtilExt util
 {
 public:
-	static time_t FileTimeToTime_t(const FILETIME& ft);
-
 	static bool toSysTime(__time64_t time, SYSTEMTIME& sysTime);
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
 	
 	static void getCurrentTime(int& nHour, int& nMinute);
 	static wstring getCurrentTime();
+
+	static time_t FileTimeToTime_t(const FILETIME& ft);
 
 	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
 	static wstring FormatTime(__time64_t time, const wstring& strFormat);
