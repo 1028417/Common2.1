@@ -93,7 +93,7 @@ void CViewTab::SetTabStyle(E_TabStyle eTabStyle)
 		break;
 	}
 	
-	ModifyStyle(0, dwTabStyle);
+	ModifyStyle(TCS_MULTILINE, dwTabStyle);
 }
 
 BOOL CViewTab::SetFontSize(float fFontSizeOffset)
@@ -447,6 +447,11 @@ BOOL CDockView::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
 
 	Page.m_cstrTitle = cstrTitle;
 
+	//if (cstrTitle.GetLength() > 100)
+	//{
+	//	Page.m_cstrTitle = cstrTitle.Left(100) + L"...";
+	//}
+		
 	TCITEM tci;
 	tci.mask = TCIF_TEXT;
 	//if (-1 != iImage)
