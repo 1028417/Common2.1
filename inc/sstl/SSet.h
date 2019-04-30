@@ -87,6 +87,11 @@ namespace NS_SSTL
 		//}
 
 	public:
+		bool insert(__DataConstRef data)
+		{
+			return m_data.insert(data).second;
+		}
+
 		template <typename T>
 		SSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
