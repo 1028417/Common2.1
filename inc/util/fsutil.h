@@ -70,7 +70,7 @@ public:
 	
 	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
-	static bool copyFile(const wstring& strSrcFile, const wstring& strSnkFile, bool bSyncModifyTime=false);
+	static bool copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime=false);
 
 	static void ExplorePath(const list<wstring>& lstPath);
 	static void ExplorePath(const wstring& strPath);

@@ -419,7 +419,7 @@ bool fsutil_win::DeletePath(const wstring& strPath, HWND hwndParent, const wstri
 	return false;
 }
 
-bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, bool bSyncModifyTime)
+bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
 {
 	ifstream srcStream;
 	try
@@ -434,7 +434,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 	ofstream snkStream;
 	try
 	{
-		snkStream.open(strSnkFile, ios::binary | ios::trunc);
+		snkStream.open(strDstFile, ios::binary | ios::trunc);
 	}
 	catch (...)
 	{
@@ -475,7 +475,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strSnkFile, 
 		if (0 == _wstat(strSrcFile.c_str(), &fileStat))
 		{
 			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
-			(void)_wutime(strSnkFile.c_str(), &timbuf);
+			(void)_wutime(strDstFile.c_str(), &timbuf);
 		}
 	}
 
