@@ -41,10 +41,7 @@ public:
 struct __UtilExt tagFindData
 {
 	WIN32_FIND_DATAW data;
-
-	time_t tModifyTime = 0;
-	time_t tCreateTime = 0;
-
+	
 	tagFindData()
 	{
 		memset(&data, 0, sizeof data);
@@ -67,12 +64,7 @@ struct __UtilExt tagFindData
 
 	inline time_t getModifyTime() const
 	{
-		if (0 == tModifyTime)
-		{
-			(time_t&)tModifyTime = util::FileTimeToTime_t(data.ftLastWriteTime);
-		}
-
-		return tModifyTime;
+		return util::FileTimeToTime_t(data.ftLastWriteTime);
 	}
 	
 	inline wstring getModifyTime(const wstring& strFormat) const
@@ -82,12 +74,7 @@ struct __UtilExt tagFindData
 
 	inline time_t getCreateTime() const
 	{
-		if (0 == tCreateTime)
-		{
-			(time_t&)tCreateTime = util::FileTimeToTime_t(data.ftCreationTime);
-		}
-
-		return tCreateTime;
+		return util::FileTimeToTime_t(data.ftCreationTime);
 	}
 
 	inline wstring getCreateTime(const wstring& strFormat) const
