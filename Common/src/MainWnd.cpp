@@ -398,15 +398,9 @@ void CMainWnd::OnDestroy()
 		{
 			pr.second->DestroyWindow();
 		}
-	}
-
-	__super::OnDestroy();
-}
-
-CMainWnd::~CMainWnd()
-{
-	for (auto& pr : m_mapDockViews)
-	{
 		delete pr.second;
 	}
+	m_mapDockViews.clear();
+
+	__super::OnDestroy();
 }

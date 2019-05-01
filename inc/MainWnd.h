@@ -38,8 +38,6 @@ public:
 
 	CMainWnd(){}
 
-	~CMainWnd();
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
