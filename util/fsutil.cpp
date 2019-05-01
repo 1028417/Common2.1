@@ -6,6 +6,62 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
+class ibstream : public ifstream
+{
+public:
+	ibstream() {}
+
+	ibstream(const wstring& strFile)
+		: ifstream(
+#ifdef _MSC_VER
+			strFile
+#else
+			util::WStrToStr(strFile)
+#endif
+			, ios::binary)
+	{
+	}
+
+	void open(const wstring& strFile)
+	{
+		ifstream::open(
+#ifdef _MSC_VER
+			strFile
+#else
+			util::WStrToStr(strFile)
+#endif
+			, ios::binary);
+	}
+};
+
+class obstream : public ofstream
+{
+public:
+	obstream() {}
+
+	obstream(const wstring& strFile, bool bTrunc)
+		: ofstream(
+#ifdef _MSC_VER
+			strFile
+#else
+			util::WStrToStr(strFile)
+#endif
+			, ios::binary | (bTrunc ? ios::trunc : 0))
+	{
+	}
+
+	void open(const wstring& strFile, bool bTrunc)
+	{
+		ofstream::open(
+#ifdef _MSC_VER
+			strFile
+#else
+			util::WStrToStr(strFile)
+#endif
+			, ios::binary | (bTrunc ? ios::trunc : 0));
+	}
+};
+
 bool fsutil::saveTxt(const wstring& strFile
 	, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc, bool bToUTF8)
 {
@@ -54,8 +110,7 @@ bool fsutil::saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc
 
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
-	ifstream fs;
-	fs.open(strFile, ios::binary);
+	ibstream fs(strFile);
 	if (!fs || !fs.is_open())
 	{
 		return false;
@@ -95,8 +150,7 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 
 bool fsutil::loadTxt(const wstring& strFile, string& strData)
 {
-	ifstream fs;
-	fs.open(strFile, ios::binary);
+	ibstream fs(strFile);
 	if (!fs || !fs.is_open())
 	{
 		return false;
@@ -423,25 +477,25 @@ bool fsutil_win::DeletePath(const wstring& strPath, HWND hwndParent, const wstri
 
 bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
 {
-	ifstream srcStream;
+	ibstream srcStream;
 	try
 	{
-		srcStream.open(strSrcFile, ios::binary);
+		srcStream.open(strSrcFile);
 	}
 	catch (...)
 	{
 	}	
 	__EnsureReturn(srcStream && srcStream.is_open(), false);
 
-	ofstream snkStream;
+	obstream dstStream;
 	try
 	{
-		snkStream.open(strDstFile, ios::binary | ios::trunc);
+		dstStream.open(strDstFile, true);
 	}
 	catch (...)
 	{
 	}
-	if (!snkStream || !snkStream.is_open())
+	if (!dstStream || !dstStream.is_open())
 	{
 		srcStream.close();
 
@@ -459,7 +513,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strDstFile, 
 			auto size = srcStream.gcount();			
 			if (size > 0)
 			{
-				snkStream.write(lpBuffer, size);
+				dstStream.write(lpBuffer, size);
 			}
 		}
 	}
@@ -469,7 +523,7 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strDstFile, 
 	}
 
 	srcStream.close();
-	snkStream.close();
+	dstStream.close();
 
 	if (bResult)
 	{

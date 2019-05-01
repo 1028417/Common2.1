@@ -1,4 +1,4 @@
-
+ï»¿
 #pragma once
 
 class __UtilExt fsutil
@@ -103,8 +103,8 @@ public:
 
 	static bool CreateDir(const wstring& strDir);
 
-	// »ñÈ¡ÎÄ¼ş¼ĞÍ¼±ê
+	// è·å–æ–‡ä»¶å¤¹å›¾æ ‡
 	static HICON getFolderIcon();
-	// »ñÈ¡ÎÄ¼şÍ¼±ê
+	// è·å–æ–‡ä»¶å›¾æ ‡
 	static HICON getFileIcon(const wstring& extention);
 };

@@ -105,12 +105,12 @@ public:
 
 	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
 
-	static wstring& StrLowerCase(wstring& str);
+	static void LowerCase(wstring& str);
 	static wstring StrLowerCase(const wstring& str);
 	
-	static wstring& StrUpperCase(wstring& str);
+	static void UpperCase(wstring& str);
 	static wstring StrUpperCase(const wstring& str);
-
+	
 	static string WStrToStr(const wstring&str, UINT CodePage = CP_ACP);
 	static wstring StrToWStr(const string&str, UINT CodePage = CP_ACP);
 	

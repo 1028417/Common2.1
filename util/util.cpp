@@ -244,29 +244,27 @@ int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
 	return pos;
 }
 
-wstring& util::StrLowerCase(wstring& str)
+void util::LowerCase(wstring& str)
 {
 	(void)::_wcslwr_s((TCHAR *)str.c_str(), str.size() + 1);
-	return str;
 }
 
 wstring util::StrLowerCase(const wstring& str)
 {
 	wstring strTemp = str;
-	(void)::_wcslwr_s((TCHAR *)strTemp.c_str(), strTemp.size() + 1);
+	LowerCase(strTemp);
 	return strTemp;
 }
 
-wstring& util::StrUpperCase(wstring& str)
+void util::UpperCase(wstring& str)
 {
 	(void)::_wcsupr_s((TCHAR *)str.c_str(), str.size() + 1);
-	return str;
 }
 
 wstring util::StrUpperCase(const wstring& str)
 {
 	wstring strTemp = str;
-	(void)::_wcsupr_s((TCHAR *)strTemp.c_str(), strTemp.size() + 1);
+	UpperCase(strTemp);
 	return str;
 }
 
