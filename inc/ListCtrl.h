@@ -315,7 +315,7 @@ public:
 	UINT GetHeaderHeight();
 
 protected:
-	virtual void GenListItem(CListObject& Object, vector<wstring>& vecText, int& iImage);
+	virtual void GenListItem(CListObject& Object, bool bReportView, vector<wstring>& vecText, int& iImage);
 
 	virtual void PreSubclassWindow() override;
 

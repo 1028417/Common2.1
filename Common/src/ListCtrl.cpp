@@ -449,9 +449,10 @@ void CObjectList::UpdateObject(CListObject& Object)
 
 void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
+	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
+	vector<wstring> vecText(bReportView ? m_para.lstColumns.size() : 1);
 	int iImage = 0;
-	vector<wstring> vecText;
-	GenListItem(Object, vecText, iImage);
+	GenListItem(Object, bReportView, vecText, iImage);
 
 	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
 		, iImage, 0, 0, (LPARAM)&Object));
@@ -478,9 +479,10 @@ void CObjectList::UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& 
 {
 	__Ensure(m_hWnd);
 
+	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
+	vector<wstring> vecText(bReportView? m_para.lstColumns.size():1);
 	int iImage = 0;
-	vector<wstring> vecText;
-	GenListItem(Object, vecText, iImage);
+	GenListItem(Object, bReportView, vecText, iImage);
 
 	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
 		, iImage, 0, 0, (LPARAM)&Object));
@@ -572,9 +574,9 @@ void CObjectList::DeleteItems(list<UINT> lstItems)
 	}
 }
 
-void CObjectList::GenListItem(CListObject& Object, vector<wstring>& vecText, int& iImage)
+void CObjectList::GenListItem(CListObject& Object, bool bReportView, vector<wstring>& vecText, int& iImage)
 {
-	Object.GenListItem(E_ListViewType::LVT_Report == this->GetView(), vecText, iImage);
+	Object.GenListItem(bReportView, vecText, iImage);
 }
 
 void CObjectList::SetItemImage(UINT uItem, int iImage)
