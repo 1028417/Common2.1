@@ -82,13 +82,34 @@ BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pR
 	{
 		CPoint ptCursor(0,0);
 		(void)::GetCursorPos(&ptCursor);
-
 		this->ScreenToClient(&ptCursor);
 
 		HTREEITEM hItem = this->HitTest(ptCursor);
 		if (hItem)
 		{
 			(void)this->SelectItem(hItem);
+		}
+	}
+	else if (WM_KEYUP == message)
+	{
+		if (VK_RETURN == GET_KEYSTATE_LPARAM(wParam))
+		{
+			CEdit *pEdit = GetEditControl();
+			if (NULL == pEdit)
+			{
+				HTREEITEM hItem = GetSelectedItem();
+				if (NULL != hItem)
+				{
+					if (GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)
+					{
+						Expand(hItem, TVE_COLLAPSE);
+					}
+					else
+					{
+						Expand(hItem, TVE_EXPAND);
+					}
+				}
+			}
 		}
 	}
 
@@ -211,8 +232,8 @@ BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 	if (WM_KEYDOWN == message)
 	{
-		int nChar = LOWORD(wParam);
-		if (VK_SPACE == nChar)
+		 auto uKey = GET_KEYSTATE_LPARAM(wParam);
+		if (VK_SPACE == uKey)
 		{
 			hItem = __super::GetSelectedItem();
 		}

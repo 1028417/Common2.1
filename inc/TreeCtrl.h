@@ -91,9 +91,9 @@ public:
 		return __super::SelectItem(getTreeItem(Object));
 	}
 
-	BOOL ExpandObject(const CTreeObject& Object)
+	BOOL ExpandObject(const CTreeObject& Object, bool bExpand = true)
 	{
-		return __super::Expand(getTreeItem(Object), TVE_EXPAND);
+		return __super::Expand(getTreeItem(Object), bExpand ? TVE_EXPAND : TVE_COLLAPSE);
 	}
 
 	CEdit* EditObject(const CTreeObject& Object)

@@ -300,7 +300,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 		break;
 	case WM_KEYDOWN:
 	{
-		UINT uKey = pMsg->wParam;
+		auto uKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
 		if (VK_CONTROL != uKey && VK_SHIFT != uKey && VK_MENU != uKey)
 		{
 			UINT uFlag = 0;
