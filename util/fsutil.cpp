@@ -410,13 +410,13 @@ bool fsutil_win::FindFile(const wstring& strFindPath, const function<bool(const 
 	return true;
 }
 
-bool fsutil_win::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
-{
-	return fsutil_win::FindFile(strFindPath, [&](const tagFindData& FindData) {
-		arrFindData.add(FindData);
-		return true;
-	});
-}
+//bool fsutil_win::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
+//{
+//	return fsutil_win::FindFile(strFindPath, [&](const tagFindData& FindData) {
+//		arrFindData.add(FindData);
+//		return true;
+//	});
+//}
 
 void fsutil_win::GetSysDrivers(list<wstring>& lstDrivers)
 {
