@@ -18,7 +18,7 @@ public:
 #else
 			util::WStrToStr(strFile)
 #endif
-			, ios::binary)
+            , ios_base::binary)
 	{
 	}
 
@@ -30,7 +30,7 @@ public:
 #else
 			util::WStrToStr(strFile)
 #endif
-			, ios::binary);
+            , ios_base::binary);
 	}
 };
 
@@ -46,7 +46,7 @@ public:
 #else
 			util::WStrToStr(strFile)
 #endif
-			, ios::binary | (bTrunc ? ios::trunc : 0))
+            , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary)
 	{
 	}
 
@@ -58,7 +58,7 @@ public:
 #else
 			util::WStrToStr(strFile)
 #endif
-			, ios::binary | (bTrunc ? ios::trunc : 0));
+            , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary);
 	}
 };
 
