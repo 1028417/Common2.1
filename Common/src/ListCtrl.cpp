@@ -450,7 +450,7 @@ void CObjectList::UpdateObject(CListObject& Object)
 void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
 	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
-	vector<wstring> vecText(bReportView ? m_para.lstColumns.size() : 1);
+	vector<wstring> vecText;
 	int iImage = 0;
 	GenListItem(Object, bReportView, vecText, iImage);
 
@@ -480,7 +480,7 @@ void CObjectList::UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& 
 	__Ensure(m_hWnd);
 
 	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
-	vector<wstring> vecText(bReportView? m_para.lstColumns.size():1);
+	vector<wstring> vecText;
 	int iImage = 0;
 	GenListItem(Object, bReportView, vecText, iImage);
 
