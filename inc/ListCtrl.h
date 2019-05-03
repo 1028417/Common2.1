@@ -39,7 +39,7 @@ struct __CommonExt tagListColumn
 {
 	CString cstrText;
 	UINT uWidth = 0;
-	UINT uFormat = LVCFMT_LEFT;
+	bool bCenter = false;
 };
 typedef list<tagListColumn> TD_ListColumn;
 
@@ -78,8 +78,7 @@ private:
 public:
 	CListColumnGuard& addFix(const CString& cstrText, UINT uWidth, bool bCenter=false)
 	{
-		UINT uFormat = bCenter ? LVCFMT_CENTER : LVCFMT_LEFT;
-		m_lstColumn.push_back({ cstrText, uWidth,  uFormat });
+		m_lstColumn.push_back({ cstrText, uWidth, bCenter });
 
 		m_uFixWidth += uWidth;
 

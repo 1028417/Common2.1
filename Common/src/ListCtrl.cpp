@@ -197,8 +197,8 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& s
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
 	{
-		(void)__super::InsertColumn(m_uColumnCount, (0 == column.uFormat) ? L' ' + column.cstrText
-			: column.cstrText, column.uFormat, column.uWidth);
+		(void)__super::InsertColumn(m_uColumnCount, column.bCenter ? column.cstrText : (L' ' + column.cstrText)
+			, column.bCenter ? LVCFMT_CENTER : LVCFMT_LEFT, column.uWidth);
 
 		m_uColumnCount++;
 	}
