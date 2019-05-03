@@ -228,21 +228,21 @@ bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 }
 
-int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
-{
-	if (str.size() < strToFind.size())
-	{
-		return -1;
-	}
-
-	size_t pos = StrLowerCase(str).find(StrLowerCase(strToFind));
-	if (wstring::npos == pos)
-	{
-		return -1;
-	}
-
-	return pos;
-}
+//int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
+//{
+//	if (str.size() < strToFind.size())
+//	{
+//		return -1;
+//	}
+//
+//	size_t pos = StrLowerCase(str).find(StrLowerCase(strToFind));
+//	if (wstring::npos == pos)
+//	{
+//		return -1;
+//	}
+//
+//	return pos;
+//}
 
 void util::LowerCase(wstring& str)
 {

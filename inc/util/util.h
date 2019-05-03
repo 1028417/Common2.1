@@ -103,7 +103,7 @@ public:
 
 	static bool StrMatchIgnoreCase(const wstring& str1, const wstring& str2);
 
-	static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
+	//static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
 
 	static void LowerCase(wstring& str);
 	static wstring StrLowerCase(const wstring& str);
