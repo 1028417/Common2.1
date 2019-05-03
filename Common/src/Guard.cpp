@@ -11,7 +11,7 @@ CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	: m_wnd(wnd)
 	, m_bFlag(bFlag)
 {
-	if (wnd)
+	if (m_wnd)
 	{
 		if (m_bFlag)
 		{
@@ -32,7 +32,7 @@ CRedrawLockGuard::~CRedrawLockGuard()
 
 void CRedrawLockGuard::Unlock()
 {
-	if (m_bLocked)
+	if (m_bLocked && m_wnd)
 	{
 		m_bLocked = FALSE;
 
@@ -43,7 +43,7 @@ void CRedrawLockGuard::Unlock()
 		else
 		{
 			m_wnd.SetRedraw(TRUE);
-			m_wnd.RedrawWindow();
+			m_wnd.RedrawWindow(NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
 		}
 	}
 }

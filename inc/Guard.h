@@ -45,7 +45,7 @@ private:
 class __CommonExt CRedrawLockGuard
 {
 public:
-	CRedrawLockGuard(CWnd& wnd, bool bFlag = true);
+	CRedrawLockGuard(CWnd& wnd, bool bFlag = false);
 
 	~CRedrawLockGuard();
 
