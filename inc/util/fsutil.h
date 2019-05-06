@@ -97,9 +97,11 @@ public:
 	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
 	static bool copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime=false);
+	
+	static void ExploreDir(const wstring& strDir, HWND hWnd = NULL);
 
-	static void ExplorePath(const list<wstring>& lstPath);
-	static void ExplorePath(const wstring& strPath);
+	static void ExploreFiles(const list<wstring>& lstPath, HWND hWnd=NULL);
+	static void ExploreFile(const wstring& strPath, HWND hWnd = NULL);
 
 	static bool CreateDir(const wstring& strDir);
 

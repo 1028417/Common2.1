@@ -538,12 +538,17 @@ bool fsutil_win::copyFile(const wstring& strSrcFile, const wstring& strDstFile, 
 	return bResult;
 }
 
-void fsutil_win::ExplorePath(const wstring& strPath)
+void fsutil_win::ExploreDir(const wstring& strDir, HWND hWnd)
 {
-	ExplorePath(list<wstring>({ strPath }));
+	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/root," + strDir).c_str(), NULL, SW_MAXIMIZE);
 }
 
-void fsutil_win::ExplorePath(const list<wstring>& lstPath)
+void fsutil_win::ExploreFile(const wstring& strPath, HWND hWnd)
+{
+	ExploreFiles(list<wstring>({ strPath }));
+}
+
+void fsutil_win::ExploreFiles(const list<wstring>& lstPath, HWND hWnd)
 {
 	wstring strExplore;
 	for (auto& strPath : lstPath)
@@ -563,7 +568,7 @@ void fsutil_win::ExplorePath(const list<wstring>& lstPath)
 		return;
 	}
 
-	(void)::ShellExecute(NULL, L"open", L"explorer.exe", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
+	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
 }
 
 bool fsutil_win::CreateDir(const wstring& strDir)
