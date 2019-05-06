@@ -866,6 +866,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		__EnsureReturn(!cstrNewText.IsEmpty(), TRUE);
 
 		__EnsureReturn(cstrNewText != m_cstrRenameText, TRUE);
+		
+		::ShowWindow(GetEditControl()->GetSafeHwnd(), SW_HIDE);
 
 		int nItem = pLVDispInfo->item.iItem;
 		CListObject *pObject = GetItemObject(nItem);
