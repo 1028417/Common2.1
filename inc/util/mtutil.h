@@ -9,6 +9,12 @@ using namespace std;
 
 namespace NS_mtutil
 {
+	template <typename CB>
+	void startThread(const CB& cb)
+	{
+		std::thread(cb).detach();
+	}
+
 	template <typename T, typename R>
 	void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, vector<R>& vecResult
 		, const function<bool(UINT uTaskIdx, T&, R&)>& cb)

@@ -82,13 +82,13 @@ void CMainApp::sync(const CB_Sync& cb)
 void CMainApp::thread(const function<void()>& cb)
 {
 	bool bExit = false;
-	std::thread([&]() {
+	NS_mtutil::startThread([&]() {
 		cb();
 
 		bExit = true;
 
 		this->PostThreadMessage(WM_NULL, 0, 0);
-	}).detach();
+	});
 
 	MSG msg;
 	while (!bExit && ::GetMessage(&msg, NULL, 0, 0))

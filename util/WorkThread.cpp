@@ -13,7 +13,7 @@ BOOL CWorkThread::Run(UINT uThreadCount)
 
 	for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
 	{
-		thread([=]() {
+		NS_mtutil::startThread([=]() {
 			m_vecThreadStatus[uIndex] = TRUE;
 
 			::Sleep(10);
@@ -21,7 +21,7 @@ BOOL CWorkThread::Run(UINT uThreadCount)
 			this->WorkThreadProc(uIndex);
 
 			m_vecThreadStatus[uIndex] = FALSE;
-		}).detach();
+		});
 	}
 
 	return TRUE;
