@@ -43,7 +43,7 @@ void CRedrawLockGuard::Unlock()
 		else
 		{
 			m_wnd.SetRedraw(TRUE);
-			m_wnd.RedrawWindow(NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+			m_wnd.Invalidate(FALSE); //m_wnd.RedrawWindow(NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
 		}
 	}
 }
