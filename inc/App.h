@@ -177,38 +177,3 @@ public:
 		BroadcastModuleMessage(uMsg, (WPARAM)para1, (LPARAM)para2);
 	}
 };
-
-class __CommonExt CAppTimer
-{
-public:
-	CAppTimer()
-	{
-	}
-
-	void set(UINT uElapse, const CB_Timer& cb)
-	{
-		kill();
-
-		m_idTimer = CTimer::setTimer(uElapse, [&, cb]() {
-			if (!cb())
-			{
-				m_idTimer = 0;
-				return false;
-			}
-
-			return true;
-		});
-	}
-
-	void kill()
-	{
-		if (0 != m_idTimer)
-		{
-			CTimer::killTimer(m_idTimer);
-			m_idTimer = 0;
-		}
-	}
-
-private:
-	UINT_PTR m_idTimer = 0;
-};

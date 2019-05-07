@@ -194,10 +194,10 @@ void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
 	};
 	if (0 != m_idTimer)
 	{
-		CTimer::resetTimer(m_idTimer, fn);
+		timerutil::resetTimer(m_idTimer, fn);
 	}
 	else
 	{
-		m_idTimer = CTimer::setTimer(uDelayTime, fn);
+		m_idTimer = timerutil::setTimer(uDelayTime, fn);
 	}
 }

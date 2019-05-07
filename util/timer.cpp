@@ -36,7 +36,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		if (!cb())
 		{
-			CTimer::killTimer(idEvent);
+			timerutil::killTimer(idEvent);
 			return;
 		}
 	}
@@ -46,7 +46,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	g_lckTimer.unlock();
 }
 
-UINT_PTR CTimer::setTimer(UINT uElapse, const CB_Timer& cb)
+UINT_PTR timerutil::setTimer(UINT uElapse, const CB_Timer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
 
@@ -55,7 +55,7 @@ UINT_PTR CTimer::setTimer(UINT uElapse, const CB_Timer& cb)
 	return idEvent;
 }
 
-void CTimer::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
+void timerutil::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
 {
 	g_lckTimer.lock();
 	auto& TimerInfo = g_mapTimer[idEvent];
@@ -64,11 +64,57 @@ void CTimer::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
 	g_lckTimer.unlock();
 }
 
-void CTimer::killTimer(UINT_PTR idEvent)
+void timerutil::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
 
 	g_lckTimer.lock();
 	(void)g_mapTimer.erase(idEvent);
 	g_lckTimer.unlock();
+}
+
+void CTimer::_set(const CB_Timer& cb, UINT uElapse)
+{
+	auto fn = [=]() {
+		if (!cb())
+		{
+			m_idTimer = 0;
+			return false;
+		}
+
+		return true;
+	};
+
+	if (0 == uElapse)
+	{
+		if (0 != m_idTimer)
+		{
+			timerutil::resetTimer(m_idTimer, fn);
+		}
+
+		return;
+	}
+
+	kill();
+
+	m_idTimer = timerutil::setTimer(uElapse, fn);
+}
+
+void CTimer::set(UINT uElapse, const CB_Timer& cb)
+{
+	_set(cb, uElapse);
+}
+
+void CTimer::set(const CB_Timer& cb)
+{
+	_set(cb);
+}
+
+void CTimer::kill()
+{
+	if (0 != m_idTimer)
+	{
+		timerutil::killTimer(m_idTimer);
+		m_idTimer = 0;
+	}
 }
