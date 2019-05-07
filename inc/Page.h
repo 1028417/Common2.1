@@ -49,7 +49,7 @@ public:
 
 	BOOL SetTitle(const CString& cstrTitle, int iImage = -1);
 
-	virtual const CString& GetTitle() const
+	const CString& GetTitle() const
 	{
 		return m_cstrTitle;
 	}
