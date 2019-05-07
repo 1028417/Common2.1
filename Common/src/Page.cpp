@@ -179,25 +179,3 @@ BOOL CPage::OnCommand(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CPage::AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb)
-{
-	m_cbAsyncLoop = cb;
-
-	auto fn = [=]() {
-		if (m_cbAsyncLoop && m_cbAsyncLoop())
-		{
-			return true;
-		}
-		
-		m_idTimer = 0;
-		return false;
-	};
-	if (0 != m_idTimer)
-	{
-		timerutil::resetTimer(m_idTimer, fn);
-	}
-	else
-	{
-		m_idTimer = timerutil::setTimer(uDelayTime, fn);
-	}
-}

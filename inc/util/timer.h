@@ -20,9 +20,15 @@ public:
 	}
 
 private:
+	UINT m_uElapse = 0;
+
 	UINT_PTR m_idTimer = 0;
+	
+	CB_Timer m_cb;
 
 private:
+	bool _onTimer();
+		
 	void _set(const CB_Timer& cb, UINT uElapse=0);
 
 public:

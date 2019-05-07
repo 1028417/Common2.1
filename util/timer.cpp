@@ -73,31 +73,43 @@ void timerutil::killTimer(UINT_PTR idEvent)
 	g_lckTimer.unlock();
 }
 
+bool CTimer::_onTimer()
+{
+	if (!m_cb())
+	{
+		m_idTimer = 0;
+		return false;
+	}
+
+	return true;
+}
+
 void CTimer::_set(const CB_Timer& cb, UINT uElapse)
 {
-	auto fn = [=]() {
-		if (!cb())
-		{
-			m_idTimer = 0;
-			return false;
-		}
-
-		return true;
-	};
+	m_cb = cb;
 
 	if (0 == uElapse)
 	{
+		return;
+	}
+
+	if (0 == m_idTimer || uElapse != m_uElapse)
+	{
+		m_uElapse = uElapse;
+
+		auto fn = [=]() {
+			return _onTimer();
+		};
+
 		if (0 != m_idTimer)
 		{
 			timerutil::resetTimer(m_idTimer, fn);
 		}
-
-		return;
+		else
+		{
+			m_idTimer = timerutil::setTimer(uElapse, fn);
+		}
 	}
-
-	kill();
-
-	m_idTimer = timerutil::setTimer(uElapse, fn);
 }
 
 void CTimer::set(UINT uElapse, const CB_Timer& cb)

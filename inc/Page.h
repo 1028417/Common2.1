@@ -10,8 +10,6 @@ class CModuleApp;
 
 class CMainWnd;
 
-using CB_AsyncLoop = function<bool()>;
-
 class __CommonExt CPage: public CPropertyPage
 {
 	friend class CDockView;
@@ -42,8 +40,6 @@ private:
 
 	UINT_PTR m_idTimer = 0;
 
-	CB_AsyncLoop m_cbAsyncLoop;
-	
 public:
 	BOOL Active(bool bForceFocus=true);
 
@@ -80,6 +76,4 @@ protected:
 		
 		return TRUE;
 	}
-
-	void AsyncLoop(UINT uDelayTime, const CB_AsyncLoop& cb=NULL);
 };
