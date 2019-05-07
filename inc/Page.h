@@ -16,6 +16,10 @@ class __CommonExt CPage: public CPropertyPage
 {
 	friend class CDockView;
 
+	DECLARE_MESSAGE_MAP()
+	
+	BOOL OnEraseBkgnd(CDC* pDC);
+
 public:
 	CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
@@ -29,6 +33,8 @@ private:
 	CString m_cstrTitle;
 
 	bool m_bAutoActive = false;
+
+	map<HWND, map<UINT, UINT>> m_mapMenuHotKeys;
 
 	set<HWND> m_setDragableCtrls;
 
@@ -48,6 +54,8 @@ public:
 		return m_cstrTitle;
 	}
 
+	void RegMenuHotkey(CWnd& wndCtrl, UINT uVkKeyCode, UINT uCmd = 0);
+
 protected:
 	BOOL OnSetActive() override;
 	BOOL OnKillActive() override;
@@ -55,6 +63,9 @@ protected:
 	virtual void OnActive(BOOL bActive) {}
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
+
+	BOOL OnCommand(WPARAM wParam, LPARAM lParam) override;
+	virtual void OnMenuCommand(UINT uID, UINT uVkKey = 0) {}
 
 	virtual BOOL GetCtrlDragData(HWND hwndCtrl, const CPoint& point, LPVOID& pDragData)
 	{
