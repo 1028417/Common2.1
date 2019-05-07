@@ -140,6 +140,8 @@ public:
 class __CommonExt CObjectList : public CTouchWnd<CListCtrl>
 {
 public:
+	using CB_AsyncTask = function<bool(UINT uItem)>;
+
 	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
 	using CB_ListViewChanged = function<void(E_ListViewType)>;
 
@@ -187,13 +189,13 @@ public:
 		(void)m_ImglstSmall.DeleteImageList();		
 	}
 
-	CImglst m_Imglst;
-	CImglst m_ImglstSmall;
-
 	bool m_bDblClick = false;
 
 private:
 	tagListPara m_para;
+
+	CImglst m_Imglst;
+	CImglst m_ImglstSmall;
 
 	CCompatableFont m_CompatableFont;
 
@@ -210,6 +212,10 @@ private:
 	int m_iTrackMouseFlag = -1;
 	
 	CString m_cstrRenameText;
+
+	vector<BOOL> m_vecAsyncTaskFlag;
+	CB_AsyncTask m_cbAsyncTask;
+	CTimer m_AsyncTaskTimer;
 
 protected:
 	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
@@ -247,12 +253,6 @@ public:
 	}
 
 	void SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent=NULL);
-
-private:
-	template <bool _clear_other>
-	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
-
-	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {};
 
 public:
 	int InsertItemEx(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
@@ -313,6 +313,8 @@ public:
 
 	UINT GetHeaderHeight();
 
+	void AsyncTask(UINT uElapse, const CB_AsyncTask& cb=NULL);
+
 protected:
 	virtual void GenListItem(CListObject& Object, bool bReportView, vector<wstring>& vecText, int& iImage);
 
@@ -329,4 +331,12 @@ protected:
 	void ChangeListCtrlView(short zDelta);
 
 	virtual void OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault);
+
+private:
+	template <bool _clear_other>
+	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
+
+	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {};
+
+	virtual bool onAsyncTask(UINT uItem);
 };

@@ -1054,3 +1054,76 @@ UINT CObjectList::GetHeaderHeight()
 
 	return (UINT)rcHeader.Height();
 }
+
+void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
+{
+	int nCount = GetItemCount();
+	if (0 == nCount)
+	{
+		return;
+	}
+
+	m_vecAsyncTaskFlag.assign((size_t)nCount, FALSE);
+
+	m_cbAsyncTask = cb;
+
+	m_AsyncTaskTimer.set(uElapse, [&]() {
+		if (E_ListViewType::LVT_Report != GetView())
+		{
+			return false;
+		}
+
+		int nTopItem = GetTopIndex();
+		if (nTopItem < 0)
+		{
+			return false;
+		}
+
+		UINT uCount = min((UINT)GetItemCount(), m_vecAsyncTaskFlag.size());
+		for (UINT uItem = (UINT)nTopItem; uItem < uCount; uItem++)
+		{
+			BOOL& bAsyncTaskFlag = m_vecAsyncTaskFlag[uItem];
+			if (bAsyncTaskFlag)
+			{
+				continue;
+			}
+			bAsyncTaskFlag = TRUE;
+
+			if (!onAsyncTask(uItem))
+			{
+				return false;
+			}
+			
+			return true;
+		}
+
+		for (UINT uItem = 0; uItem < (UINT)nTopItem; uItem++)
+		{
+			BOOL& bAsyncTaskFlag = m_vecAsyncTaskFlag[uItem];
+			if (bAsyncTaskFlag)
+			{
+				continue;
+			}
+			bAsyncTaskFlag = TRUE;
+
+			if (!onAsyncTask(uItem))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	});
+}
+
+bool CObjectList::onAsyncTask(UINT uItem)
+{
+	if (m_cbAsyncTask)
+	{
+		return m_cbAsyncTask(uItem);
+	}
+
+	return false;
+}
