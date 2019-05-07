@@ -19,6 +19,11 @@ public:
 	{
 	}
 
+	~CTimer()
+	{
+		kill();
+	}
+
 private:
 	UINT m_uElapse = 0;
 
