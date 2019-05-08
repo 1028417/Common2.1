@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fsdlg.cpp" />
+    <ClCompile Include="mtutil.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="ProFile.cpp" />
     <ClCompile Include="fsutil.cpp" />
@@ -24,7 +25,6 @@
     <ClCompile Include="sqlite\sqlite3.c" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="util.cpp" />
-    <ClCompile Include="WorkThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\util\timer.h" />
@@ -36,7 +36,6 @@
     <ClInclude Include="..\inc\util\SQLiteDB.h" />
     <ClInclude Include="..\inc\util\util.h" />
     <ClInclude Include="..\inc\util\ProFile.h" />
-    <ClInclude Include="..\inc\util\WorkThread.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="sqlite\sqlite3ext.h" />
   </ItemGroup>
