@@ -6,17 +6,17 @@
 #include "MainWnd.h"
 
 BEGIN_MESSAGE_MAP(CPage, CPropertyPage)
-	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
-BOOL CPage::OnEraseBkgnd(CDC* pDC)
+HBRUSH CPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	CRect rcClip;
-	pDC->GetClipBox(rcClip);
+	if (nCtlColor == CTLCOLOR_DLG)
+	{
+		return (HBRUSH)::GetStockObject(WHITE_BRUSH);
+	}
 
-	pDC->FillSolidRect(rcClip, __Color_White);
-
-	return TRUE;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 
 CPage::CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle, bool bAutoActive)

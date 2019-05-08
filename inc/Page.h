@@ -15,9 +15,9 @@ class __CommonExt CPage: public CPropertyPage
 	friend class CDockView;
 
 	DECLARE_MESSAGE_MAP()
-	
-	BOOL OnEraseBkgnd(CDC* pDC);
 
+	HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	
 public:
 	CPage(CResModule& resModule, UINT uIDDlgRes, const CString& cstrTitle=L"", bool bAutoActive=false);
 
