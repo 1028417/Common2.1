@@ -39,22 +39,19 @@ BOOL CProgressDlg::OnInitDialog()
 
 	m_bFinished = FALSE;
 
-	(void)this->Run(1);
+	(void)this->Run([&](UINT) {
+		if (m_fnWork)
+		{
+			m_fnWork(*this);
+		}
+
+		if (!m_bFinished)
+		{
+			(void)this->PostMessage(WM_EndProgress);
+		}	
+	});
 
 	return TRUE;
-}
-
-void CProgressDlg::WorkThreadProc(UINT uWorkThreadIndex)
-{
-	if (m_fnWork)
-	{
-		m_fnWork(*this);
-	}
-
-	if (!m_bFinished)
-	{
-		(void)this->PostMessage(WM_EndProgress);
-	}
 }
 
 void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)

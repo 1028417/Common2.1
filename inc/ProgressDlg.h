@@ -72,8 +72,6 @@ private:
 	virtual void OnCancel();
 
 private:
-	void WorkThreadProc(UINT uWorkThreadIndex) override;
-
 	void _updateProgress();
 	void _endProgress();
 };

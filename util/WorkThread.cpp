@@ -5,7 +5,7 @@
 
 // CWorkThread
 
-BOOL CWorkThread::Run(UINT uThreadCount)
+BOOL CWorkThread::Run(const CB_WorkThread& cb, UINT uThreadCount)
 {
 	m_CancelEvent.reset();
 
@@ -15,10 +15,8 @@ BOOL CWorkThread::Run(UINT uThreadCount)
 	{
 		NS_mtutil::startThread([=]() {
 			m_vecThreadStatus[uIndex] = TRUE;
-
-			::Sleep(10);
-
-			this->WorkThreadProc(uIndex);
+			
+			cb(uIndex);
 
 			m_vecThreadStatus[uIndex] = FALSE;
 		});

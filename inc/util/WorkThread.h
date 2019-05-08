@@ -21,7 +21,9 @@ private:
 	NS_mtutil::CWinEvent m_CancelEvent;
 
 public:
-	BOOL Run(UINT uThreadCount=1);
+	using CB_WorkThread = function<void(UINT uWorkThreadIndex)>;
+
+	BOOL Run(const CB_WorkThread& cb, UINT uThreadCount=1);
 
 	BOOL CheckCancel();
 
@@ -31,9 +33,4 @@ protected:
 	void Cancel();
 
 	UINT GetActiveCount();
-
-private:
-	virtual void WorkThreadProc(UINT uWorkThreadIndex) = 0;
-
-	static DWORD WINAPI ThreadProc(LPVOID lpThreadParam);
 };
