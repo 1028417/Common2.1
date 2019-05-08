@@ -1,8 +1,6 @@
 
 #include <mtutil.h>
 
-#include <WorkThread.h>
-
 // CWorkThread
 
 BOOL CWorkThread::Run(const CB_WorkThread& cb, UINT uThreadCount)

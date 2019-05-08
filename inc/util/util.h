@@ -148,18 +148,16 @@ struct __UtilExt tagCNSortor
 	}
 };
 
-#include "SQLiteDB.h"
-
-#include "fsutil.h"
-
 #include "mtutil.h"
 
-#include "ProFile.h"
-
-#include "WorkThread.h"
+#include "fsutil.h"
 
 #include "fsdlg.h"
 
 #include "Path.h"
 
 #include "timer.h"
+
+#include "ProFile.h"
+
+#include "SQLiteDB.h"
