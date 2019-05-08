@@ -173,6 +173,8 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
 	}
 
+	onDrawItem(dc, lpDrawItemStruct);
+
 	dc.Detach();
 }
 

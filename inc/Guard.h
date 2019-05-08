@@ -154,7 +154,10 @@ public:
 
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) override;
 
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override;
+private:
+	void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override;
+
+	virtual void onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct) {};
 };
 
 class __CommonExt CMenuGuard
