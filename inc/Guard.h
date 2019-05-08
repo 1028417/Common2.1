@@ -138,7 +138,7 @@ private:
 	list<CMenuEx> m_lstSubMenu;
 
 private:
-	void _setOwerDraw();
+	void _setOwnerDraw();
 
 public:
 	HMENU Detach();

@@ -48,7 +48,7 @@ void CRedrawLockGuard::Unlock()
 	}
 }
 
-void CMenuEx::_setOwerDraw()
+void CMenuEx::_setOwnerDraw()
 {
 	int iItemCount = this->GetMenuItemCount();
 	for (int iItem = 0; iItem < iItemCount; iItem++)
@@ -103,7 +103,7 @@ BOOL CMenuEx::Attach(HMENU hMenu, BOOL bTopMenu)
 	m_hMenuAttach = hMenu;
 	m_bTopMenu = bTopMenu;
 
-	_setOwerDraw();
+	_setOwnerDraw();
 
 	return TRUE;
 }
