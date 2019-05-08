@@ -121,71 +121,6 @@ namespace NS_mtutil
 		}
 	};
 
-	class __UtilExt CCSLock
-	{
-	public:
-		CCSLock()
-		{
-			InitializeCriticalSection(&m_cs);
-		}
-
-		~CCSLock()
-		{
-			DeleteCriticalSection(&m_cs);
-		}
-
-	public:
-		void lock()
-		{
-			EnterCriticalSection(&m_cs);
-		}
-
-		void unlock()
-		{
-			LeaveCriticalSection(&m_cs);
-		}
-
-	private:
-		CRITICAL_SECTION m_cs;
-	};
-
-	class __UtilExt CWinEvent
-	{
-	public:
-		CWinEvent(BOOL bManualReset)
-		{
-			m_hEvent = ::CreateEvent(NULL, bManualReset, FALSE, NULL);
-		}
-
-		~CWinEvent()
-		{
-			(void)::CloseHandle(m_hEvent);
-		}
-
-		bool check()
-		{
-			return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, 0);
-		}
-
-		bool wait(DWORD dwTimeout = INFINITE)
-		{
-			return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, dwTimeout);
-		}
-
-		bool notify()
-		{
-			return TRUE==SetEvent(m_hEvent);
-		}
-
-		bool reset()
-		{
-			return TRUE == ResetEvent(m_hEvent);
-		}
-
-	private:
-		HANDLE m_hEvent = INVALID_HANDLE_VALUE;
-	};
-
 	class __UtilExt CCASLock
 	{
 	public:
@@ -238,6 +173,34 @@ namespace NS_mtutil
 		}
 	};
 
+	class __UtilExt CCSLock
+	{
+	public:
+		CCSLock()
+		{
+			InitializeCriticalSection(&m_cs);
+		}
+
+		~CCSLock()
+		{
+			DeleteCriticalSection(&m_cs);
+		}
+
+	public:
+		void lock()
+		{
+			EnterCriticalSection(&m_cs);
+		}
+
+		void unlock()
+		{
+			LeaveCriticalSection(&m_cs);
+		}
+
+	private:
+		CRITICAL_SECTION m_cs;
+	};
+
 	class __UtilExt CCondVar : public condition_variable
 	{
 	public:
@@ -259,5 +222,42 @@ namespace NS_mtutil
 
 	private:
 		mutex m_mtx;
+	};
+
+	class __UtilExt CWinEvent
+	{
+	public:
+		CWinEvent(BOOL bManualReset)
+		{
+			m_hEvent = ::CreateEvent(NULL, bManualReset, FALSE, NULL);
+		}
+
+		~CWinEvent()
+		{
+			(void)::CloseHandle(m_hEvent);
+		}
+
+		bool check()
+		{
+			return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, 0);
+		}
+
+		bool wait(DWORD dwTimeout = INFINITE)
+		{
+			return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, dwTimeout);
+		}
+
+		bool notify()
+		{
+			return TRUE == SetEvent(m_hEvent);
+		}
+
+		bool reset()
+		{
+			return TRUE == ResetEvent(m_hEvent);
+		}
+
+	private:
+		HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 	};
 }
