@@ -172,10 +172,7 @@ BOOL CMainApp::InitInstance()
 	{
 		if (HotkeyInfo.bGlobal)
 		{
-			if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
-			{
-				return FALSE;
-			}
+			(void)_RegGlobalHotkey(hwndMain, HotkeyInfo);
 		}
 	}
 
