@@ -35,10 +35,18 @@ class CViewTab : public CTabCtrl
 
 public:
 	CViewTab()
+		: m_pen(Color(230, 230, 230), 1)
+		, m_brushSel(Color(255, 255, 255))
+		, m_brushUnsel(Color(242, 242, 242))
 	{
 	}
 
 private:
+	const Pen m_pen;
+
+	const SolidBrush m_brushSel;
+	const SolidBrush m_brushUnsel;
+
 	CCompatableFont m_CompatableFont;
 
 	E_TabStyle m_eTabStyle = E_TabStyle::TS_HideTab;

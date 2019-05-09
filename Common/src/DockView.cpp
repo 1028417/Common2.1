@@ -222,9 +222,6 @@ void CViewTab::OnPaint()
 	dc.BitBlt(0, y, rcClient.right, nHeight, &MemDC, 0, y, SRCCOPY);
 }
 
-static const Color g_ckSel(255, 255, 255);
-static const Color g_crUnsel(242, 242, 242);
-
 void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 {
 	int nSelItem = GetCurSel();
@@ -261,21 +258,19 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 		}
 	}*/
 
-	SolidBrush whiteBrush(nItem == nSelItem ? g_ckSel : g_crUnsel);
-	graphics.FillPolygon(&whiteBrush, pt, sizeof(pt) / sizeof(pt[0]));
+	graphics.FillPolygon(nItem == nSelItem ? &m_brushSel : &m_brushUnsel, pt, sizeof(pt) / sizeof(pt[0]));
 
-	static const Pen s_pen(Color(225, 225, 225), 1);
 	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
 	if (nItem != nSelItem)
 	{
 		if (nItem > 0)
 		{
-			graphics.DrawLine(&s_pen, pt[0].X, pt[0].Y + 1, pt[1].X, pt[1].Y + 1);
+			graphics.DrawLine(&m_pen, pt[0].X, pt[0].Y + 1, pt[1].X, pt[1].Y + 1);
 		}
 
-		graphics.DrawLine(&s_pen, pt[1].X, pt[1].Y + 1, pt[2].X, pt[2].Y + 1);
+		graphics.DrawLine(&m_pen, pt[1].X, pt[1].Y + 1, pt[2].X, pt[2].Y + 1);
 
-		graphics.DrawLine(&s_pen, pt[2].X, pt[2].Y, pt[3].X, pt[3].Y);
+		graphics.DrawLine(&m_pen, pt[2].X, pt[2].Y, pt[3].X, pt[3].Y);
 	}
 
 	TC_ITEMW tci;
