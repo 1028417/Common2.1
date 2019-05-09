@@ -1,11 +1,6 @@
 
 #include "stdafx.h"
 
-#include <WinSock2.h>
-
-#include <stdio.h>
-#include <time.h>
-
 #include <Dbghelp.h>
 #pragma comment(lib, "Dbghelp.lib")
 

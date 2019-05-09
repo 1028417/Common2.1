@@ -86,3 +86,5 @@ using CB_TrackMouseEvent = function<void(E_TrackMouseEvent, const CPoint&)>;
 #include <DragDrop.h>
 
 #include <ProgressDlg.h>
+
+#include <DialogT.h>

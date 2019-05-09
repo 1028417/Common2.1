@@ -50,9 +50,7 @@
     <ClCompile Include="src\DragDrop.cpp">
       <Filter>src\ctrl</Filter>
     </ClCompile>
-    <ClCompile Include="Dump.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="Dump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -98,6 +96,9 @@
     </ClInclude>
     <ClInclude Include="..\inc\DragDrop.h">
       <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\DialogT.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

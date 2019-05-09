@@ -138,7 +138,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dump.cpp" />
+    <ClCompile Include="Dump.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\Guard.cpp" />
     <ClCompile Include="src\img.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -164,6 +166,7 @@
     <ClInclude Include="..\inc\App.h" />
     <ClInclude Include="..\inc\CDispatch.h" />
     <ClInclude Include="..\inc\Common.h" />
+    <ClInclude Include="..\inc\DialogT.h" />
     <ClInclude Include="..\inc\DockView.h" />
     <ClInclude Include="..\inc\DragDrop.h" />
     <ClInclude Include="..\inc\Guard.h" />
