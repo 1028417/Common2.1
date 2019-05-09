@@ -44,7 +44,7 @@ void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
 	_async([=]() {
 		if (0 == uDelayTime)
 		{
-			_async(cb);
+			cb();
 		}
 		else
 		{
