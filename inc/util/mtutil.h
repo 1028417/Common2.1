@@ -6,17 +6,12 @@
 
 #include "util.h"
 
+#include <thread>
+
 #include <mutex>
-using namespace std;
 
 namespace NS_mtutil
 {
-	template <typename CB>
-	void startThread(const CB& cb)
-	{
-		std::thread(cb).detach();
-	}
-
 	template <typename T, typename R>
 	void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, vector<R>& vecResult
 		, const function<bool(UINT uTaskIdx, T&, R&)>& cb)
@@ -99,24 +94,53 @@ namespace NS_mtutil
 		virtual bool onTask(UINT uTaskIdx, T&, R&) { return false; }
 	};
 	
-	class __UtilExt CAsync
+	class __UtilExt CThread
 	{
 	public:
-		CAsync() {}
+		CThread() {}
 
-		bool async()
+		static void Wakeup(DWORD dwThreadID, PAPCFUNC lpProc = NULL)
 		{
+			HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
+
+			if (NULL == lpProc)
+			{
+				lpProc = APCFunc;
+			}
+			QueueUserAPC(lpProc, hThread, 0);
+		}
+		
+		template <typename CB>
+		static void Start(const CB& cb)
+		{
+			std::thread(cb).detach();
+		}
+
+		bool poolStart(const fn_voidvoid& cb)
+		{
+			m_cb = cb;
 			return TRUE == QueueUserWorkItem(cbQueueUserWorkItem, this, WT_EXECUTEDEFAULT);
 		}
 
 	private:
-		virtual void onAsync() {};
+		fn_voidvoid m_cb;
+
+		static VOID WINAPI APCFunc(ULONG_PTR dwParam) {}
+
+	private:
+		virtual void onAsync()
+		{
+			if (m_cb)
+			{
+				m_cb();
+			}
+		}
 
 		static DWORD WINAPI cbQueueUserWorkItem(LPVOID lpPara)
 		{
 			if (NULL != lpPara)
 			{
-				((CAsync*)lpPara)->onAsync();
+				((CThread*)lpPara)->onAsync();
 			}
 
 			return 0;
@@ -262,38 +286,34 @@ namespace NS_mtutil
 	private:
 		HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 	};
-}
 
-#include <thread>
-
-class CWorkThread;
-
-class __UtilExt CWorkThread
-{
-public:
-	CWorkThread()
-		: m_CancelEvent(TRUE)
+	class __UtilExt CWorkThread
 	{
-	}
+	public:
+		CWorkThread()
+			: m_CancelEvent(TRUE)
+		{
+		}
 
-private:
-	vector<BOOL> m_vecThreadStatus;
+	private:
+		vector<BOOL> m_vecThreadStatus;
 
-	bool m_bPause = false;
+		bool m_bPause = false;
 
-	NS_mtutil::CWinEvent m_CancelEvent;
+		NS_mtutil::CWinEvent m_CancelEvent;
 
-public:
-	using CB_WorkThread = function<void(UINT uWorkThreadIndex)>;
+	public:
+		using CB_WorkThread = function<void(UINT uWorkThreadIndex)>;
 
-	BOOL Run(const CB_WorkThread& cb, UINT uThreadCount = 1);
+		BOOL Run(const CB_WorkThread& cb, UINT uThreadCount = 1);
 
-	BOOL CheckCancel();
+		BOOL CheckCancel();
 
-protected:
-	void Pause(BOOL bPause = TRUE);
+	protected:
+		void Pause(BOOL bPause = TRUE);
 
-	void Cancel();
+		void Cancel();
 
-	UINT GetActiveCount();
-};
+		UINT GetActiveCount();
+	};
+}

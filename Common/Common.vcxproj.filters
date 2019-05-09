@@ -47,9 +47,11 @@
     <ClCompile Include="src\ResModule.cpp">
       <Filter>src\app</Filter>
     </ClCompile>
-    <ClCompile Include="Dump.cpp" />
     <ClCompile Include="src\DragDrop.cpp">
       <Filter>src\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Dump.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -122,18 +122,18 @@ public:
 
 	static void async(const CB_Sync& cb, UINT uDelayTime=0);
 
-	static void sync(const CB_Sync& cb);
+	static void sync(const CB_Sync& cb, bool bBlock=true);
 
 	template <typename T>
-	static void sync(const function<void(T&)>& cb, T& para)
+	static void sync(const function<void(T&)>& cb, T& para, bool bBlock = true)
 	{
-		sync([&]() {
+		sync([=]() {
 			cb(para);
-		});
+		}, bBlock);
 	}
-
-	void thread(const function<void()>& cb);
 	
+	void thread(const fn_voidvoid& cb);
+
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
 	static void getWorkArea(CRect& rtWorkArea)

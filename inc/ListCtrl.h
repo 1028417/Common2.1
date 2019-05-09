@@ -336,7 +336,7 @@ private:
 	template <bool _clear_other>
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 
-	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {};
+	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {}
 
 	virtual bool onAsyncTask(UINT uItem);
 };

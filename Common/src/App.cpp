@@ -41,8 +41,6 @@ static void _async(const CB_Sync& cb)
 	}
 }
 
-static VOID WINAPI APCFunc(ULONG_PTR dwParam){}
-
 void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
 {
 	_async([=]() {
@@ -60,7 +58,7 @@ void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
 	});
 }
 
-void CMainApp::sync(const CB_Sync& cb)
+void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 {
 	DWORD dwThreadID = ::GetCurrentThreadId();
 	if (dwThreadID == GetMainApp()->m_nThreadID)
@@ -69,20 +67,25 @@ void CMainApp::sync(const CB_Sync& cb)
 		return;
 	}
 
-	HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
 	async([=]() {
 		cb();
 
-		QueueUserAPC(APCFunc, hThread, 0);
+		if (bBlock)
+		{
+			CThread::Wakeup(dwThreadID);
+		}
 	});
 
-	::SleepEx(-1, TRUE);
+	if (bBlock)
+	{
+		::SleepEx(-1, TRUE);
+	}
 }
 
-void CMainApp::thread(const function<void()>& cb)
+void CMainApp::thread(const fn_voidvoid& cb)
 {
 	bool bExit = false;
-	NS_mtutil::startThread([&]() {
+	CThread::Start([&]() {
 		cb();
 
 		bExit = true;
