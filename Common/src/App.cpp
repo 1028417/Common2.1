@@ -7,8 +7,6 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
-#define WM_Async WM_USER+1
-
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
@@ -37,7 +35,7 @@ static void _async(const CB_Sync& cb)
 
 		g_lckAsync.unlock();
 
-		CMainApp::GetMainApp()->PostThreadMessage(WM_Async, 0, 0);
+		CMainApp::GetMainApp()->PostThreadMessage(WM_NULL, 0, 0);
 	}
 }
 
