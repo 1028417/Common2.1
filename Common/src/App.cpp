@@ -153,6 +153,9 @@ static void _init()
 
 BOOL CMainApp::InitInstance()
 {
+	extern void InitMinDump();
+	InitMinDump();
+	
 	__AssertReturn(__super::InitInstance(), FALSE);
 
 	_init();

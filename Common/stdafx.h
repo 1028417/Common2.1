@@ -22,8 +22,6 @@
 #include <afxdisp.h>        // MFC 自动化类
 
 
-extern class CResModule g_ResModule;
-
 #include "Common.h"
 
 #include "Resource.h"

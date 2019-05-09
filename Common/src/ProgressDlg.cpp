@@ -21,7 +21,8 @@ INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
 {
 	m_strTitle = strTitle;
 
-	LPCDLGTEMPLATE lpDialogTemplate = g_ResModule.loadDialog(IDD_DLG_PROGRESS);
+	CResModule ResModule("Common");
+	LPCDLGTEMPLATE lpDialogTemplate = ResModule.loadDialog(IDD_DLG_PROGRESS);
 	__AssertReturn(lpDialogTemplate, -1);
 
 	__AssertReturn(this->InitModalIndirect(lpDialogTemplate, pWndParent), -1);

@@ -143,7 +143,8 @@ END_MESSAGE_MAP()
 
 BOOL CObjectCheckTree::InitCtrl()
 {
-	HBITMAP hStateBitmap = g_ResModule.loadBitmap(IDB_CHECKTREE_STATE);
+	CResModule ResModule("Common");
+	HBITMAP hStateBitmap = ResModule.loadBitmap(IDB_CHECKTREE_STATE);
 	__AssertReturn(hStateBitmap, FALSE);
 
 	CBitmap StateBitmap;
