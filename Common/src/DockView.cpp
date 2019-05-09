@@ -5,6 +5,13 @@
 
 #define __Offset 8
 
+CViewTab::CViewTab()
+	: m_pen(Color(235, 235, 235), 1)
+	, m_brushSel(Color(255, 255, 255))
+	, m_brushUnsel(Color(245, 245, 245))
+{
+}
+
 UINT CViewTab::getItemHeight() const
 {
 	switch (m_eTabStyle)

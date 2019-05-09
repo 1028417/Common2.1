@@ -34,12 +34,7 @@ class CViewTab : public CTabCtrl
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CViewTab()
-		: m_pen(Color(230, 230, 230), 1)
-		, m_brushSel(Color(255, 255, 255))
-		, m_brushUnsel(Color(242, 242, 242))
-	{
-	}
+	CViewTab();
 
 private:
 	const Pen m_pen;
