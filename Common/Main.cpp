@@ -21,9 +21,13 @@ static AFX_EXTENSION_MODULE ControlDLL = { NULL, NULL };
 
  CResModule g_ResModule;
 
+ extern void InitMinDump();
+
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
+	InitMinDump();
+
 	g_ResModule = CResModule(hInstance);
 
 	// 如果使用 lpReserved，请将此移除

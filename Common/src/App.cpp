@@ -177,15 +177,6 @@ BOOL CMainApp::InitInstance()
 		}
 	}
 
-	if (!pMainWnd->IsWindowVisible())
-	{
-		pMainWnd->show();
-	}
-	else
-	{
-		pMainWnd->SetActiveWindow();
-	}
-
 	__AssertReturn(getController().start(), FALSE);
 
 	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
