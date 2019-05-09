@@ -72,7 +72,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 
 		if (bBlock)
 		{
-			CThread::Wakeup(dwThreadID);
+			NS_mtutil::CThread::Wakeup(dwThreadID);
 		}
 	});
 
@@ -85,7 +85,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 void CMainApp::thread(const fn_voidvoid& cb)
 {
 	bool bExit = false;
-	CThread::Start([&]() {
+	NS_mtutil::CThread::Start([&]() {
 		cb();
 
 		bExit = true;
