@@ -241,6 +241,11 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 			{
 				cb();
 			}
+			
+			if (WM_NULL == pMsg->message)
+			{
+				return TRUE;
+			}
 		}
 	}
 
