@@ -2,6 +2,8 @@
 #ifndef __Check_H
 #define __Check_H
 
+#include <sstream>
+
 namespace NS_SSTL
 {
 	template <bool _test>
@@ -75,12 +77,13 @@ namespace NS_SSTL
 
 	template <typename T, typename... args>
 	using checkArgs0Type_t = checkSameType_t<T, args0Type_t<args...>>;
-	
-	template<class _Iter> using checkIter_t =
+
+    template<class _Iter> using checkIter_t =
 #ifdef _MSC_VER
-	enableIf_t<_Is_iterator, _Iter>;
+    enableIf_t<_Is_iterator, _Iter>;
 #else
-	_RequireInputIter<_Iter>;
+    typename enable_if<is_convertible<typename
+          iterator_traits<_Iter>::iterator_category, input_iterator_tag>::value>::type;
 #endif
 
 	template <typename C>

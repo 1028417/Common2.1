@@ -591,7 +591,7 @@ namespace NS_SSTL
 					return false;
 				}
 
-				uRet += del(key);
+                uRet += this->del(key);
 				return true;
 			}, key, others...);
 

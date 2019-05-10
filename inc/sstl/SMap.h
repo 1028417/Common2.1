@@ -374,38 +374,38 @@ namespace NS_SSTL
 		}
 
 		size_t _del(__KeyConstRef key, CB_Del cb) override
-		{
-			auto itr = m_data.find(key);
-			if (itr == m_data.end())
-			{
-				return 0;
-			}
+        {
+            auto itr = m_data.find(key);
+            if (itr == m_data.end())
+            {
+                return 0;
+            }
 
-			size_t uRet = 0;
-			do
-			{
-				E_DelConfirm eRet = cb(*itr);
-				if (E_DelConfirm::DC_Abort == eRet)
-				{
-					break;
-				}
-				else if (E_DelConfirm::DC_No == eRet)
-				{
-					++itr;
-				}
-				else
-				{
-					itr = m_data.erase(itr);
-					uRet++;
+            size_t uRet = 0;
+            do
+            {
+                E_DelConfirm eRet = cb(*itr);
+                if (E_DelConfirm::DC_Abort == eRet)
+                {
+                    break;
+                }
+                else if (E_DelConfirm::DC_No == eRet)
+                {
+                    ++itr;
+                }
+                else
+                {
+                    itr = m_data.erase(itr);
+                    uRet++;
 
-					if (E_DelConfirm::DC_YesAbort == eRet)
-					{
-						break;
-					}
-				}
-			} while (m_bMulti && itr != m_data.end() && itr->first == key);
+                    if (E_DelConfirm::DC_YesAbort == eRet)
+                    {
+                        break;
+                    }
+                }
+            } while (m_bMulti && itr != m_data.end() && itr->first == key);
 
-			return uRet;
+            return uRet;
 		}
 
 		bool _includes(__KeyConstRef key) const override
@@ -477,11 +477,11 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-		template <typename _V, typename = void>
-		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
-		{
-			return m_data.insert({ key, value })->second;
-		}
+//		template <typename _V, typename = void>
+//		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
+//		{
+//			return m_data.insert({ key, value })->second;
+//		}
 
 	private:
 		template <class T = __ContainerType>
