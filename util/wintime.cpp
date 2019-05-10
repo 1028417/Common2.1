@@ -12,7 +12,7 @@ time_t wintime::transFileTime(const FILETIME& ft)
 	return ((LONGLONG)(ui.QuadPart - 116444736000000000) / 10000000);
 }
 
-bool wintime::toSysTime(__time64_t time, SYSTEMTIME& sysTime)
+bool wintime::toSysTime(time64_t time, SYSTEMTIME& sysTime)
 {
 	tm atm;
 	if (0 != _localtime64_s(&atm, &time))
@@ -95,7 +95,7 @@ wstring wintime::formatTime(const FILETIME& fileTime, const wstring& strFormat)
 	return _FormatTime(atm, strFormat);*/
 }
 
-wstring wintime::formatTime(__time64_t time, const wstring& strFormat)
+wstring wintime::formatTime(time64_t time, const wstring& strFormat)
 {
 	if (0 == time)
 	{

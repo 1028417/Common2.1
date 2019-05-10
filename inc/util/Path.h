@@ -69,11 +69,6 @@ private:
 	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
 
 public:
-	inline const tagFindData& GetFileInfo() const
-	{
-		return m_fileInfo;
-	}
-
 	void SetDir(const wstring& strDir);
 
 	void SetName(const wstring& strNewName)

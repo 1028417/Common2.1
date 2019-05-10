@@ -280,7 +280,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 	return bResult;
 }
 
-__time64_t fsutil::GetFileModifyTime(const wstring& strFilePath)
+time64_t fsutil::GetFileModifyTime(const wstring& strFilePath)
 {
 	struct _stat fileStat;
 	if (0 == _wstat(strFilePath.c_str(), &fileStat))

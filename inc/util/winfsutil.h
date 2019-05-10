@@ -1,11 +1,11 @@
 ﻿
 #pragma once
 
-struct __UtilExt tagFindData : public WIN32_FIND_DATAW
-{	
+struct __UtilExt tagFindData : WIN32_FIND_DATAW
+{
 	tagFindData()
 	{
-		memset(this, 0, sizeof tagFindData);
+		memset(this, 0, sizeof(tagFindData));
 	}
 
 	inline bool isDir() const

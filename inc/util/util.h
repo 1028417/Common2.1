@@ -9,6 +9,7 @@
 #include <stddef.h>
 
 using UINT = unsigned int;
+using time64_t = int64_t;
 
 #ifdef __UtilPrj
 #define __UtilExt __declspec(dllexport)
@@ -106,11 +107,11 @@ public:
 	
 	static bool IsUTF8Str(const string& strText);
 
-	template <class _C>
-	static wstring ContainerToStr(const _C& container, const wstring& strSplitor)
+	template <typename T>
+	static wstring ContainerToStr(const T& container, const wstring& strSplitor)
 	{
 		wstringstream ssResult;
-        for (typename _C::const_iterator it = container.begin(); ; )
+        for (typename T::const_iterator it = container.begin(); ; )
 		{
 			ssResult << *it;
 			
