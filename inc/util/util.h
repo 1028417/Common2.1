@@ -133,6 +133,27 @@ struct __UtilExt tagCNSortor
 	}
 };
 
+struct tagFileInfo
+{
+	tagFileInfo()
+	{
+	}
+
+	tagFileInfo(const tagFileInfo& FileInfo)
+	{
+		*this = FileInfo;
+	}
+
+	bool m_bDir = false;
+
+	wstring m_strName;
+
+	unsigned long m_uFileSize = 0;
+
+	time_t m_tCreateTime = 0;
+	time_t m_tModifyTime = 0;
+};
+
 #include "fsutil.h"
 
 #ifdef _MSC_VER

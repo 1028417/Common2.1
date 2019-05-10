@@ -3,6 +3,29 @@
 
 #include "winfsutil.h"
 
+struct tagFindData : WIN32_FIND_DATAW
+{
+	bool isDir() const
+	{
+		return dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+	}
+
+	unsigned long getFileSize() const
+	{
+		return nFileSizeLow;
+	}
+
+	time_t getModifyTime() const
+	{
+		return wintime::transFileTime(ftLastWriteTime);
+	}
+
+	time_t getCreateTime() const
+	{
+		return wintime::transFileTime(ftCreationTime);
+	}
+};
+
 bool winfsutil::ExistsFile(const wstring& strFile)
 {
 	if (strFile.empty())
@@ -35,9 +58,11 @@ bool winfsutil::ExistsDir(const wstring& strDir)
 	return (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-bool winfsutil::FindFile(const wstring& strFindPath, const function<bool(const tagFindData&)>& cb)
+bool winfsutil::FindFile(const wstring& strFindPath, CB_FindFile cb)
 {
 	tagFindData FindData;
+	memset(&FindData, 0, sizeof(tagFindData));
+	
 	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindData);
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
@@ -56,7 +81,13 @@ bool winfsutil::FindFile(const wstring& strFindPath, const function<bool(const t
 			continue;
 		}
 
-		if (!cb(FindData))
+		tagFileInfo FileInfo;
+		FileInfo.m_bDir = FindData.isDir();
+		FileInfo.m_strName = FindData.cFileName;
+		FileInfo.m_uFileSize = FindData.getFileSize();
+		FileInfo.m_tCreateTime = FindData.getCreateTime();
+		FileInfo.m_tModifyTime = FindData.getModifyTime();
+		if (!cb(FileInfo))
 		{
 			break;
 		}

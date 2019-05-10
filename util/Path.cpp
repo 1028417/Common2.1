@@ -57,19 +57,16 @@ wstring CPath::GetParentDir() const
 	return L"";
 }
 
-TD_PathList& CPath::assignSubPath(const SArray<tagFindData>& arrFindData)
+bool CPath::onFindFile(TD_PathList& lstSubPath)
 {
-	m_plstSubPath = new TD_PathList();
-
-    arrFindData([&](const tagFindData& findData) {
-		CPath *pSubPath = NewSubPath(findData, this);
+	return winfsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFileInfo& FileInfo) {
+		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
 		{
 			m_plstSubPath->add(pSubPath);
 		}
+		return true;
 	});
-
-	return *m_plstSubPath;
 }
 
 TD_PathList& CPath::_findFile()
@@ -81,14 +78,7 @@ TD_PathList& CPath::_findFile()
 
 	m_plstSubPath = new TD_PathList();
 
-	m_bExists = winfsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
-		CPath *pSubPath = NewSubPath(findData, this);
-		if (pSubPath)
-		{
-			m_plstSubPath->add(pSubPath);
-		}
-		return true;
-	});
+	m_bExists = onFindFile(*m_plstSubPath);
 	
 	m_plstSubPath->qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)

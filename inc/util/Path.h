@@ -19,7 +19,7 @@ using TD_PathObjectList = PtrArray<CPathObject>;
 class CDirObject;
 using TD_DirObjectList = PtrArray<CDirObject>;
 
-class __UtilExt CPath
+class __UtilExt CPath : public tagFileInfo
 {
 	friend struct tagPathSortor;
 
@@ -30,11 +30,9 @@ public:
 
 	CPath(const wstring& strName, bool bDir);
 
-	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
-		: m_fileInfo(findData)
-		, m_bDir(findData.isDir())
-		, m_strName(findData.cFileName)
-		, m_pParentDir(pParentDir)
+	CPath(const tagFileInfo& FileInfo, CPath& ParentDir)
+		: tagFileInfo(FileInfo)
+		, m_pParentDir(&ParentDir)
 	{
 	}
 	
@@ -44,28 +42,24 @@ public:
 	}
 
 private:
-	wstring m_strName;
-
-	bool m_bDir = false;
-
 	bool m_bExists = false;
-	
-protected:
-	tagFindData m_fileInfo;
 
 	TD_PathList *m_plstSubPath = NULL;
 
+protected:	
 	CPath *m_pParentDir = NULL;
-
+	
 protected:
-	virtual TD_PathList& _findFile();
+	virtual bool onFindFile(TD_PathList& lstSubPath);
 
-	virtual CPath* NewSubPath(const tagFindData& findData, CPath *pParentDir)
+	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir)
 	{
-		return new CPath(findData, pParentDir);
+		return new CPath(FileInfo, ParentDir);
 	}
 	
 private:
+	TD_PathList& _findFile();
+
 	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
 
 public:
@@ -124,8 +118,6 @@ public:
 	void RemoveSubPath(const TD_PathList& lstDeletePaths);
 
 	bool HasFile() const;
-
-	TD_PathList& assignSubPath(const SArray<tagFindData>& arrFindData);
 };
 
 class __UtilExt CListObject
@@ -184,8 +176,8 @@ public:
 	{
 	}
 
-	CPathObject(const tagFindData& findData, CPath *pParentDir)
-		: CPath(findData, pParentDir)
+	CPathObject(const tagFileInfo& FileInfo, CPath& ParentDir)
+		: CPath(FileInfo, ParentDir)
 	{
 	}
 
@@ -194,9 +186,9 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
+	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir) override
 	{
-		return new CPathObject(findData, pParentDir);
+		return new CPathObject(FileInfo, ParentDir);
 	}
 };
 
@@ -208,8 +200,8 @@ public:
 	{
 	}
 
-	CDirObject(const tagFindData& findData, CPath *pParentDir)
-		: CPathObject(findData, pParentDir)
+	CDirObject(const tagFileInfo& FileInfo, CPath& ParentDir)
+		: CPathObject(FileInfo, ParentDir)
 	{
 	}
 
@@ -218,11 +210,14 @@ public:
 	}
 
 protected:
-	virtual CPath *NewSubPath(const tagFindData& findData, CPath *pParentDir) override
+	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir) override
 	{
-		__EnsureReturn(findData.isDir(), NULL);
+		if (FileInfo.m_bDir)
+		{
+			return new CDirObject(FileInfo, ParentDir);
+		}
 
-		return new CDirObject(findData, pParentDir);
+		return NULL;
 	}
 
 public:

@@ -477,11 +477,13 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-//		template <typename _V, typename = void>
-//		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
-//		{
-//			return m_data.insert({ key, value })->second;
-//		}
+#ifdef _MSC_VER // 其实只有安卓gcc不行
+		template <typename _V, typename = void>
+		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
+		{
+			return m_data.insert({ key, value })->second;
+		}
+#endif
 
 	private:
 		template <class T = __ContainerType>
