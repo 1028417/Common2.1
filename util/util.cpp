@@ -6,6 +6,9 @@
 static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
+#define CP_ACP                    0           // default to ANSI code page
+#define CP_UTF8                   65001       // UTF-8 translation
+
 bool util::checkWChar(const wstring& str)
 {
 	for (auto& wchr : str)
@@ -160,8 +163,10 @@ wstring util::StrUpperCase(const wstring& str)
 	return str;
 }
 
-string util::WStrToStr(const wstring&str, UINT CodePage)
+string util::WStrToStr(const wstring&str, bool bUTF8)
 {
+	UINT CodePage = bUTF8 ? CP_ACP : CP_UTF8;
+
 	if (str.empty())
 	{
 		return "";
@@ -191,8 +196,10 @@ string util::WStrToStr(const wstring&str, UINT CodePage)
 	return strRet;
 }
 
-wstring util::StrToWStr(const string&str, UINT CodePage)
+wstring util::StrToWStr(const string&str, bool bUTF8)
 {
+	UINT CodePage = bUTF8 ? CP_ACP : CP_UTF8;
+
 	if (str.empty())
 	{
 		return L"";

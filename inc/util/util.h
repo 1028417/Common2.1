@@ -102,9 +102,8 @@ public:
 	static void UpperCase(wstring& str);
 	static wstring StrUpperCase(const wstring& str);
 	
-#define CP_ACP 0
-	static string WStrToStr(const wstring&str, UINT CodePage = CP_ACP);
-	static wstring StrToWStr(const string&str, UINT CodePage = CP_ACP);
+	static string WStrToStr(const wstring&str, bool bUTF8 = false);
+	static wstring StrToWStr(const string&str, bool bUTF8 = false);
 	
 	static bool IsUTF8Str(const string& strText);
 
