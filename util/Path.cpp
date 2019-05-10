@@ -81,7 +81,7 @@ TD_PathList& CPath::_findFile()
 
 	m_plstSubPath = new TD_PathList();
 
-	m_bExists = fsutil_win::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
+	m_bExists = winfsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFindData& findData) {
 		CPath *pSubPath = NewSubPath(findData, this);
 		if (pSubPath)
 		{

@@ -132,13 +132,17 @@ struct __UtilExt tagCNSortor
 	}
 };
 
+#include "fsutil.h"
+
+#ifdef _MSC_VER
 #include "wintime.h"
 
 #include "mtutil.h"
 
-#include "fsutil.h"
+#include "winfsutil.h"
 
 #include "fsdlg.h"
+#endif
 
 #include "Path.h"
 

@@ -25,6 +25,7 @@
     <ClCompile Include="sqlite\sqlite3.c" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="winfsutil.cpp" />
     <ClCompile Include="wintime.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +38,7 @@
     <ClInclude Include="..\inc\util\SQLiteDB.h" />
     <ClInclude Include="..\inc\util\util.h" />
     <ClInclude Include="..\inc\util\ProFile.h" />
+    <ClInclude Include="..\inc\util\winfsutil.h" />
     <ClInclude Include="..\inc\util\wintime.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="sqlite\sqlite3ext.h" />

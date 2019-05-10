@@ -33,7 +33,7 @@ public:
 	CPath(const tagFindData& findData, CPath *pParentDir=NULL)
 		: m_fileInfo(findData)
 		, m_bDir(findData.isDir())
-		, m_strName(findData.getFileName())
+		, m_strName(findData.cFileName)
 		, m_pParentDir(pParentDir)
 	{
 	}

@@ -18,6 +18,7 @@
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="mtutil.cpp" />
     <ClCompile Include="wintime.cpp" />
+    <ClCompile Include="winfsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -40,6 +41,7 @@
     <ClInclude Include="..\inc\util\mtutil.h" />
     <ClInclude Include="..\inc\util\timer.h" />
     <ClInclude Include="..\inc\util\wintime.h" />
+    <ClInclude Include="..\inc\util\winfsutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

@@ -10,6 +10,8 @@
 
 #include <mutex>
 
+#include <Windows.h>
+
 namespace NS_mtutil
 {
 	template <typename T, typename R>
@@ -99,15 +101,11 @@ namespace NS_mtutil
 	public:
 		CThread() {}
 
-		static void Wakeup(DWORD dwThreadID, PAPCFUNC lpProc = NULL)
+		static void Wakeup(DWORD dwThreadID, const fn_voidvoid& fn=NULL)
 		{
 			HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
 
-			if (NULL == lpProc)
-			{
-				lpProc = APCFunc;
-			}
-			QueueUserAPC(lpProc, hThread, 0);
+			QueueUserAPC(APCFunc, hThread, fn?(ULONG_PTR)&fn:0);
 		}
 		
 		template <typename CB>
@@ -125,7 +123,14 @@ namespace NS_mtutil
 	private:
 		fn_voidvoid m_cb;
 
-		static VOID WINAPI APCFunc(ULONG_PTR dwParam) {}
+		static VOID WINAPI APCFunc(ULONG_PTR dwParam)
+		{
+			auto  pfn = (const fn_voidvoid *)dwParam;
+			if (pfn && *pfn)
+			{
+				(*pfn)();
+			}
+		}
 
 	private:
 		virtual void onAsync()
@@ -155,13 +160,20 @@ namespace NS_mtutil
 		}
 		
 	private:
-		char m_lockFlag = 0;
-
-	private:
+#ifdef _MSC_VER
+		volatile char m_lockFlag = 0;
 #pragma intrinsic(_InterlockedCompareExchange8, _InterlockedExchange8)
+#else
+        volatile long m_lockFlag = 0;
+#endif
+
 		bool _lock(UINT uRetryTimes=0, UINT uSleepTime=0)
 		{
+#ifdef _MSC_VER
 			while (_InterlockedCompareExchange8(&m_lockFlag, 1, 0))
+#else
+            while (InterlockedCompareExchange(&m_lockFlag, 1, 0))
+#endif
 			{
 				if (0 != uRetryTimes && 0 == --uRetryTimes)
 				{
