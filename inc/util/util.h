@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <Windows.h>
+using UINT = unsigned int;
 
 #ifdef __UtilPrj
 #define __UtilExt __declspec(dllexport)
@@ -75,17 +75,6 @@ using namespace NS_SSTL;
 class __UtilExt util
 {
 public:
-	static bool toSysTime(__time64_t time, SYSTEMTIME& sysTime);
-	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
-	
-	static void getCurrentTime(int& nHour, int& nMinute);
-	static wstring getCurrentTime();
-
-	static time_t FileTimeToTime_t(const FILETIME& ft);
-
-	static wstring FormatTime(const FILETIME& fileTime, const wstring& strFormat);
-	static wstring FormatTime(__time64_t time, const wstring& strFormat);
-
 	static bool checkWChar(const wstring& str);
 
 	static wstring& trim(wstring& strText, wchar_t chr = ' ');
@@ -111,16 +100,11 @@ public:
 	static void UpperCase(wstring& str);
 	static wstring StrUpperCase(const wstring& str);
 	
+#define CP_ACP 0
 	static string WStrToStr(const wstring&str, UINT CodePage = CP_ACP);
 	static wstring StrToWStr(const string&str, UINT CodePage = CP_ACP);
 	
 	static bool IsUTF8Str(const string& strText);
-
-	template <class _C, class _V>
-	static bool ContainerFind(_C& container, _V value)
-	{
-		return std::find(container.begin(), container.end(), value) != container.end();
-	}
 
 	template <class _C>
 	static wstring ContainerToStr(const _C& container, const wstring& strSplitor)
@@ -147,6 +131,8 @@ struct __UtilExt tagCNSortor
 		return util::StrCompareUseCNCollate(lhs, rhs)<0;
 	}
 };
+
+#include "wintime.h"
 
 #include "mtutil.h"
 

@@ -64,22 +64,22 @@ struct __UtilExt tagFindData
 
 	inline time_t getModifyTime() const
 	{
-		return util::FileTimeToTime_t(data.ftLastWriteTime);
+		return wintime::transFileTime(data.ftLastWriteTime);
 	}
 	
 	inline wstring getModifyTime(const wstring& strFormat) const
 	{
-		return util::FormatTime(getModifyTime(), strFormat);
+		return wintime::formatTime(getModifyTime(), strFormat);
 	}
 
 	inline time_t getCreateTime() const
 	{
-		return util::FileTimeToTime_t(data.ftCreationTime);
+		return wintime::transFileTime(data.ftCreationTime);
 	}
 
 	inline wstring getCreateTime(const wstring& strFormat) const
 	{
-		return util::FormatTime(getCreateTime(), strFormat);
+		return wintime::formatTime(getCreateTime(), strFormat);
 	}
 };
 
