@@ -165,7 +165,7 @@ wstring util::StrUpperCase(const wstring& str)
 
 string util::WStrToStr(const wstring&str, bool bUTF8)
 {
-	UINT CodePage = bUTF8 ? CP_ACP : CP_UTF8;
+	UINT CodePage = bUTF8 ? CP_UTF8 : CP_ACP;
 
 	if (str.empty())
 	{
@@ -198,7 +198,7 @@ string util::WStrToStr(const wstring&str, bool bUTF8)
 
 wstring util::StrToWStr(const string&str, bool bUTF8)
 {
-	UINT CodePage = bUTF8 ? CP_ACP : CP_UTF8;
+	UINT CodePage = bUTF8 ? CP_UTF8 : CP_ACP;
 
 	if (str.empty())
 	{
