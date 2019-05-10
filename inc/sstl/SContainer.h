@@ -560,7 +560,7 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t del_ex(__CB_Ref_bool cb)
+		size_t del(__CB_Ref_bool cb)
 		{
 			size_t uRet = 0;
 

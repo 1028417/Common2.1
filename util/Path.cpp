@@ -226,10 +226,19 @@ void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
 	m_plstSubPath->del_ex([&](CPath& SubPath) {
 		if (0 == setDeletePaths.erase(&SubPath))
 		{
-			return false;
+			return E_DelConfirm::DC_No;
 		}
-
-		return true;
+		else
+		{
+			if (setDeletePaths.empty())
+			{
+				return E_DelConfirm::DC_YesAbort;
+			}
+			else
+			{
+				return E_DelConfirm::DC_Yes;
+			}
+		}
 	});
 }
 

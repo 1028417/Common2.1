@@ -161,7 +161,7 @@ struct tagFileInfo
 
 #include "SQLiteDB.h"
 
-#ifdef _MSC_VER
+#ifndef __ANDROID__
 #include <Windows.h>
 
 #include "mtutil.h"

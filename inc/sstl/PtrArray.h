@@ -490,9 +490,9 @@ namespace NS_SSTL
 			});
 		}
 
-		size_t del_ex(const function<bool(__RefType)>& cb)
+		size_t del(const function<bool(__RefType)>& cb)
 		{
-			return __Super::del_ex([&](const __PtrType ptr) {
+			return __Super::del([&](const __PtrType ptr) {
 				if (NULL != ptr)
 				{
 					return cb(*ptr);
