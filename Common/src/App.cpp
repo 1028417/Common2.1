@@ -439,8 +439,6 @@ BOOL CMainApp::AddModule(CModuleApp& Module)
 	CMainApp *pMainApp = GetMainApp();
 	__EnsureReturn(pMainApp, FALSE);
 
-	__AssertReturn(!util::ContainerFind(pMainApp->m_vctModules, &Module), FALSE);
-
 	pMainApp->m_vctModules.push_back(&Module);
 
 	return TRUE;
@@ -512,19 +510,16 @@ LPVOID CMainApp::GetInterface(UINT uIndex)
 
 BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 {
-	if (!util::ContainerFind(g_vctHotkeyInfos, HotkeyInfo))
-	{
-		g_vctHotkeyInfos.push_back(HotkeyInfo);
+	g_vctHotkeyInfos.push_back(HotkeyInfo);
 
-		if (HotkeyInfo.bGlobal)
+	if (HotkeyInfo.bGlobal)
+	{
+		auto hwndMain = AfxGetMainWnd()->GetSafeHwnd();
+		if (NULL != hwndMain)
 		{
-			auto hwndMain = AfxGetMainWnd()->GetSafeHwnd();
-			if (NULL != hwndMain)
+			if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
 			{
-				if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
-				{
-					return FALSE;
-				}
+				return FALSE;
 			}
 		}
 	}

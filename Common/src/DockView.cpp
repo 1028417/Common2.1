@@ -378,8 +378,6 @@ void CDockView::OnDestroy()
 
 BOOL CDockView::AddPage(CPage& Page)
 {
-	__AssertReturn(!util::ContainerFind(m_vctPages, &Page), FALSE);
-
 	m_vctPages.push_back(&Page);
 
 	__super::AddPage(&Page);
