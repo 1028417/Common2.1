@@ -63,7 +63,7 @@ bool CPath::onFindFile(TD_PathList& lstSubPath)
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
 		{
-			m_plstSubPath->add(pSubPath);
+			lstSubPath.add(pSubPath);
 		}
 		return true;
 	});
@@ -219,24 +219,23 @@ void CPath::Clear()
 	}
 }
 
-void CPath::RemoveSubPath(const TD_PathList& lstDeletePaths)
+void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
 {
 	__Ensure(m_plstSubPath);
 
 	m_plstSubPath->del_ex([&](CPath& SubPath) {
-		if (lstDeletePaths.includes(&SubPath))
+		if (0 == setDeletePaths.erase(&SubPath))
 		{
-			delete &SubPath;
-			return true;
+			return false;
 		}
 
-		return false;
+		return true;
 	});
 }
 
 bool CPath::HasFile() const
 {
-	__EnsureReturn(m_plstSubPath, FALSE);
+	__EnsureReturn(m_plstSubPath, false);
 	return m_plstSubPath->any([](CPath& SubPath) {
 		return !SubPath.m_bDir;
 	});

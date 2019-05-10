@@ -62,6 +62,21 @@ public:
 	}
 };
 
+#ifdef __ANDROID__
+using FileStat = struct stat;
+#else
+using FileStat = struct _stat;
+#endif
+
+static bool getFileStat(const wstring& strFile, FileStat& fileStat)
+{
+#ifdef __ANDROID__
+	return 0 == stat(util::WStrToStr(strFile).c_str(), &fileStat);
+#else
+	return 0 == _wstat(strFile.c_str(), &fileStat);
+#endif
+}
+
 bool fsutil::saveTxt(const wstring& strFile
 	, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc, bool bToUTF8)
 {
@@ -76,14 +91,23 @@ bool fsutil::saveTxt(const wstring& strFile
 	}
 
 	FILE* pFile = NULL;
-	if (0 != _wfopen_s(&pFile, strFile.c_str(), strMode.c_str()) || NULL == pFile)
+
+#ifdef __ANDROID__
+    pFile = fopen(util::WStrToStr(strFile).c_str(), util::WStrToStr(strMode).c_str());
+    if (NULL == pFile)
+    {
+        return false;
+    }
+#else
+    if (0 != _wfopen_s(&pFile, strFile.c_str(), strMode.c_str()) || NULL == pFile)
 	{
 		return false;
 	}
+#endif
 
 	if (!bToUTF8)
 	{
-		BYTE chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
+        unsigned char chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
 		fwrite(chUnicodeHead, sizeof(chUnicodeHead), 1, pFile);
 	}
 
@@ -206,15 +230,15 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineData, char 
 	}, cdelimiter);
 }
 
-int fsutil::GetFileSize(const wstring& strFilePath)
+int fsutil::GetFileSize(const wstring& strFile)
 {
-	struct _stat fileStat;
-	if (0 == _wstat(strFilePath.c_str(), &fileStat))
+	FileStat fileStat;
+	if (!getFileStat(strFile, fileStat))
 	{
-		return fileStat.st_size;
+		return -1;
 	}
-	
-	return -1;
+
+	return fileStat.st_size;
 }
 
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
@@ -269,26 +293,33 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 
 	if (bResult)
 	{
-		struct _stat fileStat;
-		if (0 == _wstat(strSrcFile.c_str(), &fileStat))
+		FileStat fileStat;
+		if (getFileStat(strSrcFile, fileStat))
 		{
+#ifdef __ANDROID__
+            struct timeval timeVal[] = {
+                       {0,0}, {0,0}
+                   };
+            utimes(util::WStrToStr(strDstFile).c_str(), timeVal);
+#else
 			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
 			(void)_wutime(strDstFile.c_str(), &timbuf);
+#endif
 		}
 	}
 
 	return bResult;
 }
 
-time64_t fsutil::GetFileModifyTime(const wstring& strFilePath)
+time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 {
-	struct _stat fileStat;
-	if (0 == _wstat(strFilePath.c_str(), &fileStat))
+	FileStat fileStat;
+	if (!getFileStat(strFile, fileStat))
 	{
-		return fileStat.st_mtime;
+		return -1;
 	}
 
-	return -1;
+	return fileStat.st_mtime;
 }
 
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
@@ -386,11 +417,13 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size), false);
-
 	__EnsureReturn(fsutil::backSlant == *strDir.rbegin() || fsutil::backSlant == strSubPath[size], false);
 
-	return true;
+#ifdef __ANDROID__
+	return 0 == strncasecmp(util::WStrToStr(strDir).c_str(), util::WStrToStr(strSubPath).c_str(), size);
+#else
+	return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
+#endif
 }
 
 wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)

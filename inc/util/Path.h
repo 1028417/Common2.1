@@ -115,7 +115,7 @@ public:
 
 	virtual void Clear();
 
-	void RemoveSubPath(const TD_PathList& lstDeletePaths);
+	void RemoveSubPath(set<CPath*> setDeletePaths);
 
 	bool HasFile() const;
 };

@@ -20,8 +20,8 @@ public:
 
 	static bool copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime = false);
 
-	static int GetFileSize(const wstring& strFilePath);
-	static time64_t GetFileModifyTime(const wstring& strFilePath);
+	static int GetFileSize(const wstring& strFile);
+	static time64_t GetFileModifyTime(const wstring& strFile);
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
 

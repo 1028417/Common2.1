@@ -159,6 +159,8 @@ struct tagFileInfo
 
 #include "Path.h"
 
+#include "SQLiteDB.h"
+
 #ifdef _MSC_VER
 #include <Windows.h>
 
@@ -170,8 +172,6 @@ struct tagFileInfo
 
 #include "wintimer.h"
 #include "wintime.h"
-#endif
 
 #include "ProFile.h"
-
-#include "SQLiteDB.h"
+#endif
