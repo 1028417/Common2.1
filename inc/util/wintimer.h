@@ -1,19 +1,15 @@
 #pragma once
 
-using CB_Timer = function<bool()>;
-
-class __UtilExt timerutil
+class __UtilExt WinTimer
 {
 public:
+	using CB_Timer = function<bool()>;
 	static UINT_PTR setTimer(UINT uElapse, const CB_Timer& cb);
 
 	static void resetTimer(UINT_PTR idEvent, const CB_Timer& cb);
 
 	static void killTimer(UINT_PTR idEvent);
-};
 
-class __UtilExt WinTimer
-{
 public:
 	WinTimer()
 	{

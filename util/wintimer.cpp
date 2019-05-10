@@ -7,7 +7,7 @@ struct tagTimerInfo
 {
 	bool bPending = false;
 
-	CB_Timer cb;
+	WinTimer::CB_Timer cb;
 };
 
 static map<UINT, tagTimerInfo> g_mapTimer;
@@ -15,7 +15,7 @@ static NS_mtutil::CCSLock g_lckTimer;
 
 void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	CB_Timer cb;
+	WinTimer::CB_Timer cb;
 	g_lckTimer.lock();
 	auto itr = g_mapTimer.find(idEvent);
 	if (itr != g_mapTimer.end())
@@ -36,7 +36,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		if (!cb())
 		{
-			timerutil::killTimer(idEvent);
+			WinTimer::killTimer(idEvent);
 			return;
 		}
 	}
@@ -46,7 +46,7 @@ void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	g_lckTimer.unlock();
 }
 
-UINT_PTR timerutil::setTimer(UINT uElapse, const CB_Timer& cb)
+UINT_PTR WinTimer::setTimer(UINT uElapse, const CB_Timer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
 
@@ -55,7 +55,7 @@ UINT_PTR timerutil::setTimer(UINT uElapse, const CB_Timer& cb)
 	return idEvent;
 }
 
-void timerutil::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
+void WinTimer::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
 {
 	g_lckTimer.lock();
 	auto& TimerInfo = g_mapTimer[idEvent];
@@ -64,7 +64,7 @@ void timerutil::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
 	g_lckTimer.unlock();
 }
 
-void timerutil::killTimer(UINT_PTR idEvent)
+void WinTimer::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
 
@@ -103,11 +103,11 @@ void WinTimer::_set(const CB_Timer& cb, UINT uElapse)
 
 		if (0 != m_idTimer)
 		{
-			timerutil::resetTimer(m_idTimer, fn);
+			resetTimer(m_idTimer, fn);
 		}
 		else
 		{
-			m_idTimer = timerutil::setTimer(uElapse, fn);
+			m_idTimer = setTimer(uElapse, fn);
 		}
 	}
 }
@@ -126,7 +126,7 @@ void WinTimer::kill()
 {
 	if (0 != m_idTimer)
 	{
-		timerutil::killTimer(m_idTimer);
+		killTimer(m_idTimer);
 		m_idTimer = 0;
 	}
 }
