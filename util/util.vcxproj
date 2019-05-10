@@ -23,13 +23,13 @@
     <ClCompile Include="SQLiteDB.cpp" />
     <ClCompile Include="sqlite\shell.c" />
     <ClCompile Include="sqlite\sqlite3.c" />
-    <ClCompile Include="timer.cpp" />
+    <ClCompile Include="wintimer.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="winfsutil.cpp" />
     <ClCompile Include="wintime.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\util\timer.h" />
+    <ClInclude Include="..\inc\util\wintimer.h" />
     <ClInclude Include="..\inc\util\fsdlg.h" />
     <ClInclude Include="..\inc\util\fsutil.h" />
     <ClInclude Include="..\inc\util\IDB.h" />

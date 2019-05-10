@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-#include "timer.h"
+#include "wintimer.h"
 
 struct tagTimerInfo
 {
@@ -73,7 +73,7 @@ void timerutil::killTimer(UINT_PTR idEvent)
 	g_lckTimer.unlock();
 }
 
-bool CTimer::_onTimer()
+bool WinTimer::_onTimer()
 {
 	if (!m_cb())
 	{
@@ -84,7 +84,7 @@ bool CTimer::_onTimer()
 	return true;
 }
 
-void CTimer::_set(const CB_Timer& cb, UINT uElapse)
+void WinTimer::_set(const CB_Timer& cb, UINT uElapse)
 {
 	m_cb = cb;
 
@@ -112,17 +112,17 @@ void CTimer::_set(const CB_Timer& cb, UINT uElapse)
 	}
 }
 
-void CTimer::set(UINT uElapse, const CB_Timer& cb)
+void WinTimer::set(UINT uElapse, const CB_Timer& cb)
 {
 	_set(cb, uElapse);
 }
 
-void CTimer::set(const CB_Timer& cb)
+void WinTimer::set(const CB_Timer& cb)
 {
 	_set(cb);
 }
 
-void CTimer::kill()
+void WinTimer::kill()
 {
 	if (0 != m_idTimer)
 	{
