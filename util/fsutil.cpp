@@ -6,6 +6,8 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
+static const unsigned char g_chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
+
 class ibstream : public ifstream
 {
 public:
@@ -16,7 +18,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WStrToStr(strFile)
+			util::WSToAsc(strFile)
 #endif
             , ios_base::binary)
 	{
@@ -28,7 +30,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WStrToStr(strFile)
+			util::WSToAsc(strFile)
 #endif
             , ios_base::binary);
 	}
@@ -44,7 +46,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WStrToStr(strFile)
+			util::WSToAsc(strFile)
 #endif
             , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary)
 	{
@@ -56,7 +58,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WStrToStr(strFile)
+			util::WSToAsc(strFile)
 #endif
             , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary);
 	}
@@ -71,7 +73,7 @@ using FileStat = struct _stat;
 static bool getFileStat(const wstring& strFile, FileStat& fileStat)
 {
 #ifdef __ANDROID__
-	return 0 == stat(util::WStrToStr(strFile).c_str(), &fileStat);
+	return 0 == stat(util::WSToAsc(strFile).c_str(), &fileStat);
 #else
 	return 0 == _wstat(strFile.c_str(), &fileStat);
 #endif
@@ -93,7 +95,7 @@ bool fsutil::saveTxt(const wstring& strFile
 	FILE* pFile = NULL;
 
 #ifdef __ANDROID__
-    pFile = fopen(util::WStrToStr(strFile).c_str(), util::WStrToStr(strMode).c_str());
+    pFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
     if (NULL == pFile)
     {
         return false;
@@ -107,8 +109,7 @@ bool fsutil::saveTxt(const wstring& strFile
 
 	if (!bToUTF8)
 	{
-        unsigned char chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
-		fwrite(chUnicodeHead, sizeof(chUnicodeHead), 1, pFile);
+		fwrite(g_chUnicodeHead, sizeof(g_chUnicodeHead), 1, pFile);
 	}
 
 	auto fnWrite = [&](const wstring& strData) {
@@ -300,7 +301,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
             struct timeval timeVal[] = {
                        {0,0}, {0,0}
                    };
-            utimes(util::WStrToStr(strDstFile).c_str(), timeVal);
+            utimes(util::WSToAsc(strDstFile).c_str(), timeVal);
 #else
 			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
 			(void)_wutime(strDstFile.c_str(), &timbuf);
@@ -420,7 +421,8 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(fsutil::backSlant == *strDir.rbegin() || fsutil::backSlant == strSubPath[size], false);
 
 #ifdef __ANDROID__
-	return 0 == strncasecmp(util::WStrToStr(strDir).c_str(), util::WStrToStr(strSubPath).c_str(), size);
+	const auto& _strDir = util::WSToAsc(strDir);
+	return 0 == strncasecmp(_strDir.c_str(), util::WSToAsc(strSubPath).c_str(), _strDir.size());
 #else
 	return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
 #endif

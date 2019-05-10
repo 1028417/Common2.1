@@ -102,10 +102,14 @@ public:
 	static void UpperCase(wstring& str);
 	static wstring StrUpperCase(const wstring& str);
 	
-	static string WStrToStr(const wstring&str, bool bUTF8 = false);
-	static wstring StrToWStr(const string&str, bool bUTF8 = false);
-	
-	static bool IsUTF8Str(const string& strText);
+	static bool CheckUTF8(const string& str);
+	static wstring UTF8ToWS(const string& str);
+	static string WSToUTF8(const wstring& str);
+
+	static string WSToAsc(const wstring& str);
+	static wstring AscToWS(const string& str);
+
+	static wstring SToWS(const string& str);
 
 	template <typename T>
 	static wstring ContainerToStr(const T& container, const wstring& strSplitor)

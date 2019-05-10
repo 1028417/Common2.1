@@ -120,7 +120,13 @@ int util::StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs)
 
 bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 {
+#ifdef __ANDROID__
+	const auto& _str1 = util::WSToAsc(str1);
+	const auto& _str2 = util::WSToAsc(str2);
+	return 0 == strncasecmp(_str1.c_str(), _str2.c_str(), MAX(_str1.size(), _str2.size()));
+#else
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+#endif
 }
 
 //int util::StrFindIgnoreCase(const wstring& str, const wstring& strToFind)
@@ -141,19 +147,19 @@ bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 
 void util::LowerCase(wstring& str)
 {
-	(void)::_wcslwr_s((TCHAR *)str.c_str(), str.size() + 1);
+	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 }
 
 wstring util::StrLowerCase(const wstring& str)
 {
-	wstring strTemp = str;
-	LowerCase(strTemp);
-	return strTemp;
+	wstring strRet = str;
+	LowerCase(strRet);
+	return strRet;
 }
 
 void util::UpperCase(wstring& str)
 {
-	(void)::_wcsupr_s((TCHAR *)str.c_str(), str.size() + 1);
+	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 }
 
 wstring util::StrUpperCase(const wstring& str)
@@ -162,84 +168,20 @@ wstring util::StrUpperCase(const wstring& str)
 	UpperCase(strTemp);
 	return str;
 }
-
-string util::WStrToStr(const wstring&str, bool bUTF8)
+bool util::CheckUTF8(const string& str)
 {
-	UINT CodePage = bUTF8 ? CP_UTF8 : CP_ACP;
-
 	if (str.empty())
-	{
-		return "";
-	}
-
-	int buffSize = WideCharToMultiByte(CodePage,
-		0,
-		str.c_str(),
-		-1,
-		NULL,
-		0,
-		NULL,
-		NULL);
-	vector<char> vecBuff(buffSize + 1);
-	char* pBuff = &vecBuff.front();// new char[buffSize + 1];
-	memset((void*)pBuff, 0, vecBuff.size());
-	::WideCharToMultiByte(CodePage,
-		0,
-		str.c_str(),
-		-1,
-		pBuff,
-		buffSize,
-		NULL,
-		NULL);
-	string strRet = pBuff;
-	//delete[] pBuff;
-	return strRet;
-}
-
-wstring util::StrToWStr(const string&str, bool bUTF8)
-{
-	UINT CodePage = bUTF8 ? CP_UTF8 : CP_ACP;
-
-	if (str.empty())
-	{
-		return L"";
-	}
-
-	int buffSize = ::MultiByteToWideChar(CodePage,
-		0,
-		str.c_str(),
-		-1,
-		NULL,
-		0);
-
-	vector<wchar_t> vecBuff(buffSize + 1);
-	wchar_t * pBuff = &vecBuff.front();// new wchar_t[buffSize + 1];
-	memset(pBuff, 0, sizeof(pBuff[0]) * (buffSize + 1));
-	::MultiByteToWideChar(CodePage,
-		0,
-		str.c_str(),
-		-1,
-		(LPWSTR)pBuff,
-		buffSize);
-	wstring strRet = (wchar_t*)pBuff;
-	//delete pBuff;
-	return strRet;
-}
-
-bool util::IsUTF8Str(const string& strText)
-{
-	if (strText.empty())
 	{
 		return false;
 	}
 
-	const char* str = strText.c_str();
+	const char* pstr = str.c_str();
 
 	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
-	unsigned char chr = *str;
+	unsigned char chr = *pstr;
 	bool bAllAscii = true;
-	for (UINT uIndex = 0; str[uIndex] != '\0'; ++uIndex) {
-		chr = *(str + uIndex);
+	for (UINT uIndex = 0; pstr[uIndex] != '\0'; ++uIndex) {
+		chr = *(pstr + uIndex);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
 		if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
@@ -285,4 +227,128 @@ bool util::IsUTF8Str(const string& strText)
 		return true;
 	}
 	return true;
+}
+
+wstring util::UTF8ToWS(const string& str)
+{
+	if (str.empty())
+	{
+		return L"";
+	}
+
+	int buffSize = ::MultiByteToWideChar(CP_UTF8,
+		0,
+		str.c_str(),
+		-1,
+		NULL,
+		0);
+	
+	vector<wchar_t> vecBuff(buffSize + 1);
+	wchar_t *pBuff = &vecBuff.front();// new wchar_t[buffSize + 1];
+	memset(pBuff, 0, sizeof(pBuff[0]) * (buffSize + 1));
+	::MultiByteToWideChar(CP_UTF8,
+		0,
+		str.c_str(),
+		-1,
+		pBuff,
+		buffSize);
+	
+	return pBuff;
+}
+
+string util::WSToUTF8(const wstring& str)
+{
+	if (str.empty())
+	{
+		return "";
+	}
+	
+	int buffSize = WideCharToMultiByte(CP_UTF8,
+		0,
+		str.c_str(),
+		-1,
+		NULL,
+		0,
+		NULL,
+		NULL);
+
+	vector<char> vecBuff(buffSize + 1);
+	char *pBuff = &vecBuff.front();// new char[buffSize + 1];
+	memset((void*)pBuff, 0, vecBuff.size());
+	::WideCharToMultiByte(CP_UTF8,
+		0,
+		str.c_str(),
+		-1,
+		pBuff,
+		buffSize,
+		NULL,
+		NULL);
+	
+	return pBuff;
+}
+
+//setlocale(LC_ALL, "en_US.utf8");
+string util::WSToAsc(const wstring& str)
+{
+	if (str.empty())
+	{
+		return "";
+	}
+
+	size_t len = 0;
+	if (wcstombs_s(&len, NULL, 0, str.c_str(), 0) || 0 == len)
+	{
+		return "";
+	}
+
+	vector<char> vecBuff(len + 1);
+	char *pBuff = &vecBuff.front();
+	
+	if (wcstombs_s(NULL, pBuff, len, str.c_str(), len))
+	{
+		return "";
+	}
+
+	return pBuff;
+}
+
+wstring util::AscToWS(const string& str)
+{
+	if (str.empty())
+	{
+		return L"";
+	}
+
+	size_t len = 0;
+	if (mbstowcs_s(&len, NULL, 0, str.c_str(), 0) || 0 == len)
+	{
+		return L"";
+	}
+
+	vector<wchar_t> vecBuff(len + 1);
+	wchar_t *pBuff = &vecBuff.front();
+
+	if (mbstowcs_s(NULL, pBuff, len, str.c_str(), len))
+	{
+		return L"";
+	}
+
+	return pBuff;
+}
+
+wstring util::SToWS(const string& str)
+{
+	if (str.empty())
+	{
+		return L"";
+	}
+
+	if (CheckUTF8(str))
+	{
+		return UTF8ToWS(str);
+	}
+	else
+	{
+		return AscToWS(str);
+	}
 }
