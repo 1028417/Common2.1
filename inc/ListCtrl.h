@@ -215,7 +215,7 @@ private:
 
 	vector<BOOL> m_vecAsyncTaskFlag;
 	CB_AsyncTask m_cbAsyncTask;
-	CTimer m_AsyncTaskTimer;
+	WinTimer m_AsyncTaskTimer;
 
 protected:
 	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});

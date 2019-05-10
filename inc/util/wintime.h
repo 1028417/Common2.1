@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <Windows.h>
-
 class __UtilExt wintime
 {
 public:

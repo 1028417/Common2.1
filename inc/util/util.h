@@ -3,6 +3,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4251)
+#pragma warning(disable: 4275)
 #endif
 
 #include <stdint.h>
@@ -156,19 +157,20 @@ struct tagFileInfo
 
 #include "fsutil.h"
 
+#include "Path.h"
+
 #ifdef _MSC_VER
-#include "wintime.h"
+#include <Windows.h>
 
 #include "mtutil.h"
 
 #include "winfsutil.h"
 
 #include "fsdlg.h"
+
+#include "wintimer.h"
+#include "wintime.h"
 #endif
-
-#include "Path.h"
-
-#include "timer.h"
 
 #include "ProFile.h"
 

@@ -12,14 +12,14 @@ public:
 	static void killTimer(UINT_PTR idEvent);
 };
 
-class __UtilExt CTimer
+class __UtilExt WinTimer
 {
 public:
-	CTimer()
+	WinTimer()
 	{
 	}
 
-	~CTimer()
+	~WinTimer()
 	{
 		kill();
 	}

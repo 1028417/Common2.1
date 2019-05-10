@@ -1,16 +1,10 @@
 #pragma once
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4275)
-#endif
-
 #include "util.h"
 
 #include <thread>
 
 #include <mutex>
-
-#include <Windows.h>
 
 namespace NS_mtutil
 {
