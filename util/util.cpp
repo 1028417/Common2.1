@@ -6,10 +6,6 @@
 static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
-#ifndef _MSC_VER
-#include <qstring.h>
-#endif
-
 void util::getCurrentTime(int& nHour, int& nMinute)
 {
     tagTM tm;

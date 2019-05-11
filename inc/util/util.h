@@ -7,6 +7,8 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
+#else
+#include <qstring.h>
 #endif
 
 #ifdef __ANDROID__

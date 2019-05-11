@@ -90,36 +90,29 @@ bool fsutil::saveTxt(const wstring& strFile
 		strMode.append(L"b");
 	}
 
-	FILE* pFile = NULL;
-
+	FILE *lpFile = NULL;
 #ifdef __ANDROID__
-    pFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
-    if (NULL == pFile)
-    {
-        return false;
-    }
+	lpFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
 #else
-    if (0 != _wfopen_s(&pFile, strFile.c_str(), strMode.c_str()) || NULL == pFile)
-	{
-		return false;
-	}
+	__EnsureReturn(0 == _wfopen_s(&lpFile, strFile.c_str(), strMode.c_str()), false);
 #endif
+	__EnsureReturn(lpFile, false);
 
 	if (!bToUTF8)
 	{
-		fwrite(g_chUnicodeHead, sizeof(g_chUnicodeHead), 1, pFile);
+		fwrite(g_chUnicodeHead, sizeof(g_chUnicodeHead), 1, lpFile);
 	}
 
 	auto fnWrite = [&](const wstring& strData) {
 		if (!strData.empty())
 		{
-			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, pFile);
+			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, lpFile);
 		}
 	};
 
 	cb(fnWrite);
 
-	fclose(pFile);
+	fclose(lpFile);
 
 	return true;
 }
@@ -290,7 +283,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 	srcStream.close();
 	dstStream.close();
 
-	if (bResult)
+	if (bResult && bSyncModifyTime)
 	{
 		FileStat fileStat;
 		if (getFileStat(strSrcFile, fileStat))
