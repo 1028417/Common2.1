@@ -8,9 +8,9 @@
 #include <util/util.h>
 
 #ifdef __CommonPrj
-#define __CommonExt __declspec(dllexport)
+#define __CommonExt __dllexport
 #else
-#define __CommonExt __declspec(dllimport)
+#define __CommonExt __dllimport
 #endif
 
 #ifdef _DEBUG

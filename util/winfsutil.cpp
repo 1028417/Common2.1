@@ -1,4 +1,6 @@
 ﻿
+#ifndef __ANDROID__
+
 #include "util.h"
 
 struct tagFindData : WIN32_FIND_DATAW
@@ -278,3 +280,5 @@ HICON winfsutil::getFileIcon(const wstring& extention)
 
 	return NULL;
 }
+
+#endif

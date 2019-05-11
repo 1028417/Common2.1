@@ -1,4 +1,6 @@
 ﻿
+#ifndef __ANDROID__
+
 #include "util.h"
 
 time64_t wintime::transFileTime(const FILETIME& ft)
@@ -108,3 +110,5 @@ wstring wintime::formatTime(time64_t time, const wstring& strFormat)
 
 	return _formatTime(atm, strFormat);
 }
+
+#endif

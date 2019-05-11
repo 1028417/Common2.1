@@ -1,4 +1,6 @@
 
+#ifndef __ANDROID__
+
 #include "util.h"
 
 struct tagTimerInfo
@@ -128,3 +130,5 @@ void WinTimer::kill()
 		m_idTimer = 0;
 	}
 }
+
+#endif

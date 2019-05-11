@@ -1,23 +1,27 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
 #endif
 
 #ifdef __ANDROID__
-#define __UtilExt
+	#define __dllexport
+	#define __dllimport
 #else
-#ifdef __UtilPrj
-#define __UtilExt __declspec(dllexport)
-#else
-#define __UtilExt __declspec(dllimport)
-#endif
+	#define __dllexport __declspec(dllexport)
+	#define __dllimport __declspec(dllimport)
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
+#ifdef __UtilPrj
+#define __UtilExt __dllexport
+#else
+#define __UtilExt __dllimport
+#endif
 
 using time64_t = int64_t;
 
