@@ -113,9 +113,8 @@ public:
 	static bool toTM(time64_t time, tagTM& tm);
 
 	static void getCurrentTime(int& nHour, int& nMinute);
-	static wstring getCurrentTime(const wstring& strFormat = L"%u.%02u.%02u_%02u.%02u.%02u");
 
-	static wstring formatTime(time64_t time, const wstring& strFormat);
+	static wstring formatTime(const wstring& strFormat, time64_t t_time=-1);
 
 	static bool checkWChar(const wstring& str);
 
