@@ -23,6 +23,7 @@
 #define __UtilExt __dllimport
 #endif
 
+using time32_t = long;
 using time64_t = int64_t;
 
 #ifndef UINT
@@ -110,11 +111,15 @@ struct tagTM : tm
 class __UtilExt util
 {
 public:
-	static bool toTM(time64_t time, tagTM& tm);
-
 	static void getCurrentTime(int& nHour, int& nMinute);
 
-	static wstring formatTime(const wstring& strFormat, time64_t t_time=-1);
+	static bool timeToTM(time32_t tTime, tagTM& tm);
+	static wstring formatTime(const wstring& strFormat, time32_t tTime = -1);
+
+#ifndef __ANDROID__
+	static bool time64ToTM(time64_t tTime, tagTM& tm);
+	static wstring formatTime64(const wstring& strFormat, time64_t tTime = -1);
+#endif
 
 	static bool checkWChar(const wstring& str);
 

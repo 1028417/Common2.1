@@ -10,26 +10,34 @@ static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_loc
 #include <qstring.h>
 #endif
 
-bool util::toTM(time64_t time, tagTM& tm)
+void util::getCurrentTime(int& nHour, int& nMinute)
+{
+    tagTM tm;
+    timeToTM((time32_t)time(0), tm);
+
+    nHour = tm.tm_hour;
+    nMinute = tm.tm_min;
+}
+
+bool util::timeToTM(time32_t tTime, tagTM& tm)
 {
 	struct tm _tm;
-	if (0 != _localtime64_s(&_tm, &time))
+
+#ifdef __ANDROID__
+    if (localtime_r(&tTime, &_tm))
+    {
+        return L"";
+    }
+#else
+    if (_localtime32_s(&_tm, &tTime))
 	{
 		return false;
 	}
+#endif
 
 	tm = _tm;
 
 	return true;
-}
-
-void util::getCurrentTime(int& nHour, int& nMinute)
-{
-	tagTM tm;
-	toTM(time(0), tm);
-
-	nHour = tm.tm_hour;
-	nMinute = tm.tm_min;
 }
 
 static wstring _formatTime(const tm& atm, const wstring& strFormat)
@@ -44,21 +52,60 @@ static wstring _formatTime(const tm& atm, const wstring& strFormat)
 	return lpBuff;
 }
 
-wstring util::formatTime(const wstring& strFormat, time64_t t_time)
+wstring util::formatTime(const wstring& strFormat, time32_t tTime)
 {
-	if (-1 == t_time)
+    if (-1 == tTime)
 	{
-		t_time = time(0);
+        tTime = (time32_t)time(0);
+	}
+
+    struct tm _tm;
+
+#ifdef __ANDROID__
+    if (localtime_r(&tTime, &_tm))
+    {
+        return L"";
+    }
+#else
+    if (_localtime32_s(&_tm, &tTime))
+	{
+		return L"";
+	}
+#endif
+
+    return _formatTime(_tm, strFormat);
+}
+
+#ifndef __ANDROID__
+bool util::time64ToTM(time64_t time, tagTM& tm)
+{
+    struct tm _tm;
+    if (_localtime64_s(&_tm, &time))
+    {
+        return false;
+    }
+
+    tm = _tm;
+
+    return true;
+}
+
+wstring util::formatTime64(const wstring& strFormat, time64_t tTime)
+{
+    if (-1 == tTime)
+	{
+        tTime = (time64_t)time(0);
 	}
 
 	tm atm;
-	if (0 != _localtime64_s(&atm, &t_time))
+    if (_localtime64_s(&atm, &tTime))
 	{
 		return L"";
 	}
 
 	return _formatTime(atm, strFormat);
 }
+#endif
 
 bool util::checkWChar(const wstring& str)
 {
