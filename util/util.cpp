@@ -122,13 +122,7 @@ int util::StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs)
 bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 {
 #ifdef __ANDROID__
-    QString qstr1;
-    qstr1.fromStdWString(str1);
-
-    QString qstr2;
-    qstr2.fromStdWString(str2);
-
-    return 0 == qstr1.compare(qstr2, Qt::CaseInsensitive);
+    return 0 == QString::fromStdWString(str1).compare(QString::fromStdWString(str2), Qt::CaseInsensitive);
 #else
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #endif
@@ -153,9 +147,7 @@ bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 void util::LowerCase(wstring& str)
 {
 #ifdef __ANDROID__
-    QString qstr;
-    qstr.fromStdWString(str);
-    str = qstr.toLower().toStdWString();
+    str = QString::fromStdWString(str).toLower().toStdWString();
 #else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif
@@ -171,9 +163,7 @@ wstring util::StrLowerCase(const wstring& str)
 void util::UpperCase(wstring& str)
 {
 #ifdef __ANDROID__
-    QString qstr;
-    qstr.fromStdWString(str);
-    str = qstr.toUpper().toStdWString();
+    str = QString::fromStdWString(str).toUpper().toStdWString();
 #else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif
@@ -261,8 +251,7 @@ wstring util::UTF8ToWS(const string& str)
 	}
 
 #ifndef _MSC_VER
-    QString qstr(str.c_str());
-    return qstr.toStdWString();
+    return QString::fromUtf8(str.c_str()).toStdWString();
 #else
     return g_utf8Convert.from_bytes(str);
 #endif
@@ -295,9 +284,7 @@ string util::WSToUTF8(const wstring& str)
 	}
 
 #ifndef _MSC_VER
-    QString qstr;
-    qstr.fromStdWString(str);
-    return qstr.toUtf8().data();
+    return QString::fromStdWString(str).toUtf8().constData();
 #else
 	return g_utf8Convert.to_bytes(str);
 #endif
