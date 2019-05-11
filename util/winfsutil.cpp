@@ -17,14 +17,47 @@ struct tagFindData : WIN32_FIND_DATAW
 
 	time64_t getModifyTime() const
 	{
-		return wintime::transFileTime(ftLastWriteTime);
+		return winfsutil::transFileTime(ftLastWriteTime);
 	}
 
 	time64_t getCreateTime() const
 	{
-		return wintime::transFileTime(ftCreationTime);
+		return winfsutil::transFileTime(ftCreationTime);
 	}
 };
+
+time64_t winfsutil::transFileTime(const FILETIME& ft)
+{
+	ULARGE_INTEGER ui;
+	ui.LowPart = ft.dwLowDateTime;
+	ui.HighPart = ft.dwHighDateTime;
+
+	return (ui.QuadPart - 116444736000000000) / 10000000;
+}
+
+wstring winfsutil::formatFileTime(const FILETIME& fileTime, const wstring& strFormat)
+{
+	return util::formatTime(transFileTime(fileTime), strFormat);
+
+	/*SYSTEMTIME sysTime;
+	SYSTEMTIME localTime;
+	if (!FileTimeToSystemTime(&fileTime, &sysTime)
+	|| !SystemTimeToTzSpecificLocalTime(nullptr, &sysTime, &localTime))
+	{
+	return L"";
+	}
+
+	tm atm;
+	atm.tm_year = localTime.wYear - 1900;     // tm_year is 1900 based
+	atm.tm_mon = localTime.wMonth - 1;        // tm_mon is 0 based
+	atm.tm_mday = localTime.wDay;
+	atm.tm_hour = localTime.wHour;
+	atm.tm_min = localTime.wMinute;
+	atm.tm_sec = 0;
+	atm.tm_isdst = -1;
+
+	return _FormatTime(atm, strFormat);*/
+}
 
 bool winfsutil::ExistsFile(const wstring& strFile)
 {

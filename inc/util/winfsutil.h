@@ -4,6 +4,9 @@
 class __UtilExt winfsutil
 {
 public:
+	static time64_t transFileTime(const FILETIME& ft);
+	static wstring formatFileTime(const FILETIME& fileTime, const wstring& strFormat);
+
 	static bool ExistsFile(const wstring& strFile);
 	static bool ExistsDir(const wstring& strDir);
 

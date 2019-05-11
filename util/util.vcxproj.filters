@@ -16,7 +16,6 @@
       <Filter>db</Filter>
     </ClCompile>
     <ClCompile Include="mtutil.cpp" />
-    <ClCompile Include="wintime.cpp" />
     <ClCompile Include="winfsutil.cpp" />
     <ClCompile Include="wintimer.cpp" />
   </ItemGroup>
@@ -39,7 +38,6 @@
       <Filter>db</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\util\mtutil.h" />
-    <ClInclude Include="..\inc\util\wintime.h" />
     <ClInclude Include="..\inc\util\winfsutil.h" />
     <ClInclude Include="..\inc\util\wintimer.h" />
   </ItemGroup>

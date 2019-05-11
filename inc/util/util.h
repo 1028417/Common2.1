@@ -90,9 +90,33 @@ using fn_voidvoid = function<void()>;
 #include "sstl/sstl.h"
 using namespace NS_SSTL;
 
+struct tagTM : tm
+{
+	tagTM()
+	{
+	}
+
+	tagTM& operator = (const tm& _tm)
+	{
+		memcpy(this, &_tm, sizeof(_tm));
+
+		tm_year += 1900;     // tm_year is 1900 based
+		tm_mon += 1;        // tm_mon is 0 based
+
+		return *this;
+	}
+};
+
 class __UtilExt util
 {
 public:
+	static bool toTM(time64_t time, tagTM& tm);
+
+	static void getCurrentTime(int& nHour, int& nMinute);
+	static wstring getCurrentTime(const wstring& strFormat = L"%u.%02u.%02u_%02u.%02u.%02u");
+
+	static wstring formatTime(time64_t time, const wstring& strFormat);
+
 	static bool checkWChar(const wstring& str);
 
 	static wstring& trim(wstring& strText, wchar_t chr = ' ');
@@ -190,7 +214,6 @@ struct tagFileInfo
 #include "fsdlg.h"
 
 #include "wintimer.h"
-#include "wintime.h"
 
 #include "ProFile.h"
 #endif

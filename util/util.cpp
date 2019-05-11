@@ -10,6 +10,71 @@ static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_loc
 #include <qstring.h>
 #endif
 
+
+bool util::toTM(time64_t time, tagTM& tm)
+{
+	struct tm _tm;
+	if (0 != _localtime64_s(&_tm, &time))
+	{
+		return false;
+	}
+
+	tm = _tm;
+
+	return true;
+}
+
+void util::getCurrentTime(int& nHour, int& nMinute)
+{
+	tagTM tm;
+	toTM(time(0), tm);
+
+	nHour = tm.tm_hour;
+	nMinute = tm.tm_min;
+}
+
+wstring util::getCurrentTime(const wstring& strFormat)
+{
+	tagTM tm;
+	toTM(time(0), tm);
+
+	wchar_t pszRet[64];
+	memset(pszRet, 0, sizeof pszRet);
+
+	wsprintf(pszRet, strFormat.c_str(), tm.tm_year, tm.tm_mon, tm.tm_mday
+		, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+	return pszRet;
+}
+
+static wstring _formatTime(const tm& atm, const wstring& strFormat)
+{
+	wchar_t lpBuff[24];
+	memset(lpBuff, 0, sizeof lpBuff);
+	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
+	{
+		return L"";
+	}
+
+	return lpBuff;
+}
+
+wstring util::formatTime(time64_t time, const wstring& strFormat)
+{
+	if (0 == time)
+	{
+		return L"";
+	}
+
+	tm atm;
+	if (0 != _localtime64_s(&atm, &time))
+	{
+		return L"";
+	}
+
+	return _formatTime(atm, strFormat);
+}
+
 bool util::checkWChar(const wstring& str)
 {
 	for (auto& wchr : str)
