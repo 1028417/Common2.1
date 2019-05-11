@@ -33,6 +33,10 @@ using time64_t = int64_t;
 #define MAX(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef BOOL
+using BOOL = int;
+#endif
+
 #define __Ensure(x) \
 	if (!(x)) \
 	{ \
@@ -161,8 +165,8 @@ struct tagFileInfo
 
 	unsigned long m_uFileSize = 0;
 
-	time_t m_tCreateTime = 0;
-	time_t m_tModifyTime = 0;
+	time64_t m_tCreateTime = 0;
+	time64_t m_tModifyTime = 0;
 };
 
 #include "fsutil.h"

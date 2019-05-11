@@ -4,9 +4,11 @@
 #include <Dbghelp.h>
 #pragma comment(lib, "Dbghelp.lib")
 
-static inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCSTR strFileName)
+#include <util/wintime.h>
+
+static inline void CreateMiniDump(PEXCEPTION_POINTERS pep, const wstring& strFileName)
 {
-	HANDLE hFile = CreateFileA(strFileName, GENERIC_READ | GENERIC_WRITE,
+	HANDLE hFile = CreateFileW(strFileName.c_str(), GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if ((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE))
@@ -44,14 +46,8 @@ static LONG MyUnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInfo)
 	sprintf_s(pszExceptionInfo, "ExceptionCode=%u, ExceptionFlags=%u, ExceptionAddress=%d, NumberParameters=%u"
 		, exceptionRecord.ExceptionCode, exceptionRecord.ExceptionFlags, (int)exceptionRecord.ExceptionAddress, exceptionRecord.NumberParameters);
 	
-	time_t tTime = time(NULL);
-	tm tmTime;
-	(void)localtime_s(&tmTime, &tTime);
-	char pszDumpFile[64];
-	memset(pszDumpFile, 0, sizeof pszDumpFile);
-	(void)strftime(pszDumpFile, sizeof pszDumpFile, "pc_crash_%Y%m%d_%H%M%S.dmp", &tmTime);
-
-	CreateMiniDump(pExceptionInfo, pszDumpFile);
+	wstring 	strDumpFile = wintime::formatTime(time(NULL), L"pc_crash_%Y%m%d_%H%M%S.dmp");
+	CreateMiniDump(pExceptionInfo, strDumpFile);
 	
 	return EXCEPTION_EXECUTE_HANDLER;
 }

@@ -15,12 +15,12 @@ struct tagFindData : WIN32_FIND_DATAW
 		return nFileSizeLow;
 	}
 
-	time_t getModifyTime() const
+	time64_t getModifyTime() const
 	{
 		return wintime::transFileTime(ftLastWriteTime);
 	}
 
-	time_t getCreateTime() const
+	time64_t getCreateTime() const
 	{
 		return wintime::transFileTime(ftCreationTime);
 	}

@@ -3,13 +3,13 @@
 
 #include "wintime.h"
 
-time_t wintime::transFileTime(const FILETIME& ft)
+time64_t wintime::transFileTime(const FILETIME& ft)
 {
 	ULARGE_INTEGER ui;
 	ui.LowPart = ft.dwLowDateTime;
 	ui.HighPart = ft.dwHighDateTime;
 
-	return ((LONGLONG)(ui.QuadPart - 116444736000000000) / 10000000);
+	return (ui.QuadPart - 116444736000000000) / 10000000;
 }
 
 bool wintime::toSysTime(time64_t time, SYSTEMTIME& sysTime)

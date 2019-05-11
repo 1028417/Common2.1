@@ -4,7 +4,7 @@
 class __UtilExt wintime
 {
 public:
-	static time_t transFileTime(const FILETIME& ft);
+	static time64_t transFileTime(const FILETIME& ft);
 
 	static bool toSysTime(time64_t time, SYSTEMTIME& sysTime);
 	static void toSysTime(const tm& atm, SYSTEMTIME& sysTime);
