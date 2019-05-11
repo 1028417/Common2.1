@@ -1,8 +1,6 @@
 ﻿
 #include "util.h"
 
-#include "winfsutil.h"
-
 struct tagFindData : WIN32_FIND_DATAW
 {
 	bool isDir() const

@@ -1,8 +1,6 @@
 
 #include "util.h"
 
-#include "wintimer.h"
-
 struct tagTimerInfo
 {
 	bool bPending = false;

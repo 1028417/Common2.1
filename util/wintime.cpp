@@ -1,8 +1,6 @@
 ﻿
 #include "util.h"
 
-#include "wintime.h"
-
 time64_t wintime::transFileTime(const FILETIME& ft)
 {
 	ULARGE_INTEGER ui;

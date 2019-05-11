@@ -19,11 +19,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
+using time64_t = int64_t;
+
 #ifndef UINT
 using UINT = unsigned int;
+
 #endif
 
-using time64_t = int64_t;
+#ifndef BOOL
+using BOOL = int;
+#endif
 
 #ifndef MIN
 #define MIN(a,b)            (((a) < (b)) ? (a) : (b))
@@ -31,10 +36,6 @@ using time64_t = int64_t;
 
 #ifndef MAX
 #define MAX(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef BOOL
-using BOOL = int;
 #endif
 
 #define __Ensure(x) \

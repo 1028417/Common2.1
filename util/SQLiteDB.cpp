@@ -1,8 +1,6 @@
 
 #include "util.h"
 
-#include "SQLiteDB.h"
-
 #include "sqlite/sqlite3.h"
 
 //CSQLiteDBResult

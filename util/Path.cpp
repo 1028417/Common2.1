@@ -1,8 +1,6 @@
 
 #include "util.h"
 
-#include "Path.h"
-
 CPath::CPath(const wstring& strName, bool bDir)
 {
 	if (bDir)
