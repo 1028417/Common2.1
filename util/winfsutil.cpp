@@ -37,7 +37,7 @@ time64_t winfsutil::transFileTime(const FILETIME& ft)
 
 wstring winfsutil::formatFileTime(const FILETIME& fileTime, const wstring& strFormat)
 {
-	return util::formatTime(transFileTime(fileTime), strFormat);
+	return util::formatTime(strFormat, transFileTime(fileTime));
 
 	/*SYSTEMTIME sysTime;
 	SYSTEMTIME localTime;

@@ -10,7 +10,6 @@ static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_loc
 #include <qstring.h>
 #endif
 
-
 bool util::toTM(time64_t time, tagTM& tm)
 {
 	struct tm _tm;
@@ -33,20 +32,6 @@ void util::getCurrentTime(int& nHour, int& nMinute)
 	nMinute = tm.tm_min;
 }
 
-wstring util::getCurrentTime(const wstring& strFormat)
-{
-	tagTM tm;
-	toTM(time(0), tm);
-
-	wchar_t pszRet[64];
-	memset(pszRet, 0, sizeof pszRet);
-
-	wsprintf(pszRet, strFormat.c_str(), tm.tm_year, tm.tm_mon, tm.tm_mday
-		, tm.tm_hour, tm.tm_min, tm.tm_sec);
-
-	return pszRet;
-}
-
 static wstring _formatTime(const tm& atm, const wstring& strFormat)
 {
 	wchar_t lpBuff[24];
@@ -59,15 +44,15 @@ static wstring _formatTime(const tm& atm, const wstring& strFormat)
 	return lpBuff;
 }
 
-wstring util::formatTime(time64_t time, const wstring& strFormat)
+wstring util::formatTime(const wstring& strFormat, time64_t t_time)
 {
-	if (0 == time)
+	if (-1 == t_time)
 	{
-		return L"";
+		t_time = time(0);
 	}
 
 	tm atm;
-	if (0 != _localtime64_s(&atm, &time))
+	if (0 != _localtime64_s(&atm, &t_time))
 	{
 		return L"";
 	}
