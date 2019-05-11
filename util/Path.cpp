@@ -59,9 +59,7 @@ wstring CPath::GetParentDir() const
 
 bool CPath::onFindFile(TD_PathList& lstSubPath)
 {
-#ifdef __ANDROID__
-	return false;
-#else
+#ifdef _MSC_VER
 	return winfsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
@@ -71,6 +69,8 @@ bool CPath::onFindFile(TD_PathList& lstSubPath)
 		return true;
 	});
 #endif
+
+    return false;
 }
 
 TD_PathList& CPath::_findFile()

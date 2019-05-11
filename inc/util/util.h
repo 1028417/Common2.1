@@ -6,17 +6,24 @@
 #pragma warning(disable: 4275)
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
-
-using UINT = unsigned int;
-using time64_t = int64_t;
-
+#ifdef __ANDROID__
+#define __UtilExt
+#else
 #ifdef __UtilPrj
 #define __UtilExt __declspec(dllexport)
 #else
 #define __UtilExt __declspec(dllimport)
 #endif
+#endif
+
+#include <stdint.h>
+#include <stddef.h>
+
+#ifndef UINT
+using UINT = unsigned int;
+#endif
+
+using time64_t = int64_t;
 
 #ifndef MIN
 #define MIN(a,b)            (((a) < (b)) ? (a) : (b))

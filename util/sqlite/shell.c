@@ -16463,7 +16463,7 @@ int SQLITE_CDECL _wmain(int argc, wchar_t **wargv){
       }
       zHistory = getenv("SQLITE_HISTORY");
       if( zHistory ){
-        zHistory = _strdup(zHistory);
+        zHistory = strdup(zHistory);
       }else if( (zHome = find_home_dir(0))!=0 ){
         nHistory = strlen30(zHome) + 20;
         if( (zHistory = malloc(nHistory))!=0 ){

@@ -6,8 +6,9 @@
 static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
-#define CP_ACP                    0           // default to ANSI code page
-#define CP_UTF8                   65001       // UTF-8 translation
+#ifndef _MSC_VER
+#include <qstring.h>
+#endif
 
 bool util::checkWChar(const wstring& str)
 {
@@ -121,9 +122,13 @@ int util::StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs)
 bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 {
 #ifdef __ANDROID__
-	const auto& _str1 = util::WSToAsc(str1);
-	const auto& _str2 = util::WSToAsc(str2);
-	return 0 == strncasecmp(_str1.c_str(), _str2.c_str(), MAX(_str1.size(), _str2.size()));
+    QString qstr1;
+    qstr1.fromStdWString(str1);
+
+    QString qstr2;
+    qstr2.fromStdWString(str2);
+
+    return 0 == qstr1.compare(qstr2, Qt::CaseInsensitive);
 #else
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #endif
@@ -147,7 +152,13 @@ bool util::StrMatchIgnoreCase(const wstring& str1, const wstring& str2)
 
 void util::LowerCase(wstring& str)
 {
+#ifdef __ANDROID__
+    QString qstr;
+    qstr.fromStdWString(str);
+    str = qstr.toLower().toStdWString();
+#else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
+#endif
 }
 
 wstring util::StrLowerCase(const wstring& str)
@@ -159,7 +170,13 @@ wstring util::StrLowerCase(const wstring& str)
 
 void util::UpperCase(wstring& str)
 {
+#ifdef __ANDROID__
+    QString qstr;
+    qstr.fromStdWString(str);
+    str = qstr.toUpper().toStdWString();
+#else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
+#endif
 }
 
 wstring util::StrUpperCase(const wstring& str)
@@ -168,6 +185,7 @@ wstring util::StrUpperCase(const wstring& str)
 	UpperCase(strTemp);
 	return str;
 }
+
 bool util::CheckUTF8(const string& str)
 {
 	if (str.empty())
@@ -229,6 +247,12 @@ bool util::CheckUTF8(const string& str)
 	return true;
 }
 
+#ifdef _MSC_VER
+#include <codecvt>
+using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
+static utf8_convert g_utf8Convert;
+#endif
+
 wstring util::UTF8ToWS(const string& str)
 {
 	if (str.empty())
@@ -236,6 +260,13 @@ wstring util::UTF8ToWS(const string& str)
 		return L"";
 	}
 
+#ifndef _MSC_VER
+    QString qstr(str.c_str());
+    return qstr.toStdWString();
+#else
+    return g_utf8Convert.from_bytes(str);
+#endif
+}/*
 	int buffSize = ::MultiByteToWideChar(CP_UTF8,
 		0,
 		str.c_str(),
@@ -254,7 +285,7 @@ wstring util::UTF8ToWS(const string& str)
 		buffSize);
 	
 	return pBuff;
-}
+}*/
 
 string util::WSToUTF8(const wstring& str)
 {
@@ -262,8 +293,16 @@ string util::WSToUTF8(const wstring& str)
 	{
 		return "";
 	}
-	
-	int buffSize = WideCharToMultiByte(CP_UTF8,
+
+#ifndef _MSC_VER
+    QString qstr;
+    qstr.fromStdWString(str);
+    return qstr.toUtf8().data();
+#else
+	return g_utf8Convert.to_bytes(str);
+#endif
+}/*
+    int buffSize = ::WideCharToMultiByte(CP_UTF8,
 		0,
 		str.c_str(),
 		-1,
@@ -285,9 +324,8 @@ string util::WSToUTF8(const wstring& str)
 		NULL);
 	
 	return pBuff;
-}
+}*/
 
-//setlocale(LC_ALL, "en_US.utf8");
 string util::WSToAsc(const wstring& str)
 {
 	if (str.empty())
@@ -296,18 +334,30 @@ string util::WSToAsc(const wstring& str)
 	}
 
 	size_t len = 0;
-	if (wcstombs_s(&len, NULL, 0, str.c_str(), 0) || 0 == len)
+#ifdef __ANDROID__
+    len = wcstombs(NULL, str.c_str(), 0);
+#else
+    if (wcstombs_s(&len, NULL, 0, str.c_str(), 0))
 	{
 		return "";
 	}
+#endif
+    if (0 == len)
+    {
+        return "";
+    }
 
 	vector<char> vecBuff(len + 1);
 	char *pBuff = &vecBuff.front();
-	
+
+#ifdef __ANDROID__
+    (void)wcstombs(pBuff, str.c_str(), len);
+#else
 	if (wcstombs_s(NULL, pBuff, len, str.c_str(), len))
 	{
 		return "";
 	}
+#endif
 
 	return pBuff;
 }
@@ -320,18 +370,30 @@ wstring util::AscToWS(const string& str)
 	}
 
 	size_t len = 0;
-	if (mbstowcs_s(&len, NULL, 0, str.c_str(), 0) || 0 == len)
+#ifdef __ANDROID__
+    len = mbstowcs(NULL, str.c_str(), 0);
+#else
+    if (mbstowcs_s(&len, NULL, 0, str.c_str(), 0))
 	{
 		return L"";
 	}
+#endif
+    if (0 == len)
+    {
+       return L"";
+    }
 
 	vector<wchar_t> vecBuff(len + 1);
 	wchar_t *pBuff = &vecBuff.front();
 
+#ifdef __ANDROID__
+    (void)mbstowcs(pBuff, str.c_str(), len);
+#else
 	if (mbstowcs_s(NULL, pBuff, len, str.c_str(), len))
 	{
 		return L"";
 	}
+#endif
 
 	return pBuff;
 }
