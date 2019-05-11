@@ -477,7 +477,7 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-#ifdef _MSC_VER // 其实只有安卓gcc不行
+#ifndef __ANDROID__
 		template <typename _V, typename = void>
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
 		{
