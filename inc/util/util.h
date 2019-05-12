@@ -119,6 +119,16 @@ public:
 
 	static bool checkWChar(const wstring& str);
 
+	template <typename T>
+	inline static wstring numToWS(const T& num)
+	{
+#ifdef __ANDROID__
+		return QString::number(num).toStdWString();
+#else
+		return std::to_wstring(num);
+#endif
+	}
+
 	static wstring& trim(wstring& strText, wchar_t chr = ' ');
 	static wstring trim(const wstring& strText, wchar_t chr = ' ');
 

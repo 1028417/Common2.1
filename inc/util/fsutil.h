@@ -1,6 +1,8 @@
 ﻿
 #pragma once
 
+#define MAX_PATH 260
+
 class __UtilExt fsutil
 {
 public:
