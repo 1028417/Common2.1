@@ -1,19 +1,17 @@
 
-#include <mtutil.h>
-
-// CWorkThread
+#include <util.h>
 
 namespace NS_mtutil
 {
-	BOOL CWorkThread::Run(const CB_WorkThread& cb, UINT uThreadCount)
+	void CWorkThread::Run(const CB_WorkThread& cb, UINT uThreadCount)
 	{
-		m_CancelEvent.reset();
+		m_bCancelEvent = false; // m_CancelEvent.reset();
 
 		m_vecThreadStatus.assign(uThreadCount, FALSE);
 
 		for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
 		{
-			CThread::Start([=]() {
+			CThread::start([=]() {
 				m_vecThreadStatus[uIndex] = TRUE;
 
 				cb(uIndex);
@@ -21,28 +19,26 @@ namespace NS_mtutil
 				m_vecThreadStatus[uIndex] = FALSE;
 			});
 		}
-
-		return TRUE;
 	}
 
-	void CWorkThread::Pause(BOOL bPause)
+	void CWorkThread::Pause(bool bPause)
 	{
 		m_bPause = bPause;
 	}
 
 	void CWorkThread::Cancel()
 	{
-		(void)m_CancelEvent.notify();
+		m_bCancelEvent = true; // (void)m_CancelEvent.notify();
 	}
 
-	BOOL CWorkThread::CheckCancel()
+	bool CWorkThread::CheckCancel()
 	{
 		while (m_bPause)
 		{
 			Sleep(10);
 		}
 
-		return m_CancelEvent.wait(0);
+		return m_bCancelEvent; // m_CancelEvent.wait(0);
 	}
 
 	UINT CWorkThread::GetActiveCount()

@@ -1,11 +1,7 @@
 
 #include "util.h"
 
-#include "fsdlg.h"
-
 #include <ShlObj.h>
-
-//CFolderDlg
 
 wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle, LPCWSTR lpszMessage
 	, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, UINT uWidth, UINT uHeight)

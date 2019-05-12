@@ -72,7 +72,6 @@ using BOOL = int;
 using namespace std;
 
 #include <string>
-#include <string>
 #include <sstream>
 
 #include <list>
@@ -84,11 +83,6 @@ using namespace std;
 
 #include <functional>
 using fn_voidvoid = function<void()>;
-
-#include <thread>
-#include <future>
-
-#include <fstream>
 
 #include "sstl/sstl.h"
 using namespace NS_SSTL;
@@ -211,10 +205,6 @@ struct tagFileInfo
 #include "SQLiteDB.h"
 
 #ifndef __ANDROID__
-#include <Windows.h>
-
-#include "mtutil.h"
-
 #include "winfsutil.h"
 
 #include "fsdlg.h"
@@ -223,3 +213,5 @@ struct tagFileInfo
 
 #include "ProFile.h"
 #endif
+
+#include "mtutil.h"

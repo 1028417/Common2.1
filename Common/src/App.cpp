@@ -70,7 +70,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 
 		if (bBlock)
 		{
-			NS_mtutil::CThread::Wakeup(dwThreadID);
+			NS_mtutil::CThread::apcWakeup(dwThreadID);
 		}
 	});
 

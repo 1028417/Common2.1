@@ -2,9 +2,21 @@
 
 #include "util.h"
 
+#ifdef __ANDROID__
+#define _GLIBCXX_HAS_GTHREADS
+#define GLIBCXX_USE_C99_STDINT_TR1
+
+#define _GLIBCXX_USE_NANOSLEEP
+
+#else
+#include <Windows.h>
+#endif
+
 #include <thread>
 
 #include <mutex>
+
+#include <future>
 
 namespace NS_mtutil
 {
@@ -95,17 +107,12 @@ namespace NS_mtutil
 	public:
 		CThread() {}
 
-		static void Wakeup(DWORD dwThreadID, const fn_voidvoid& fn=NULL)
+#ifndef __ANDROID__
+		static void apcWakeup(DWORD dwThreadID, const fn_voidvoid& fn=NULL)
 		{
 			HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
 
 			QueueUserAPC(APCFunc, hThread, fn?(ULONG_PTR)&fn:0);
-		}
-		
-		template <typename CB>
-		static void Start(const CB& cb)
-		{
-			std::thread(cb).detach();
 		}
 
 		bool poolStart(const fn_voidvoid& cb)
@@ -113,18 +120,21 @@ namespace NS_mtutil
 			m_cb = cb;
 			return TRUE == QueueUserWorkItem(cbQueueUserWorkItem, this, WT_EXECUTEDEFAULT);
 		}
+#endif
+
+		template <typename CB>
+		static void start(const CB& cb)
+		{
+			std::thread(cb).detach();
+		}
+
+		static void usleep(UINT uMS)
+		{
+			std::this_thread::sleep_for(chrono::milliseconds(uMS));
+		}
 
 	private:
 		fn_voidvoid m_cb;
-
-		static VOID WINAPI APCFunc(ULONG_PTR dwParam)
-		{
-			auto  pfn = (const fn_voidvoid *)dwParam;
-			if (pfn && *pfn)
-			{
-				(*pfn)();
-			}
-		}
 
 	private:
 		virtual void onAsync()
@@ -135,6 +145,7 @@ namespace NS_mtutil
 			}
 		}
 
+#ifndef __ANDROID__
 		static DWORD WINAPI cbQueueUserWorkItem(LPVOID lpPara)
 		{
 			if (NULL != lpPara)
@@ -144,93 +155,16 @@ namespace NS_mtutil
 
 			return 0;
 		}
-	};
 
-	class __UtilExt CCASLock
-	{
-	public:
-		CCASLock()
+		static VOID WINAPI APCFunc(ULONG_PTR dwParam)
 		{
-		}
-		
-	private:
-#ifdef _MSC_VER
-		volatile char m_lockFlag = 0;
-#pragma intrinsic(_InterlockedCompareExchange8, _InterlockedExchange8)
-#else
-        volatile long m_lockFlag = 0;
-#endif
-
-		bool _lock(UINT uRetryTimes=0, UINT uSleepTime=0)
-		{
-#ifdef _MSC_VER
-			while (_InterlockedCompareExchange8(&m_lockFlag, 1, 0))
-#else
-            while (InterlockedCompareExchange(&m_lockFlag, 1, 0))
-#endif
+			auto  pfn = (const fn_voidvoid *)dwParam;
+			if (pfn && *pfn)
 			{
-				if (0 != uRetryTimes && 0 == --uRetryTimes)
-				{
-					return false;
-				}
-
-				if (0 == uSleepTime)
-				{
-					this_thread::yield();
-				}
-				else
-				{
-					::Sleep(uSleepTime);
-				}
+				(*pfn)();
 			}
-
-			return true;
 		}
-
-	public:
-		bool try_lock(UINT uRetryTimes=1)
-		{
-			return _lock(uRetryTimes, 0);
-		}
-
-		void lock(UINT uSleepTime = 0)
-		{
-			_lock(0, uSleepTime);
-		}
-
-		void unlock()
-		{
-			//(void)_InterlockedExchange8(&m_lockFlag, 0);
-			m_lockFlag = 0;
-		}
-	};
-
-	class __UtilExt CCSLock
-	{
-	public:
-		CCSLock()
-		{
-			InitializeCriticalSection(&m_cs);
-		}
-
-		~CCSLock()
-		{
-			DeleteCriticalSection(&m_cs);
-		}
-
-	public:
-		void lock()
-		{
-			EnterCriticalSection(&m_cs);
-		}
-
-		void unlock()
-		{
-			LeaveCriticalSection(&m_cs);
-		}
-
-	private:
-		CRITICAL_SECTION m_cs;
+#endif
 	};
 
 	class __UtilExt CCondVar : public condition_variable
@@ -243,19 +177,20 @@ namespace NS_mtutil
 		void wait()
 		{
 			std::unique_lock<mutex> lock(m_mtx);
-            condition_variable::wait(lock);
+			condition_variable::wait(lock);
 		}
 
 		void notify()
 		{
 			std::unique_lock<mutex> lock(m_mtx);
-            condition_variable::notify_all();
+			condition_variable::notify_all();
 		}
 
 	private:
 		mutex m_mtx;
 	};
 
+#ifndef __ANDROID__
 	class __UtilExt CWinEvent
 	{
 	public:
@@ -293,30 +228,117 @@ namespace NS_mtutil
 		HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 	};
 
+	class __UtilExt CCSLock
+	{
+	public:
+		CCSLock()
+		{
+			InitializeCriticalSection(&m_cs);
+		}
+
+		~CCSLock()
+		{
+			DeleteCriticalSection(&m_cs);
+		}
+
+	public:
+		void lock()
+		{
+			EnterCriticalSection(&m_cs);
+		}
+
+		void unlock()
+		{
+			LeaveCriticalSection(&m_cs);
+		}
+
+	private:
+		CRITICAL_SECTION m_cs;
+	};
+
+	class __UtilExt CCASLock
+	{
+	public:
+		CCASLock()
+		{
+		}
+
+	private:
+#ifdef _MSC_VER
+		volatile char m_lockFlag = 0;
+
+#pragma intrinsic(_InterlockedCompareExchange8, _InterlockedExchange8)
+#define __CompareExchange _InterlockedCompareExchange8
+#else
+		volatile long m_lockFlag = 0;
+#define	__CompareExchange InterlockedCompareExchange
+#endif
+
+		bool _lock(UINT uRetryTimes = 0, UINT uSleepTime = 0)
+		{
+			while (__CompareExchange(&m_lockFlag, 1, 0))
+			{
+				if (0 != uRetryTimes && 0 == --uRetryTimes)
+				{
+					return false;
+				}
+
+				if (0 == uSleepTime)
+				{
+					this_thread::yield();
+				}
+				else
+				{
+					::Sleep(uSleepTime);
+				}
+			}
+
+			return true;
+		}
+
+	public:
+		bool try_lock(UINT uRetryTimes = 1)
+		{
+			return _lock(uRetryTimes, 0);
+		}
+
+		void lock(UINT uSleepTime = 0)
+		{
+			_lock(0, uSleepTime);
+		}
+
+		void unlock()
+		{
+			//(void)__CompareExchange(&m_lockFlag, 0);
+			m_lockFlag = 0;
+		}
+	};
+#endif
+
 	class __UtilExt CWorkThread
 	{
 	public:
 		CWorkThread()
-			: m_CancelEvent(TRUE)
+			//: m_CancelEvent(TRUE)
 		{
 		}
 
 	private:
 		vector<BOOL> m_vecThreadStatus;
 
-		bool m_bPause = false;
+		volatile bool m_bPause = false;
 
-		NS_mtutil::CWinEvent m_CancelEvent;
-
+		bool m_bCancelEvent = false; // NS_mtutil::CWinEvent m_CancelEvent;
+		
 	public:
 		using CB_WorkThread = function<void(UINT uWorkThreadIndex)>;
 
-		BOOL Run(const CB_WorkThread& cb, UINT uThreadCount = 1);
+		void Run(const CB_WorkThread& cb, UINT uThreadCount = 1);
 
-		BOOL CheckCancel();
+		bool CheckCancel();
 
 	protected:
-		void Pause(BOOL bPause = TRUE);
+		void Pause(bool bPause = true);
 
 		void Cancel();
 

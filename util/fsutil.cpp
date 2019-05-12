@@ -4,8 +4,12 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
+#include <fstream>
+
 #ifndef _MSC_VER
 #include <QFileInfo>
+#else
+#include <Windows.h>
 #endif
 
 static const unsigned char g_chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头

@@ -1,16 +1,12 @@
 
 #include "util.h"
 
-#include <ProFile.h>
+#include <Windows.h>
 
 #define MAX_BUFFER 1024
 
 CProFile::CProFile(const string& strIniPath)
 	: m_strIniPath(strIniPath)
-{
-}
-
-CProFile::~CProFile()
 {
 }
 

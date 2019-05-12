@@ -5,7 +5,6 @@ class __UtilExt CProFile
 {
 public:
 	CProFile(const string& strIniPath);
-	virtual ~CProFile();
 
 private:
 	string m_strIniPath;

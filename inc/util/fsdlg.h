@@ -1,7 +1,7 @@
 
 #pragma once
 
-//CCFolderDlg
+#include <Windows.h>
 
 class __UtilExt CFolderDlg
 {
