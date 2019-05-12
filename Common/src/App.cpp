@@ -83,7 +83,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 void CMainApp::thread(const fn_voidvoid& cb)
 {
 	bool bExit = false;
-	NS_mtutil::CThread::Start([&]() {
+	NS_mtutil::CThread::start([&]() {
 		cb();
 
 		bExit = true;
