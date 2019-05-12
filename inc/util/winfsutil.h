@@ -21,8 +21,6 @@ public:
 	static void ExploreFiles(const list<wstring>& lstPath, HWND hWnd=NULL);
 	static void ExploreFile(const wstring& strPath, HWND hWnd = NULL);
 
-	static bool CreateDir(const wstring& strDir);
-
 	// 获取文件夹图标
 	static HICON getFolderIcon();
 	// 获取文件图标

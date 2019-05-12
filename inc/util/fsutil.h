@@ -43,4 +43,6 @@ public:
 
 	static bool fileExists(const wstring& strFile);
 	static bool dirExists(const wstring& strDir);
+
+	static void createDir(const wstring& strDir);
 };

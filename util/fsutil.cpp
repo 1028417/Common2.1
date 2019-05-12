@@ -473,3 +473,20 @@ bool fsutil::dirExists(const wstring& strDir)
 	return INVALID_FILE_ATTRIBUTES != dwFileAttr && (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
 #endif
 }
+
+void fsutil::createDir(const wstring& strDir)
+{
+#ifdef _MSC_VER
+	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
+	{
+		return;
+	}
+
+	createDir(fsutil::GetParentDir(strDir));
+
+	createDir(strDir);
+
+#else
+
+#endif
+}

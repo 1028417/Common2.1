@@ -197,21 +197,6 @@ void winfsutil::ExploreFiles(const list<wstring>& lstPath, HWND hWnd)
 	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
 }
 
-bool winfsutil::CreateDir(const wstring& strDir)
-{
-	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
-	{
-		return true;
-	}
-	
-	if (!CreateDir(fsutil::GetParentDir(strDir)))
-	{
-		return false;
-	}
-
-	return CreateDir(strDir);
-}
-
 // 获取文件夹类型
 static wstring getFolderType()
 {
