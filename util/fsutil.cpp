@@ -499,3 +499,15 @@ bool fsutil::removeFile(const wstring& strFile)
 	return false;
 #endif
 }
+
+wstring fsutil::currentDir()
+{
+#ifdef _MSC_VER
+	wchar_t pszCurrDir[MAX_PATH];
+	memset(pszCurrDir, 0, sizeof pszCurrDir);
+	::GetCurrentDirectoryW(sizeof(pszCurrDir), pszCurrDir);
+	return pszCurrDir;
+#else
+	return L""; // QDir().currentPath();
+#endif
+}

@@ -46,4 +46,6 @@ public:
 
 	static void createDir(const wstring& strDir);
 	static bool removeFile(const wstring& strFile);
+
+	static wstring currentDir();
 };
