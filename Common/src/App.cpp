@@ -12,7 +12,7 @@ static map<UINT, LPVOID> g_mapInterfaces;
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
 static CB_Sync g_cbAsync;
-static NS_mtutil::CCSLock g_lckAsync;
+static CCSLock g_lckAsync;
 
 static void _async(const CB_Sync& cb)
 {
@@ -70,7 +70,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 
 		if (bBlock)
 		{
-			NS_mtutil::CThread::apcWakeup(dwThreadID);
+			mtutil::apcWakeup(dwThreadID);
 		}
 	});
 
@@ -83,7 +83,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 void CMainApp::thread(const fn_voidvoid& cb)
 {
 	bool bExit = false;
-	NS_mtutil::CThread::start([&]() {
+	mtutil::start([&]() {
 		cb();
 
 		bExit = true;

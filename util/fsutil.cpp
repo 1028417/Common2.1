@@ -496,6 +496,15 @@ void fsutil::createDir(const wstring& strDir)
 	createDir(strDir);   
 }
 
+bool fsutil::removeDir(const wstring& strDir)
+{
+#ifdef __ANDROID__
+    return QDir::remove(QString::fromStdWString(strDir));
+#else
+    return TRUE == :RemoveDirectoryW(strDir.c_str());
+#endif
+}
+
 bool fsutil::removeFile(const wstring& strFile)
 {
 #ifdef __ANDROID__

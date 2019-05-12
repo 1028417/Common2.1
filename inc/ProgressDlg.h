@@ -7,7 +7,7 @@
 
 using FN_Work = function<void(class CProgressDlg&)>;
 
-class __CommonExt CProgressDlg : public CDialog, public NS_mtutil::CWorkThread
+class __CommonExt CProgressDlg : public CDialog, public CWorkThread
 {
 public:
 	CProgressDlg(const FN_Work& fnWork, UINT uMaxProgress=0)
@@ -30,7 +30,7 @@ private:
 
 	UINT m_uProgress = 0;
 
-	NS_mtutil::CCASLock m_csLock;
+	CCASLock m_csLock;
 	
 	BOOL m_bFinished = false;
 
