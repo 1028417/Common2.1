@@ -141,7 +141,7 @@ public:
 
 	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, const CB_SubTask& cb=NULL)
 	{
-		startMultiTask(alTask, uThreadCount, m_vecResult, cb);
+		mtutil::startMultiTask(alTask, uThreadCount, m_vecResult, cb);
 
 		return m_vecResult;
 	}

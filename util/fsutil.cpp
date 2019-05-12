@@ -501,7 +501,7 @@ bool fsutil::removeDir(const wstring& strDir)
 #ifdef __ANDROID__
     return QDir::remove(QString::fromStdWString(strDir));
 #else
-    return TRUE == :RemoveDirectoryW(strDir.c_str());
+    return TRUE == RemoveDirectoryW(strDir.c_str());
 #endif
 }
 
