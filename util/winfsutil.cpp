@@ -59,38 +59,6 @@ wstring winfsutil::formatFileTime(const FILETIME& fileTime, const wstring& strFo
 	return _FormatTime(atm, strFormat);*/
 }
 
-bool winfsutil::ExistsFile(const wstring& strFile)
-{
-	if (strFile.empty())
-	{
-		return false;
-	}
-
-	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
-	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
-	{
-		return false;
-	}
-
-	return 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
-}
-
-bool winfsutil::ExistsDir(const wstring& strDir)
-{
-	if (strDir.empty())
-	{
-		return false;
-	}
-
-	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
-	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
-	{
-		return false;
-	}
-
-	return (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
-}
-
 bool winfsutil::FindFile(const wstring& strFindPath, CB_FindFile cb)
 {
 	tagFindData FindData;
@@ -211,7 +179,7 @@ void winfsutil::ExploreFiles(const list<wstring>& lstPath, HWND hWnd)
 	wstring strExplore;
 	for (auto& strPath : lstPath)
 	{
-		if (ExistsFile(strPath) || ExistsDir(strPath))
+		if (fsutil::fileExists(strPath) || fsutil::dirExists(strPath))
 		{
 			if (!strExplore.empty())
 			{

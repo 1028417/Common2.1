@@ -38,4 +38,7 @@ public:
 	static bool CheckSubPath(const wstring& strDir, const wstring& strSubPath);
 
 	static wstring GetOppPath(const wstring& strPath, const wstring strBaseDir);
+
+	static bool fileExists(const wstring& strFile);
+	static bool dirExists(const wstring& strDir);
 };

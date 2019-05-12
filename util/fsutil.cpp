@@ -4,6 +4,10 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
+#ifndef _MSC_VER
+#include <QFileInfo>
+#endif
+
 static const unsigned char g_chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
 
 class ibstream : public ifstream
@@ -432,4 +436,36 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 	}
 
 	return strPath.substr(strBaseDir.size());
+}
+
+bool fsutil::fileExists(const wstring& strFile)
+{
+	if (strFile.empty())
+	{
+		return false;
+	}
+
+#ifndef _MSC_VER
+	QFileInfo fi(QString::fromStdWString(strFile));
+	return fi.isFile();
+#else
+	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
+	return INVALID_FILE_ATTRIBUTES != dwFileAttr && 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
+#endif
+}
+
+bool fsutil::dirExists(const wstring& strDir)
+{
+	if (strDir.empty())
+	{
+		return false;
+	}
+
+#ifndef _MSC_VER
+	QFileInfo fi(QString::fromStdWString(strDir));
+	return fi.isDir();
+#else
+	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
+	return INVALID_FILE_ATTRIBUTES != dwFileAttr && (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
+#endif
 }
