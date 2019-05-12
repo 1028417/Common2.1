@@ -8,6 +8,8 @@
 
 #ifndef _MSC_VER
 #include <QFileInfo>
+#include <QFile>
+#include <QDir>
 #else
 #include <Windows.h>
 #endif
@@ -476,46 +478,73 @@ bool fsutil::dirExists(const wstring& strDir)
 
 void fsutil::createDir(const wstring& strDir)
 {
-#ifdef _MSC_VER
+#ifdef __ANDROID__
+    QDir dir(QString::fromStdWString(strDir));
+    if (dir.exists())
+    {
+        return;
+    }
+#else
 	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
 	{
 		return;
 	}
+#endif
 
 	createDir(fsutil::GetParentDir(strDir));
 
-	createDir(strDir);
-
-#else
-
-#endif
+	createDir(strDir);   
 }
 
 bool fsutil::removeFile(const wstring& strFile)
 {
-#ifdef _MSC_VER
-	return TRUE == ::DeleteFileW(strFile.c_str());
+#ifdef __ANDROID__
+    return QFile::remove(QString::fromStdWString(strFile));
 #else
-	return false;
+    return TRUE == ::DeleteFileW(strFile.c_str());
 #endif
 }
 
 wstring fsutil::currentDir()
 {
-#ifdef _MSC_VER
-	wchar_t pszCurrDir[MAX_PATH];
-	memset(pszCurrDir, 0, sizeof pszCurrDir);
-	::GetCurrentDirectoryW(sizeof(pszCurrDir), pszCurrDir);
-	return pszCurrDir;
+#ifdef __ANDROID__
+    return QDir::currentPath().toStdWString();
 #else
-	return L""; // QDir().currentPath();
+    wchar_t pszCurrDir[MAX_PATH];
+    memset(pszCurrDir, 0, sizeof pszCurrDir);
+    ::GetCurrentDirectoryW(sizeof(pszCurrDir), pszCurrDir);
+    return pszCurrDir;
 #endif
 }
 
 #ifdef __ANDROID__
 bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
 {
-	return true;
+    QDir dir(QString::fromStdWString(strFindPath));
+    if(!dir.exists())
+    {
+        return false;
+    }
+    dir.setFilter(QDir::Dirs | QDir::Files);
+    dir.setSorting(QDir::DirsFirst);
+
+    QFileInfoList list = dir.entryInfoList();
+    for (int nIdx = 0; nIdx<list.size(); nIdx++)
+    {
+        const QFileInfo& fileInfo = list.at(nIdx);
+        if(fileInfo.fileName() == "." | fileInfo.fileName() == "..")
+        {
+            continue;
+        }
+
+        if(!fileInfo.isDir())
+        {
+            // fileInfo.fileName() fileInfo.baseName() fileInfo.path() fileInfo.completeSuffix() fileInfo.suffix()
+            // fileInfo.groupId() fileInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss") fileInfo.absoluteFilePath()
+        }
+    }
+
+    return true;
 }
 
 #else
@@ -581,8 +610,8 @@ bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
 	(void)::FindClose(hFindFile);
 
 	return true;
-#endif
 }
+#endif
 
 //bool fsutil::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
 //{
