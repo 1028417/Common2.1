@@ -479,27 +479,24 @@ bool fsutil::dirExists(const wstring& strDir)
 void fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    QDir dir(QString::fromStdWString(strDir));
-    if (dir.exists())
-    {
-        return;
-    }
+    (void)QDir().mkpath(QString::fromStdWString(strDir));
 #else
 	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
 	{
 		return;
 	}
-#endif
 
 	createDir(fsutil::GetParentDir(strDir));
 
 	createDir(strDir);   
+#endif
 }
 
 bool fsutil::removeDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    return QDir::remove(QString::fromStdWString(strDir));
+    QDir dir(QString::fromStdWString(strDir));
+    return dir.rmpath(dir.absolutePath());;
 #else
     return TRUE == RemoveDirectoryW(strDir.c_str());
 #endif
