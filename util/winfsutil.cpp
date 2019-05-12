@@ -3,29 +3,6 @@
 
 #include "util.h"
 
-struct tagFindData : WIN32_FIND_DATAW
-{
-	bool isDir() const
-	{
-		return dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-	}
-
-	unsigned long getFileSize() const
-	{
-		return nFileSizeLow;
-	}
-
-	time64_t getModifyTime() const
-	{
-		return winfsutil::transFileTime(ftLastWriteTime);
-	}
-
-	time64_t getCreateTime() const
-	{
-		return winfsutil::transFileTime(ftCreationTime);
-	}
-};
-
 time64_t winfsutil::transFileTime(const FILETIME& ft)
 {
 	ULARGE_INTEGER ui;
@@ -59,55 +36,7 @@ wstring winfsutil::formatFileTime(const FILETIME& fileTime, const wstring& strFo
 	return _FormatTime(atm, strFormat);*/
 }
 
-bool winfsutil::FindFile(const wstring& strFindPath, CB_FindFile cb)
-{
-	tagFindData FindData;
-	memset(&FindData, 0, sizeof(tagFindData));
-	
-	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindData);
-	if (INVALID_HANDLE_VALUE == hFindFile)
-	{
-		return false;
-	}
-
-	do
-	{
-		if (fsutil::dot == FindData.cFileName[0])
-		{
-			continue;
-		}
-
-		if (FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
-		{
-			continue;
-		}
-
-		tagFileInfo FileInfo;
-		FileInfo.m_bDir = FindData.isDir();
-		FileInfo.m_strName = FindData.cFileName;
-		FileInfo.m_uFileSize = FindData.getFileSize();
-		FileInfo.m_tCreateTime = FindData.getCreateTime();
-		FileInfo.m_tModifyTime = FindData.getModifyTime();
-		if (!cb(FileInfo))
-		{
-			break;
-		}
-	} while (::FindNextFileW(hFindFile, &FindData));
-
-	(void)::FindClose(hFindFile);
-
-	return true;
-}
-
-//bool winfsutil::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
-//{
-//	return winfsutil::FindFile(strFindPath, [&](const tagFindData& FindData) {
-//		arrFindData.add(FindData);
-//		return true;
-//	});
-//}
-
-void winfsutil::GetSysDrivers(list<wstring>& lstDrivers)
+void winfsutil::getSysDrivers(list<wstring>& lstDrivers)
 {
 	#define MAX_DRIVE (_MAX_DRIVE + 1)
 
@@ -132,13 +61,10 @@ void winfsutil::GetSysDrivers(list<wstring>& lstDrivers)
 	}
 }
 
-bool winfsutil::DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle)
+bool winfsutil::removeDir(const wstring& strPath, HWND hwndParent, const wstring& strTitle)
 {
 	SHFILEOPSTRUCT FileOp;
 	ZeroMemory(&FileOp, sizeof(FileOp));
-		
-	FileOp.fFlags = FOF_NOCONFIRMATION;
-
 	FileOp.hwnd = hwndParent;
 
 	if (!strTitle.empty())
@@ -147,8 +73,8 @@ bool winfsutil::DeletePath(const wstring& strPath, HWND hwndParent, const wstrin
 	}
 
 	FileOp.pFrom = strPath.c_str();
-
 	FileOp.wFunc = FO_DELETE;
+	FileOp.fFlags = FOF_NOCONFIRMATION;
 
 	int nResult = SHFileOperation(&FileOp);
 	if (ERROR_SUCCESS == nResult)
@@ -164,17 +90,17 @@ bool winfsutil::DeletePath(const wstring& strPath, HWND hwndParent, const wstrin
 	return false;
 }
 
-void winfsutil::ExploreDir(const wstring& strDir, HWND hWnd)
+void winfsutil::exploreDir(const wstring& strDir, HWND hWnd)
 {
 	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/root," + strDir).c_str(), NULL, SW_MAXIMIZE);
 }
 
-void winfsutil::ExploreFile(const wstring& strPath, HWND hWnd)
+void winfsutil::exploreFile(const wstring& strPath, HWND hWnd)
 {
-	ExploreFiles(list<wstring>({ strPath }));
+	exploreFiles(list<wstring>({ strPath }));
 }
 
-void winfsutil::ExploreFiles(const list<wstring>& lstPath, HWND hWnd)
+void winfsutil::exploreFiles(const list<wstring>& lstPath, HWND hWnd)
 {
 	wstring strExplore;
 	for (auto& strPath : lstPath)

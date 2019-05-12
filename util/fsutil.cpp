@@ -511,3 +511,83 @@ wstring fsutil::currentDir()
 	return L""; // QDir().currentPath();
 #endif
 }
+
+#ifdef __ANDROID__
+bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
+{
+	return true;
+}
+
+#else
+
+struct tagFindData : WIN32_FIND_DATAW
+{
+	bool isDir() const
+	{
+		return dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+	}
+
+	unsigned long getFileSize() const
+	{
+		return nFileSizeLow;
+	}
+
+	time64_t getModifyTime() const
+	{
+		return winfsutil::transFileTime(ftLastWriteTime);
+	}
+
+	time64_t getCreateTime() const
+	{
+		return winfsutil::transFileTime(ftCreationTime);
+	}
+};
+
+bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
+{
+	tagFindData FindData;
+	memset(&FindData, 0, sizeof(tagFindData));
+
+	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindData);
+	if (INVALID_HANDLE_VALUE == hFindFile)
+	{
+		return false;
+	}
+
+	do
+	{
+		if (fsutil::dot == FindData.cFileName[0])
+		{
+			continue;
+		}
+
+		if (FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
+		{
+			continue;
+		}
+
+		tagFileInfo FileInfo;
+		FileInfo.m_bDir = FindData.isDir();
+		FileInfo.m_strName = FindData.cFileName;
+		FileInfo.m_uFileSize = FindData.getFileSize();
+		FileInfo.m_tCreateTime = FindData.getCreateTime();
+		FileInfo.m_tModifyTime = FindData.getModifyTime();
+		if (!cb(FileInfo))
+		{
+			break;
+		}
+	} while (::FindNextFileW(hFindFile, &FindData));
+
+	(void)::FindClose(hFindFile);
+
+	return true;
+#endif
+}
+
+//bool fsutil::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
+//{
+//	return fsutil::findFile(strFindPath, [&](const tagFindData& FindData) {
+//		arrFindData.add(FindData);
+//		return true;
+//	});
+//}

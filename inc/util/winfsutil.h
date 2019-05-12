@@ -9,17 +9,14 @@ public:
 	static time64_t transFileTime(const FILETIME& ft);
 	static wstring formatFileTime(const FILETIME& fileTime, const wstring& strFormat);
 
-	using CB_FindFile = const function<bool(const tagFileInfo&)>&;
-	static bool FindFile(const wstring& strFindPath, CB_FindFile cb);
-
-	static void GetSysDrivers(list<wstring>& lstDrivers);
+	static void getSysDrivers(list<wstring>& lstDrivers);
 	
-	static bool DeletePath(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
+	static bool removeDir(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
-	static void ExploreDir(const wstring& strDir, HWND hWnd = NULL);
+	static void exploreDir(const wstring& strDir, HWND hWnd = NULL);
 
-	static void ExploreFiles(const list<wstring>& lstPath, HWND hWnd=NULL);
-	static void ExploreFile(const wstring& strPath, HWND hWnd = NULL);
+	static void exploreFiles(const list<wstring>& lstPath, HWND hWnd=NULL);
+	static void exploreFile(const wstring& strPath, HWND hWnd = NULL);
 
 	// 获取文件夹图标
 	static HICON getFolderIcon();

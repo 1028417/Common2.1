@@ -58,7 +58,7 @@ wstring CPath::GetParentDir() const
 bool CPath::onFindFile(TD_PathList& lstSubPath)
 {
 #ifdef _MSC_VER
-	return winfsutil::FindFile(this->GetPath() + L"\\*", [&](const tagFileInfo& FileInfo) {
+	return fsutil::findFile(this->GetPath() + L"\\*", [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
 		{

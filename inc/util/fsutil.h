@@ -48,4 +48,7 @@ public:
 	static bool removeFile(const wstring& strFile);
 
 	static wstring currentDir();
+
+	using CB_FindFile = const function<bool(const tagFileInfo&)>&;
+	static bool findFile(const wstring& strFindPath, CB_FindFile cb);
 };
