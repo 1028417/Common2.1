@@ -45,4 +45,5 @@ public:
 	static bool dirExists(const wstring& strDir);
 
 	static void createDir(const wstring& strDir);
+	static bool removeFile(const wstring& strFile);
 };

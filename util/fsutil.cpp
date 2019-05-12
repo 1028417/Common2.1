@@ -490,3 +490,12 @@ void fsutil::createDir(const wstring& strDir)
 
 #endif
 }
+
+bool fsutil::removeFile(const wstring& strFile)
+{
+#ifdef _MSC_VER
+	return TRUE == ::DeleteFileW(strFile.c_str());
+#else
+	return false;
+#endif
+}
