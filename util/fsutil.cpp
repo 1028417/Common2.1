@@ -44,14 +44,8 @@ public:
 	obstream() {}
 
 	obstream(const wstring& strFile, bool bTrunc)
-		: ofstream(
-#ifdef _MSC_VER
-			strFile
-#else
-			util::WSToAsc(strFile)
-#endif
-            , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary)
 	{
+		open(strFile, bTrunc);
 	}
 
 	void open(const wstring& strFile, bool bTrunc)
