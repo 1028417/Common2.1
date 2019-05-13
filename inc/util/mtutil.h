@@ -164,27 +164,30 @@ public:
 	}
 };
 
-class __UtilExt CCondVar : public condition_variable
+class __UtilExt CCondVar
 {
 public:
 	CCondVar()
 	{
 	}
 
-	void wait()
-	{
-		std::unique_lock<mutex> lock(m_mtx);
-		condition_variable::wait(lock);
-	}
+private:
+	condition_variable m_condvar;
 
+	mutex m_mtx;
+
+public:
 	void notify()
 	{
 		std::unique_lock<mutex> lock(m_mtx);
-		condition_variable::notify_all();
+		m_condvar.notify_all();
 	}
 
-private:
-	mutex m_mtx;
+	void wait()
+	{
+		std::unique_lock<mutex> lock(m_mtx);
+		m_condvar.wait(lock);
+	}
 };
 
 #ifndef __ANDROID__
@@ -239,6 +242,9 @@ public:
 		DeleteCriticalSection(&m_cs);
 	}
 
+private:
+	CRITICAL_SECTION m_cs;
+
 public:
 	void lock()
 	{
@@ -249,9 +255,6 @@ public:
 	{
 		LeaveCriticalSection(&m_cs);
 	}
-
-private:
-	CRITICAL_SECTION m_cs;
 };
 
 class __UtilExt CCASLock
