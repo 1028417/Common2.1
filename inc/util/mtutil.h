@@ -191,9 +191,9 @@ private:
 class __UtilExt CWinEvent
 {
 public:
-	CWinEvent(BOOL bManualReset)
+	CWinEvent(BOOL bManualReset=FALSE, BOOL bInitialState=FALSE)
 	{
-		m_hEvent = ::CreateEvent(NULL, bManualReset, FALSE, NULL);
+		m_hEvent = ::CreateEvent(NULL, bManualReset, bInitialState, NULL);
 	}
 
 	~CWinEvent()
@@ -201,9 +201,13 @@ public:
 		(void)::CloseHandle(m_hEvent);
 	}
 
-	bool check()
+private:
+	HANDLE m_hEvent = INVALID_HANDLE_VALUE;
+
+public:
+	bool notify()
 	{
-		return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, 0);
+		return TRUE == ::SetEvent(m_hEvent);
 	}
 
 	bool wait(DWORD dwTimeout = INFINITE)
@@ -211,18 +215,15 @@ public:
 		return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, dwTimeout);
 	}
 
-	bool notify()
+	bool check()
 	{
-		return TRUE == SetEvent(m_hEvent);
+		return wait(0);
 	}
 
 	bool reset()
 	{
-		return TRUE == ResetEvent(m_hEvent);
+		return TRUE == ::ResetEvent(m_hEvent);
 	}
-
-private:
-	HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 };
 
 class __UtilExt CCSLock
