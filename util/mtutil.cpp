@@ -1,35 +1,53 @@
 
 #include <util.h>
 
-void CWorkThread::Run(const CB_WorkThread& cb, UINT uThreadCount)
+void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock)
 {
 	m_bCancelEvent = false; // m_CancelEvent.reset();
 
     m_vecThreadStatus.assign(uThreadCount, 0);
 
-	for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
+	if (bBlock)
 	{
-		mtutil::start([=]() {
-            m_vecThreadStatus[uIndex] = 1;
+		list<thread> lstThread;
+		for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
+		{
+			lstThread.push_back(thread([&, uIndex]() {
+				cb(uIndex);
+			}));
+		}
 
-			cb(uIndex);
+		for (auto& thr : lstThread)
+		{
+			thr.join();
+		}
+	}
+	else
+	{
+		for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
+		{
+			mtutil::start([=]() {
+				m_vecThreadStatus[uIndex] = 1;
 
-            m_vecThreadStatus[uIndex] = 0;
-		});
+				cb(uIndex);
+
+				m_vecThreadStatus[uIndex] = 0;
+			});
+		}
 	}
 }
 
-void CWorkThread::Pause(bool bPause)
+void CThreadGroup::pause(bool bPause)
 {
 	m_bPause = bPause;
 }
 
-void CWorkThread::Cancel()
+void CThreadGroup::cancel()
 {
 	m_bCancelEvent = true; // (void)m_CancelEvent.notify();
 }
 
-bool CWorkThread::CheckCancel()
+bool CThreadGroup::checkCancel()
 {
 	while (m_bPause)
 	{
@@ -39,7 +57,7 @@ bool CWorkThread::CheckCancel()
 	return m_bCancelEvent; // m_CancelEvent.wait(0);
 }
 
-UINT CWorkThread::GetActiveCount()
+UINT CThreadGroup::getActiveCount()
 {
 	UINT uCount = 0;
 	for (BOOL& bThreadStatus : m_vecThreadStatus)

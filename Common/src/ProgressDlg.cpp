@@ -40,7 +40,7 @@ BOOL CProgressDlg::OnInitDialog()
 
 	m_bFinished = FALSE;
 
-	(void)this->Run([&](UINT) {
+	(void)this->start(1, [&](UINT) {
 		if (m_fnWork)
 		{
 			m_fnWork(*this);
@@ -50,7 +50,7 @@ BOOL CProgressDlg::OnInitDialog()
 		{
 			(void)this->PostMessage(WM_EndProgress);
 		}	
-	});
+	}, false);
 
 	return TRUE;
 }
@@ -156,19 +156,19 @@ void CProgressDlg::OnCancel()
 		return;
 	}
 		
-	this->Pause(true);
+	this->pause(true);
 
 	if (IDYES != this->showMsgBox(L"确认取消?", MB_YESNO))
 	{
-		this->Pause(false);
+		this->pause(false);
 		return;
 	}
 
-	this->Cancel();
+	this->cancel();
 
-	this->Pause(false);
+	this->pause(false);
 
-	while (0 != this->GetActiveCount())
+	while (0 != this->getActiveCount())
 	{
 		(void)CMainApp::GetMainApp()->DoEvents(); // 必须的
 	}

@@ -2,12 +2,7 @@
 
 #include "util.h"
 
-#ifdef __ANDROID__
-//#define _GLIBCXX_HAS_GTHREADS
-//#define _GLIBCXX_USE_C99_STDINT_TR1
-
-//#define _GLIBCXX_USE_NANOSLEEP
-#else
+#ifndef __ANDROID__
 #include <Windows.h>
 #endif
 
@@ -21,11 +16,15 @@ class __UtilExt mtutil
 {
 #ifndef __ANDROID__
 public:
+	static void apcWakeup(HANDLE hThread, const fn_voidvoid& fn = NULL)
+	{
+		QueueUserAPC(APCFunc, hThread, fn ? (ULONG_PTR)&fn : 0);
+	}
+
 	static void apcWakeup(DWORD dwThreadID, const fn_voidvoid& fn = NULL)
 	{
 		HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
-
-		QueueUserAPC(APCFunc, hThread, fn ? (ULONG_PTR)&fn : 0);
+		apcWakeup(hThread, fn);
 	}
 
 	static bool poolStart(const fn_voidvoid& fn)
@@ -75,57 +74,38 @@ public:
     {
         std::this_thread::yield();
     }
-
-	template <typename T, typename R>
-	static void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, vector<R>& vecResult
-		, const function<bool(UINT uTaskIdx, T&, R&)>& cb)
-	{
-		if (0 == uThreadCount)
-		{
-			uThreadCount = 1;
-		}
-
-		vecResult.resize(uThreadCount);
-
-		bool bCancelFlag = false;
-
-		vector<thread> vecThread(uThreadCount);
-		for (UINT uThreadIdx = 0; uThreadIdx < vecThread.size(); uThreadIdx++)
-		{
-			vecThread[uThreadIdx] = thread([&, uThreadIdx]() {
-				for (UINT uTaskIdx = uThreadIdx; uTaskIdx < alTask.size(); uTaskIdx += uThreadCount)
-				{
-					alTask.get(uTaskIdx, [&](T& task) {
-						if (!cb(uTaskIdx, task, vecResult[uThreadIdx]))
-						{
-							bCancelFlag = true;
-						}
-					});
-					if (bCancelFlag)
-					{
-						break;
-					}
-				}
-			});
-		}
-
-		for (auto& thr : vecThread)
-		{
-			thr.join();
-		}
-	}
-
-	template <typename T>
-	static void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
-	{
-		vector<BOOL> vecResult;
-		startMultiTask<T, BOOL>(alTask, uThreadCount, vecResult, [&](UINT uTaskIdx, T& task, BOOL&) {
-			return cb(uTaskIdx, task);
-		});
-	}
 };
 
-template <typename T, typename R>
+class __UtilExt CThreadGroup
+{
+public:
+	CThreadGroup()
+		//: m_CancelEvent(TRUE)
+	{
+	}
+
+private:
+	vector<BOOL> m_vecThreadStatus;
+
+	volatile bool m_bPause = false;
+
+	bool m_bCancelEvent = false; // CWinEvent m_CancelEvent;
+
+public:
+	using CB_WorkThread = function<void(UINT uThreadIndex)>;
+	void start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock);
+
+	bool checkCancel();
+
+protected:
+	void pause(bool bPause = true);
+
+	void cancel();
+
+	UINT getActiveCount();
+};
+
+template <typename T, typename R=BOOL>
 class CMultiTask
 {
 public:
@@ -137,19 +117,56 @@ private:
 	vector<R> m_vecResult;
 
 public:
-	using CB_SubTask = function<bool(UINT uTaskIdx, T&, R&)>;
-
-	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, const CB_SubTask& cb=NULL)
+	using CB_SubTask = const function<bool(UINT uTaskIdx, T&, R&)>&;
+	static void start(ArrList<T>& alTask, vector<R>& vecResult, UINT uThreadCount
+		, CB_SubTask cb)
 	{
-		mtutil::startMultiTask(alTask, uThreadCount, m_vecResult, cb);
+		if (0 == uThreadCount)
+		{
+			uThreadCount = 1;
+		}
 
-		return m_vecResult;
+		vecResult.resize(uThreadCount);
+
+		CThreadGroup ThreadGroup;
+		ThreadGroup.start(uThreadCount, [&](UINT uThreadIndex) {
+			bool bCancelFlag = false;
+			for (UINT uTaskIdx = uThreadIndex; uTaskIdx < alTask.size(); uTaskIdx += uThreadCount)
+			{
+				alTask.get(uTaskIdx, [&](T& task) {
+					if (!cb(uTaskIdx, task, vecResult[uThreadIndex]))
+					{
+						bCancelFlag = true;
+					}
+				});
+				if (bCancelFlag)
+				{
+					break;
+				}
+			}
+		}, true);
 	}
 
-	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount)
+	static void start(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
 	{
-		startMultiTask(alTask, uThreadCount, [&](UINT uTaskIdx, T& task, R& result) {
-			return onTask(uTaskIdx, task, result);
+		vector<BOOL> vecResult;
+		start(alTask, vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, BOOL&) {
+			return cb(uTaskIdx, task);
+		});
+	}
+
+public:
+	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, CB_SubTask cb=NULL)
+	{
+		start(alTask, m_vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, R& result) {
+			if (cb)
+			{
+				return cb(uTaskIdx, task, result);
+			}
+			else
+			{
+				return onTask(uTaskIdx, task, result);
+			}
 		});
 
 		return m_vecResult;
@@ -306,33 +323,3 @@ public:
 	}
 };
 #endif
-
-class __UtilExt CWorkThread
-{
-public:
-	CWorkThread()
-		//: m_CancelEvent(TRUE)
-	{
-	}
-
-private:
-	vector<BOOL> m_vecThreadStatus;
-
-	volatile bool m_bPause = false;
-
-	bool m_bCancelEvent = false; // CWinEvent m_CancelEvent;
-		
-public:
-	using CB_WorkThread = function<void(UINT uWorkThreadIndex)>;
-
-	void Run(const CB_WorkThread& cb, UINT uThreadCount = 1);
-
-	bool CheckCancel();
-
-protected:
-	void Pause(bool bPause = true);
-
-	void Cancel();
-
-	UINT GetActiveCount();
-};
