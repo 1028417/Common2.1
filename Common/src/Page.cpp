@@ -109,7 +109,7 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 {
 	switch (pMsg->message)
 	{
-	case WM_KEYDOWN:
+	case WM_KEYUP:
 	{
 		UINT uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
 

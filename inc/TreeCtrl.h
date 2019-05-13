@@ -156,6 +156,8 @@ private:
 	void SetChildItemsImageState(HTREEITEM hItem);
 	void SetParentItemsImageState(HTREEITEM hItem);
 
+	void _onItemClick(HTREEITEM hItem);
+
 protected:
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 };

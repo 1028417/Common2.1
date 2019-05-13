@@ -78,39 +78,37 @@ void CBaseTree::GetChildItems(HTREEITEM hItem, list<HTREEITEM>& lstItems)
 
 BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	if (WM_LBUTTONDOWN == message || WM_RBUTTONDOWN == message)
+	switch (message)
 	{
-		CPoint ptCursor(0,0);
-		(void)::GetCursorPos(&ptCursor);
-		this->ScreenToClient(&ptCursor);
-
-		HTREEITEM hItem = this->HitTest(ptCursor);
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	{
+		CPoint ptPos(lParam);
+		HTREEITEM hItem = this->HitTest(ptPos);
 		if (hItem)
 		{
 			(void)this->SelectItem(hItem);
 		}
 	}
-	else if (WM_KEYUP == message)
-	{
+
+	break;
+	case WM_KEYUP:
 		if (VK_RETURN == GET_KEYSTATE_LPARAM(wParam))
 		{
-			CEdit *pEdit = GetEditControl();
-			if (NULL == pEdit)
+			HTREEITEM hItem = GetSelectedItem();
+			if (NULL != hItem)
 			{
-				HTREEITEM hItem = GetSelectedItem();
-				if (NULL != hItem)
+				if (GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)
 				{
-					if (GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)
-					{
-						Expand(hItem, TVE_COLLAPSE);
-					}
-					else
-					{
-						Expand(hItem, TVE_EXPAND);
-					}
+					Expand(hItem, TVE_COLLAPSE);
+				}
+				else
+				{
+					Expand(hItem, TVE_EXPAND);
 				}
 			}
 		}
+		break;
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
@@ -229,30 +227,30 @@ void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 
 BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	HTREEITEM hItem = NULL;
-
-	if (WM_KEYDOWN == message)
+	if (WM_KEYUP == message)
 	{
-		 auto uKey = GET_KEYSTATE_LPARAM(wParam);
-		if (VK_SPACE == uKey)
+		if (VK_SPACE == GET_KEYSTATE_LPARAM(wParam))
 		{
-			hItem = __super::GetSelectedItem();
+			_onItemClick(__super::GetSelectedItem());
 		}
 	}
 	else if (WM_LBUTTONDOWN == message)
 	{
-		CPoint ptCursor(0,0);
-		(void)::GetCursorPos(&ptCursor);
-
-		__super::ScreenToClient(&ptCursor);
-
+		CPoint ptPos(lParam);
 		UINT uFlag = 0;
-		hItem = __super::HitTest(ptCursor, &uFlag);
-		if (TVHT_ONITEMSTATEICON != uFlag)
+		HTREEITEM hItem = __super::HitTest(ptPos, &uFlag);
+		if (TVHT_ONITEMSTATEICON == uFlag)
 		{
-			hItem = NULL;
+			_onItemClick(hItem);
 		}
 	}
+
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}
+
+void CObjectCheckTree::_onItemClick(HTREEITEM hItem)
+{
+	__Ensure(hItem);
 
 	if (hItem)
 	{
@@ -273,8 +271,6 @@ BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 			m_cbCheckChanged(eCheckState);
 		}
 	}
-
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
 void CObjectCheckTree::SetChildItemsImageState(HTREEITEM hItem)

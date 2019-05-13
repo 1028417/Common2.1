@@ -221,7 +221,7 @@ void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 
 BOOL CMenuGuard::_popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
-	CPoint ptCursor(0, 0);
+	POINT ptCursor{0,0};
 	(void)::GetCursorPos(&ptCursor);
 
 	CMenuEx menu(uItemHeight + 2, m_uMenuWidth, fFontSize, hMenu);
