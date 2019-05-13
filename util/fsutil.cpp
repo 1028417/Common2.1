@@ -255,6 +255,12 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 	}
 	__EnsureReturn(srcStream && srcStream.is_open(), false);
 
+	if (!removeFile(strDstFile))
+	{
+		srcStream.close();
+		return false;
+	}
+
 	obstream dstStream;
 	try
 	{
@@ -266,7 +272,6 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 	if (!dstStream || !dstStream.is_open())
 	{
 		srcStream.close();
-
 		return false;
 	}
 
@@ -495,19 +500,40 @@ void fsutil::createDir(const wstring& strDir)
 bool fsutil::removeDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    QDir dir(QString::fromStdWString(strDir));
-    return dir.rmpath(dir.absolutePath());;
+	QDir dir(QString::fromStdWString(strDir));
+	return dir.rmpath(dir.absolutePath());
 #else
-    return TRUE == RemoveDirectoryW(strDir.c_str());
+	if (::RemoveDirectoryW(strDir.c_str()))
+	{
+		return true;
+	}
+
+	auto err = ::GetLastError();
+	if (ERROR_FILE_NOT_FOUND == err || ERROR_PATH_NOT_FOUND == err)
+	{
+		return true;
+	}
+	
+	return false;
 #endif
 }
 
 bool fsutil::removeFile(const wstring& strFile)
 {
 #ifdef __ANDROID__
-    return QFile::remove(QString::fromStdWString(strFile));
+	return QFile::remove(QString::fromStdWString(strFile));
 #else
-    return TRUE == ::DeleteFileW(strFile.c_str());
+	if (::DeleteFileW(strFile.c_str()))
+	{
+		return true;
+	}
+
+	if (ERROR_FILE_NOT_FOUND == ::GetLastError())
+	{
+		return true;
+	}
+
+	return false;
 #endif
 }
 
