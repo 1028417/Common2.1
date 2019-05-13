@@ -13,10 +13,8 @@ public:
 	
 	static bool removeDir(const wstring& strPath, HWND hwndParent, const wstring& strTitle=L"");
 
-	static void exploreDir(const wstring& strDir, HWND hWnd = NULL);
-
-	static void exploreFiles(const list<wstring>& lstPath, HWND hWnd=NULL);
-	static void exploreFile(const wstring& strPath, HWND hWnd = NULL);
+	static void exploreDir(const wstring& strDir, bool bAsRoot=false);
+	static void exploreFile(const wstring& strFile);
 
 	// 获取文件夹图标
 	static HICON getFolderIcon();

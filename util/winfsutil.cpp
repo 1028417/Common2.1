@@ -90,29 +90,48 @@ bool winfsutil::removeDir(const wstring& strPath, HWND hwndParent, const wstring
 	return false;
 }
 
-void winfsutil::exploreDir(const wstring& strDir, HWND hWnd)
+static void _shellExplore(const wstring& strSelFile, const wstring& strDir=L"", bool bRoot=false, HWND hWnd = NULL)
 {
-	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/root," + strDir).c_str(), NULL, SW_MAXIMIZE);
+	wstring strPara = L"/e";
+
+	if (!strDir.empty())
+	{
+		if (bRoot)
+		{
+			strPara.append(L",/root");
+		}
+		strPara.append(L"," + strDir);
+	}
+	else if (!strSelFile.empty())
+	{
+		strPara.append(L",/select," + strSelFile);
+	}
+
+	(void)::ShellExecuteW(NULL, L"open", L"explorer",  strPara.c_str(), NULL, SW_MAXIMIZE);
 }
 
-void winfsutil::exploreFile(const wstring& strPath, HWND hWnd)
+void winfsutil::exploreDir(const wstring& strDir, bool bAsRoot)
 {
-	exploreFiles(list<wstring>({ strPath }));
+	_shellExplore(L"", strDir, bAsRoot);
+}
+void winfsutil::exploreFile(const wstring& strFile)
+{
+	_shellExplore(strFile);
 }
 
-void winfsutil::exploreFiles(const list<wstring>& lstPath, HWND hWnd)
+/*void winfsutil::shellExplore(const list<wstring>& lstFiles)
 {
 	wstring strExplore;
-	for (auto& strPath : lstPath)
+	for (auto& strFile : lstFiles)
 	{
-		if (fsutil::fileExists(strPath) || fsutil::dirExists(strPath))
+		if (fsutil::fileExists(strFile) || fsutil::dirExists(strFile))
 		{
 			if (!strExplore.empty())
 			{
 				strExplore.append(L",");
 			}
 
-			strExplore.append(L'\"' + strPath + L'\"');
+			strExplore.append(L'\"' + strFile + L'\"');
 		}
 	}
 	if (strExplore.empty())
@@ -120,8 +139,8 @@ void winfsutil::exploreFiles(const list<wstring>& lstPath, HWND hWnd)
 		return;
 	}
 
-	(void)::ShellExecute(NULL, L"open", L"explorer", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
-}
+	shellExplore((NULL, L"open", L"explorer", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
+}*/
 
 // 获取文件夹类型
 static wstring getFolderType()
