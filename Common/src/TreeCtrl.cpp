@@ -78,10 +78,7 @@ void CBaseTree::GetChildItems(HTREEITEM hItem, list<HTREEITEM>& lstItems)
 
 BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	switch (message)
-	{
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
+	if (WM_LBUTTONDOWN == message || WM_RBUTTONDOWN == message)
 	{
 		CPoint ptPos(lParam);
 		HTREEITEM hItem = this->HitTest(ptPos);
@@ -90,28 +87,54 @@ BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pR
 			(void)this->SelectItem(hItem);
 		}
 	}
+	
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}
 
-	break;
-	case WM_KEYUP:
-		if (VK_RETURN == GET_KEYSTATE_LPARAM(wParam))
+BOOL CBaseTree::PreTranslateMessage(MSG* pMsg)
+{
+	if (WM_KEYUP == pMsg->message)
+	{
+		WORD uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
+		if (pMsg->hwnd == m_hWnd)
 		{
-			HTREEITEM hItem = GetSelectedItem();
-			if (NULL != hItem)
+			if (VK_RETURN == uVkKey)
 			{
-				if (GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)
+				HTREEITEM hItem = GetSelectedItem();
+				if (NULL != hItem)
 				{
-					Expand(hItem, TVE_COLLAPSE);
-				}
-				else
-				{
-					Expand(hItem, TVE_EXPAND);
+					if (GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)
+					{
+						Expand(hItem, TVE_COLLAPSE);
+					}
+					else
+					{
+						Expand(hItem, TVE_EXPAND);
+					}
 				}
 			}
 		}
-		break;
+		else
+		{
+			if (VK_RETURN == uVkKey || VK_ESCAPE == uVkKey)
+			{
+				CEdit *pEdit = this->GetEditControl();
+				if (pEdit->GetSafeHwnd() == pMsg->hwnd)
+				{	
+					if (VK_ESCAPE == uVkKey)
+					{
+						(void)pEdit->SetWindowText(NULL);
+					}
+
+					(void)this->SetFocus();
+
+					return TRUE;
+				}
+			}
+		}
 	}
 
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
+	return __super::PreTranslateMessage(pMsg);
 }
 
 BOOL CBaseTree::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
@@ -225,18 +248,21 @@ void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 	});
 }
 
-BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+BOOL CObjectCheckTree::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_KEYUP == message)
+	if (WM_KEYUP == pMsg->message)
 	{
-		if (VK_SPACE == GET_KEYSTATE_LPARAM(wParam))
+		if (pMsg->hwnd == m_hWnd)
 		{
-			_onItemClick(__super::GetSelectedItem());
+			if (VK_SPACE == GET_KEYSTATE_LPARAM(pMsg->wParam))
+			{
+				_onItemClick(__super::GetSelectedItem());
+			}
 		}
 	}
-	else if (WM_LBUTTONDOWN == message)
+	else if (WM_LBUTTONDOWN == pMsg->message)
 	{
-		CPoint ptPos(lParam);
+		CPoint ptPos(pMsg->lParam);
 		UINT uFlag = 0;
 		HTREEITEM hItem = __super::HitTest(ptPos, &uFlag);
 		if (TVHT_ONITEMSTATEICON == uFlag)
@@ -245,7 +271,7 @@ BOOL CObjectCheckTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 		}
 	}
 
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
+	return __super::PreTranslateMessage(pMsg);
 }
 
 void CObjectCheckTree::_onItemClick(HTREEITEM hItem)

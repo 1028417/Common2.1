@@ -111,7 +111,7 @@ BOOL CPage::PreTranslateMessage(MSG* pMsg)
 	{
 	case WM_KEYUP:
 	{
-		UINT uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
+		WORD uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
 
 		map<HWND, map<UINT, UINT>>::iterator itHotKeys = m_mapMenuHotKeys.find(pMsg->hwnd);
 		if (itHotKeys != m_mapMenuHotKeys.end())

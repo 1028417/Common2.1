@@ -45,6 +45,8 @@ public:
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 
 	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+	
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 protected:
 	virtual BOOL handleNMNotify(NMHDR& NMHDR) { return FALSE; }
@@ -159,5 +161,5 @@ private:
 	void _onItemClick(HTREEITEM hItem);
 
 protected:
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 };

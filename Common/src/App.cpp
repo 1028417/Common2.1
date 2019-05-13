@@ -297,8 +297,8 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 		break;
 	case WM_KEYUP:
 	{
-		auto uKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
-		if (VK_CONTROL != uKey && VK_SHIFT != uKey && VK_MENU != uKey)
+		WORD uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
+		if (VK_CONTROL != uVkKey && VK_SHIFT != uVkKey && VK_MENU != uVkKey)
 		{
 			UINT uFlag = 0;
 			if(getKeyState(VK_CONTROL))
@@ -316,7 +316,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 				uFlag |= MOD_ALT;
 			}
 			
-			if (_HandleHotkey(MAKELPARAM(uFlag, uKey)))
+			if (_HandleHotkey(MAKELPARAM(uFlag, uVkKey)))
 			{
 				return TRUE;
 			}
