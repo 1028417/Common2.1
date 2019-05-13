@@ -105,7 +105,7 @@ protected:
 	UINT getActiveCount();
 };
 
-template <typename T, typename R=BOOL>
+template <typename T, typename R>
 class CMultiTask
 {
 public:
@@ -118,8 +118,7 @@ private:
 
 public:
 	using CB_SubTask = const function<bool(UINT uTaskIdx, T&, R&)>&;
-	static void start(ArrList<T>& alTask, vector<R>& vecResult, UINT uThreadCount
-		, CB_SubTask cb)
+	static void start(ArrList<T>& alTask, vector<R>& vecResult, UINT uThreadCount, CB_SubTask cb)
 	{
 		if (0 == uThreadCount)
 		{
@@ -149,31 +148,20 @@ public:
 
 	static void start(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
 	{
-		vector<BOOL> vecResult;
-		start(alTask, vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, BOOL&) {
+		vector<R> vecResult;
+		start(alTask, vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, R&) {
 			return cb(uTaskIdx, task);
 		});
 	}
 
-public:
-	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, CB_SubTask cb=NULL)
+	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, CB_SubTask cb)
 	{
 		start(alTask, m_vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, R& result) {
-			if (cb)
-			{
-				return cb(uTaskIdx, task, result);
-			}
-			else
-			{
-				return onTask(uTaskIdx, task, result);
-			}
+			return cb(uTaskIdx, task, result);
 		});
 
 		return m_vecResult;
 	}
-
-private:
-	virtual bool onTask(UINT uTaskIdx, T&, R&) { return false; }
 };
 
 class __UtilExt CCondVar : public condition_variable
