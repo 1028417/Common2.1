@@ -8,7 +8,8 @@
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
 #else
-#include <qstring.h>
+#include <QString>
+#define __QStr(wstr) QString::fromStdWString(wstr)
 #endif
 
 #ifdef __ANDROID__
@@ -30,7 +31,6 @@ using time64_t = int64_t;
 
 #ifndef UINT
 using UINT = unsigned int;
-
 #endif
 
 #ifndef BOOL

@@ -22,14 +22,8 @@ public:
 	ibstream() {}
 
 	ibstream(const wstring& strFile)
-		: ifstream(
-#ifdef _MSC_VER
-			strFile
-#else
-			util::WSToAsc(strFile)
-#endif
-            , ios_base::binary)
 	{
+		open(strFile);
 	}
 
 	void open(const wstring& strFile)
@@ -243,62 +237,76 @@ int fsutil::GetFileSize(const wstring& strFile)
 	return fileStat.st_size;
 }
 
-bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
+static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-	ibstream srcStream;
-	try
-	{
-		srcStream.open(strSrcFile);
-	}
-	catch (...)
-	{
-	}
-	__EnsureReturn(srcStream && srcStream.is_open(), false);
+#ifdef __ANDROID__
+    return QFile::copy(__QStr(strSrcFile), __QStr(strDstFile));
+#else
+	return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+#endif
+}
 
-	if (!removeFile(strDstFile))
-	{
-		srcStream.close();
-		return false;
-	}
+/*ibstream srcStream;
+try
+{
+	srcStream.open(strSrcFile);
+}
+catch (...)
+{
+}
+__EnsureReturn(srcStream && srcStream.is_open(), false);
 
-	obstream dstStream;
-	try
-	{
-		dstStream.open(strDstFile, true);
-	}
-	catch (...)
-	{
-	}
-	if (!dstStream || !dstStream.is_open())
-	{
-		srcStream.close();
-		return false;
-	}
+if (!removeFile(strDstFile))
+{
+	srcStream.close();
+	return false;
+}
 
-	bool bResult = true;
+obstream dstStream;
+try
+{
+	dstStream.open(strDstFile, true);
+}
+catch (...)
+{
+}
+if (!dstStream || !dstStream.is_open())
+{
+	srcStream.close();
+	return false;
+}
 
-	char lpBuffer[1024]{ 0 };
-	try
+bool bResult = true;
+
+char lpBuffer[1024]{ 0 };
+try
+{
+	while (!srcStream.eof())
 	{
-		while (!srcStream.eof())
+		srcStream.read(lpBuffer, sizeof lpBuffer);
+		auto size = srcStream.gcount();
+		if (size > 0)
 		{
-			srcStream.read(lpBuffer, sizeof lpBuffer);
-			auto size = srcStream.gcount();
-			if (size > 0)
-			{
-				dstStream.write(lpBuffer, size);
-			}
+			dstStream.write(lpBuffer, size);
 		}
 	}
-	catch (...)
+}
+catch (...)
+{
+	bResult = false;
+}
+
+srcStream.close();
+dstStream.close();*/
+
+bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
+{
+	if (!_copyFile(strSrcFile, strDstFile))
 	{
-		bResult = false;
+		return false;
 	}
 
-	srcStream.close();
-	dstStream.close();
-
-	if (bResult && bSyncModifyTime)
+	if (bSyncModifyTime)
 	{
 		FileStat fileStat;
 		if (getFileStat(strSrcFile, fileStat))
@@ -315,7 +323,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 		}
 	}
 
-	return bResult;
+	return true;
 }
 
 time64_t fsutil::GetFileModifyTime(const wstring& strFile)
@@ -457,7 +465,7 @@ bool fsutil::fileExists(const wstring& strFile)
 	}
 
 #ifndef _MSC_VER
-	QFileInfo fi(QString::fromStdWString(strFile));
+	QFileInfo fi(__QStr(strFile));
 	return fi.isFile();
 #else
 	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
@@ -473,7 +481,7 @@ bool fsutil::dirExists(const wstring& strDir)
 	}
 
 #ifndef _MSC_VER
-	QFileInfo fi(QString::fromStdWString(strDir));
+	QFileInfo fi(__QStr(strDir));
 	return fi.isDir();
 #else
 	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
@@ -484,7 +492,7 @@ bool fsutil::dirExists(const wstring& strDir)
 void fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    (void)QDir().mkpath(QString::fromStdWString(strDir));
+    (void)QDir().mkpath(__QStr(strDir));
 #else
 	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
 	{
@@ -500,7 +508,7 @@ void fsutil::createDir(const wstring& strDir)
 bool fsutil::removeDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-	QDir dir(QString::fromStdWString(strDir));
+	QDir dir(__QStr(strDir));
 	return dir.rmpath(dir.absolutePath());
 #else
 	if (::RemoveDirectoryW(strDir.c_str()))
@@ -521,7 +529,7 @@ bool fsutil::removeDir(const wstring& strDir)
 bool fsutil::removeFile(const wstring& strFile)
 {
 #ifdef __ANDROID__
-	return QFile::remove(QString::fromStdWString(strFile));
+	return QFile::remove(__QStr(strFile));
 #else
 	if (::DeleteFileW(strFile.c_str()))
 	{
@@ -540,7 +548,7 @@ bool fsutil::removeFile(const wstring& strFile)
 bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #ifdef __ANDROID__
-    return QFile::rename(QString::fromStdWString(strSrcFile), QString::fromStdWString(strDstFile));
+    return QFile::rename(__QStr(strSrcFile), __QStr(strDstFile));
 #else
 	return TRUE == ::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED);
 #endif
@@ -561,7 +569,7 @@ wstring fsutil::currentDir()
 #ifdef __ANDROID__
 bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
 {
-    QDir dir(QString::fromStdWString(strFindPath));
+    QDir dir(__QStr(strFindPath));
     if(!dir.exists())
     {
         return false;
