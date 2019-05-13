@@ -511,6 +511,15 @@ bool fsutil::removeFile(const wstring& strFile)
 #endif
 }
 
+bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
+{
+#ifdef __ANDROID__
+    return QFile::rename(QString::fromStdWString(strSrcFile), QString::fromStdWString(strDstFile));
+#else
+	return TRUE == ::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED);
+#endif
+}
+
 wstring fsutil::currentDir()
 {
 #ifdef __ANDROID__

@@ -48,6 +48,8 @@ public:
     static bool removeDir(const wstring& strDir);
     static bool removeFile(const wstring& strFile);
 
+	static bool moveFile(const wstring& strSrcFile, const wstring& strDstFile);
+
 	static wstring currentDir();
 
 	using CB_FindFile = const function<bool(const tagFileInfo&)>&;
