@@ -169,7 +169,7 @@ BOOL CMainApp::InitInstance()
 
 	CMainWnd *pMainWnd = getView().init();
 	HWND hwndMain = pMainWnd->GetSafeHwnd();
-	__EnsureReturn(NULL != hwndMain, FALSE);
+	__EnsureReturn(hwndMain, FALSE);
 	m_pMainWnd = pMainWnd;
 
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)

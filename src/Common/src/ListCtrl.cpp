@@ -1065,8 +1065,6 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 	m_vecAsyncTaskFlag.assign((size_t)nCount, FALSE);
 
-	m_cbAsyncTask = cb;
-
 	m_AsyncTaskTimer.set(uElapse, [&]() {
 		if (E_ListViewType::LVT_Report != GetView())
 		{
@@ -1089,9 +1087,13 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (!onAsyncTask(uItem))
+			if (cb)
 			{
-				return false;
+				cb(uItem);
+			}
+			else
+			{
+				onAsyncTask(uItem);
 			}
 			
 			return true;
@@ -1106,9 +1108,13 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (!onAsyncTask(uItem))
+			if (cb)
 			{
-				return false;
+				cb(uItem);
+			}
+			else
+			{
+				onAsyncTask(uItem);
 			}
 
 			return true;
@@ -1116,14 +1122,4 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 		return false;
 	});
-}
-
-bool CObjectList::onAsyncTask(UINT uItem)
-{
-	if (m_cbAsyncTask)
-	{
-		return m_cbAsyncTask(uItem);
-	}
-
-	return false;
 }

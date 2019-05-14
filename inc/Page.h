@@ -38,8 +38,6 @@ private:
 
 	bool m_bDragable = false;
 
-	UINT_PTR m_idTimer = 0;
-
 public:
 	BOOL Active(bool bForceFocus=true);
 

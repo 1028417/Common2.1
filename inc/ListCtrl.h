@@ -214,7 +214,6 @@ private:
 	CString m_cstrRenameText;
 
 	vector<BOOL> m_vecAsyncTaskFlag;
-	CB_AsyncTask m_cbAsyncTask;
 	WinTimer m_AsyncTaskTimer;
 
 protected:
@@ -338,5 +337,5 @@ private:
 
 	virtual void OnListItemRename(UINT uItem, const CString& cstrNewText) {}
 
-	virtual bool onAsyncTask(UINT uItem);
+	virtual void onAsyncTask(UINT uItem) {}
 };
