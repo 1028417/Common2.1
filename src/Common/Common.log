@@ -1,0 +1,22 @@
+﻿  stdafx.cpp
+  Dump.cpp
+  App.cpp
+  DockView.cpp
+  DragDrop.cpp
+  Guard.cpp
+  ListCtrl.cpp
+  MainWnd.cpp
+  Page.cpp
+  PathCtrl.cpp
+  ProgressDlg.cpp
+  ResModule.cpp
+  TreeCtrl.cpp
+  img.cpp
+    正在创建库 ../lib/Common.lib 和对象 ../lib/Common.exp
+  正在生成代码
+  60 of 5337 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    56 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  Common.vcxproj -> D:\dev\c++\Common2.1\Common\../bin/Common.dll
+  Common.vcxproj -> ../build\Common/Common.pdb (Full PDB)

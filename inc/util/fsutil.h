@@ -5,8 +5,40 @@
 
 #define __strUnicodeBOM wstring({ 0xff, 0xfe }) // Unicode头
 
-template <bool _ToUTF8 = false, bool _WithBOM = false>
-class CTxtWriter
+#ifndef _MSC_VER
+#include <QFileInfo>
+#include <QFile>
+#include <QDir>
+#endif
+
+#ifdef __ANDROID__
+#define __WriteLineFlag E_WriteLineFlag::WLF_N
+#else
+#define __WriteLineFlag E_WriteLineFlag::WLF_RN
+#endif
+
+enum class E_WriteLineFlag
+{
+	WLF_N = 0,
+	WLF_RN,
+	WLF_R
+};
+
+class ITxtWriter
+{
+public:
+	virtual 	bool open(const wstring& strFile, bool bTrunc = false) = 0;
+	
+	virtual 	size_t write(const wstring& strData) = 0;
+	virtual 	size_t writeln(const wstring& strData) = 0;
+
+	virtual 	bool isOpened() = 0;
+
+	virtual bool close() = 0;
+};
+
+template <E_WriteLineFlag _Flag = __WriteLineFlag, bool _ToUTF8 = false, bool _WithBOM = false>
+class CTxtWriter : public ITxtWriter
 {
 public:
 	CTxtWriter(const wstring& strFile = L"", bool bTrunc = false)
@@ -26,7 +58,7 @@ private:
 	FILE *m_lpFile = NULL;
 
 public:
-	bool open(const wstring& strFile, bool bTrunc = false)
+	bool open(const wstring& strFile, bool bTrunc = false) override
 	{
 		wstring strMode(bTrunc ? L"w" : L"a");
 		if (_ToUTF8)
@@ -53,7 +85,7 @@ public:
 		return true;
 	}
 
-	size_t write(const wstring& strData)
+	size_t write(const wstring& strData) override
 	{
 		if (NULL == m_lpFile)
 		{
@@ -68,12 +100,28 @@ public:
 		return fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, m_lpFile);
 	}
 
-	bool isOpened()
+	size_t writeln(const wstring& strData) override
+	{
+		if (E_WriteLineFlag::WLF_N == _Flag)
+		{
+			return write(strData + L"\n");
+		}
+		else if (E_WriteLineFlag::WLF_RN == _Flag)
+		{
+			return write(strData + L"\r\n");
+		}
+		else
+		{
+			return write(strData + L"\r");
+		}
+	}
+	
+	bool isOpened() override
 	{
 		return NULL != m_lpFile;
 	}
 
-	bool close()
+	bool close() override
 	{
 		if (NULL != m_lpFile)
 		{
@@ -100,7 +148,7 @@ public:
 	static bool saveTxt(const wstring& strFile
 		, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc = false)
 	{
-		CTxtWriter<_ToUTF8, _WithBOM> TxtWriter;
+		CTxtWriter<__WriteLineFlag, _ToUTF8, _WithBOM> TxtWriter;
 		if (!TxtWriter.open(strFile, bTrunc))
 		{
 			return false;
@@ -117,7 +165,7 @@ public:
 	template <bool _ToUTF8 = false, bool _WithBOM = false>
 	static bool saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc = false)
 	{
-		return saveTxt<_ToUTF8, _WithBOM>(strFile, [&](FN_WriteTxt cb) {
+		return saveTxt<__WriteLineFlag, _ToUTF8, _WithBOM>(strFile, [&](FN_WriteTxt cb) {
 			cb(strData);
 		}, bTrunc);
 	}

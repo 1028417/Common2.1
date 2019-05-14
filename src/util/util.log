@@ -1,0 +1,17 @@
+﻿  Path.cpp
+  ProFile.cpp
+  SQLiteDB.cpp
+  fsdlg.cpp
+  fsutil.cpp
+  mtutil.cpp
+  util.cpp
+  winfsutil.cpp
+  wintimer.cpp
+    正在创建库 ../lib/util.lib 和对象 ../lib/util.exp
+  正在生成代码
+  0 of 6081 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    616 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  util.vcxproj -> D:\dev\c++\Common2.1\util\../bin/util.dll
+  util.vcxproj -> ../build\util/util.pdb (Full PDB)

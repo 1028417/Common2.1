@@ -6,11 +6,7 @@
 
 #include <fstream>
 
-#ifndef _MSC_VER
-#include <QFileInfo>
-#include <QFile>
-#include <QDir>
-#else
+#ifdef _MSC_VER
 #include <Windows.h>
 #endif
 
