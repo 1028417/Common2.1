@@ -14,8 +14,6 @@
 #include <Windows.h>
 #endif
 
-static const unsigned char g_chUnicodeHead[] = { 0xff, 0xfe }; // Unicode头
-
 class ibstream : public ifstream
 {
 public:
@@ -73,53 +71,6 @@ static bool getFileStat(const wstring& strFile, FileStat& fileStat)
 #else
 	return 0 == _wstat(strFile.c_str(), &fileStat);
 #endif
-}
-
-bool fsutil::saveTxt(const wstring& strFile
-	, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc, bool bToUTF8)
-{
-	wstring strMode(bTrunc?L"w":L"a");
-	if (bToUTF8)
-	{
-		strMode.append(L",ccs=UTF-8");
-	}
-	else
-	{
-		strMode.append(L"b");
-	}
-
-	FILE *lpFile = NULL;
-#ifdef __ANDROID__
-	lpFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
-#else
-	__EnsureReturn(0 == _wfopen_s(&lpFile, strFile.c_str(), strMode.c_str()), false);
-#endif
-	__EnsureReturn(lpFile, false);
-
-	if (!bToUTF8)
-	{
-		fwrite(g_chUnicodeHead, sizeof(g_chUnicodeHead), 1, lpFile);
-	}
-
-	auto fnWrite = [&](const wstring& strData) {
-		if (!strData.empty())
-		{
-			fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, lpFile);
-		}
-	};
-
-	cb(fnWrite);
-
-	fclose(lpFile);
-
-	return true;
-}
-
-bool fsutil::saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc, bool bToUTF8)
-{
-	return saveTxt(strFile, [&](FN_WriteTxt cb) {
-		cb(strData);
-	}, bTrunc, bToUTF8);
 }
 
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
