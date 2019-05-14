@@ -28,16 +28,16 @@
     <ClCompile Include="winfsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\util\wintimer.h" />
-    <ClInclude Include="..\inc\util\fsdlg.h" />
-    <ClInclude Include="..\inc\util\fsutil.h" />
-    <ClInclude Include="..\inc\util\IDB.h" />
-    <ClInclude Include="..\inc\util\mtutil.h" />
-    <ClInclude Include="..\inc\util\Path.h" />
-    <ClInclude Include="..\inc\util\SQLiteDB.h" />
-    <ClInclude Include="..\inc\util\util.h" />
-    <ClInclude Include="..\inc\util\ProFile.h" />
-    <ClInclude Include="..\inc\util\winfsutil.h" />
+    <ClInclude Include="..\..\inc\util\wintimer.h" />
+    <ClInclude Include="..\..\inc\util\fsdlg.h" />
+    <ClInclude Include="..\..\inc\util\fsutil.h" />
+    <ClInclude Include="..\..\inc\util\IDB.h" />
+    <ClInclude Include="..\..\inc\util\mtutil.h" />
+    <ClInclude Include="..\..\inc\util\Path.h" />
+    <ClInclude Include="..\..\inc\util\SQLiteDB.h" />
+    <ClInclude Include="..\..\inc\util\util.h" />
+    <ClInclude Include="..\..\inc\util\ProFile.h" />
+    <ClInclude Include="..\..\inc\util\winfsutil.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="sqlite\sqlite3ext.h" />
   </ItemGroup>

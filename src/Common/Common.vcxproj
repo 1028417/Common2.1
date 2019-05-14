@@ -162,21 +162,21 @@
     <ResourceCompile Include="Common.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\App.h" />
-    <ClInclude Include="..\inc\CDispatch.h" />
-    <ClInclude Include="..\inc\Common.h" />
-    <ClInclude Include="..\inc\DialogT.h" />
-    <ClInclude Include="..\inc\DockView.h" />
-    <ClInclude Include="..\inc\DragDrop.h" />
-    <ClInclude Include="..\inc\Guard.h" />
-    <ClInclude Include="..\inc\img.h" />
-    <ClInclude Include="..\inc\MainWnd.h" />
-    <ClInclude Include="..\inc\ListCtrl.h" />
-    <ClInclude Include="..\inc\ModuleApp.h" />
-    <ClInclude Include="..\inc\Page.h" />
-    <ClInclude Include="..\inc\PathCtrl.h" />
-    <ClInclude Include="..\inc\ProgressDlg.h" />
-    <ClInclude Include="..\inc\TreeCtrl.h" />
+    <ClInclude Include="..\..\inc\App.h" />
+    <ClInclude Include="..\..\inc\CDispatch.h" />
+    <ClInclude Include="..\..\inc\Common.h" />
+    <ClInclude Include="..\..\inc\DialogT.h" />
+    <ClInclude Include="..\..\inc\DockView.h" />
+    <ClInclude Include="..\..\inc\DragDrop.h" />
+    <ClInclude Include="..\..\inc\Guard.h" />
+    <ClInclude Include="..\..\inc\img.h" />
+    <ClInclude Include="..\..\inc\MainWnd.h" />
+    <ClInclude Include="..\..\inc\ListCtrl.h" />
+    <ClInclude Include="..\..\inc\ModuleApp.h" />
+    <ClInclude Include="..\..\inc\Page.h" />
+    <ClInclude Include="..\..\inc\PathCtrl.h" />
+    <ClInclude Include="..\..\inc\ProgressDlg.h" />
+    <ClInclude Include="..\..\inc\TreeCtrl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

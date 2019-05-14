@@ -54,49 +54,49 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="..\inc\App.h">
+    <ClInclude Include="..\..\inc\App.h">
       <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\DockView.h">
+    <ClInclude Include="..\..\inc\DockView.h">
       <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\MainWnd.h">
+    <ClInclude Include="..\..\inc\MainWnd.h">
       <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\Page.h">
+    <ClInclude Include="..\..\inc\ModuleApp.h">
       <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\img.h">
-      <Filter>src\ctrl</Filter>
+    <ClInclude Include="..\..\inc\Page.h">
+      <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\ListCtrl.h">
-      <Filter>src\ctrl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\PathCtrl.h">
-      <Filter>src\ctrl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\TreeCtrl.h">
-      <Filter>src\ctrl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\CDispatch.h">
+    <ClInclude Include="..\..\inc\CDispatch.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\ProgressDlg.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\Common.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\Guard.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\ModuleApp.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\DragDrop.h">
+    <ClInclude Include="..\..\inc\DragDrop.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\DialogT.h">
+    <ClInclude Include="..\..\inc\img.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\ListCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\PathCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\TreeCtrl.h">
+      <Filter>src\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\DialogT.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Guard.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\ProgressDlg.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
