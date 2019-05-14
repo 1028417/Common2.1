@@ -1065,7 +1065,7 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 	m_vecAsyncTaskFlag.assign((size_t)nCount, FALSE);
 
-	m_AsyncTaskTimer.set(uElapse, [&]() {
+	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (E_ListViewType::LVT_Report != GetView())
 		{
 			return false;
