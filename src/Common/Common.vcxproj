@@ -87,7 +87,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>NotSet</SubSystem>
-      <ImportLibrary>../lib/$(ProjectName)d.lib</ImportLibrary>
+      <ImportLibrary>../../lib/$(ProjectName)d.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>../../lib/utild.lib</AdditionalDependencies>
     </Link>
@@ -126,7 +126,7 @@
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <ImportLibrary>../lib/$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>../../lib/$(ProjectName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>../../lib/util.lib</AdditionalDependencies>
     </Link>
