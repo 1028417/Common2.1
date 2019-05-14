@@ -140,8 +140,6 @@ public:
 class __CommonExt CObjectList : public CTouchWnd<CListCtrl>
 {
 public:
-	using CB_AsyncTask = function<bool(UINT uItem)>;
-
 	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
 	using CB_ListViewChanged = function<void(E_ListViewType)>;
 
@@ -312,6 +310,7 @@ public:
 
 	UINT GetHeaderHeight();
 
+	using CB_AsyncTask = function<void(UINT uItem)>;
 	void AsyncTask(UINT uElapse, const CB_AsyncTask& cb=NULL);
 
 protected:
