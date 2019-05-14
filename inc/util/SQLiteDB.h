@@ -46,13 +46,11 @@ private:
 class __UtilExt CSQLiteDB : public IDB
 {
 public:
-	CSQLiteDB(const string& strDBPath="");
+	CSQLiteDB(const wstring& strFile=L"");
 
 	~CSQLiteDB();
 
 private:
-	string m_strDBPath;
-	
 	void *m_hDB = NULL;
 
 	string m_strError;
@@ -67,7 +65,7 @@ public:
 		return m_strError;
 	}
 
-	bool Connect(const string& strPara="") override;
+	bool Connect(const wstring& strPara=L"") override;
 
 	bool Disconnect() override;
 

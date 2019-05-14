@@ -32,7 +32,7 @@ class IDB
 public:
 	virtual int GetStatus() = 0;
 
-	virtual bool Connect(const string& strPara="") = 0;
+	virtual bool Connect(const wstring& strPara=L"") = 0;
 	virtual bool Disconnect() = 0;
 
 	virtual bool Execute(const string& strSql) = 0;

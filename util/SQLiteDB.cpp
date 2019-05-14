@@ -109,9 +109,12 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<double>& arrValue)
 
 //CSQLiteDB
 
-CSQLiteDB::CSQLiteDB(const string& strDBPath)
-	: m_strDBPath(strDBPath)
+CSQLiteDB::CSQLiteDB(const wstring& strFile)
 {
+	if (!strFile.empty())
+	{
+		(void)Connect(strFile);
+	}
 }
 
 CSQLiteDB::~CSQLiteDB()
@@ -124,13 +127,11 @@ int CSQLiteDB::GetStatus()
 	return (NULL != m_hDB);
 }
 
-bool CSQLiteDB::Connect(const string& strPara)
+bool CSQLiteDB::Connect(const wstring& strPara)
 {
 	__EnsureReturn(!m_hDB, false);
 
-	string strDBPath = !strPara.empty()?strPara:m_strDBPath;
-	
-	__EnsureReturn(SQLITE_OK == sqlite3_open(strDBPath.c_str(), (sqlite3**)&m_hDB), false);
+	__EnsureReturn(SQLITE_OK == sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB), false);
 	__EnsureReturn(m_hDB, false);
 
 	return true;
