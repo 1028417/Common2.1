@@ -155,11 +155,13 @@ public:
 		}
 
 		auto fnWrite = [&](const wstring& strData) {
-			TxtWriter.write(strData);
+			(void)TxtWriter.write(strData);
 		};
 		cb(fnWrite);
 
-		TxtWriter.close();
+		(void)TxtWriter.close();
+
+		return true;
 	}
 
 	template <bool _ToUTF8 = false, bool _WithBOM = false>
