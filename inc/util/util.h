@@ -121,6 +121,9 @@ public:
 class __UtilExt wstrutil
 {
 public:
+	static const wchar_t wchSpace = L' ';
+
+public:
 	static bool checkWChar(const wstring& str);
 
 	template <typename T>
@@ -157,7 +160,8 @@ public:
 	static wstring upperCase_r(const wstring& str);
 
 	static void replace(wstring& str, wchar_t chrFind, wchar_t chrReplace);
-	
+	static void replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace);
+
 	static wstring fromUTF8(const string& str);
 	static string toUTF8(const wstring& str);
 

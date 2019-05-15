@@ -140,8 +140,8 @@ public:
 class __UtilExt fsutil
 {
 public:
-	static const wchar_t dot = L'.';
-	static const wchar_t backSlant = L'\\';
+	static const wchar_t wchDot = L'.';
+	static const wchar_t wchBackSlant = L'\\';
 
 	using FN_WriteTxt = const function<void(const wstring&)>&;
 	template <bool _ToUTF8 = false , bool _WithBOM = false>

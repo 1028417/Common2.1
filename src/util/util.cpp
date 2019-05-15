@@ -279,6 +279,17 @@ void wstrutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 	}
 }
 
+void wstrutil::replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+{
+	for (auto& chr : str)
+	{
+		if (wstring::npos != strFindChars.find(chr))
+		{
+			chr = chrReplace;
+		}
+	}
+}
+
 #ifdef _MSC_VER
 #include <codecvt>
 using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;

@@ -281,7 +281,7 @@ time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int iPos = -1;
-	auto pos = strPath.find_last_of(fsutil::backSlant);
+	auto pos = strPath.find_last_of(fsutil::wchBackSlant);
 	if (wstring::npos != pos)
 	{
 		iPos = pos;
@@ -320,7 +320,7 @@ void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 {
 	wstring strName = GetFileName(strPath);
 
-	auto pos = strName.find_last_of(dot);
+	auto pos = strName.find_last_of(fsutil::wchDot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
@@ -356,12 +356,12 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
-	if (fsutil::backSlant == strNewPath.back())
+	if (fsutil::wchBackSlant == strNewPath.back())
 	{
 		strNewPath.pop_back();
 	}
 
-	int nPos = (int)strNewPath.rfind(fsutil::backSlant);
+	int nPos = (int)strNewPath.rfind(fsutil::wchBackSlant);
 	__EnsureReturn(0 <= nPos, L"");
 
 	return strNewPath.substr(0, nPos);
@@ -373,7 +373,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(fsutil::backSlant == *strDir.rbegin() || fsutil::backSlant == strSubPath[size], false);
+	__EnsureReturn(fsutil::wchBackSlant == *strDir.rbegin() || fsutil::wchBackSlant == strSubPath[size], false);
 
 #ifdef __ANDROID__
 	const auto& _strDir = wstrutil::toStr(strDir);
@@ -575,7 +575,7 @@ bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
 
 	do
 	{
-		if (fsutil::dot == FindData.cFileName[0])
+		if (fsutil::wchDot == FindData.cFileName[0])
 		{
 			continue;
 		}
