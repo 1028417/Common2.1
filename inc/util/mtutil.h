@@ -16,15 +16,15 @@ class __UtilExt mtutil
 {
 #ifndef __ANDROID__
 public:
-	static void apcWakeup(HANDLE hThread, const fn_voidvoid& fn = NULL)
+	static bool apcWakeup(HANDLE hThread, const fn_voidvoid& fn = NULL)
 	{
-		QueueUserAPC(APCFunc, hThread, fn ? (ULONG_PTR)&fn : 0);
+		return 0 != QueueUserAPC(APCFunc, hThread, fn ? (ULONG_PTR)&fn : 0);
 	}
 
-	static void apcWakeup(DWORD dwThreadID, const fn_voidvoid& fn = NULL)
+	static bool apcWakeup(DWORD dwThreadID, const fn_voidvoid& fn = NULL)
 	{
 		HANDLE hThread = OpenThread(PROCESS_ALL_ACCESS, FALSE, dwThreadID);
-		apcWakeup(hThread, fn);
+		return apcWakeup(hThread, fn);
 	}
 
 	static bool poolStart(const fn_voidvoid& fn)

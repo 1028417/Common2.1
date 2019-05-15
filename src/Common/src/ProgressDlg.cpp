@@ -27,9 +27,7 @@ INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
 
 	__AssertReturn(this->InitModalIndirect(lpDialogTemplate, pWndParent), -1);
 
-	INT_PTR nResult = __super::DoModal();
-
-	return nResult;
+	return __super::DoModal();
 }
 
 BOOL CProgressDlg::OnInitDialog()
@@ -155,7 +153,7 @@ void CProgressDlg::OnCancel()
 		__super::OnOK();
 		return;
 	}
-		
+	
 	this->pause(true);
 
 	if (IDYES != this->showMsgBox(L"确认取消?", MB_YESNO))

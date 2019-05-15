@@ -7,9 +7,14 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
+
 #else
 #include <QString>
 #define __QStr(wstr) QString::fromStdWString(wstr)
+
+#ifndef QT_NO_DEBUG
+#define _DEBUG
+#endif
 #endif
 
 #ifdef __ANDROID__

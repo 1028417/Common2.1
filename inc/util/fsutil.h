@@ -10,39 +10,40 @@
 #include <QTime>
 #endif
 
+#define __UnicodeHead string({(char)0xff, (char)0xfe})
+#define __UTF8Bom string({(char)0xef, (char)0xbb, (char)0xbf})
+
 #ifdef __ANDROID__
-#define __WriteLineFlag E_WriteLineFlag::WLF_N
+#define __DefEOL E_EOLFlag::eol_n
 #else
-#define __WriteLineFlag E_WriteLineFlag::WLF_RN
+#define __DefEOL E_EOLFlag::eol_rn
 #endif
 
-enum class E_WriteLineFlag
+enum class E_EOLFlag
 {
-	WLF_N = 0,
-	WLF_RN,
-	WLF_R
+	eol_n = 0,
+	eol_rn,
+	eol_r
 };
 
 class ITxtWriter
 {
-public:
-    virtual 	size_t write(const wstring& strData) = 0;
-	virtual 	size_t writeln(const wstring& strData) = 0;
+	virtual size_t write(const wstring& strText) const = 0;
+	virtual size_t write(const string& strText) const = 0;
+	
+	virtual size_t writeln(const wstring& strText) const = 0;
+	virtual size_t writeln(const string& strText) const = 0;
 };
 
-#define __UnicodeBOM string({(char)0xff, (char)0xfe})
-#define __UTF8Head string({(char)0xef, (char)0xbb, (char)0xbf})
-
-template <E_WriteLineFlag _Flag = __WriteLineFlag>
+class __UtilExt fsutil
+{
+public:
 class CTxtWriter : public ITxtWriter
 {
 public:
-	CTxtWriter(const wstring& strFile = L"", bool bTrunc = false)
+	CTxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
 	{
-		if (!strFile.empty())
-		{
-			(void)open(strFile, bTrunc);
-		}
+		m_eEOLFlag = eEOLFlag;
 	}
 
 	~CTxtWriter()
@@ -51,15 +52,53 @@ public:
 	}
 
 private:
+	E_EOLFlag m_eEOLFlag;
+	
 	FILE *m_lpFile = NULL;
 
-public:
-    bool open(const wstring& strFile, bool bTrunc = false, bool bToUTF8 = false)
-	{
-		wstring strMode(bTrunc ? L"w" : L"a");
-        if (bToUTF8)
+	bool m_bUTF8 = false;
+
+protected:
+	inline size_t _write(const void *pData, size_t size) const
+    {
+		if (NULL == m_lpFile)
 		{
-			strMode.append(L",ccs=UTF-8");
+			return 0;
+		}
+
+		if (NULL == pData || 0 == size)
+		{
+			return 0;
+		}
+
+        size_t ret = fwrite(pData, size, 1, m_lpFile);
+
+#ifdef _DEBUG
+		(void)fflush(m_lpFile);
+#endif
+
+		return ret;
+	}
+
+	inline size_t _write(const wstring& strText) const
+	{
+		return _write(strText.c_str(), strText.size()*sizeof(wchar_t));
+	}
+
+	inline size_t _write(const string& strText) const
+	{
+		return _write(strText.c_str(), strText.size());
+	}
+
+public:
+	bool open(const wstring& strFile, bool bTrunc = false, bool bUTF8 = false)
+	{
+		m_bUTF8 = bUTF8;
+
+		wstring strMode(bTrunc ? L"w" : L"a");
+		if (bUTF8)
+		{
+			strMode.append(L"b,ccs=UTF-8");
 		}
 		else
 		{
@@ -72,49 +111,57 @@ public:
 		__EnsureReturn(0 == _wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str()), false);
 #endif
 		__EnsureReturn(m_lpFile, false);
-
-        if (bTrunc)
-        {
-            (void)write(wstrutil::fromStr(bToUTF8?__UTF8Head:__UnicodeBOM));
-        }
-
+	
 		return true;
 	}
 
-	size_t write(const wstring& strData) override
+	virtual size_t write(const wstring& strText) const override
 	{
-		if (NULL == m_lpFile)
+		if (m_bUTF8)
 		{
-			return 0;
-		}
-
-		if (strData.empty())
-		{
-			return 0;
-		}
-
-		return fwrite(strData.c_str(), strData.size() * sizeof(wchar_t), 1, m_lpFile);
-	}
-
-	size_t writeln(const wstring& strData) override
-	{
-		if (E_WriteLineFlag::WLF_N == _Flag)
-		{
-			return write(strData + L"\n");
-		}
-		else if (E_WriteLineFlag::WLF_RN == _Flag)
-		{
-			return write(strData + L"\r\n");
+			return _write(wstrutil::toUTF8(strText));
 		}
 		else
 		{
-			return write(strData + L"\r");
+			return _write(strText);
 		}
 	}
-	
-    bool isOpened()
+
+	virtual size_t write(const string& strText) const override
 	{
-		return NULL != m_lpFile;
+		return _write(strText);
+	}
+
+	virtual size_t writeln(const wstring& strText) const override
+	{
+		if (E_EOLFlag::eol_n == m_eEOLFlag)
+		{
+			return write(strText + L"\n");
+		}
+		else if (E_EOLFlag::eol_rn == m_eEOLFlag)
+		{
+			return write(strText + L"\r\n");
+		}
+		else
+		{
+			return write(strText + L"\r");
+		}
+	}
+
+	virtual size_t writeln(const string& strText) const override
+	{
+		if (E_EOLFlag::eol_n == m_eEOLFlag)
+		{
+			return write(strText + "\n");
+		}
+		else if (E_EOLFlag::eol_rn == m_eEOLFlag)
+		{
+			return write(strText + "\r\n");
+		}
+		else
+		{
+			return write(strText + "\r");
+		}
 	}
 
     bool close()
@@ -133,46 +180,92 @@ public:
 	}
 };
 
-class __UtilExt fsutil
+class CUnicodeTxtWriter : public CTxtWriter
 {
 public:
-	static const wchar_t wchDot = L'.';
-	static const wchar_t wchBackSlant = L'\\';
-
-    using FN_WriteTxt = const function<void(const wstring&)>&;
-    template <E_WriteLineFlag _Flag = __WriteLineFlag>
-	static bool saveTxt(const wstring& strFile
-        , const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc = false, bool bToUTF8 = false)
+	CUnicodeTxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
+		: CTxtWriter(eEOLFlag)
 	{
-        CTxtWriter<_Flag> TxtWriter;
-        if (!TxtWriter.open(strFile, bTrunc, bToUTF8))
+	}
+	
+public:
+	bool open(const wstring& strFile, bool bTrunc = false)
+	{
+		bool bExists = fsutil::fileExists(strFile);
+
+		if (!CTxtWriter::open(strFile, bTrunc))
 		{
 			return false;
 		}
 
-		auto fnWrite = [&](const wstring& strData) {
-			(void)TxtWriter.write(strData);
-		};
-		cb(fnWrite);
-
-		(void)TxtWriter.close();
+		if (!bExists || bTrunc)
+		{
+			(void)CTxtWriter::_write(__UnicodeHead);
+		}
 
 		return true;
 	}
 
-    template <E_WriteLineFlag _Flag = __WriteLineFlag>
-    static bool saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc = false, bool bToUTF8 = false)
+	size_t write(const wstring& strText) const override
 	{
-        return saveTxt<_Flag>(strFile, [&](FN_WriteTxt cb) {
-			cb(strData);
-        }, bTrunc, bToUTF8);
+		return CTxtWriter::_write(strText);
 	}
 
-	static bool loadBinary(const wstring& strFile, vector<char>& vecstrData, UINT uReadSize = 0);
+	size_t writeln(const wstring& strText) const override
+	{
+		return CTxtWriter::writeln(strText);
+	}
+
+	size_t write(const string& strText) const override
+	{
+		return write(wstrutil::fromStr(strText));
+	}
+
+	size_t writeln(const string& strText) const override
+	{
+		return writeln(wstrutil::fromStr(strText));
+	}
+};
+
+class CUTF8TxtWriter : public CTxtWriter
+{
+public:
+	CUTF8TxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
+		: CTxtWriter(eEOLFlag)
+	{
+	}
+
+public:
+	bool open(const wstring& strFile, bool bTrunc = false, bool bWithBom = true)
+	{
+		bool bExists = fsutil::fileExists(strFile);
+
+		if (!CTxtWriter::open(strFile, bTrunc, true))
+		{
+			return false;
+		}
+
+		if (bWithBom)
+		{
+			if (!bExists || bTrunc)
+			{
+				(void)CTxtWriter::write(__UTF8Bom);
+			}
+		}
+
+		return true;
+	}
+};
+
+public:
+	static const wchar_t wchDot = L'.';
+	static const wchar_t wchBackSlant = L'\\';
+
+	static bool loadBinary(const wstring& strFile, vector<char>& vecText, UINT uReadSize = 0);
 	
-	static bool loadTxt(const wstring& strFile, string& strData);
+	static bool loadTxt(const wstring& strFile, string& strText);
 	static bool loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
-	static bool loadTxt(const wstring& strFile, SVector<string>& vecLineData, char cdelimiter = '\n');
+	static bool loadTxt(const wstring& strFile, SVector<string>& vecLineText, char cdelimiter = '\n');
 
 	static bool copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime = false);
 

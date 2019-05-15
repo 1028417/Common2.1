@@ -109,7 +109,7 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 	return true;
 }
 
-bool fsutil::loadTxt(const wstring& strFile, string& strData)
+bool fsutil::loadTxt(const wstring& strFile, string& strText)
 {
 	ibstream fs(strFile);
 	if (!fs || !fs.is_open())
@@ -122,20 +122,20 @@ bool fsutil::loadTxt(const wstring& strFile, string& strData)
 		char lpBuff[256] = { 0 };
 		fs.read(lpBuff, sizeof(lpBuff) - 1);
 
-		strData.append(lpBuff);
+		strText.append(lpBuff);
 	}
 
-    size_t size = __UTF8Head.size();
-    if (strData.substr(0, size) == __UTF8Head)
+    size_t size = __UTF8Bom.size();
+    if (strText.substr(0, size) == __UTF8Bom)
     {
-        strData.erase(0, size);
+		strText.erase(0, size);
     }
     else
     {
-        size = __UnicodeBOM.size();
-        if (strData.substr(0, size) == __UnicodeBOM)
+        size = __UnicodeHead.size();
+        if (strText.substr(0, size) == __UnicodeHead)
         {
-            strData.erase(0, size);
+			strText.erase(0, size);
         }
     }
 
@@ -146,37 +146,37 @@ bool fsutil::loadTxt(const wstring& strFile, string& strData)
 
 bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter)
 {
-	string strData;
-	if (!loadTxt(strFile, strData))
+	string strText;
+	if (!loadTxt(strFile, strText))
 	{
 		return false;
 	}
 
 	size_t prePos = 0;
-	size_t pos = strData.find(cdelimiter, prePos);
+	size_t pos = strText.find(cdelimiter, prePos);
 	while (string::npos != pos)
 	{
-		if (!cb(strData.substr(prePos, pos - prePos)))
+		if (!cb(strText.substr(prePos, pos - prePos)))
 		{
 			return true;
 		}
 		
 		prePos = pos + 1;
-		pos = strData.find(cdelimiter, prePos);
+		pos = strText.find(cdelimiter, prePos);
 	}
 
-	if (prePos < strData.size())
+	if (prePos < strText.size())
 	{
-		cb(strData.substr(prePos));
+		cb(strText.substr(prePos));
 	}
 
 	return true;
 }
 
-bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineData, char cdelimiter)
+bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText, char cdelimiter)
 {
-	return loadTxt(strFile, [&](const string& strData) {
-		vecLineData.add(strData);
+	return loadTxt(strFile, [&](const string& strText) {
+		vecLineText.add(strText);
 		return true;
 	}, cdelimiter);
 }
@@ -194,10 +194,10 @@ int fsutil::GetFileSize(const wstring& strFile)
 
 static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-#ifdef __ANDROID__
-    return QFile::copy(__QStr(strSrcFile), __QStr(strDstFile));
+#ifdef _MSC_VER
+    return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-	return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+    return QFile::copy(__QStr(strSrcFile), __QStr(strDstFile));
 #endif
 }
 
