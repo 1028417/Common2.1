@@ -46,7 +46,7 @@ static LONG MyUnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInfo)
 	sprintf_s(pszExceptionInfo, "ExceptionCode=%u, ExceptionFlags=%u, ExceptionAddress=%d, NumberParameters=%u"
 		, exceptionRecord.ExceptionCode, exceptionRecord.ExceptionFlags, (int)exceptionRecord.ExceptionAddress, exceptionRecord.NumberParameters);
 	
-	wstring 	strDumpFile = util::formatTime64(L"pc_crash_%Y%m%d_%H%M%S.dmp");
+	wstring 	strDumpFile = timeutil::formatTime64(L"pc_crash_%Y%m%d_%H%M%S.dmp");
 	CreateMiniDump(pExceptionInfo, strDumpFile);
 	
 	return EXCEPTION_EXECUTE_HANDLER;

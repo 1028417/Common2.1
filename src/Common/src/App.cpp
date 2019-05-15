@@ -169,7 +169,7 @@ BOOL CMainApp::InitInstance()
 
 	CMainWnd *pMainWnd = getView().init();
 	HWND hwndMain = pMainWnd->GetSafeHwnd();
-	__EnsureReturn(NULL != hwndMain, FALSE);
+	__EnsureReturn(hwndMain, FALSE);
 	m_pMainWnd = pMainWnd;
 
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)
@@ -353,13 +353,14 @@ BOOL CMainApp::OnCommand(UINT uID)
 
 bool CMainApp::_HandleHotkey(LPARAM lParam)
 {
-	static DWORD dwLastTime = 0;
-	if (100 > ::GetTickCount() - dwLastTime)
+	static DWORD s_dwPrevTickCount = 0;
+	auto dwTickCount = ::GetTickCount();
+	if (dwTickCount - s_dwPrevTickCount < 300)
 	{
-		return FALSE;		
+		return false;	
 	}
-	dwLastTime = ::GetTickCount();
-
+	s_dwPrevTickCount = dwTickCount;
+	
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)
 	{
 		if (HotkeyInfo.lParam == lParam)

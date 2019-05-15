@@ -197,7 +197,7 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& s
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
 	{
-		(void)__super::InsertColumn(m_uColumnCount, column.bCenter ? column.cstrText : (L' ' + column.cstrText)
+		(void)__super::InsertColumn(m_uColumnCount, column.bCenter ? column.cstrText : (wstrutil::wchSpace + column.cstrText)
 			, column.bCenter ? LVCFMT_CENTER : LVCFMT_LEFT, column.uWidth);
 
 		m_uColumnCount++;
@@ -873,7 +873,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		CListObject *pObject = GetItemObject(nItem);
 		if (pObject)
 		{
-			pObject->OnListItemRename((LPCTSTR)cstrNewText);
+			pObject->OnListItemRename((wstring)cstrNewText);
 		}
 		else
 		{
@@ -1065,9 +1065,7 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 	m_vecAsyncTaskFlag.assign((size_t)nCount, FALSE);
 
-	m_cbAsyncTask = cb;
-
-	m_AsyncTaskTimer.set(uElapse, [&]() {
+	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (E_ListViewType::LVT_Report != GetView())
 		{
 			return false;
@@ -1089,9 +1087,13 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (!onAsyncTask(uItem))
+			if (cb)
 			{
-				return false;
+				cb(uItem);
+			}
+			else
+			{
+				onAsyncTask(uItem);
 			}
 			
 			return true;
@@ -1106,9 +1108,13 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (!onAsyncTask(uItem))
+			if (cb)
 			{
-				return false;
+				cb(uItem);
+			}
+			else
+			{
+				onAsyncTask(uItem);
 			}
 
 			return true;
@@ -1116,14 +1122,4 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 		return false;
 	});
-}
-
-bool CObjectList::onAsyncTask(UINT uItem)
-{
-	if (m_cbAsyncTask)
-	{
-		return m_cbAsyncTask(uItem);
-	}
-
-	return false;
 }

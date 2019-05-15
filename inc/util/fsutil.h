@@ -71,7 +71,7 @@ public:
 		}
 
 #ifdef __ANDROID__
-		m_lpFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
+		m_lpFile = fopen(wstrutil::toStr(strFile).c_str(), wstrutil::toStr(strMode).c_str());
 #else
 		__EnsureReturn(0 == _wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str()), false);
 #endif
@@ -140,8 +140,8 @@ public:
 class __UtilExt fsutil
 {
 public:
-	static const wchar_t dot = L'.';
-	static const wchar_t backSlant = L'\\';
+	static const wchar_t wchDot = L'.';
+	static const wchar_t wchBackSlant = L'\\';
 
 	using FN_WriteTxt = const function<void(const wstring&)>&;
 	template <bool _ToUTF8 = false , bool _WithBOM = false>
