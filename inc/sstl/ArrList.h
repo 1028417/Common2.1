@@ -181,7 +181,7 @@ namespace NS_SSTL
 		{
 			int iRetPos = -1;
 
-			(*this)([&](__DataConstRef data, size_t pos) {
+            (*this)(startPos, [&](__DataConstRef data, size_t pos) {
 				if (cb(data))
 				{
 					iRetPos = pos;

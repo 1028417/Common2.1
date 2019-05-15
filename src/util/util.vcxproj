@@ -28,6 +28,19 @@
     <ClCompile Include="winfsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\inc\sstl\ArrList.h" />
+    <ClInclude Include="..\..\inc\sstl\PairList.h" />
+    <ClInclude Include="..\..\inc\sstl\PtrArray.h" />
+    <ClInclude Include="..\..\inc\sstl\ptrcontainer.h" />
+    <ClInclude Include="..\..\inc\sstl\SArray.h" />
+    <ClInclude Include="..\..\inc\sstl\SContainer.h" />
+    <ClInclude Include="..\..\inc\sstl\SList.h" />
+    <ClInclude Include="..\..\inc\sstl\SMap.h" />
+    <ClInclude Include="..\..\inc\sstl\SSet.h" />
+    <ClInclude Include="..\..\inc\sstl\sstl.h" />
+    <ClInclude Include="..\..\inc\sstl\_check.h" />
+    <ClInclude Include="..\..\inc\sstl\_define.h" />
+    <ClInclude Include="..\..\inc\sstl\_util.h" />
     <ClInclude Include="..\..\inc\util\wintimer.h" />
     <ClInclude Include="..\..\inc\util\fsdlg.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h" />

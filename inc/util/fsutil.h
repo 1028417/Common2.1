@@ -3,12 +3,11 @@
 
 #define MAX_PATH 260
 
-#define __strUnicodeBOM wstring({ 0xff, 0xfe }) // Unicode头
-
 #ifndef _MSC_VER
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
+#include <QTime>
 #endif
 
 #ifdef __ANDROID__
@@ -27,17 +26,14 @@ enum class E_WriteLineFlag
 class ITxtWriter
 {
 public:
-	virtual 	bool open(const wstring& strFile, bool bTrunc = false) = 0;
-	
-	virtual 	size_t write(const wstring& strData) = 0;
+    virtual 	size_t write(const wstring& strData) = 0;
 	virtual 	size_t writeln(const wstring& strData) = 0;
-
-	virtual 	bool isOpened() = 0;
-
-	virtual bool close() = 0;
 };
 
-template <E_WriteLineFlag _Flag = __WriteLineFlag, bool _ToUTF8 = false, bool _WithBOM = false>
+#define __UnicodeBOM string({(char)0xff, (char)0xfe})
+#define __UTF8Head string({(char)0xef, (char)0xbb, (char)0xbf})
+
+template <E_WriteLineFlag _Flag = __WriteLineFlag>
 class CTxtWriter : public ITxtWriter
 {
 public:
@@ -58,10 +54,10 @@ private:
 	FILE *m_lpFile = NULL;
 
 public:
-	bool open(const wstring& strFile, bool bTrunc = false) override
+    bool open(const wstring& strFile, bool bTrunc = false, bool bToUTF8 = false)
 	{
 		wstring strMode(bTrunc ? L"w" : L"a");
-		if (_ToUTF8)
+        if (bToUTF8)
 		{
 			strMode.append(L",ccs=UTF-8");
 		}
@@ -77,10 +73,10 @@ public:
 #endif
 		__EnsureReturn(m_lpFile, false);
 
-		if (_WithBOM)
-		{
-			(void)write(__strUnicodeBOM);
-		}
+        if (bTrunc)
+        {
+            (void)write(wstrutil::fromStr(bToUTF8?__UTF8Head:__UnicodeBOM));
+        }
 
 		return true;
 	}
@@ -116,12 +112,12 @@ public:
 		}
 	}
 	
-	bool isOpened() override
+    bool isOpened()
 	{
 		return NULL != m_lpFile;
 	}
 
-	bool close() override
+    bool close()
 	{
 		if (NULL != m_lpFile)
 		{
@@ -143,13 +139,13 @@ public:
 	static const wchar_t wchDot = L'.';
 	static const wchar_t wchBackSlant = L'\\';
 
-	using FN_WriteTxt = const function<void(const wstring&)>&;
-	template <bool _ToUTF8 = false , bool _WithBOM = false>
+    using FN_WriteTxt = const function<void(const wstring&)>&;
+    template <E_WriteLineFlag _Flag = __WriteLineFlag>
 	static bool saveTxt(const wstring& strFile
-		, const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc = false)
+        , const function<void(FN_WriteTxt fnWriteTxt)>& cb, bool bTrunc = false, bool bToUTF8 = false)
 	{
-		CTxtWriter<__WriteLineFlag, _ToUTF8, _WithBOM> TxtWriter;
-		if (!TxtWriter.open(strFile, bTrunc))
+        CTxtWriter<_Flag> TxtWriter;
+        if (!TxtWriter.open(strFile, bTrunc, bToUTF8))
 		{
 			return false;
 		}
@@ -164,12 +160,12 @@ public:
 		return true;
 	}
 
-	template <bool _ToUTF8 = false, bool _WithBOM = false>
-	static bool saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc = false)
+    template <E_WriteLineFlag _Flag = __WriteLineFlag>
+    static bool saveTxt(const wstring& strFile, const wstring& strData, bool bTrunc = false, bool bToUTF8 = false)
 	{
-		return saveTxt<__WriteLineFlag, _ToUTF8, _WithBOM>(strFile, [&](FN_WriteTxt cb) {
+        return saveTxt<_Flag>(strFile, [&](FN_WriteTxt cb) {
 			cb(strData);
-		}, bTrunc);
+        }, bTrunc, bToUTF8);
 	}
 
 	static bool loadBinary(const wstring& strFile, vector<char>& vecstrData, UINT uReadSize = 0);

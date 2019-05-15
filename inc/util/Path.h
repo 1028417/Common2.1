@@ -123,17 +123,22 @@ public:
 class __UtilExt CListObject
 {
 public:
-	virtual void GenListItem(bool bReportView, vector<wstring>& vecText, int& iImage)
+    virtual void GenListItem(bool bReportView, vector<wstring>& vecText, int& iImage)
 	{
-	}
+        (void)bReportView;
+        (void)vecText;
+        (void)iImage;
+    }
 
 	virtual bool GetRenameText(wstring& strRenameText) const
 	{
+        (void)strRenameText;
 		return true;
 	}
 
 	virtual void OnListItemRename(const wstring& strNewName)
 	{
+        (void)strNewName;
 	}
 };
 
@@ -160,7 +165,7 @@ public:
 
 	virtual void GetTreeChilds(TD_TreeObjectList& lstChilds)
 	{
-		//do nothing
+        (void)lstChilds;
 	}
 };
 

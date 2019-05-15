@@ -125,6 +125,20 @@ bool fsutil::loadTxt(const wstring& strFile, string& strData)
 		strData.append(lpBuff);
 	}
 
+    size_t size = __UTF8Head.size();
+    if (strData.substr(0, size) == __UTF8Head)
+    {
+        strData.erase(0, size);
+    }
+    else
+    {
+        size = __UnicodeBOM.size();
+        if (strData.substr(0, size) == __UnicodeBOM)
+        {
+            strData.erase(0, size);
+        }
+    }
+
 	fs.close();
 
 	return true;
@@ -521,16 +535,26 @@ bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
     QFileInfoList list = dir.entryInfoList();
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
     {
-        const QFileInfo& fileInfo = list.at(nIdx);
-        if(fileInfo.fileName() == "." | fileInfo.fileName() == "..")
+        const QFileInfo& fi = list.at(nIdx);
+        if(fi.fileName() == "." || fi.fileName() == "..")
         {
             continue;
         }
 
-        if(!fileInfo.isDir())
+        tagFileInfo FileInfo;
+        if (fi.isDir())
         {
-            // fileInfo.fileName() fileInfo.baseName() fileInfo.path() fileInfo.completeSuffix() fileInfo.suffix()
-            // fileInfo.groupId() fileInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss") fileInfo.absoluteFilePath()
+            FileInfo.m_bDir = true;
+            FileInfo.m_strName = fi.fileName().toStdWString();
+            FileInfo.m_uFileSize = fi.size();
+            FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+            FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
+            // fi.baseName() fi.path() fi.absoluteFilePath() fi.completeSuffix() fi.suffix()
+        }
+
+        if (!cb(FileInfo))
+        {
+            break;
         }
     }
 

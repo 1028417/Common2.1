@@ -1,6 +1,8 @@
 
-#ifndef __ANDROID__
-#define strdup _strdup
+#ifdef __ANDROID__
+#define __strdup strdup
+#else
+#define __strdup _strdup
 #endif
 
 /* DO NOT EDIT!
@@ -11381,7 +11383,7 @@ static char *readline_completion_generator(const char *text, int state){
     sqlite3_free(zSql);
   }
   if( sqlite3_step(pStmt)==SQLITE_ROW ){
-    zRet = strdup((const char*)sqlite3_column_text(pStmt, 0));
+    zRet = __strdup((const char*)sqlite3_column_text(pStmt, 0));
   }else{
     sqlite3_finalize(pStmt);
     pStmt = 0;
@@ -16468,7 +16470,7 @@ int SQLITE_CDECL _wmain(int argc, wchar_t **wargv){
       }
       zHistory = getenv("SQLITE_HISTORY");
       if( zHistory ){
-        zHistory = strdup(zHistory);
+        zHistory = __strdup(zHistory);
       }else if( (zHome = find_home_dir(0))!=0 ){
         nHistory = strlen30(zHome) + 20;
         if( (zHistory = malloc(nHistory))!=0 ){

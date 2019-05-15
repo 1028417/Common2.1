@@ -15,8 +15,11 @@ struct tagTimerInfo
 static map<UINT, tagTimerInfo> g_mapTimer;
 static CCSLock g_lckTimer;
 
-void __stdcall TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+void __stdcall TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
+    (void)uMsg;
+    (void)dwTime;
+
 	WinTimer::CB_Timer cb;
 	g_lckTimer.lock();
 	auto itr = g_mapTimer.find(idEvent);

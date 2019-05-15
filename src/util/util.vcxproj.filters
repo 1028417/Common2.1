@@ -40,6 +40,45 @@
     <ClInclude Include="..\..\inc\util\SQLiteDB.h">
       <Filter>db</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\_check.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\_define.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\_util.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\ArrList.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\PairList.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\PtrArray.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\ptrcontainer.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\SArray.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\SContainer.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\SList.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\SMap.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\SSet.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\sstl\sstl.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">
@@ -47,6 +86,9 @@
     </Filter>
     <Filter Include="db\sqlite">
       <UniqueIdentifier>{306da33b-f8ab-4908-8815-34bdc8709607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sstl">
+      <UniqueIdentifier>{6aae0b5e-872e-4adb-8ed6-f60039352119}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

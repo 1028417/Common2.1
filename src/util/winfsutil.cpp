@@ -107,7 +107,7 @@ static void _shellExplore(const wstring& strSelFile, const wstring& strDir=L"", 
 		strPara.append(L",/select," + strSelFile);
 	}
 
-	(void)::ShellExecuteW(NULL, L"open", L"explorer",  strPara.c_str(), NULL, SW_MAXIMIZE);
+    (void)::ShellExecuteW(hWnd, L"open", L"explorer",  strPara.c_str(), NULL, SW_MAXIMIZE);
 }
 
 void winfsutil::exploreDir(const wstring& strDir, bool bAsRoot)
