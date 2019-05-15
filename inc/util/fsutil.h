@@ -71,7 +71,7 @@ public:
 		}
 
 #ifdef __ANDROID__
-		m_lpFile = fopen(util::WSToAsc(strFile).c_str(), util::WSToAsc(strMode).c_str());
+		m_lpFile = fopen(wstrutil::toStr(strFile).c_str(), wstrutil::toStr(strMode).c_str());
 #else
 		__EnsureReturn(0 == _wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str()), false);
 #endif

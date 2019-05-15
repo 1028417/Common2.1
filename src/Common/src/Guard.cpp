@@ -70,12 +70,11 @@ void CMenuEx::_setOwnerDraw()
 		mmi.fMask = MIIM_SUBMENU;
 		if (CMenu::GetMenuItemInfo(iItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
 		{
-			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP
-				, (UINT)mmi.hSubMenu, (LPCTSTR)strText);
+			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)mmi.hSubMenu, strText);
 		}
 		else
 		{
-			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, (LPCTSTR)strText);
+			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, strText);
 		}
 	}
 }
@@ -293,7 +292,7 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 
 	for (int iSrc = 0, iDst = GetMenuItemCount(hDst); iSrc<GetMenuItemCount(hSrc); iSrc++)
 	{
-		CString szMenuStr(L'\0', 256);
+		CString strMenuStr(L'\0', 256);
 		MENUITEMINFO mii;
 		memset(&mii, 0, sizeof mii);
 		mii.cbSize = sizeof(mii);
@@ -305,12 +304,11 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 			| MIIM_SUBMENU //Retrieves or sets the hSubMenu member. 
 			| MIIM_TYPE //Retrieves or sets the fType and dwTypeData members. 
 			| 0;
-		mii.dwTypeData = (LPTSTR)(LPCTSTR)szMenuStr;
-		mii.cch = szMenuStr.GetLength();
+		mii.dwTypeData = (LPTSTR)(LPCTSTR)strMenuStr;
+		mii.cch = strMenuStr.GetLength();
 
 		VERIFY(GetMenuItemInfo(hSrc, iSrc, TRUE, &mii));
-
-		szMenuStr.Trim();
+		strMenuStr.Trim();
 
 		if (mii.hSubMenu)
 		{

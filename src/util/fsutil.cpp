@@ -26,7 +26,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WSToAsc(strFile)
+			wstrutil::toStr(strFile)
 #endif
             , ios_base::binary);
 	}
@@ -48,7 +48,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			util::WSToAsc(strFile)
+			wstrutil::toStr(strFile)
 #endif
             , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary);
 	}
@@ -63,7 +63,7 @@ using FileStat = struct _stat;
 static bool getFileStat(const wstring& strFile, FileStat& fileStat)
 {
 #ifdef __ANDROID__
-	return 0 == stat(util::WSToAsc(strFile).c_str(), &fileStat);
+	return 0 == stat(wstrutil::toStr(strFile).c_str(), &fileStat);
 #else
 	return 0 == _wstat(strFile.c_str(), &fileStat);
 #endif
@@ -256,7 +256,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
             struct timeval timeVal[] = {
                        {0,0}, {0,0}
                    };
-            utimes(util::WSToAsc(strDstFile).c_str(), timeVal);
+            utimes(wstrutil::toStr(strDstFile).c_str(), timeVal);
 #else
 			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
 			(void)_wutime(strDstFile.c_str(), &timbuf);
@@ -376,8 +376,8 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(fsutil::backSlant == *strDir.rbegin() || fsutil::backSlant == strSubPath[size], false);
 
 #ifdef __ANDROID__
-	const auto& _strDir = util::WSToAsc(strDir);
-	return 0 == strncasecmp(_strDir.c_str(), util::WSToAsc(strSubPath).c_str(), _strDir.size());
+	const auto& _strDir = wstrutil::toStr(strDir);
+	return 0 == strncasecmp(_strDir.c_str(), wstrutil::toStr(strSubPath).c_str(), _strDir.size());
 #else
 	return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
 #endif

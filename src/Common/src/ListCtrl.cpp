@@ -873,7 +873,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		CListObject *pObject = GetItemObject(nItem);
 		if (pObject)
 		{
-			pObject->OnListItemRename((LPCTSTR)cstrNewText);
+			pObject->OnListItemRename((wstring)cstrNewText);
 		}
 		else
 		{

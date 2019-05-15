@@ -104,7 +104,7 @@ struct tagTM : tm
 	}
 };
 
-class __UtilExt util
+class __UtilExt timeutil
 {
 public:
 	static void getCurrentTime(int& nHour, int& nMinute);
@@ -116,11 +116,15 @@ public:
 	static bool time64ToTM(time64_t tTime, tagTM& tm);
 	static wstring formatTime64(const wstring& strFormat, time64_t tTime = -1);
 #endif
+};
 
+class __UtilExt wstrutil
+{
+public:
 	static bool checkWChar(const wstring& str);
 
 	template <typename T>
-	inline static wstring numToWS(const T& num)
+	inline static wstring fromNum(const T& num)
 	{
 #ifdef __ANDROID__
 		return QString::number(num).toStdWString();
@@ -129,37 +133,36 @@ public:
 #endif
 	}
 
-	static wstring& trim(wstring& strText, wchar_t chr = ' ');
-	static wstring trim(const wstring& strText, wchar_t chr = ' ');
+	static void trim(wstring& strText, wchar_t chr = ' ');
+	static wstring trim_r(const wstring& strText, wchar_t chr = ' ');
 
-	static wstring& ltrim(wstring& strText, wchar_t chr = ' ');
-	static wstring ltrim(const wstring& strText, wchar_t chr = ' ');
+	static void ltrim(wstring& strText, wchar_t chr = ' ');
+	static wstring ltrim_r(const wstring& strText, wchar_t chr = ' ');
 
-	static wstring& rtrim(wstring& strText, wchar_t chr = ' ');
-	static wstring rtrim(const wstring& strText, wchar_t chr = ' ');
+	static void rtrim(wstring& strText, wchar_t chr = ' ');
+	static wstring rtrim_r(const wstring& strText, wchar_t chr = ' ');
 	
-	static void SplitString(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim=false);
+	static void split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim=false);
 
-	static int StrCompareUseCNCollate(const wstring& lhs, const wstring& rhs);
+	static int compareUseCNCollate(const wstring& lhs, const wstring& rhs);
 
-	static bool StrMatchIgnoreCase(const wstring& str1, const wstring& str2);
+	static bool matchIgnoreCase(const wstring& str1, const wstring& str2);
 
-	//static int StrFindIgnoreCase(const wstring& str, const wstring& strToFind);
+	//static int findIgnoreCase(const wstring& str, const wstring& strToFind);
 
-	static void LowerCase(wstring& str);
-	static wstring StrLowerCase(const wstring& str);
+	static void lowerCase(wstring& str);
+	static wstring lowerCase_r(const wstring& str);
 	
-	static void UpperCase(wstring& str);
-	static wstring StrUpperCase(const wstring& str);
+	static void upperCase(wstring& str);
+	static wstring upperCase_r(const wstring& str);
+
+	static void replace(wstring& str, wchar_t chrFind, wchar_t chrReplace);
 	
-	static bool CheckUTF8(const string& str);
-	static wstring UTF8ToWS(const string& str);
-	static string WSToUTF8(const wstring& str);
+	static wstring fromUTF8(const string& str);
+	static string toUTF8(const wstring& str);
 
-	static string WSToAsc(const wstring& str);
-	static wstring AscToWS(const string& str);
-
-	static wstring SToWS(const string& str);
+	static string toStr(const wstring& str);
+	static wstring fromStr(const string& str, bool bCheckUTF8=false);
 
 	template <typename T>
 	static wstring ContainerToStr(const T& container, const wstring& strSplitor)
@@ -183,7 +186,7 @@ struct __UtilExt tagCNSortor
 {
 	bool operator()(const wstring& lhs, const wstring& rhs) const
 	{
-		return util::StrCompareUseCNCollate(lhs, rhs)<0;
+		return wstrutil::compareUseCNCollate(lhs, rhs)<0;
 	}
 };
 

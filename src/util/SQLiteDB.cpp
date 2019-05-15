@@ -32,7 +32,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 	string t_strData;
 	__EnsureReturn(GetData(uRow, uColumn, t_strData), false);
 	
-	strData = util::UTF8ToWS(t_strData);
+	strData = wstrutil::fromUTF8(t_strData);
 	
 	return true;
 }
@@ -88,7 +88,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<string>& arrData)
 bool CSQLiteDBResult::GetData(UINT uRow, SArray<wstring>& arrData)
 {
 	return _getData(uRow, [&](const string& strData) {
-		arrData.add(util::UTF8ToWS(strData));
+		arrData.add(wstrutil::fromUTF8(strData));
 	});
 }
 
@@ -168,7 +168,7 @@ bool CSQLiteDB::Execute(const string& strSql)
 
 bool CSQLiteDB::Execute(const wstring& strSql)
 {
-	return Execute(util::WSToUTF8(strSql));
+	return Execute(wstrutil::toUTF8(strSql));
 }
 
 IDBResult* CSQLiteDB::Query(const string& strSql)
@@ -205,7 +205,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)
 {
-	return Query(util::WSToUTF8(strSql));
+	return Query(wstrutil::toUTF8(strSql));
 }
 
 bool CSQLiteDB::BeginTrans()

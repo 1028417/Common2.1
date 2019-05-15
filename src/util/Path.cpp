@@ -20,7 +20,7 @@ void CPath::SetDir(const wstring& strDir)
 	m_bDir = true;
 	m_strName = strDir;
 
-	util::rtrim(m_strName, fsutil::backSlant);
+	wstrutil::rtrim(m_strName, fsutil::backSlant);
 }
 
 wstring CPath::GetName() const
@@ -90,7 +90,7 @@ TD_PathList& CPath::_findFile()
 
 		if (lhs.m_bDir == rhs.m_bDir)
 		{
-			return util::StrCompareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
+			return wstrutil::compareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
 		}
 
 		return false;
@@ -170,7 +170,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 				}
 			}
 
-			if (util::StrMatchIgnoreCase(SubPath.m_strName, strName))
+			if (wstrutil::matchIgnoreCase(SubPath.m_strName, strName))
 			{
 				pPath = &SubPath;
 				return false;
