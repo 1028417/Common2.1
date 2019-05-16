@@ -66,8 +66,6 @@ namespace NS_SSTL
 #define __UsingSuperType(T) using T = typename __Super::T;
 #endif
 
-#define __UsingSuperData ;
-
 #define __UsingSuper(Super) \
 	using __Super = Super; \
 	\

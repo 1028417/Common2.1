@@ -10,7 +10,9 @@
 #include <QTime>
 #endif
 
-#define __UnicodeHead string({(char)0xff, (char)0xfe})
+#define __UnicodeHead_Lit string({(char)0xff, (char)0xfe})
+#define __UnicodeHead_Big string({(char)0xfe, (char)0xff})
+
 #define __UTF8Bom string({(char)0xef, (char)0xbb, (char)0xbf})
 
 #ifdef __ANDROID__
@@ -28,11 +30,16 @@ enum class E_EOLFlag
 
 class ITxtWriter
 {
+public:
+    virtual bool open(const wstring& strFile, bool bTrunc) = 0;
+
 	virtual size_t write(const wstring& strText) const = 0;
 	virtual size_t write(const string& strText) const = 0;
 	
 	virtual size_t writeln(const wstring& strText) const = 0;
 	virtual size_t writeln(const string& strText) const = 0;
+
+    virtual bool close() = 0;
 };
 
 class __UtilExt fsutil
@@ -41,10 +48,24 @@ public:
 class CTxtWriter : public ITxtWriter
 {
 public:
-	CTxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
-	{
-		m_eEOLFlag = eEOLFlag;
-	}
+    CTxtWriter() {}
+
+    CTxtWriter(E_EOLFlag eEOLFlag)
+    {
+        m_eEOLFlag = eEOLFlag;
+    }
+
+    CTxtWriter(bool bUTF8 = false)
+    {
+        m_bUTF8 = bUTF8;
+    }
+
+    CTxtWriter(E_EOLFlag eEOLFlag, bool bUTF8)
+    {
+        m_eEOLFlag = eEOLFlag;
+
+        m_bUTF8 = bUTF8;
+    }
 
 	~CTxtWriter()
 	{
@@ -52,11 +73,11 @@ public:
 	}
 
 private:
-	E_EOLFlag m_eEOLFlag;
-	
-	FILE *m_lpFile = NULL;
+    E_EOLFlag m_eEOLFlag = __DefEOL;
 
 	bool m_bUTF8 = false;
+
+    FILE *m_lpFile = NULL;
 
 protected:
 	inline size_t _write(const void *pData, size_t size) const
@@ -91,12 +112,10 @@ protected:
 	}
 
 public:
-	bool open(const wstring& strFile, bool bTrunc = false, bool bUTF8 = false)
-	{
-		m_bUTF8 = bUTF8;
-
+    virtual bool open(const wstring& strFile, bool bTrunc) override
+    {
 		wstring strMode(bTrunc ? L"w" : L"a");
-		if (bUTF8)
+        if (m_bUTF8)
 		{
 			strMode.append(L"b,ccs=UTF-8");
 		}
@@ -164,7 +183,7 @@ public:
 		}
 	}
 
-    bool close()
+    bool close() override
 	{
 		if (NULL != m_lpFile)
 		{
@@ -189,7 +208,7 @@ public:
 	}
 	
 public:
-	bool open(const wstring& strFile, bool bTrunc = false)
+    bool open(const wstring& strFile, bool bTrunc) override
 	{
 		bool bExists = fsutil::fileExists(strFile);
 
@@ -200,7 +219,13 @@ public:
 
 		if (!bExists || bTrunc)
 		{
-			(void)CTxtWriter::_write(__UnicodeHead);
+            (void)CTxtWriter::_write(
+#ifdef __ANDROID__
+                __UnicodeHead_Big
+#else
+                __UnicodeHead_Lit
+#endif
+            );
 		}
 
 		return true;
@@ -230,22 +255,42 @@ public:
 class CUTF8TxtWriter : public CTxtWriter
 {
 public:
-	CUTF8TxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
-		: CTxtWriter(eEOLFlag)
-	{
+    CUTF8TxtWriter()
+        : CTxtWriter(true)
+    {
+    }
+
+    CUTF8TxtWriter(E_EOLFlag eEOLFlag)
+        : CTxtWriter(eEOLFlag, true)
+    {
 	}
 
+    CUTF8TxtWriter(bool bWithBom)
+        : CTxtWriter(true)
+    {
+        m_bWithBom = bWithBom;
+    }
+
+    CUTF8TxtWriter(E_EOLFlag eEOLFlag, bool bWithBom)
+        : CTxtWriter(eEOLFlag)
+    {
+        m_bWithBom = bWithBom;
+    }
+
+private:
+    bool m_bWithBom = false;
+
 public:
-	bool open(const wstring& strFile, bool bTrunc = false, bool bWithBom = true)
+    bool open(const wstring& strFile, bool bTrunc) override
 	{
 		bool bExists = fsutil::fileExists(strFile);
 
-		if (!CTxtWriter::open(strFile, bTrunc, true))
+        if (!CTxtWriter::open(strFile, bTrunc))
 		{
 			return false;
 		}
 
-		if (bWithBom)
+        if (m_bWithBom)
 		{
 			if (!bExists || bTrunc)
 			{
@@ -291,14 +336,21 @@ public:
 	static bool fileExists(const wstring& strFile);
 	static bool dirExists(const wstring& strDir);
 
-    static void createDir(const wstring& strDir);
+    static bool createDir(const wstring& strDir);
     static bool removeDir(const wstring& strDir);
     static bool removeFile(const wstring& strFile);
 
 	static bool moveFile(const wstring& strSrcFile, const wstring& strDstFile);
 
-	static wstring currentDir();
+    //static wstring currentDir();
+    static wstring startupDir();
 
 	using CB_FindFile = const function<bool(const tagFileInfo&)>&;
 	static bool findFile(const wstring& strFindPath, CB_FindFile cb);
+};
+
+class __UtilExt andrfsutil
+{
+public:
+
 };

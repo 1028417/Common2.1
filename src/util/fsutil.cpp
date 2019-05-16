@@ -10,6 +10,13 @@
 #include <Windows.h>
 #endif
 
+#ifdef __ANDROID__
+#include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
+#include <QtAndroid>
+#include <QtAndroidExtras>
+#endif
+
 class ibstream : public ifstream
 {
 public:
@@ -125,17 +132,25 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
 		strText.append(lpBuff);
 	}
 
-    size_t size = __UTF8Bom.size();
-    if (strText.substr(0, size) == __UTF8Bom)
+    const auto& strHead = __UTF8Bom;
+    if (strText.substr(0, strHead.size()) == strHead)
     {
-		strText.erase(0, size);
+        strText.erase(0, strHead.size());
     }
     else
     {
-        size = __UnicodeHead.size();
-        if (strText.substr(0, size) == __UnicodeHead)
+        const auto& strHead = __UnicodeHead_Lit;
+        if (strText.substr(0, strHead.size()) == strHead)
         {
-			strText.erase(0, size);
+            strText.erase(0, strHead.size());
+        }
+        else
+        {
+            const auto& strHead = __UnicodeHead_Big;
+            if (strText.substr(0, strHead.size()) == strHead)
+            {
+                strText.erase(0, strHead.size());
+            }
         }
     }
 
@@ -444,19 +459,27 @@ bool fsutil::dirExists(const wstring& strDir)
 #endif
 }
 
-void fsutil::createDir(const wstring& strDir)
+bool fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    (void)QDir().mkpath(__QStr(strDir));
+    return QDir().mkpath(__QStr(strDir));
 #else
 	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
 	{
-		return;
+        return true;
 	}
 
-	createDir(fsutil::GetParentDir(strDir));
+    if (!createDir(fsutil::GetParentDir(strDir)))
+    {
+        return false;
+    }
 
-	createDir(strDir);   
+    if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
+    {
+        return true;
+    }
+
+    return fasle;
 #endif
 }
 
@@ -509,15 +532,27 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #endif
 }
 
-wstring fsutil::currentDir()
+/*wstring fsutil::currentDir()
 {
 #ifdef __ANDROID__
     return QDir::currentPath().toStdWString();
 #else
-    wchar_t pszCurrDir[MAX_PATH];
-    memset(pszCurrDir, 0, sizeof pszCurrDir);
-    ::GetCurrentDirectoryW(sizeof(pszCurrDir), pszCurrDir);
-    return pszCurrDir;
+    wchar_t pszPath[MAX_PATH];
+    memset(pszPath, 0, sizeof pszPath);
+    ::GetCurrentDirectoryW(sizeof(pszPath), pszPath);
+    return pszPath;
+#endif
+}*/
+
+wstring fsutil::startupDir()
+{
+#ifdef __ANDROID__
+    return QDir::currentPath().toStdWString();
+#else
+    wchar_t pszPath[MAX_PATH];
+    memset(pszPath, 0, sizeof pszPath);
+    ::GetModouleFileNameW(sizeof(pszPath), pszPath);
+    return GetParentDir(pszCurrDir);
 #endif
 }
 

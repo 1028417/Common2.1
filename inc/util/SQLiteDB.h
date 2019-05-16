@@ -48,22 +48,34 @@ class __UtilExt CSQLiteDB : public IDB
 public:
 	CSQLiteDB(const wstring& strFile=L"");
 
-	~CSQLiteDB();
+    ~CSQLiteDB()
+    {
+        Disconnect();
+    }
 
 private:
 	void *m_hDB = NULL;
 
+    int m_nRetCode = 0;
 	string m_strError;
 	
 	bool m_bInTrans = false;
 
 public:
-	int GetStatus() override;
+    int GetErrCode() const
+    {
+        return m_nRetCode;
+    }
 
-	string& GetLastError()
-	{
-		return m_strError;
-	}
+    const string& GetErrMsg() const
+    {
+        return m_strError;
+    }
+
+    int GetStatus() const override
+    {
+        return (NULL != m_hDB);
+    }
 
 	bool Connect(const wstring& strPara=L"") override;
 

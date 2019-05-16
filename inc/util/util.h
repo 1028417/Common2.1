@@ -20,6 +20,7 @@
 #ifdef __ANDROID__
 	#define __dllexport
 	#define __dllimport
+
 #else
 	#define __dllexport __declspec(dllexport)
 	#define __dllimport __declspec(dllimport)

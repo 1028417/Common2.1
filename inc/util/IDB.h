@@ -30,7 +30,7 @@ public:
 class IDB
 {
 public:
-	virtual int GetStatus() = 0;
+    virtual int GetStatus() const = 0;
 
 	virtual bool Connect(const wstring& strPara=L"") = 0;
 	virtual bool Disconnect() = 0;

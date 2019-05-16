@@ -117,21 +117,16 @@ CSQLiteDB::CSQLiteDB(const wstring& strFile)
 	}
 }
 
-CSQLiteDB::~CSQLiteDB()
-{
-	Disconnect();
-}
-
-int CSQLiteDB::GetStatus()
-{
-	return (NULL != m_hDB);
-}
-
 bool CSQLiteDB::Connect(const wstring& strPara)
 {
 	__EnsureReturn(!m_hDB, false);
-
-	__EnsureReturn(SQLITE_OK == sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB), false);
+#ifdef __ANDROID__
+    string strFile = wstrutil::toUTF8(strPara);
+    m_nRetCode = sqlite3_open(strFile.c_str(), (sqlite3**)&m_hDB);
+#else
+    m_nRetCode = sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB);
+#endif
+    __EnsureReturn(SQLITE_OK == m_nRetCode, false);
 	__EnsureReturn(m_hDB, false);
 
 	return true;
@@ -141,7 +136,9 @@ bool CSQLiteDB::Disconnect()
 {
 	__EnsureReturn(m_hDB, false);
 
-	__EnsureReturn(SQLITE_OK == sqlite3_close((sqlite3*)m_hDB), false);
+    m_nRetCode = sqlite3_close((sqlite3*)m_hDB);
+
+    __EnsureReturn(SQLITE_OK == m_nRetCode, false);
 
 	m_hDB = NULL;
 
@@ -153,7 +150,8 @@ bool CSQLiteDB::Execute(const string& strSql)
 	__EnsureReturn(m_hDB, false);
 
 	char *pszError = NULL;
-	int iRet = sqlite3_exec((sqlite3*)m_hDB, strSql.c_str(), 0, 0, &pszError);
+
+    m_nRetCode = sqlite3_exec((sqlite3*)m_hDB, strSql.c_str(), 0, 0, &pszError);
 	if (NULL != pszError)
 	{
 		m_strError = pszError;
@@ -163,7 +161,7 @@ bool CSQLiteDB::Execute(const string& strSql)
 		m_strError.clear();
 	}
 
-	return SQLITE_OK == iRet;
+    return SQLITE_OK == m_nRetCode;
 }
 
 bool CSQLiteDB::Execute(const wstring& strSql)
@@ -181,7 +179,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 	int nRowCount = 0;
 
 	char *pszError = NULL;
-	int iRet = sqlite3_get_table((sqlite3*)m_hDB, strSql.c_str(), &pData
+    m_nRetCode = sqlite3_get_table((sqlite3*)m_hDB, strSql.c_str(), &pData
 		, &nRowCount, &nColumnCount, &pszError);
 	if (pszError)
 	{
@@ -192,7 +190,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 		m_strError.clear();
 	}
 
-	__EnsureReturn(SQLITE_OK == iRet && pData, NULL);
+    __EnsureReturn(SQLITE_OK == m_nRetCode && pData, NULL);
 	
 	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
 	pSQLiteDBResult->m_uColumnCount = (UINT)nColumnCount;
