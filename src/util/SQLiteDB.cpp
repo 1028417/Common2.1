@@ -137,7 +137,6 @@ bool CSQLiteDB::Disconnect()
 	__EnsureReturn(m_hDB, false);
 
     m_nRetCode = sqlite3_close((sqlite3*)m_hDB);
-
     __EnsureReturn(SQLITE_OK == m_nRetCode, false);
 
 	m_hDB = NULL;

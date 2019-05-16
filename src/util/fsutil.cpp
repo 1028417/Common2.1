@@ -479,7 +479,7 @@ bool fsutil::createDir(const wstring& strDir)
         return true;
     }
 
-    return fasle;
+    return false;
 #endif
 }
 
@@ -551,8 +551,8 @@ wstring fsutil::startupDir()
 #else
     wchar_t pszPath[MAX_PATH];
     memset(pszPath, 0, sizeof pszPath);
-    ::GetModouleFileNameW(sizeof(pszPath), pszPath);
-    return GetParentDir(pszCurrDir);
+    ::GetModuleFileNameW(NULL, pszPath, sizeof(pszPath));
+    return GetParentDir(pszPath);
 #endif
 }
 
