@@ -50,7 +50,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 		if (SHGetPathFromIDList(lpItemIDList, pszPath))
 		{
 			m_strInitDir = pszPath;
-			wstrutil::trim(m_strInitDir, fsutil::wchBackSlant);
+			wsutil::trim(m_strInitDir, fsutil::wchBackSlant);
 
 			return m_strInitDir;
 		}

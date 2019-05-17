@@ -32,7 +32,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 	string t_strData;
 	__EnsureReturn(GetData(uRow, uColumn, t_strData), false);
 	
-	strData = wstrutil::fromUTF8(t_strData);
+	strData = wsutil::fromUTF8(t_strData);
 	
 	return true;
 }
@@ -88,7 +88,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<string>& arrData)
 bool CSQLiteDBResult::GetData(UINT uRow, SArray<wstring>& arrData)
 {
 	return _getData(uRow, [&](const string& strData) {
-		arrData.add(wstrutil::fromUTF8(strData));
+		arrData.add(wsutil::fromUTF8(strData));
 	});
 }
 
@@ -121,7 +121,7 @@ bool CSQLiteDB::Connect(const wstring& strPara)
 {
 	__EnsureReturn(!m_hDB, false);
 #ifdef __ANDROID__
-    string strFile = wstrutil::toUTF8(strPara);
+    string strFile = wsutil::toUTF8(strPara);
     m_nRetCode = sqlite3_open(strFile.c_str(), (sqlite3**)&m_hDB);
 #else
     m_nRetCode = sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB);
@@ -165,7 +165,7 @@ bool CSQLiteDB::Execute(const string& strSql)
 
 bool CSQLiteDB::Execute(const wstring& strSql)
 {
-	return Execute(wstrutil::toUTF8(strSql));
+	return Execute(wsutil::toUTF8(strSql));
 }
 
 IDBResult* CSQLiteDB::Query(const string& strSql)
@@ -202,7 +202,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)
 {
-	return Query(wstrutil::toUTF8(strSql));
+	return Query(wsutil::toUTF8(strSql));
 }
 
 bool CSQLiteDB::BeginTrans()

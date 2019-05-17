@@ -6,106 +6,7 @@
 static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
 
-void timeutil::getCurrentTime(int& nHour, int& nMinute)
-{
-    tagTM tm;
-    timeToTM((time32_t)time(0), tm);
-
-    nHour = tm.tm_hour;
-    nMinute = tm.tm_min;
-}
-
-bool timeutil::timeToTM(time32_t tTime, tagTM& tm)
-{
-	struct tm _tm;
-
-#ifdef __ANDROID__
-    if (localtime_r(&tTime, &_tm))
-    {
-        return L"";
-    }
-#else
-    if (_localtime32_s(&_tm, &tTime))
-	{
-		return false;
-	}
-#endif
-
-	tm = _tm;
-
-	return true;
-}
-
-static wstring _formatTime(const tm& atm, const wstring& strFormat)
-{
-	wchar_t lpBuff[24];
-	memset(lpBuff, 0, sizeof lpBuff);
-	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
-	{
-		return L"";
-	}
-
-	return lpBuff;
-}
-
-wstring timeutil::formatTime(const wstring& strFormat, time32_t tTime)
-{
-    if (-1 == tTime)
-	{
-        tTime = (time32_t)time(0);
-	}
-
-    struct tm _tm;
-
-#ifdef __ANDROID__
-    if (localtime_r(&tTime, &_tm))
-    {
-        return L"";
-    }
-#else
-    if (_localtime32_s(&_tm, &tTime))
-	{
-		return L"";
-	}
-#endif
-
-    return _formatTime(_tm, strFormat);
-}
-
-#ifndef __ANDROID__
-bool timeutil::time64ToTM(time64_t time, tagTM& tm)
-{
-    struct tm _tm;
-    if (_localtime64_s(&_tm, &time))
-    {
-        return false;
-    }
-
-    tm = _tm;
-
-    return true;
-}
-
-wstring timeutil::formatTime64(const wstring& strFormat, time64_t tTime)
-{
-    if (-1 == tTime)
-	{
-        tTime = (time64_t)time(0);
-	}
-
-	tm atm;
-    if (_localtime64_s(&atm, &tTime))
-	{
-		return L"";
-	}
-
-	return _formatTime(atm, strFormat);
-}
-#endif
-
-
-
-bool wstrutil::checkWChar(const wstring& str)
+bool wsutil::checkWChar(const wstring& str)
 {
 	for (auto& wchr : str)
 	{
@@ -118,44 +19,44 @@ bool wstrutil::checkWChar(const wstring& str)
 	return false;
 }
 
-void wstrutil::trim(wstring& strText, wchar_t chr)
+void wsutil::trim(wstring& strText, wchar_t chr)
 {
 	strText.erase(0, strText.find_first_not_of(chr));
 	strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
-wstring wstrutil::trim_r(const wstring& strText, wchar_t chr)
+wstring wsutil::trim_r(const wstring& strText, wchar_t chr)
 {
 	wstring strRet(strText);
 	trim(strRet, chr);
 	return strRet;
 }
 
-void wstrutil::ltrim(wstring& strText, wchar_t chr)
+void wsutil::ltrim(wstring& strText, wchar_t chr)
 {
 	strText.erase(0, strText.find_first_not_of(chr));
 }
 
-wstring wstrutil::ltrim_r(const wstring& strText, wchar_t chr)
+wstring wsutil::ltrim_r(const wstring& strText, wchar_t chr)
 {
 	wstring strRet(strText);
 	ltrim(strRet, chr);
 	return strRet;
 }
 
-void wstrutil::rtrim(wstring& strText, wchar_t chr)
+void wsutil::rtrim(wstring& strText, wchar_t chr)
 {
 	strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
-wstring wstrutil::rtrim_r(const wstring& strText, wchar_t chr)
+wstring wsutil::rtrim_r(const wstring& strText, wchar_t chr)
 {
 	wstring strRet(strText);
 	rtrim(strRet, chr);
 	return strRet;
 }
 
-void wstrutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
+void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
 {
 	size_t startPos = 0;
 	while (true)
@@ -205,13 +106,13 @@ void wstrutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>&
 	}
 }
 
-int wstrutil::compareUseCNCollate(const wstring& lhs, const wstring& rhs)
+int wsutil::compareUseCNCollate(const wstring& lhs, const wstring& rhs)
 {
 	return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
 		, rhs.c_str(), rhs.c_str() + rhs.size());
 }
 
-bool wstrutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
+bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 {
 #ifdef __ANDROID__
     return 0 == __QStr(str1).compare(__QStr(str2), Qt::CaseInsensitive);
@@ -220,7 +121,7 @@ bool wstrutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 #endif
 }
 
-//int wstrutil::findIgnoreCase(const wstring& str, const wstring& strToFind)
+//int wsutil::findIgnoreCase(const wstring& str, const wstring& strToFind)
 //{
 //	if (str.size() < strToFind.size())
 //	{
@@ -236,7 +137,7 @@ bool wstrutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 //	return pos;
 //}
 
-void wstrutil::lowerCase(wstring& str)
+void wsutil::lowerCase(wstring& str)
 {
 #ifdef __ANDROID__
 	str = __QStr(str).toLower().toStdWString();
@@ -245,14 +146,14 @@ void wstrutil::lowerCase(wstring& str)
 #endif
 }
 
-wstring wstrutil::lowerCase_r(const wstring& str)
+wstring wsutil::lowerCase_r(const wstring& str)
 {
 	wstring strRet = str;
 	lowerCase(strRet);
 	return strRet;
 }
 
-void wstrutil::upperCase(wstring& str)
+void wsutil::upperCase(wstring& str)
 {
 #ifdef __ANDROID__
 	str = __QStr(str).toUpper().toStdWString();
@@ -261,14 +162,14 @@ void wstrutil::upperCase(wstring& str)
 #endif	
 }
 
-wstring wstrutil::upperCase_r(const wstring& str)
+wstring wsutil::upperCase_r(const wstring& str)
 {
 	wstring strRet = str;
 	upperCase(strRet);
 	return strRet;
 }
 
-void wstrutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
+void wsutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 {
 	for (auto& chr : str)
 	{
@@ -279,7 +180,7 @@ void wstrutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 	}
 }
 
-void wstrutil::replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+void wsutil::replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
 {
 	for (auto& chr : str)
 	{
@@ -296,7 +197,7 @@ using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
 #endif
 
-wstring wstrutil::fromUTF8(const string& str)
+wstring wsutil::fromUTF8(const string& str)
 {
 	if (str.empty())
 	{
@@ -329,7 +230,7 @@ wstring wstrutil::fromUTF8(const string& str)
 	return pBuff;
 }*/
 
-string wstrutil::toUTF8(const wstring& str)
+string wsutil::toUTF8(const wstring& str)
 {
 	if (str.empty())
 	{
@@ -366,7 +267,7 @@ string wstrutil::toUTF8(const wstring& str)
 	return pBuff;
 }*/
 
-string wstrutil::toStr(const wstring& str)
+string wsutil::toStr(const wstring& str)
 {
 	if (str.empty())
 	{
@@ -500,7 +401,7 @@ static wstring _fromStr(const string& str)
 	return pBuff;
 }
 
-wstring wstrutil::fromStr(const string& str, bool bCheckUTF8)
+wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
 {
 	if (str.empty())
 	{

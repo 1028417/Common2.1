@@ -10,12 +10,12 @@
 #include <Windows.h>
 #endif
 
-#ifdef __ANDROID__
-#include <QAndroidJniObject>
-#include <QAndroidJniEnvironment>
-#include <QtAndroid>
-#include <QtAndroidExtras>
-#endif
+//#ifdef __ANDROID__
+//#include <QAndroidJniObject>
+//#include <QAndroidJniEnvironment>
+//#include <QtAndroid>
+//#include <QtAndroidExtras>
+//#endif
 
 class ibstream : public ifstream
 {
@@ -33,7 +33,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			wstrutil::toStr(strFile)
+			wsutil::toStr(strFile)
 #endif
             , ios_base::binary);
 	}
@@ -55,7 +55,7 @@ public:
 #ifdef _MSC_VER
 			strFile
 #else
-			wstrutil::toStr(strFile)
+			wsutil::toStr(strFile)
 #endif
             , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary);
 	}
@@ -70,7 +70,7 @@ using FileStat = struct _stat;
 static bool getFileStat(const wstring& strFile, FileStat& fileStat)
 {
 #ifdef __ANDROID__
-	return 0 == stat(wstrutil::toStr(strFile).c_str(), &fileStat);
+	return 0 == stat(wsutil::toStr(strFile).c_str(), &fileStat);
 #else
 	return 0 == _wstat(strFile.c_str(), &fileStat);
 #endif
@@ -285,7 +285,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
             struct timeval timeVal[] = {
                        {0,0}, {0,0}
                    };
-            utimes(wstrutil::toStr(strDstFile).c_str(), timeVal);
+            utimes(wsutil::toStr(strDstFile).c_str(), timeVal);
 #else
 			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
 			(void)_wutime(strDstFile.c_str(), &timbuf);
@@ -405,8 +405,8 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(fsutil::wchBackSlant == *strDir.rbegin() || fsutil::wchBackSlant == strSubPath[size], false);
 
 #ifdef __ANDROID__
-	const auto& _strDir = wstrutil::toStr(strDir);
-	return 0 == strncasecmp(_strDir.c_str(), wstrutil::toStr(strSubPath).c_str(), _strDir.size());
+	const auto& _strDir = wsutil::toStr(strDir);
+	return 0 == strncasecmp(_strDir.c_str(), wsutil::toStr(strSubPath).c_str(), _strDir.size());
 #else
 	return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
 #endif
@@ -684,9 +684,9 @@ size_t CTxtWriter::_write(const void *pData, size_t size) const
 
 	size_t ret = fwrite(pData, size, 1, m_lpFile);
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	(void)fflush(m_lpFile);
-#endif
+//#endif
 
 	return ret;
 }
@@ -704,7 +704,7 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 	}
 
 #ifdef __ANDROID__
-	m_lpFile = fopen(wstrutil::toStr(strFile).c_str(), wstrutil::toStr(strMode).c_str());
+	m_lpFile = fopen(wsutil::toStr(strFile).c_str(), wsutil::toStr(strMode).c_str());
 #else
 	__EnsureReturn(0 == _wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str()), false);
 #endif
@@ -717,7 +717,7 @@ size_t CTxtWriter::write(const wstring& strText) const
 {
 	if (m_bUTF8)
 	{
-		return _write(wstrutil::toUTF8(strText));
+		return _write(wsutil::toUTF8(strText));
 	}
 	else
 	{

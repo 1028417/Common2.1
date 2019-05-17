@@ -23,9 +23,10 @@
     <ClCompile Include="SQLiteDB.cpp" />
     <ClCompile Include="sqlite\shell.c" />
     <ClCompile Include="sqlite\sqlite3.c" />
+    <ClCompile Include="tmutil.cpp" />
     <ClCompile Include="wintimer.cpp" />
-    <ClCompile Include="util.cpp" />
     <ClCompile Include="winfsutil.cpp" />
+    <ClCompile Include="wsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\sstl\ArrList.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="..\..\inc\sstl\_check.h" />
     <ClInclude Include="..\..\inc\sstl\_define.h" />
     <ClInclude Include="..\..\inc\sstl\_util.h" />
+    <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\wintimer.h" />
     <ClInclude Include="..\..\inc\util\fsdlg.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h" />
@@ -51,6 +53,7 @@
     <ClInclude Include="..\..\inc\util\util.h" />
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\winfsutil.h" />
+    <ClInclude Include="..\..\inc\util\wsutil.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="sqlite\sqlite3ext.h" />
   </ItemGroup>
@@ -92,11 +95,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../bin/</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../build\$(ProjectName)d/</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)bin/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)build\$(ProjectName)d/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../bin/</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../build\$(ProjectName)/</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)build\$(ProjectName)/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)d</TargetName>
   </PropertyGroup>
@@ -130,7 +133,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>NotSet</SubSystem>
-      <ImportLibrary>../../lib/$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib/$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <BuildLog>
@@ -165,7 +168,7 @@
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <ImportLibrary>../../lib/$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)lib/$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <BuildLog>

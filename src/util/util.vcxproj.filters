@@ -8,7 +8,6 @@
       <Filter>db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="fsutil.cpp" />
-    <ClCompile Include="util.cpp" />
     <ClCompile Include="ProFile.cpp" />
     <ClCompile Include="fsdlg.cpp" />
     <ClCompile Include="Path.cpp" />
@@ -18,6 +17,8 @@
     <ClCompile Include="mtutil.cpp" />
     <ClCompile Include="winfsutil.cpp" />
     <ClCompile Include="wintimer.cpp" />
+    <ClCompile Include="tmutil.cpp" />
+    <ClCompile Include="wsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -79,6 +80,8 @@
     <ClInclude Include="..\..\inc\sstl\sstl.h">
       <Filter>sstl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\util\tmutil.h" />
+    <ClInclude Include="..\..\inc\util\wsutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">
