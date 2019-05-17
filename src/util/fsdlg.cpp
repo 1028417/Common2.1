@@ -165,7 +165,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				TCHAR pszPath[512];
 				if (SHGetPathFromIDList((LPITEMIDLIST)lParam, pszPath))
 				{
-					if (!fsutil::dirExists(pszPath))
+					if (!fsutil::existDir(pszPath))
 					{
 						::EnableWindow(hWndOkButton, FALSE);
 					}

@@ -32,6 +32,8 @@
 #define __UtilExt __dllimport
 #endif
 
+#define cauto const auto
+
 using time32_t = long;
 using time64_t = int64_t;
 
