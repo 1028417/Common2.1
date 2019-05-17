@@ -124,7 +124,7 @@ void winfsutil::exploreFile(const wstring& strFile)
 	wstring strExplore;
 	for (auto& strFile : lstFiles)
 	{
-		if (fsutil::existFile(strFile) || fsutil::dirExists(strFile))
+		if (fsutil::fileExists(strFile) || fsutil::dirExists(strFile))
 		{
 			if (!strExplore.empty())
 			{

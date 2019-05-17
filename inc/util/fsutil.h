@@ -91,7 +91,7 @@ public:
 	static bool findFile(const wstring& strFindPath, CB_FindFile cb);
 };
 
-class CTxtWriter : public ITxtWriter
+class __UtilExt CTxtWriter : public ITxtWriter
 {
 public:
 	CTxtWriter() {}
@@ -101,7 +101,7 @@ public:
 		m_eEOLFlag = eEOLFlag;
 	}
 
-	CTxtWriter(bool bUTF8 = false)
+	CTxtWriter(bool bUTF8)
 	{
 		m_bUTF8 = bUTF8;
 	}
@@ -155,7 +155,7 @@ public:
 	bool close() override;
 };
 
-class CUnicodeTxtWriter : public CTxtWriter
+class __UtilExt CUnicodeTxtWriter : public CTxtWriter
 {
 public:
 	CUnicodeTxtWriter(E_EOLFlag eEOLFlag = __DefEOL)
@@ -187,7 +187,7 @@ public:
 	}
 };
 
-class CUTF8TxtWriter : public CTxtWriter
+class __UtilExt CUTF8TxtWriter : public CTxtWriter
 {
 public:
 	CUTF8TxtWriter()
