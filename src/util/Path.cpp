@@ -20,7 +20,7 @@ void CPath::SetDir(const wstring& strDir)
 	m_bDir = true;
 	m_strName = strDir;
 
-	wsutil::rtrim(m_strName, fsutil::wchBackSlant);
+	wsutil::rtrim(m_strName, fsutil::wcBackSlant);
 }
 
 wstring CPath::GetName() const
@@ -39,7 +39,7 @@ wstring CPath::GetPath() const
 {
 	if (NULL != m_pParentDir)
 	{
-		return m_pParentDir->GetPath() + fsutil::wchBackSlant + m_strName;
+		return m_pParentDir->GetPath() + fsutil::wcBackSlant + m_strName;
 	}
 
 	return m_strName;
@@ -57,13 +57,12 @@ wstring CPath::GetParentDir() const
 
 bool CPath::onFindFile(TD_PathList& lstSubPath)
 {
-	return fsutil::findFile(this->GetPath() + L"\\*", [&](const tagFileInfo& FileInfo) {
+	return fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
 		{
 			lstSubPath.add(pSubPath);
 		}
-		return true;
     });
 }
 

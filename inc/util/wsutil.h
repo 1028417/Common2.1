@@ -1,12 +1,22 @@
 
 #pragma once
 
+#include <string>
+
+#ifndef _MSC_VER
+#include <QString>
+#define __QStr(wstr) QString::fromStdWString(wstr)
+
+#ifndef QT_NO_DEBUG
+#define _DEBUG
+#endif
+#endif
+
 class __UtilExt wsutil
 {
 public:
-	static const wchar_t wchSpace = L' ';
+	static const wchar_t wcSpace = L' ';
 
-public:
 	static bool checkWChar(const wstring& str);
 
 	template <typename T>
@@ -31,9 +41,9 @@ public:
 	static void split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim=false);
 
 	static int compareUseCNCollate(const wstring& lhs, const wstring& rhs);
-
+	static int compareIgnoreCase(const wstring& str1, const wstring& str2, size_t size=0);
 	static bool matchIgnoreCase(const wstring& str1, const wstring& str2);
-
+	
 	//static int findIgnoreCase(const wstring& str, const wstring& strToFind);
 
 	static void lowerCase(wstring& str);

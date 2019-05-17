@@ -50,7 +50,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 		if (SHGetPathFromIDList(lpItemIDList, pszPath))
 		{
 			m_strInitDir = pszPath;
-			wsutil::trim(m_strInitDir, fsutil::wchBackSlant);
+			wsutil::trim(m_strInitDir, fsutil::wcBackSlant);
 
 			return m_strInitDir;
 		}
@@ -151,7 +151,15 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 				::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
 				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.left);
 				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.right);
-				rcTreeCtrl.top = rcStatic.bottom;
+				if (!pInstance->m_strTitle.empty())
+				{
+					rcTreeCtrl.top = rcStatic.bottom;
+				}
+				else
+				{
+					rcTreeCtrl.top = rcStatic.top;
+				}
+				
 				rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
 				::MoveWindow(hWndTreeCtrl, rcTreeCtrl.left, rcTreeCtrl.top
 					, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom-rcTreeCtrl.top, FALSE);
@@ -317,7 +325,7 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 	wstring strDir = m_lpstrFileName;
 	for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
 	{
-		*itrFile = strDir + fsutil::wchBackSlant + *itrFile;
+		*itrFile = strDir + fsutil::wcBackSlant + *itrFile;
 	}
 
 	return strDir;

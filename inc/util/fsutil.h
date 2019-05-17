@@ -183,7 +183,7 @@ struct tagFileInfo
 
 	bool m_bDir = false;
 
-	wstring m_strName;
+    wstring m_strName;
 
 	unsigned long m_uFileSize = 0;
 
@@ -194,8 +194,9 @@ struct tagFileInfo
 class __UtilExt fsutil
 {
 public:
-	static const wchar_t wchDot = L'.';
-	static const wchar_t wchBackSlant = L'\\';
+	static const wchar_t wcDot = L'.';
+	static const wchar_t wcBackSlant = L'\\';
+	static const wchar_t wcSlant = L'/';
 
 	static bool loadBinary(const wstring& strFile, vector<char>& vecText, UINT uReadSize = 0);
 	
@@ -233,9 +234,15 @@ public:
 
 	static bool moveFile(const wstring& strSrcFile, const wstring& strDstFile);
 
-    //static wstring currentDir();
     static wstring startupDir();
 
-	using CB_FindFile = const function<bool(const tagFileInfo&)>&;
-	static bool findFile(const wstring& strFindPath, CB_FindFile cb);
+	enum class E_FindFindFilter
+	{
+		FFP_None
+		, FFP_ByPrefix
+		, FFP_ByExt
+	};
+	using CB_FindFile = const function<void(const tagFileInfo&)>&;
+	static bool findFile(const wstring& strDir, CB_FindFile cb
+		, E_FindFindFilter eFilter = E_FindFindFilter::FFP_None, const wstring& strFilter = L"");
 };

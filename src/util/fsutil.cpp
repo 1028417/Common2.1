@@ -310,7 +310,7 @@ time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int iPos = -1;
-	auto pos = strPath.find_last_of(fsutil::wchBackSlant);
+	auto pos = strPath.find_last_of(fsutil::wcBackSlant);
 	if (wstring::npos != pos)
 	{
 		iPos = pos;
@@ -349,7 +349,7 @@ void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 {
 	wstring strName = GetFileName(strPath);
 
-	auto pos = strName.find_last_of(fsutil::wchDot);
+	auto pos = strName.find_last_of(fsutil::wcDot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
@@ -385,12 +385,12 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring strNewPath = strPath;
-	if (fsutil::wchBackSlant == strNewPath.back())
+	if (fsutil::wcBackSlant == strNewPath.back())
 	{
 		strNewPath.pop_back();
 	}
 
-	int nPos = (int)strNewPath.rfind(fsutil::wchBackSlant);
+	int nPos = (int)strNewPath.rfind(fsutil::wcBackSlant);
 	__EnsureReturn(0 <= nPos, L"");
 
 	return strNewPath.substr(0, nPos);
@@ -402,7 +402,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(fsutil::wchBackSlant == *strDir.rbegin() || fsutil::wchBackSlant == strSubPath[size], false);
+	__EnsureReturn(fsutil::wcBackSlant == *strDir.rbegin() || fsutil::wcBackSlant == strSubPath[size], false);
 
 #ifdef __ANDROID__
 	const auto& _strDir = wsutil::toStr(strDir);
@@ -436,11 +436,20 @@ bool fsutil::existFile(const wstring& strFile)
 
 #ifndef _MSC_VER
 	QFileInfo fi(__QStr(strFile));
-	return fi.isFile();
+    if (!fi.isFile())
+    {
+        return false;
+    }
+
 #else
 	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
-	return INVALID_FILE_ATTRIBUTES != dwFileAttr && 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
+    if (INVALID_FILE_ATTRIBUTES == dwFileAttr || (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
+    {
+        return false;
+    }
 #endif
+
+    return true;
 }
 
 bool fsutil::existDir(const wstring& strDir)
@@ -452,97 +461,121 @@ bool fsutil::existDir(const wstring& strDir)
 
 #ifndef _MSC_VER
 	QFileInfo fi(__QStr(strDir));
-	return fi.isDir();
+    if (!fi.isDir())
+    {
+        return false;
+    }
+
 #else
 	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
-	return INVALID_FILE_ATTRIBUTES != dwFileAttr && (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY);
+    if (0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
+    {
+        return false;
+    }
 #endif
+
+    return true;
 }
 
 bool fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    return QDir().mkpath(__QStr(strDir));
-#else
-	if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
-	{
-        return true;
-	}
-
-    if (!createDir(fsutil::GetParentDir(strDir)))
+    if (!QDir().mkpath(__QStr(strDir)))
     {
         return false;
     }
 
-    if (::CreateDirectory(strDir.c_str(), NULL) || ERROR_ALREADY_EXISTS == ::GetLastError())
+#else
+    if (!::CreateDirectory(strDir.c_str(), NULL))
     {
-        return true;
-    }
+        if (ERROR_ALREADY_EXISTS != ::GetLastError())
+        {
+            if (!createDir(fsutil::GetParentDir(strDir)))
+            {
+                return false;
+            }
 
-    return false;
+            if (!::CreateDirectory(strDir.c_str(), NULL))
+            {
+                return false;
+            }
+        }
+    }
 #endif
+
+    return true;
 }
 
 bool fsutil::removeDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
 	QDir dir(__QStr(strDir));
-	return dir.rmpath(dir.absolutePath());
-#else
-	if (::RemoveDirectoryW(strDir.c_str()))
-	{
-		return true;
-	}
+    if (!dir.rmpath(dir.absolutePath()))
+    {
+        return false;
+    }
 
-	auto err = ::GetLastError();
-	if (ERROR_FILE_NOT_FOUND == err || ERROR_PATH_NOT_FOUND == err)
-	{
-		return true;
-	}
-	
-	return false;
+#else
+    if (!::RemoveDirectoryW(strDir.c_str()))
+    {
+        auto err = ::GetLastError();
+        if (ERROR_FILE_NOT_FOUND != err && ERROR_PATH_NOT_FOUND != err)
+        {
+            return false;
+        }
+    }
 #endif
+
+    return true;
 }
 
 bool fsutil::removeFile(const wstring& strFile)
 {
 #ifdef __ANDROID__
-	return QFile::remove(__QStr(strFile));
+    if (!QFile::remove(__QStr(strFile)))
+    {
+        return false;
+    }
+
 #else
-	if (::DeleteFileW(strFile.c_str()))
-	{
-		return true;
-	}
-
-	if (ERROR_FILE_NOT_FOUND == ::GetLastError())
-	{
-		return true;
-	}
-
-	return false;
+    if (!::DeleteFileW(strFile.c_str()))
+    {
+        if (ERROR_FILE_NOT_FOUND != ::GetLastError())
+        {
+            return false;
+        }
+    }
 #endif
+
+    return true;
 }
 
 bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #ifdef __ANDROID__
-    return QFile::rename(__QStr(strSrcFile), __QStr(strDstFile));
-#else
-	return TRUE == ::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED);
-#endif
-}
+    if (existFile(strDstFile))
+    {
+        if (!removeFile(strDstFile))
+        {
+            return false;
+        }
+    }
 
-/*wstring fsutil::currentDir()
-{
-#ifdef __ANDROID__
-    return QDir::currentPath().toStdWString();
+    if (!QFile::rename(__QStr(strSrcFile), __QStr(strDstFile)))
+    {
+        return false;
+    }
+
 #else
-    wchar_t pszPath[MAX_PATH];
-    memset(pszPath, 0, sizeof pszPath);
-    ::GetCurrentDirectoryW(sizeof(pszPath), pszPath);
-    return pszPath;
+    if (!::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str()
+        , MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
+    {
+        return false;
+    }
 #endif
-}*/
+
+    return true;
+}
 
 wstring fsutil::startupDir()
 {
@@ -556,10 +589,18 @@ wstring fsutil::startupDir()
 #endif
 }
 
+static const wstring g_wsDot(1, fsutil::wcDot);
+static const wstring g_wsDotDot(2, fsutil::wcDot);
+
 #ifdef __ANDROID__
-bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
+bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
 {
-    QDir dir(__QStr(strFindPath));
+	if (strDir.empty())
+	{
+		return false;
+	}
+
+    QDir dir(__QStr(strDir));
     if(!dir.exists())
     {
         return false;
@@ -571,89 +612,113 @@ bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
     {
         const QFileInfo& fi = list.at(nIdx);
-        if(fi.fileName() == "." || fi.fileName() == "..")
+        if (!fi.isReadable() || fi.isHidden() || fi.isSymLink())
         {
             continue;
+        }
+
+        if (E_FindFindFilter::FFP_ByExt == eFilter)
+        {
+            if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), strFilter))
+            {
+                continue;
+            }
+        }
+
+        cauto& strFileName = fi.fileName().toStdWString();
+        if(strFileName == g_wsDot || strFileName == g_wsDotDot)
+        {
+            continue;
+        }
+
+        if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+        {
+            if (0 != wsutil::compareIgnoreCase(strFileName, strFilter, strFilter.size()))
+            {
+                continue;
+            }
         }
 
         tagFileInfo FileInfo;
         if (fi.isDir())
         {
             FileInfo.m_bDir = true;
-            FileInfo.m_strName = fi.fileName().toStdWString();
+            FileInfo.m_strName = strFileName;
             FileInfo.m_uFileSize = fi.size();
             FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
             FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
-            // fi.baseName() fi.path() fi.absoluteFilePath() fi.completeSuffix() fi.suffix()
+            // title = fi.completeBaseName()
+            // parentdir = fi.path()
+            // fullPath = fi.filePath()
+            // ??? fi.absoluteFilePath()
         }
 
-        if (!cb(FileInfo))
-        {
-            break;
-        }
+		cb(FileInfo);
     }
 
     return true;
 }
 
 #else
-
-struct tagFindData : WIN32_FIND_DATAW
+bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
 {
-	bool isDir() const
+	if (strDir.empty())
 	{
-		return dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		return false;
+	}
+	bool bFlag = (strDir.back() != fsutil::wcBackSlant && strDir.back() != fsutil::wcSlant);
+
+	wstring strFind(strDir);
+	if (bFlag)
+	{
+		strFind.append(1, fsutil::wcBackSlant);
 	}
 
-	unsigned long getFileSize() const
+	if (E_FindFindFilter::FFP_ByPrefix == eFilter)
 	{
-		return nFileSizeLow;
+		strFind.append(strFilter).append(L"*");
+	}
+	else if (E_FindFindFilter::FFP_ByExt == eFilter)
+	{
+		strFind.append(L"*.").append(strFilter);
+	}
+	else
+	{
+		strFind.append(L"*");
 	}
 
-	time64_t getModifyTime() const
-	{
-		return winfsutil::transFileTime(ftLastWriteTime);
-	}
-
-	time64_t getCreateTime() const
-	{
-		return winfsutil::transFileTime(ftCreationTime);
-	}
-};
-
-bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
-{
-	tagFindData FindData;
-	memset(&FindData, 0, sizeof(tagFindData));
-
-	auto hFindFile = ::FindFirstFileW(strFindPath.c_str(), &FindData);
+	WIN32_FIND_DATAW FindData;
+	memset(&FindData, 0, sizeof(FindData));
+	auto hFindFile = ::FindFirstFileW(strFind.c_str(), &FindData);
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
 		return false;
 	}
 
+    wstring strFileName;
 	do
-	{
-		if (fsutil::wchDot == FindData.cFileName[0])
-		{
-			continue;
-		}
+    {
+        if ((FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
+		//	|| (FindData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+		)
+        {
+            continue;
+        }
 
-		if (FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
-		{
-			continue;
-		}
+        strFileName = FindData.cFileName;
+        if(strFileName == g_wsDot || strFileName == g_wsDotDot)
+        {
+            continue;
+        }
 
 		tagFileInfo FileInfo;
-		FileInfo.m_bDir = FindData.isDir();
-		FileInfo.m_strName = FindData.cFileName;
-		FileInfo.m_uFileSize = FindData.getFileSize();
-		FileInfo.m_tCreateTime = FindData.getCreateTime();
-		FileInfo.m_tModifyTime = FindData.getModifyTime();
-		if (!cb(FileInfo))
-		{
-			break;
-		}
+		FileInfo.m_bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        FileInfo.m_strName = strFileName;
+		FileInfo.m_uFileSize = FindData.nFileSizeLow;
+		FileInfo.m_tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
+		FileInfo.m_tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
+
+		cb(FileInfo);
 	} while (::FindNextFileW(hFindFile, &FindData));
 
 	(void)::FindClose(hFindFile);
@@ -661,14 +726,6 @@ bool fsutil::findFile(const wstring& strFindPath, CB_FindFile cb)
 	return true;
 }
 #endif
-
-//bool fsutil::FindFile(const wstring& strFindPath, SArray<tagFindData>& arrFindData)
-//{
-//	return fsutil::findFile(strFindPath, [&](const tagFindData& FindData) {
-//		arrFindData.add(FindData);
-//		return true;
-//	});
-//}
 
 size_t CTxtWriter::_write(const void *pData, size_t size) const
 {

@@ -67,7 +67,7 @@ public:
 
 	void SetName(const wstring& strNewName)
 	{
-		m_strName = strNewName;
+        m_strName = strNewName;
 	}
 
 	wstring GetName() const;

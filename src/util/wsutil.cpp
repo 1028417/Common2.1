@@ -112,13 +112,30 @@ int wsutil::compareUseCNCollate(const wstring& lhs, const wstring& rhs)
 		, rhs.c_str(), rhs.c_str() + rhs.size());
 }
 
-bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
+int wsutil::compareIgnoreCase(const wstring& str1, const wstring& str2, size_t size)
 {
 #ifdef __ANDROID__
-    return 0 == __QStr(str1).compare(__QStr(str2), Qt::CaseInsensitive);
+    if (0 == size)
+    {
+        size = MIN(str1.size(), str2.size()) + 1;
+    }
+    return wcsncmp(str1.c_str(), str2.c_str(), size);
+
 #else
-	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+	if (0 != size)
+    {
+        return _wcsnicmp(str1.c_str(), str2.c_str(), size);
+	}
+	else
+	{
+		return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+	}
 #endif
+}
+
+bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
+{
+	return 0 == compareIgnoreCase(str1, str2);
 }
 
 //int wsutil::findIgnoreCase(const wstring& str, const wstring& strToFind)
