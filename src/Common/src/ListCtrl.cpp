@@ -28,7 +28,7 @@ BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 	}
 
 	m_uHeight = uHeight;
-	this->Invalidate();
+	Invalidate();
 
 	return TRUE;
 }
@@ -41,7 +41,7 @@ void CObjectList::PreSubclassWindow()
 
 	(void)ModifyStyle(0, LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS);
 
-	(void)SetExtendedStyle(__super::GetExtendedStyle()
+	(void)SetExtendedStyle(GetExtendedStyle()
 		| LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP | LVS_EX_LABELTIP);
 }
 
@@ -238,7 +238,7 @@ void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 	LvTileViewInfo.dwFlags = LVTVIF_FIXEDSIZE;
 	LvTileViewInfo.sizeTile = { (LONG)cx, (LONG)cy };
 	LvTileViewInfo.dwMask = LVTVIM_TILESIZE;
-	(void)__super::SetTileViewInfo(&LvTileViewInfo);
+	(void)SetTileViewInfo(&LvTileViewInfo);
 }
 
 void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
@@ -333,42 +333,41 @@ void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>&
 	}
 }
 
-void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts, int nPos, const wstring& strPrefix)
+void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos, const wstring& strPrefix)
 {
 	if (vecTexts.empty())
 	{
-		if (0 == nPos)
-		{
+		//if (0 == nPos)
+		//{
 			(void)DeleteAllItems();
-		}
+		//}
 
 		return;
 	}
 
-	__Assert(nPos <= GetItemCount());
-
-	int nMaxItem = GetItemCount() - 1;
+	int nPrevCount = GetItemCount();
+	//__Assert(nPos <= nPrevCount);
 
 	DeselectAll();
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	int nItem = nPos;
+	int nItem = 0;// nPos;
 	for (auto& vecText : vecTexts)
 	{
-		if (nItem <= nMaxItem)
+		if (nItem < nPrevCount)
 		{
-			SetItemTexts(nItem, vecText, strPrefix);
+			SetItemTexts(nItem, vecText);// , strPrefix);
 		}
 		else
 		{
-			(void)InsertItemEx(nItem, vecText, strPrefix);
+			(void)InsertItemEx(nItem, vecText);// , strPrefix);
 		}
 
 		nItem++;
 	}
 
-	for (; nMaxItem >= nItem; --nMaxItem)
+	for (int nMaxItem = nPrevCount-1; nMaxItem >= nItem; --nMaxItem)
 	{
 		(void)DeleteItem(nMaxItem);
 	}
@@ -386,9 +385,8 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 		return;
 	}
 	
-	//__Assert(nPos <= GetItemCount());
-
 	int nPrevCount = GetItemCount();
+	//__Assert(nPos <= nPrevCount);
 
 	DeselectAll();
 
@@ -426,19 +424,19 @@ int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& str
 {
 	if (-1 == nItem)
 	{
-		nItem = __super::GetItemCount();
+		nItem = GetItemCount();
 	}
 
 	nItem = __super::InsertItem(nItem, NULL);
 	
-	this->SetItemObject(nItem, Object, strPrefix);
+	SetItemObject(nItem, Object, strPrefix);
 	
 	return nItem;
 }
 
 void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
-	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
+	bool bReportView = E_ListViewType::LVT_Report == GetView();
 	vector<wstring> vecText;
 	int iImage = 0;
 	GenListItem(Object, bReportView, vecText, iImage);
@@ -452,10 +450,14 @@ void CObjectList::UpdateItem(UINT uItem)
 {
 	__Ensure(m_hWnd);
 
-	auto pObject = this->GetItemObject(uItem);
+	auto pObject = GetItemObject(uItem);
 	if (NULL != pObject)
 	{
-		this->SetItemObject(uItem, *pObject);
+		SetItemObject(uItem, *pObject);
+	}
+	else
+	{
+		__super::Update(uItem);
 	}
 }
 
@@ -465,7 +467,8 @@ void CObjectList::UpdateItems()
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); ++uItem)
+	UINT uItemCount = (UINT)GetItemCount();
+	for (UINT uItem = 0; uItem < uItemCount; ++uItem)
 	{
 		UpdateItem(uItem);
 	}
@@ -477,11 +480,12 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 	
-	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
+	bool bReportView = E_ListViewType::LVT_Report == GetView();
 
-	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); uItem++)
+	UINT uItemCount = (UINT)GetItemCount();
+	for (UINT uItem = 0; uItem < uItemCount; uItem++)
 	{
-		auto pObject = (CListObject*)__super::GetItemData(uItem);
+		auto pObject = (CListObject*)GetItemData(uItem);
 		if (pObject)
 		{
 			vector<wstring> vecText;
@@ -503,10 +507,10 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 
 BOOL CObjectList::DeleteObject(const CListObject *pObject)
 {
-	int nItem = this->GetObjectItem(pObject);
+	int nItem = GetObjectItem(pObject);
 	__EnsureReturn(0 <= nItem, FALSE);
 
-	return this->DeleteItem(nItem);
+	return DeleteItem(nItem);
 }
 
 void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
@@ -515,14 +519,14 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 
 	CListObject *pObject = NULL;
 
-	int nItemCount = this->GetItemCount();
+	int nItemCount = GetItemCount();
 	for (int nItem = 0; nItem < nItemCount; )
 	{
-		pObject = this->GetItemObject(nItem);
+		pObject = GetItemObject(nItem);
 		
 		if (setDeleteObjects.find(pObject) != setDeleteObjects.end())
 		{
-			this->DeleteItem(nItem);
+			DeleteItem(nItem);
 
 			nItemCount--;
 
@@ -565,14 +569,15 @@ void CObjectList::SetItemImage(UINT uItem, int iImage)
 CListObject *CObjectList::GetItemObject(int iItem)
 {
 	__EnsureReturn(iItem >= 0 && iItem < GetItemCount(), NULL);
-	return (CListObject*)__super::GetItemData(iItem);
+	return (CListObject*)GetItemData(iItem);
 }
 
 int CObjectList::GetObjectItem(const CListObject *pObject)
 {
-	for (int nItem = 0; nItem < __super::GetItemCount(); ++nItem)
+	int uItemCount = GetItemCount();
+	for (int nItem = 0; nItem < uItemCount; ++nItem)
 	{
-		if ((CListObject*)__super::GetItemData(nItem) == pObject)
+		if ((CListObject*)GetItemData(nItem) == pObject)
 		{
 			return nItem;
 		}
@@ -583,9 +588,10 @@ int CObjectList::GetObjectItem(const CListObject *pObject)
 
 void CObjectList::GetAllObjects(TD_ListObjectList& lstListObjects)
 {
-	for (int nItem = 0; nItem < __super::GetItemCount(); ++nItem)
+	UINT uItemCount = GetItemCount();
+	for (UINT nItem = 0; nItem < uItemCount; ++nItem)
 	{
-		auto pObject = (CListObject*)__super::GetItemData(nItem);
+		auto pObject = (CListObject*)GetItemData(nItem);
 		if (pObject)
 		{
 			lstListObjects.add(pObject);
@@ -595,37 +601,37 @@ void CObjectList::GetAllObjects(TD_ListObjectList& lstListObjects)
 
 int CObjectList::GetSelItem()
 {
-	POSITION lpPos = __super::GetFirstSelectedItemPosition();
+	POSITION lpPos = GetFirstSelectedItemPosition();
 	__EnsureReturn(lpPos, -1);
 
-	return __super::GetNextSelectedItem(lpPos);
+	return GetNextSelectedItem(lpPos);
 }
 
 CListObject *CObjectList::GetSelObject()
 {
-	int nItem = this->GetSelItem();
+	int nItem = GetSelItem();
 	__EnsureReturn(0 <= nItem, NULL);
 
-	return this->GetItemObject(nItem);
+	return GetItemObject(nItem);
 }
 
 void CObjectList::GetSelItems(list<UINT>& lstItems)
 {
-	POSITION lpPos = __super::GetFirstSelectedItemPosition();
+	POSITION lpPos = GetFirstSelectedItemPosition();
 	while (lpPos)
 	{
-		lstItems.push_back(__super::GetNextSelectedItem(lpPos));
+		lstItems.push_back(GetNextSelectedItem(lpPos));
 	}
 }
 
 void CObjectList::GetSelObjects(map<UINT, CListObject*>& mapObjects)
 {
 	list<UINT> lstItems;
-	this->GetSelItems(lstItems);
+	GetSelItems(lstItems);
 
 	for (auto uItem : lstItems)
 	{
-		auto pObject = this->GetItemObject(uItem);
+		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
 			mapObjects[uItem] = pObject;
@@ -636,11 +642,11 @@ void CObjectList::GetSelObjects(map<UINT, CListObject*>& mapObjects)
 void CObjectList::GetSelObjects(TD_ListObjectList& lstObjects)
 {
 	list<UINT> lstItems;
-	this->GetSelItems(lstItems);
+	GetSelItems(lstItems);
 
 	for (auto uItem : lstItems)
 	{
-		auto pObject = this->GetItemObject(uItem);
+		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
 			lstObjects.add(pObject);
@@ -650,9 +656,9 @@ void CObjectList::GetSelObjects(TD_ListObjectList& lstObjects)
 
 BOOL CObjectList::SelectFirstItem()
 {
-	__EnsureReturn(0 < this->GetItemCount(), FALSE);
+	__EnsureReturn(0 < GetItemCount(), FALSE);
 	
-	this->SelectItem(0);
+	SelectItem(0);
 
 	return TRUE;
 }
@@ -665,19 +671,19 @@ void CObjectList::SelectItem(UINT uItem, BOOL bSetFocus)
 		uState |= LVIS_FOCUSED;
 	}
 
-	(void)this->SetItemState(uItem, uState, uState);
+	(void)SetItemState(uItem, uState, uState);
 
-	(void)this->SetSelectionMark(uItem);
+	(void)SetSelectionMark(uItem);
 	
-	(void)this->EnsureVisible(uItem, FALSE);
+	(void)EnsureVisible(uItem, FALSE);
 }
 
 void CObjectList::SelectObject(const CListObject *pObject, BOOL bSetFocus)
 {
-	int nItem =	this->GetObjectItem(pObject);
+	int nItem =	GetObjectItem(pObject);
 	if (0 <= nItem)
 	{
-		this->SelectItem(nItem, bSetFocus);
+		SelectItem(nItem, bSetFocus);
 	}
 }
 
@@ -695,10 +701,10 @@ void CObjectList::SelectAll()
 {
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	int nCount = this->GetItemCount();
-	for (int nItem = 0; nItem < nCount; ++nItem)
+	int nItemCount = GetItemCount();
+	for (int nItem = 0; nItem < nItemCount; ++nItem)
 	{
-		(void)__super::SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+		(void)SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
 	}
 }
 
@@ -706,12 +712,12 @@ void CObjectList::DeselectAll()
 {
 	int nItem = 0;
 
-	POSITION lpPos = __super::GetFirstSelectedItemPosition();
+	POSITION lpPos = GetFirstSelectedItemPosition();
 	while (lpPos)
 	{
-		nItem = __super::GetNextSelectedItem(lpPos);
+		nItem = GetNextSelectedItem(lpPos);
 
-		(void)__super::SetItemState(nItem, 0, LVIS_SELECTED);
+		(void)SetItemState(nItem, 0, LVIS_SELECTED);
 	}
 }
 
@@ -734,7 +740,7 @@ BOOL CObjectList::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRES
 
 bool CObjectList::GetRenameText(UINT uItem, wstring& strRenameText)
 {
-	CListObject *pObject = this->GetItemObject(uItem);
+	CListObject *pObject = GetItemObject(uItem);
 	if (NULL != pObject)
 	{
 		if (!pObject->GetRenameText(strRenameText))
@@ -797,7 +803,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	break;
 	case LVN_BEGINLABELEDIT:
 	{
-		CEdit *pwndEdit = this->GetEditControl();
+		CEdit *pwndEdit = GetEditControl();
 		__AssertBreak(pwndEdit);
 		
 		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
@@ -821,12 +827,12 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		pwndEdit->SetSel(0, -1);
 
 		/*CMainApp::async([=]() {
-			CEdit *pwndEdit = this->GetEditControl();
+			CEdit *pwndEdit = GetEditControl();
 			if (NULL != pwndEdit)
 			{
 				CRect rcPos;
 				pwndEdit->GetWindowRect(rcPos);
-				this->ScreenToClient(rcPos);
+				ScreenToClient(rcPos);
 				rcPos.bottom += 3;
 				pwndEdit->MoveWindow(rcPos);
 			}
@@ -857,7 +863,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			OnListItemRename(pLVDispInfo->item.iItem, cstrNewText);
 		}
 
-		this->UpdateItem(pLVDispInfo->item.iItem);
+		UpdateItem(pLVDispInfo->item.iItem);
 	}
 
 	break;
@@ -867,7 +873,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 		if ('A' == pLVKeyDow->wVKey && CMainApp::getKeyState(VK_CONTROL))
 		{
-			if (0 == (this->GetStyle() & LVS_SINGLESEL))
+			if (0 == (GetStyle() & LVS_SINGLESEL))
 			{
 				DeselectAll();
 				SelectAll();
@@ -980,7 +986,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 		, E_ListViewType::LVT_Icon
 	};
 
-	E_ListViewType eViewType = this->GetView();
+	E_ListViewType eViewType = GetView();
 
 	int iMax = sizeof(lpViewType) / sizeof(E_ListViewType);
 	for (int nIndex = 0; nIndex < iMax; ++nIndex)
@@ -1012,7 +1018,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 				m_para.cbViewChanged(m_para.eViewType);
 			}
 
-			this->SetView(m_para.eViewType);
+			SetView(m_para.eViewType);
 
 			break;
 		}
@@ -1021,7 +1027,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 UINT CObjectList::GetHeaderHeight()
 {
-	if (E_ListViewType::LVT_Report != this->GetView())
+	if (E_ListViewType::LVT_Report != GetView())
 	{
 		return 0;
 	}
@@ -1034,13 +1040,13 @@ UINT CObjectList::GetHeaderHeight()
 
 void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 {
-	int nCount = GetItemCount();
-	if (0 == nCount)
+	int nItemCount = GetItemCount();
+	if (0 == nItemCount)
 	{
 		return;
 	}
 
-	m_vecAsyncTaskFlag.assign((size_t)nCount, FALSE);
+	m_vecAsyncTaskFlag.assign((size_t)nItemCount, FALSE);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (E_ListViewType::LVT_Report != GetView())

@@ -259,7 +259,7 @@ public:
 	void SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix = L"");
 	void SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, const wstring& strPrefix);
 
-	void SetTexts(const vector<vector<wstring>>& vecTexts, int nPos = 0, const wstring& strPrefix=L"");
+	void SetTexts(const vector<vector<wstring>>& vecTexts);// , int nPos = 0, const wstring& strPrefix = L"");
 
 	void SetObjects(const TD_ListObjectList& lstObjects);// , int nPos = 0, const wstring& strPrefix = L"");
 

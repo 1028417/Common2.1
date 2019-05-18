@@ -39,9 +39,7 @@ void CPathList::SetPath(CPathObject& dir)
 	dir.GetSubPath(lstSubPaths);
 
 	TD_ListObjectList lstObjects(lstSubPaths);
-
-	//DeleteAllItems();
-	
+		
 	__super::SetObjects(lstObjects);
 }
 
