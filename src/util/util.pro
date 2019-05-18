@@ -17,7 +17,7 @@ SOURCES += \
     tmutil.cpp \
     fsutil.cpp \
     Path.cpp \
-    SQLITEDB.cpp \
+    SQLiteDB.cpp \
     winfsutil.cpp \
     wintimer.cpp \
     mtutil.cpp
