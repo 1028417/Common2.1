@@ -128,7 +128,7 @@ int wsutil::compareIgnoreCase(const wstring& str1, const wstring& str2, size_t s
 	}
 	else
 	{
-		return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+		return _wcsicmp(str1.c_str(), str2.c_str());
 	}
 #endif
 }

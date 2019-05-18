@@ -261,15 +261,11 @@ public:
 
 	void SetTexts(const vector<vector<wstring>>& vecTexts, int nPos = 0, const wstring& strPrefix=L"");
 
-	void SetObjects(const TD_ListObjectList& lstObjects, int nPos=0, const wstring& strPrefix=L"");
+	void SetObjects(const TD_ListObjectList& lstObjects);// , int nPos = 0, const wstring& strPrefix = L"");
 
 	int InsertObject(CListObject& Object, int nItem=-1, const wstring& strPrefix=L"");
 
-	void UpdateObject(CListObject& Object);
-
 	void UpdateItem(UINT uItem);
-	void UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& lstColumn);
-
 	void UpdateItems();
 
 	void UpdateColumns(const list<UINT>& lstColumn);

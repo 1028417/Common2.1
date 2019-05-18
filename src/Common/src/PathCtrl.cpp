@@ -40,7 +40,7 @@ void CPathList::SetPath(CPathObject& dir)
 
 	TD_ListObjectList lstObjects(lstSubPaths);
 
-	DeleteAllItems();
+	//DeleteAllItems();
 	
 	__super::SetObjects(lstObjects);
 }

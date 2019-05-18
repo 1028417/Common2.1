@@ -374,41 +374,41 @@ void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts, int nPos, co
 	}
 }
 
-void CObjectList::SetObjects(const TD_ListObjectList& lstObjects, int nPos, const wstring& strPrefix)
+void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, const wstring& strPrefix)
 {
 	if (!lstObjects)
 	{
-		if (0 == nPos)
-		{
+		//if (0 == nPos)
+		//{
 			(void)DeleteAllItems();
-		}
+		//}
 		
 		return;
 	}
 	
-	__Assert(nPos <= GetItemCount());
+	//__Assert(nPos <= GetItemCount());
 
-	int nMaxItem = GetItemCount()-1;
+	int nPrevCount = GetItemCount();
 
 	DeselectAll();
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	int nItem = nPos;
+	int nItem = 0;//nPos;
 	lstObjects([&](CListObject& object) {
-		if (nItem <= nMaxItem)
+		if (nItem < nPrevCount)
 		{
-			SetItemObject(nItem, object, strPrefix);
+			SetItemObject(nItem, object);//, strPrefix);
 		}
 		else
 		{
-			(void)InsertObject(object, nItem, strPrefix);
+			(void)InsertObject(object, nItem);// , strPrefix);
 		}
 
 		nItem++;
 	});
 	
-	for (; nMaxItem >= nItem; --nMaxItem)
+	for (int nMaxItem = nPrevCount-1; nMaxItem >= nItem; --nMaxItem)
 	{
 		(void)DeleteItem(nMaxItem);
 	}
@@ -436,17 +436,6 @@ int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& str
 	return nItem;
 }
 
-void CObjectList::UpdateObject(CListObject& Object)
-{
-	__Ensure(m_hWnd);
-
-	int nItem = this->GetObjectItem(&Object);
-	if (0 <= nItem)
-	{
-		this->SetItemObject(nItem, Object);
-	}
-}
-
 void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
 	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
@@ -454,8 +443,7 @@ void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& 
 	int iImage = 0;
 	GenListItem(Object, bReportView, vecText, iImage);
 
-	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
-		, iImage, 0, 0, (LPARAM)&Object));
+	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL, iImage, 0, 0, (LPARAM)&Object));
 
 	_SetItemTexts<true>(uItem, vecText, strPrefix);
 }
@@ -468,31 +456,6 @@ void CObjectList::UpdateItem(UINT uItem)
 	if (NULL != pObject)
 	{
 		this->SetItemObject(uItem, *pObject);
-	}
-	else
-	{
-		__super::Update(uItem);
-	}
-}
-
-void CObjectList::UpdateItem(UINT uItem, CListObject& Object, const list<UINT>& lstColumn)
-{
-	__Ensure(m_hWnd);
-
-	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
-	vector<wstring> vecText;
-	int iImage = 0;
-	GenListItem(Object, bReportView, vecText, iImage);
-
-	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL
-		, iImage, 0, 0, (LPARAM)&Object));
-
-	for (auto nColumn : lstColumn)
-	{
-		if (nColumn < vecText.size())
-		{
-			(void)__super::SetItemText(uItem, nColumn, vecText[nColumn].c_str());
-		}
 	}
 }
 
@@ -513,13 +476,27 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 	__Ensure(m_hWnd);
 
 	CRedrawLockGuard RedrawLockGuard(*this);
+	
+	bool bReportView = E_ListViewType::LVT_Report == this->GetView();
 
 	for (UINT uItem = 0; uItem < (UINT)this->GetItemCount(); uItem++)
 	{
 		auto pObject = (CListObject*)__super::GetItemData(uItem);
 		if (pObject)
 		{
-			UpdateItem(uItem, *pObject, lstColumn);
+			vector<wstring> vecText;
+			int iImage = 0;
+			GenListItem(*pObject, bReportView, vecText, iImage);
+
+			//(void)SetItem(uItem, 0, LVIF_IMAGE, NULL, iImage, 0, 0, 0);
+
+			for (auto nColumn : lstColumn)
+			{
+				if (nColumn < vecText.size())
+				{
+					(void)__super::SetItemText(uItem, nColumn, vecText[nColumn].c_str());
+				}
+			}
 		}
 	}
 }
