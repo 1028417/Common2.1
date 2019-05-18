@@ -468,7 +468,7 @@ bool fsutil::existDir(const wstring& strDir)
 
 #else
 	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
-    if (0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
+    if (INVALID_FILE_ATTRIBUTES == dwFileAttr || 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
     {
         return false;
     }
