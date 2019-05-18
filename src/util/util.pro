@@ -63,6 +63,4 @@ INCLUDEPATH += \
 
 DESTDIR = $$PWD/../../../Player3.1/2Player
 
-CONFIG(debug, debug|release) : TARGET  = $$join(TARGET,,,d)
-
 CONFIG += c++11

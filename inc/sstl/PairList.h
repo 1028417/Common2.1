@@ -625,7 +625,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __FirstRef>>
-			void forFirst(const CB& cb, int startPos = 0, int endPos = 0) const
+			void forFirst(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					return cb(pr.first);
@@ -633,7 +633,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBVoid_t<CB, __FirstRef>, typename = void>
-			void forFirst(const CB& cb, int startPos = 0, int endPos = 0) const
+			void forFirst(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					cb(pr.first);
@@ -643,7 +643,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBBool_t<CB, __SecondRef>>
-			void forSecond(const CB& cb, int startPos = 0, int endPos = 0) const
+			void forSecond(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					return cb(pr.second);
@@ -651,7 +651,7 @@ namespace NS_SSTL
 			}
 
 			template <typename CB, typename = checkCBVoid_t<CB, __SecondRef>, typename = void>
-			void forSecond(const CB& cb, int startPos = 0, int endPos = 0) const
+			void forSecond(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
 					cb(pr.second);
