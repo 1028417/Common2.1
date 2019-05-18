@@ -13,12 +13,6 @@
 #define __CommonExt __dllimport
 #endif
 
-#ifdef _DEBUG
-#define __DllFile(_x) (_x + string("d.dll"))
-#else
-#define __DllFile(_x) (_x + string(".dll"))
-#endif
-
 #define DECLARE_SINGLETON(_CLASS) \
 	public: \
 		static _CLASS& inst() \

@@ -741,9 +741,9 @@ size_t CTxtWriter::_write(const void *pData, size_t size) const
 
 	size_t ret = fwrite(pData, size, 1, m_lpFile);
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
 	(void)fflush(m_lpFile);
-//#endif
+#endif
 
 	return ret;
 }

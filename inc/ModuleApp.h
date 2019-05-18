@@ -11,7 +11,7 @@ public:
 
 	CResModule(const string& strDllName)
 	{
-		_hInstance = GetModuleHandleA(__DllFile(strDllName).c_str());
+		_hInstance = GetModuleHandleA((strDllName + ".dll").c_str());
 	}
 
 private:
