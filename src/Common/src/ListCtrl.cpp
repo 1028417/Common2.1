@@ -390,10 +390,10 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	bool bFlag = (E_ListViewType::LVT_List == m_wndAlbumItemList.GetView());	
+	bool bFlag = (E_ListViewType::LVT_List == GetView());	
 	if (bFlag)
 	{
-		m_wndAlbumItemList.SetView(E_ListViewType::LVT_Tile);
+		SetView(E_ListViewType::LVT_Tile);
 	}
 
 	DeselectAll();
@@ -419,7 +419,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 
 	if (bFlag)
 	{
-		m_wndAlbumItemList.SetView(E_ListViewType::LVT_List);
+		SetView(E_ListViewType::LVT_List);
 	}
 }
 
