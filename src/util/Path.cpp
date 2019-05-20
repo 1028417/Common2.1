@@ -178,16 +178,6 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	return pPath;
 }
 
-UINT CPath::GetSubPathCount() const
-{
-	if (NULL == m_plstSubPath)
-	{
-		return 0;
-	}
-
-	return m_plstSubPath->size();
-}
-
 CPath *CPath::GetSubPath(UINT uIdx) const
 {
 	if (NULL == m_plstSubPath)

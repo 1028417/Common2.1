@@ -85,15 +85,12 @@ public:
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
-	
-	UINT GetSubPathCount() const;
-	CPath *GetSubPath(UINT uIdx) const;
-
-	void GetSubPath(TD_PathList& lstSubPath)
+		
+	const TD_PathList& GetSubPath()
 	{
-		lstSubPath.add(_findFile());
+		return _findFile();
 	}
-	
+		
 	void GetSubPath(TD_PathList& lstSubDir, TD_PathList& lstSubFile)
 	{
 		_GetSubPath(&lstSubDir, &lstSubFile);
@@ -108,6 +105,18 @@ public:
 	{
 		_GetSubPath(NULL, &lstSubFile);
 	}
+
+	size_t CPath::GetSubPathCount() const
+	{
+		if (NULL == m_plstSubPath)
+		{
+			return 0;
+		}
+
+		return m_plstSubPath->size();
+	}
+
+	CPath *GetSubPath(UINT uIdx) const;
 
 	CPath *FindSubPath(wstring strSubPath, bool bDir);
 
@@ -233,10 +242,6 @@ public:
 
 	void GetTreeChilds(TD_TreeObjectList& lstChilds)
 	{
-		TD_PathList lstSubPaths;
-		this->GetSubPath(lstSubPaths);
-
-		TD_DirObjectList lstDirObjects(lstSubPaths);
-		lstChilds.add(lstDirObjects);
+		lstChilds.add(TD_DirObjectList(this->GetSubPath()));
 	}
 };
