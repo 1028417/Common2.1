@@ -388,9 +388,15 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 	int nPrevCount = GetItemCount();
 	//__Assert(nPos <= nPrevCount);
 
-	DeselectAll();
-
 	CRedrawLockGuard RedrawLockGuard(*this);
+
+	bool bFlag = (E_ListViewType::LVT_List == m_wndAlbumItemList.GetView());	
+	if (bFlag)
+	{
+		m_wndAlbumItemList.SetView(E_ListViewType::LVT_Tile);
+	}
+
+	DeselectAll();
 
 	int nItem = 0;//nPos;
 	lstObjects([&](CListObject& object) {
@@ -409,6 +415,11 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 	for (int nMaxItem = nPrevCount-1; nMaxItem >= nItem; --nMaxItem)
 	{
 		(void)DeleteItem(nMaxItem);
+	}
+
+	if (bFlag)
+	{
+		m_wndAlbumItemList.SetView(E_ListViewType::LVT_List);
 	}
 }
 

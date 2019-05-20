@@ -106,7 +106,7 @@ public:
 		_GetSubPath(NULL, &lstSubFile);
 	}
 
-	size_t CPath::GetSubPathCount() const
+    size_t GetSubPathCount() const
 	{
 		if (NULL == m_plstSubPath)
 		{
