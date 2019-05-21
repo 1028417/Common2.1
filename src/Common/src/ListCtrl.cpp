@@ -548,21 +548,13 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 	}
 }
 
-void CObjectList::DeleteItems(list<UINT> lstItems)
+void CObjectList::DeleteItems(const set<UINT>& setItems)
 {
-	for (int iItem = GetItemCount()-1; iItem >= 0; iItem--)
-	{
-		auto itr = std::find(lstItems.begin(), lstItems.end(), iItem);
-		if (itr != lstItems.end())
-		{
-			DeleteItem(iItem);
+	CRedrawLockGuard RedrawLockGuard(*this);
 
-			(void)lstItems.erase(itr);
-			if (lstItems.empty())
-			{
-				break;
-			}
-		}
+	for (auto itr = setItems.rbegin(); itr != setItems.rend(); itr++)
+	{
+		DeleteItem(*itr);
 	}
 }
 

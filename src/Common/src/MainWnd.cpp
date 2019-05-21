@@ -55,8 +55,8 @@ void CMainWnd::fixWorkArea()
 	CRect rtWorkArea;
 	CMainApp::getWorkArea(rtWorkArea);
 	
-	::SetWindowPos(m_hWnd, HWND_TOP, rtWorkArea.left- __XOffset, rtWorkArea.top- __YOffset
-		, rtWorkArea.Width() + __XOffset*2+1, rtWorkArea.Height() + __YOffset*2, SWP_NOACTIVATE);
+	::SetWindowPos(m_hWnd, HWND_NOTOPMOST, rtWorkArea.left - __XOffset, rtWorkArea.top - __YOffset
+		, rtWorkArea.Width() + __XOffset * 2 + 1, rtWorkArea.Height() + __YOffset * 2, SWP_NOACTIVATE);
 }
 
 void CMainWnd::fullScreen()

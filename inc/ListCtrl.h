@@ -278,7 +278,7 @@ public:
 
 	BOOL DeleteObject(const CListObject *pObject);
 	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
-	void DeleteItems(list<UINT> lstItems);
+	void DeleteItems(const set<UINT>& setItems);
 
 	void SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
 
