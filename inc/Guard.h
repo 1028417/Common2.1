@@ -47,7 +47,24 @@ class __CommonExt CRedrawLockGuard
 public:
 	CRedrawLockGuard(CWnd& wnd, bool bFlag = false);
 
+	CRedrawLockGuard(CRedrawLockGuard& other);
+
+	CRedrawLockGuard(CRedrawLockGuard&& other);
+
 	~CRedrawLockGuard();
+
+public:
+	CRedrawLockGuard& operator =(CRedrawLockGuard& other)
+	{
+		CRedrawLockGuard::CRedrawLockGuard(other);
+		return *this;
+	}
+
+	CRedrawLockGuard& operator =(CRedrawLockGuard&& other)
+	{
+		CRedrawLockGuard::CRedrawLockGuard(other);
+		return *this;
+	}
 
 	void Unlock();
 
@@ -56,7 +73,7 @@ private:
 
 	bool m_bFlag = false;
 
-	BOOL m_bLocked = FALSE;
+	bool m_bLocked = false;
 };
 
 struct tagMenuItemInfo

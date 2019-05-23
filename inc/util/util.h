@@ -24,6 +24,8 @@
 #define __UtilExt __dllimport
 #endif
 
+#define zeroset(x) memset(&(x), 0, sizeof((x)))
+
 #define cauto const auto
 
 #ifndef UINT

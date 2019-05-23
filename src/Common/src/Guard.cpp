@@ -4,9 +4,6 @@
 
 #include "App.h"
 
-#include <afxglobals.h>
-
-
 CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	: m_wnd(wnd)
 	, m_bFlag(bFlag)
@@ -15,14 +12,28 @@ CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	{
 		if (m_bFlag)
 		{
-			m_bLocked = wnd.LockWindowUpdate();
+			m_bLocked = TRUE == wnd.LockWindowUpdate();
 		}
 		else
 		{
 			m_wnd.SetRedraw(FALSE);
-			m_bLocked = TRUE;
+			m_bLocked = true;
 		}
 	}
+}
+
+CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard& other)
+	: m_wnd(other.m_wnd)
+	, m_bFlag(other.m_bFlag)
+	, m_bLocked(other.m_bLocked)
+{
+	other.m_bFlag = false;
+}
+
+CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard&& other)
+	: CRedrawLockGuard((CRedrawLockGuard&)other)
+{
+	other.m_bFlag = false;
 }
 
 CRedrawLockGuard::~CRedrawLockGuard()
@@ -34,7 +45,7 @@ void CRedrawLockGuard::Unlock()
 {
 	if (m_bLocked && m_wnd)
 	{
-		m_bLocked = FALSE;
+		m_bLocked = false;
 
 		if (m_bFlag)
 		{
