@@ -528,13 +528,14 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 {
 	__Ensure(m_hWnd);
 
+	CRedrawLockGuard RedrawLockGuard(*this);
+
 	CListObject *pObject = NULL;
 
 	int nItemCount = GetItemCount();
 	for (int nItem = 0; nItem < nItemCount; )
 	{
-		pObject = GetItemObject(nItem);
-		
+		pObject = GetItemObject(nItem);		
 		if (setDeleteObjects.find(pObject) != setDeleteObjects.end())
 		{
 			DeleteItem(nItem);
@@ -550,6 +551,8 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 
 void CObjectList::DeleteItems(const set<UINT>& setItems)
 {
+	__Ensure(m_hWnd);
+
 	CRedrawLockGuard RedrawLockGuard(*this);
 
 	for (auto itr = setItems.rbegin(); itr != setItems.rend(); itr++)
