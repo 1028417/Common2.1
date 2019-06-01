@@ -57,15 +57,24 @@ protected:
 
 class __CommonExt CObjectTree: public CBaseTree
 {
+private:
+	map<const CTreeObject*, HTREEITEM> m_mapTreeObject;
+
 public:
-	static HTREEITEM getTreeItem(const CTreeObject& Object)
+	inline HTREEITEM getTreeItem(const CTreeObject *pObject)
 	{
-		return (HTREEITEM)Object.m_hTreeItem;
+		auto itr = m_mapTreeObject.find(pObject);
+		if (itr == m_mapTreeObject.end())
+		{
+			return NULL;
+		}
+
+		return itr->second;
 	}
 
-	static HTREEITEM getTreeItem(const CTreeObject *pObject)
+	inline HTREEITEM getTreeItem(const CTreeObject& Object)
 	{
-		return pObject ? (HTREEITEM)pObject->m_hTreeItem : NULL;
+		return getTreeItem(&Object);
 	}
 
 	void SetRootObject(CTreeObject& Object);

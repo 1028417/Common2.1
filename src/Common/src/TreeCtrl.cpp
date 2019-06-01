@@ -376,8 +376,10 @@ void CObjectTree::SetRootObject(CTreeObject& Object)
 HTREEITEM CObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObject)
 {
 	HTREEITEM hParentItem = TVI_ROOT;
-	if (pParentObject && pParentObject->m_hTreeItem)
+	if (pParentObject)
 	{
+		hParentItem = getTreeItem(pParentObject);
+
 		TVITEM item;
 		ZeroMemory(&item, sizeof(item));
 		item.hItem = getTreeItem(pParentObject);
@@ -392,15 +394,17 @@ HTREEITEM CObjectTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObj
 	
 	HTREEITEM hTreeItem = __super::InsertItem(hParentItem
 		, Object.GetTreeText().c_str(), (DWORD_PTR)&Object, Object.GetTreeImage());
-	Object.m_hTreeItem = hTreeItem;
+	m_mapTreeObject[&Object] = hTreeItem;
 	
 	return hTreeItem;
 }
 
 HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentObject)
 {
-	Object.m_hTreeItem = InsertObject(Object, pParentObject);
-	__EnsureReturn(getTreeItem(Object), NULL);
+	auto hTreeItem = InsertObject(Object, pParentObject);
+	__EnsureReturn(hTreeItem, NULL);
+
+	m_mapTreeObject[&Object] = hTreeItem;
 
 	TD_TreeObjectList lstSubObjects;
 	Object.GetTreeChilds(lstSubObjects);
@@ -409,7 +413,7 @@ HTREEITEM CObjectTree::InsertObjectEx(CTreeObject& Object, CTreeObject *pParentO
 		(void)InsertObjectEx(SubObject, &Object);
 	});
 
-	return getTreeItem(Object);
+	return hTreeItem;
 }
 
 void CObjectTree::UpdateImage(CTreeObject& Object)

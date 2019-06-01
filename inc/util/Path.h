@@ -154,14 +154,9 @@ public:
 class __UtilExt CTreeObject
 {
 public:
-	CTreeObject()
-	{
-		m_hTreeItem = NULL;
-	}
+	CTreeObject() {}
 
 public:
-	void *m_hTreeItem;
-
 	virtual wstring GetTreeText() const
 	{
 		return L"";
@@ -172,10 +167,7 @@ public:
 		return 0;
 	}
 
-	virtual void GetTreeChilds(TD_TreeObjectList& lstChilds)
-	{
-        (void)lstChilds;
-	}
+	virtual void GetTreeChilds(TD_TreeObjectList&) {}
 };
 
 class __UtilExt CPathObject : public CPath, public CListObject
