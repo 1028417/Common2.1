@@ -186,7 +186,7 @@ wstring wsutil::upperCase_r(const wstring& str)
 	return strRet;
 }
 
-void wsutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
+void wsutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 {
 	for (auto& chr : str)
 	{
@@ -197,7 +197,7 @@ void wsutil::replace(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 	}
 }
 
-void wsutil::replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+void wsutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
 {
 	for (auto& chr : str)
 	{

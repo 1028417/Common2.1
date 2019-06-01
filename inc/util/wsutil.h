@@ -52,8 +52,8 @@ public:
 	static void upperCase(wstring& str);
 	static wstring upperCase_r(const wstring& str);
 
-	static void replace(wstring& str, wchar_t chrFind, wchar_t chrReplace);
-	static void replace(wstring& str, const wstring& strFindChars, wchar_t chrReplace);
+	static void replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace);
+	static void replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace);
 
 	static wstring fromUTF8(const string& str);
 	static string toUTF8(const wstring& str);
