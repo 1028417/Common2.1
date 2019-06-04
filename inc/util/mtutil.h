@@ -6,11 +6,12 @@
 #include <Windows.h>
 #endif
 
+#include <mutex>
+#include <condition_variable>
+
 #include <thread>
 
-#include <mutex>
-
-#include <future>
+//#include <future>
 
 class __UtilExt mtutil
 {
@@ -167,7 +168,8 @@ public:
 class __UtilExt CCondVar
 {
 public:
-	CCondVar()
+	CCondVar(bool bInitialState=false)
+		: m_bState(bInitialState)
 	{
 	}
 
@@ -175,18 +177,25 @@ private:
 	condition_variable m_condvar;
 
 	mutex m_mtx;
+	
+	bool m_bState = false;
 
 public:
-	void notify()
-	{
-		std::unique_lock<mutex> lock(m_mtx);
-		m_condvar.notify_all();
-	}
-
 	void wait()
 	{
 		std::unique_lock<mutex> lock(m_mtx);
-		m_condvar.wait(lock);
+		if (!m_bState)
+		{
+			m_condvar.wait(lock);
+		}
+		m_bState = false;
+	}
+
+	void set()
+	{
+		std::unique_lock<mutex> lock(m_mtx);
+		m_bState = true;
+		m_condvar.notify_one();
 	}
 };
 
@@ -208,11 +217,6 @@ private:
 	HANDLE m_hEvent = INVALID_HANDLE_VALUE;
 
 public:
-	bool notify()
-	{
-		return TRUE == ::SetEvent(m_hEvent);
-	}
-
 	bool wait(DWORD dwTimeout = INFINITE)
 	{
 		return WAIT_OBJECT_0 == ::WaitForSingleObject(m_hEvent, dwTimeout);
@@ -221,6 +225,11 @@ public:
 	bool check()
 	{
 		return wait(0);
+	}
+
+	bool set()
+	{
+		return TRUE == ::SetEvent(m_hEvent);
 	}
 
 	bool reset()
