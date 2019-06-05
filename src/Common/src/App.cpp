@@ -147,8 +147,6 @@ static void _init()
 	GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken = 0;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
-	srand(GetTickCount());
 }
 
 BOOL CMainApp::InitInstance()

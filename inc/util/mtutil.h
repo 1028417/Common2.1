@@ -186,7 +186,7 @@ public:
 		std::unique_lock<mutex> lock(m_mtx);
 		if (!m_bState)
 		{
-			m_condvar.wait(lock);
+=			m_condvar.wait(lock);
 		}
 		m_bState = false;
 	}
