@@ -181,21 +181,33 @@ private:
 	bool m_bState = false;
 
 public:
-	void wait()
+	void wait(bool bAutoReset=true)
 	{
 		std::unique_lock<mutex> lock(m_mtx);
-		if (!m_bState)
+		while (!m_bState)
 		{
-=			m_condvar.wait(lock);
+			m_condvar.wait(lock);
 		}
-		m_bState = false;
+		
+		if (bAutoReset)
+		{
+			m_bState = false;
+		}
 	}
 
-	void set()
+	void set(bool bNotifyAll=true)
 	{
 		std::unique_lock<mutex> lock(m_mtx);
 		m_bState = true;
-		m_condvar.notify_one();
+
+		if (bNotifyAll)
+		{
+			m_condvar.notify_all();
+		}
+		else
+		{
+			m_condvar.notify_one();
+		}
 	}
 };
 
