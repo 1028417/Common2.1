@@ -177,7 +177,7 @@ namespace NS_SSTL
 
 		bool del_pos(list<size_t> lstPos)
 		{
-			for (int nIdx = m_data.size() - 1; nIdx >= 0; iIdx--)
+                        for (int nIdx = m_data.size() - 1; nIdx >= 0; nIdx--)
 			{
 				auto itr = std::find(lstPos.begin(), lstPos.end(), (size_t)nIdx);
 				if (itr != lstPos.end())
