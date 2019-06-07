@@ -307,34 +307,66 @@ time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 	return fileStat.st_mtime;
 }
 
+static inline bool _checkPathSplitor(wchar_t wch)
+{
+	return fsutil::wcBackSlant == wch || fsutil::wcSlant == wch;
+}
+
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
-	int iPos = -1;
-	auto pos = strPath.find_last_of(fsutil::wcBackSlant);
-	if (wstring::npos != pos)
+	int size = strPath.size();
+	for (int pos = size - 1; pos>=0; pos--)
 	{
-		iPos = pos;
+		if (_checkPathSplitor(strPath[pos]))
+		{
+			if (NULL != pstrDir)
+			{
+				*pstrDir = strPath.substr(0, pos);
+			}
+
+			if (NULL != pstrFile)
+			{
+				*pstrFile = strPath.substr(pos + 1);
+			}
+
+			return;
+		}
 	}
 
-	if (iPos >= 0)
+	if (NULL != pstrFile)
 	{
-		if (NULL != pstrDir)
-		{
-			*pstrDir = strPath.substr(0, iPos);
-		}
+		*pstrFile = strPath;
+	}
+}
 
-		if (NULL != pstrFile)
-		{
-			*pstrFile = strPath.substr(iPos + 1);
-		}
-	}
-	else
+wstring fsutil::GetRootDir(const wstring& strPath)
+{
+	int size = strPath.size();
+	for (int pos = 1; pos < size; pos++)
 	{
-		if (NULL != pstrFile)
+		if (_checkPathSplitor(strPath[pos]))
 		{
-			*pstrFile = strPath;
+			return strPath.substr(0, pos);
 		}
 	}
+
+	return L"";
+}
+
+wstring fsutil::GetParentDir(const wstring& strPath)
+{
+	__EnsureReturn(!strPath.empty(), L"");
+
+	wstring t_strPath = strPath;
+	if (_checkPathSplitor(t_strPath.back()))
+	{
+		t_strPath.pop_back();
+	}
+
+	wstring strParentDir;
+	SplitPath(t_strPath, &strParentDir, NULL);
+
+	return strParentDir;
 }
 
 wstring fsutil::GetFileName(const wstring& strPath)
@@ -380,29 +412,13 @@ wstring fsutil::GetFileExtName(const wstring& strPath)
 	return strExtName;
 }
 
-wstring fsutil::GetParentDir(const wstring& strPath)
-{
-	__EnsureReturn(!strPath.empty(), L"");
-
-	wstring strNewPath = strPath;
-	if (fsutil::wcBackSlant == strNewPath.back())
-	{
-		strNewPath.pop_back();
-	}
-
-	int nPos = (int)strNewPath.rfind(fsutil::wcBackSlant);
-	__EnsureReturn(0 <= nPos, L"");
-
-	return strNewPath.substr(0, nPos);
-}
-
 bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
 	auto size = strDir.size();
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(fsutil::wcBackSlant == *strDir.rbegin() || fsutil::wcBackSlant == strSubPath[size], false);
+	__EnsureReturn(_checkPathSplitor(*strDir.rbegin()) || _checkPathSplitor(strSubPath[size]), false);
 
 #ifdef __ANDROID__
 	const auto& _strDir = wsutil::toStr(strDir);
@@ -427,54 +443,36 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 	return strPath.substr(strBaseDir.size());
 }
 
-bool fsutil::existFile(const wstring& strFile)
+bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
-	if (strFile.empty())
+#ifndef _MSC_VER
+    QFileInfo fi(__QStr(strPath));
+    if (!fi.exists())
+    {
+        return false;
+    }
+
+    return fi.isDir() == bDir;
+
+#else
+	DWORD dwFileAttr = ::GetFileAttributesW(strPath.c_str());
+	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
 	{
 		return false;
 	}
 
-#ifndef _MSC_VER
-	QFileInfo fi(__QStr(strFile));
-    if (!fi.isFile())
-    {
-        return false;
-    }
-
-#else
-	DWORD dwFileAttr = ::GetFileAttributesW(strFile.c_str());
-    if (INVALID_FILE_ATTRIBUTES == dwFileAttr || (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
-    {
-        return false;
-    }
+	return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;	
 #endif
-
-    return true;
 }
 
 bool fsutil::existDir(const wstring& strDir)
 {
-	if (strDir.empty())
-	{
-		return false;
-	}
+	return existPath(strDir, true);
+}
 
-#ifndef _MSC_VER
-	QFileInfo fi(__QStr(strDir));
-    if (!fi.isDir())
-    {
-        return false;
-    }
-
-#else
-	DWORD dwFileAttr = ::GetFileAttributesW(strDir.c_str());
-    if (INVALID_FILE_ATTRIBUTES == dwFileAttr || 0 == (dwFileAttr & FILE_ATTRIBUTE_DIRECTORY))
-    {
-        return false;
-    }
-#endif
-
-    return true;
+bool fsutil::existFile(const wstring& strFile)
+{
+	return existPath(strFile, false);
 }
 
 bool fsutil::createDir(const wstring& strDir)
@@ -666,10 +664,9 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 	{
 		return false;
 	}
-	bool bFlag = (strDir.back() != fsutil::wcBackSlant && strDir.back() != fsutil::wcSlant);
-
+	
 	wstring strFind(strDir);
-	if (bFlag)
+	if (!_checkPathSplitor(strDir.back()))
 	{
 		strFind.append(1, fsutil::wcBackSlant);
 	}

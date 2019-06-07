@@ -211,6 +211,9 @@ public:
 
 	static void SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile);
 
+	static wstring GetRootDir(const wstring& strPath);
+	static wstring GetParentDir(const wstring& strPath);
+
 	static wstring GetFileName(const wstring& strPath);
 
 	static void GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName);
@@ -219,14 +222,13 @@ public:
 
 	static wstring GetFileExtName(const wstring& strPath);
 
-	static wstring GetParentDir(const wstring& strPath);
-
 	static bool CheckSubPath(const wstring& strDir, const wstring& strSubPath);
 
 	static wstring GetOppPath(const wstring& strPath, const wstring strBaseDir);
 
-    static bool existFile(const wstring& strFile);
+	static bool existPath(const wstring& strPath, bool bDir);
     static bool existDir(const wstring& strDir);
+	static bool existFile(const wstring& strFile);
 
     static bool createDir(const wstring& strDir);
     static bool removeDir(const wstring& strDir);

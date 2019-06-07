@@ -49,9 +49,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 		TCHAR pszPath[512];
 		if (SHGetPathFromIDList(lpItemIDList, pszPath))
 		{
-			m_strInitDir = pszPath;
-			wsutil::trim(m_strInitDir, fsutil::wcBackSlant);
-
+			m_strInitDir = wsutil::rtrim_r(pszPath, fsutil::wcBackSlant);
 			return m_strInitDir;
 		}
 	}

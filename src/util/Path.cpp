@@ -18,9 +18,7 @@ void CPath::SetDir(const wstring& strDir)
 	Clear();
 
 	m_bDir = true;
-	m_strName = strDir;
-
-	wsutil::rtrim(m_strName, fsutil::wcBackSlant);
+	m_strName = wsutil::rtrim_r(strDir, fsutil::wcBackSlant);
 }
 
 wstring CPath::GetName() const
