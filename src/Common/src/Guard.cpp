@@ -61,31 +61,31 @@ void CRedrawLockGuard::Unlock()
 
 void CMenuEx::_setOwnerDraw()
 {
-	int iItemCount = this->GetMenuItemCount();
-	for (int iItem = 0; iItem < iItemCount; iItem++)
+	int nItemCount = this->GetMenuItemCount();
+	for (int nItem = 0; nItem < nItemCount; nItem++)
 	{
-		UINT uItemID = this->GetMenuItemID(iItem);
+		UINT uItemID = this->GetMenuItemID(nItem);
 		
 		if (-1 == uItemID)//子菜单
 		{
 			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uMenuWidth, m_fFontSize));
-			m_lstSubMenu.back().Attach(this->GetSubMenu(iItem)->m_hMenu, FALSE); //递归调用
+			m_lstSubMenu.back().Attach(this->GetSubMenu(nItem)->m_hMenu, FALSE); //递归调用
 		}
 
 		CString strText;
-		this->GetMenuString(iItem, strText, MF_BYPOSITION);
+		this->GetMenuString(nItem, strText, MF_BYPOSITION);
 
 		tagMENUITEMINFOW mmi;
 		memset(&mmi, 0, sizeof(mmi));
 		mmi.cbSize = sizeof(mmi);
 		mmi.fMask = MIIM_SUBMENU;
-		if (CMenu::GetMenuItemInfo(iItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
+		if (CMenu::GetMenuItemInfo(nItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
 		{
-			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)mmi.hSubMenu, strText);
+			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)mmi.hSubMenu, strText);
 		}
 		else
 		{
-			(void)this->ModifyMenu(iItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, strText);
+			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, strText);
 		}
 	}
 }
@@ -270,24 +270,24 @@ BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 
 	m_mapMenuItemInfos.clear();
 
-	int iCount = ::GetMenuItemCount(hSubMenu);
-	if (iCount > 0)
+	int nCount = ::GetMenuItemCount(hSubMenu);
+	if (nCount > 0)
 	{
-		while (iCount > 0 && 0 == ::GetMenuItemID(hSubMenu, 0))
+		while (nCount > 0 && 0 == ::GetMenuItemID(hSubMenu, 0))
 		{
 			(void)::RemoveMenu(hSubMenu, 0, MF_BYPOSITION);
-			iCount--;
+			nCount--;
 		}
 
-		while (iCount > 0 && 0 == ::GetMenuItemID(hSubMenu, iCount - 1))
+		while (nCount > 0 && 0 == ::GetMenuItemID(hSubMenu, nCount - 1))
 		{
-			(void)::RemoveMenu(hSubMenu, iCount - 1, MF_BYPOSITION);
-			iCount--;
+			(void)::RemoveMenu(hSubMenu, nCount - 1, MF_BYPOSITION);
+			nCount--;
 		}
 	}
 	
 	BOOL bRet = FALSE;
-	if (iCount > 0)
+	if (nCount > 0)
 	{
 		bRet = _popup(hSubMenu, pWnd, uItemHeight, fFontSize);
 	}
@@ -299,9 +299,9 @@ BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 
 static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 {
-	int iCnt = 0;
+	int nCount = 0;
 
-	for (int iSrc = 0, iDst = GetMenuItemCount(hDst); iSrc<GetMenuItemCount(hSrc); iSrc++)
+	for (int nSrc = 0, nDst = GetMenuItemCount(hDst); nSrc<GetMenuItemCount(hSrc); nSrc++)
 	{
 		CString strMenuStr(L'\0', 256);
 		MENUITEMINFO mii;
@@ -318,7 +318,7 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 		mii.dwTypeData = (LPTSTR)(LPCTSTR)strMenuStr;
 		mii.cch = strMenuStr.GetLength();
 
-		VERIFY(GetMenuItemInfo(hSrc, iSrc, TRUE, &mii));
+		VERIFY(GetMenuItemInfo(hSrc, nSrc, TRUE, &mii));
 		strMenuStr.Trim();
 
 		if (mii.hSubMenu)
@@ -328,11 +328,11 @@ static int clonePopupMenu(HMENU hDst, HMENU hSrc)
 			mii.hSubMenu = hSub;
 		}
 
-		InsertMenuItem(hDst, iDst++, TRUE, &mii);
-		iCnt++;
+		InsertMenuItem(hDst, nDst++, TRUE, &mii);
+		nCount++;
 	}
 
-	return iCnt;
+	return nCount;
 }
 
 BOOL CMenuGuard::PopupEx(CWnd *pWnd, UINT uItemHeight, float fFontSize)
@@ -376,14 +376,14 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 
 	wcscpy_s(logFont.lfFaceName, L"微软雅黑");
 
-	int iOffset = (int)round(logFont.lfHeight*abs(m_fFontSizeOffset));
+	int nOffset = (int)round(logFont.lfHeight*abs(m_fFontSizeOffset));
 	if (m_fFontSizeOffset > 0)
 	{
-		logFont.lfHeight += iOffset;
+		logFont.lfHeight += nOffset;
 	}
 	else if (m_fFontSizeOffset < 0)
 	{
-		logFont.lfHeight -= iOffset;
+		logFont.lfHeight -= nOffset;
 	}
 
 	if (cb)

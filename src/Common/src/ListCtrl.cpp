@@ -92,7 +92,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 
 	if (m_para.cbMouseEvent)
 	{
-		m_iTrackMouseFlag = 0;
+		m_nTrackMouseFlag = 0;
 	}
 
 	return TRUE;
@@ -245,7 +245,7 @@ void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 {
 	m_para.cbMouseEvent = cbMouseEvent;
 
-	m_iTrackMouseFlag = 0;
+	m_nTrackMouseFlag = 0;
 }
 
 template <bool _clear_other>
@@ -275,8 +275,8 @@ int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, const 
 
 	wstring strText(strPrefix);
 	strText.append(vecText.front());
-	int iItem = InsertItem(uItem, strText.c_str());
-	if (iItem >= 0)
+	int nItem = InsertItem(uItem, strText.c_str());
+	if (nItem >= 0)
 	{
 		for (UINT uIndex = 1; uIndex < m_uColumnCount && uIndex < vecText.size(); ++uIndex)
 		{
@@ -287,18 +287,18 @@ int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, const 
 		}
 	}
 
-	return iItem;
+	return nItem;
 }
 
 int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
 {
-	int iItem = InsertItem(uItem, L"");
-	if (iItem >= 0)
+	int nItem = InsertItem(uItem, L"");
+	if (nItem >= 0)
 	{
-		SetItemTexts(iItem, lstText, strPrefix);
+		SetItemTexts(nItem, lstText, strPrefix);
 	}
 
-	return iItem;
+	return nItem;
 }
 
 void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
@@ -572,10 +572,10 @@ void CObjectList::SetItemImage(UINT uItem, int iImage)
 	__super::Update(uItem);
 }
 
-CListObject *CObjectList::GetItemObject(int iItem)
+CListObject *CObjectList::GetItemObject(int nItem)
 {
-	__EnsureReturn(iItem >= 0 && iItem < GetItemCount(), NULL);
-	return (CListObject*)GetItemData(iItem);
+	__EnsureReturn(nItem >= 0 && nItem < GetItemCount(), NULL);
+	return (CListObject*)GetItemData(nItem);
 }
 
 int CObjectList::GetObjectItem(const CListObject *pObject)
@@ -945,11 +945,11 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 			}
 		}
 	}
-	else if (-1 != m_iTrackMouseFlag)
+	else if (-1 != m_nTrackMouseFlag)
 	{
 		if (WM_MOUSEMOVE == message)
 		{
-			if (0 == m_iTrackMouseFlag)
+			if (0 == m_nTrackMouseFlag)
 			{
 				TRACKMOUSEEVENT tme;
 				memset(&tme, 0, sizeof tme);
@@ -957,7 +957,7 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 				tme.hwndTrack = m_hWnd;
 				tme.dwFlags = TME_LEAVE | TME_HOVER;
 				tme.dwHoverTime = HOVER_DEFAULT;
-				m_iTrackMouseFlag = ::TrackMouseEvent(&tme);
+				m_nTrackMouseFlag = ::TrackMouseEvent(&tme);
 			}
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseMove, CPoint(lParam));
@@ -965,14 +965,14 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 		}
 		else if (WM_MOUSELEAVE == message)
 		{
-			m_iTrackMouseFlag = 0;
+			m_nTrackMouseFlag = 0;
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
 			return TRUE;
 		}
 		else if (WM_MOUSEHOVER == message)
 		{
-			//m_iTrackMouseFlag = 0;
+			//m_nTrackMouseFlag = 0;
 
 			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
 			return TRUE;
@@ -994,8 +994,8 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 	E_ListViewType eViewType = GetView();
 
-	int iMax = sizeof(lpViewType) / sizeof(E_ListViewType);
-	for (int nIndex = 0; nIndex < iMax; ++nIndex)
+	int nMax = sizeof(lpViewType) / sizeof(E_ListViewType);
+	for (int nIndex = 0; nIndex < nMax; ++nIndex)
 	{
 		if (lpViewType[nIndex] == eViewType)
 		{
@@ -1003,7 +1003,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 			{
 				nIndex++;
 
-				if (nIndex >= iMax)
+				if (nIndex >= nMax)
 				{
 					nIndex = 0;
 				}
@@ -1013,7 +1013,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 				nIndex--;
 				if (nIndex < 0)
 				{
-					nIndex = iMax-1;
+					nIndex = nMax-1;
 				}
 			}
 

@@ -179,19 +179,19 @@ namespace NS_SSTL
 	public:
 		int find(__CB_ConstRef_bool cb, size_t startPos = 0) const
 		{
-			int iRetPos = -1;
+			int nRetPos = -1;
 
             (*this)(startPos, [&](__DataConstRef data, size_t pos) {
 				if (cb(data))
 				{
-					iRetPos = pos;
+					nRetPos = pos;
 					return false;
 				}
 
 				return true;
 			});
 
-			return iRetPos;
+			return nRetPos;
 		}
 
 		bool get(size_t pos, __CB_Ref_void cb)

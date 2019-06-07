@@ -177,12 +177,12 @@ namespace NS_SSTL
 
 		bool del_pos(list<size_t> lstPos)
 		{
-			for (int iIdx = m_data.size() - 1; iIdx >= 0; iIdx--)
+			for (int nIdx = m_data.size() - 1; nIdx >= 0; iIdx--)
 			{
-				auto itr = std::find(lstPos.begin(), lstPos.end(), (size_t)iIdx);
+				auto itr = std::find(lstPos.begin(), lstPos.end(), (size_t)nIdx);
 				if (itr != lstPos.end())
 				{
-					m_data.erase(m_data.begin() + iIdx);
+					m_data.erase(m_data.begin() + nIdx);
 
 					(void)lstPos.erase(itr);
 
@@ -228,19 +228,19 @@ namespace NS_SSTL
 
 		int find(__CB_ConstRef_bool cb, size_t startPos = 0) const
 		{
-			int iRetPos = -1;
+			int nRetPos = -1;
 
 			(*this)([&](__DataConstRef data, size_t pos) {
 				if (cb(data))
 				{
-					iRetPos = pos;
+					nRetPos = pos;
 					return false;
 				}
 
 				return true;
 			});
 
-			return iRetPos;
+			return nRetPos;
 		}
 
 		template<typename T>

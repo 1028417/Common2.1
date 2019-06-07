@@ -112,12 +112,12 @@ void CViewTab::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
 {
 	m_cbMouseEvent = cbMouseEvent;
 
-	m_iTrackMouseFlag = 0;
+	m_nTrackMouseFlag = 0;
 }
 
 void CViewTab::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
 {
-	m_iTrackMouseFlag = 0;
+	m_nTrackMouseFlag = 0;
 
 	if (m_cbMouseEvent)
 	{
@@ -134,7 +134,7 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 
 		break;
 	case WM_MOUSEMOVE:
-		if (0 == m_iTrackMouseFlag)
+		if (0 == m_nTrackMouseFlag)
 		{
 			TRACKMOUSEEVENT tme;
 			memset(&tme, 0, sizeof tme);
@@ -142,20 +142,20 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 			tme.hwndTrack = m_hWnd;
 			tme.dwFlags = TME_LEAVE | TME_HOVER;
 			tme.dwHoverTime = HOVER_DEFAULT;
-			m_iTrackMouseFlag = ::TrackMouseEvent(&tme);
+			m_nTrackMouseFlag = ::TrackMouseEvent(&tme);
 		}
 
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseMove, CPoint(lParam));
 
 		break;
 	case WM_MOUSELEAVE:
-		m_iTrackMouseFlag = 0;
+		m_nTrackMouseFlag = 0;
 
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
 
 		break;
 	case WM_MOUSEHOVER:
-		//m_iTrackMouseFlag = 0;
+		//m_nTrackMouseFlag = 0;
 
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
 
@@ -405,11 +405,11 @@ BOOL CDockView::AddPage(CPage& Page)
 			tagTCHITTESTINFO htInfo;
 			htInfo.pt = point;
 			htInfo.flags = TCHT_ONITEM;
-			int iItem = m_wndTabCtrl.HitTest(&htInfo);
+			int nItem = m_wndTabCtrl.HitTest(&htInfo);
 
-			__Ensure(iItem >= 0);
-			__Ensure(iItem < (int)m_vctPages.size());
-			__Ensure(m_vctPages[iItem]->m_bAutoActive);
+			__Ensure(nItem >= 0);
+			__Ensure(nItem < (int)m_vctPages.size());
+			__Ensure(m_vctPages[nItem]->m_bAutoActive);
 
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);

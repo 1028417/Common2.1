@@ -207,7 +207,7 @@ private:
 
 	bool m_bAutoChange = false;
 	
-	int m_iTrackMouseFlag = -1;
+	int m_nTrackMouseFlag = -1;
 	
 	CString m_cstrRenameText;
 
@@ -285,7 +285,7 @@ public:
 	void SetItemImage(UINT uItem, int iImage);
 
 public:
-	CListObject *GetItemObject(int iItem);
+	CListObject *GetItemObject(int nItem);
 	int GetObjectItem(const CListObject *pObject);
 	void GetAllObjects(TD_ListObjectList& lstListObjects);
 

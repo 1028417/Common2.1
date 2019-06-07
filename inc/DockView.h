@@ -48,7 +48,7 @@ private:
 
 	CImageList m_Imglst;
 
-	int m_iTrackMouseFlag = -1;
+	int m_nTrackMouseFlag = -1;
 
 	CB_TrackMouseEvent m_cbMouseEvent;
 	

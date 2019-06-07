@@ -121,12 +121,12 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 		rcDst.bottom -= prcMargin->bottom;
 	}
 
-	int iImgWidth = this->GetWidth();
-	int iImgHeight = this->GetHeight();
-	float fHWRate = (float)iImgHeight / iImgWidth;
+	int nImgWidth = this->GetWidth();
+	int nImgHeight = this->GetHeight();
+	float fHWRate = (float)nImgHeight / nImgWidth;
 
-	int iDstWidth = rcDst.Width();
-	int iDstHeight = rcDst.Height();
+	int nDstWidth = rcDst.Width();
+	int nDstHeight = rcDst.Height();
 
 	float fNeedHWRate = (float)rcDst.Height() / rcDst.Width();
 
@@ -147,8 +147,8 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 		{
 			eFixMode = E_ImgFixMode::IFM_Height;
 			
-			iDstWidth = int(iDstHeight / fHWRate);
-			auto offset = (rcDst.Width() - iDstWidth) / 2;
+			nDstWidth = int(nDstHeight / fHWRate);
+			auto offset = (rcDst.Width() - nDstWidth) / 2;
 			rcDst.left += offset;
 			rcDst.right -= offset;
 		}
@@ -156,8 +156,8 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 		{
 			eFixMode = E_ImgFixMode::IFM_Width;
 
-			iDstHeight = int(iDstWidth * fHWRate);
-			auto offset = (rcDst.Height() - iDstHeight) / 2;
+			nDstHeight = int(nDstWidth * fHWRate);
+			auto offset = (rcDst.Height() - nDstHeight) / 2;
 			rcDst.top += offset;
 			rcDst.bottom -= offset;
 		}
@@ -167,23 +167,23 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 	if (E_ImgFixMode::IFM_Width == eFixMode)
 	{
 		rcSrc.left = 0;
-		rcSrc.right = iImgWidth;
+		rcSrc.right = nImgWidth;
 
-		rcSrc.top = LONG(iImgHeight - iImgWidth*fNeedHWRate) / 2;
+		rcSrc.top = LONG(nImgHeight - nImgWidth*fNeedHWRate) / 2;
 		rcSrc.top = max(rcSrc.top, 0);
 
-		rcSrc.bottom = iImgHeight - rcSrc.top;
+		rcSrc.bottom = nImgHeight - rcSrc.top;
 		rcSrc.bottom = max(rcSrc.bottom, 0);
 	}
 	else
 	{
 		rcSrc.top = 0;
-		rcSrc.bottom = iImgHeight;
+		rcSrc.bottom = nImgHeight;
 
-		rcSrc.left = LONG(iImgWidth - iImgHeight / fNeedHWRate) / 2;
+		rcSrc.left = LONG(nImgWidth - nImgHeight / fNeedHWRate) / 2;
 		rcSrc.left = max(rcSrc.left, 0);
 		
-		rcSrc.right = iImgWidth - rcSrc.left;
+		rcSrc.right = nImgWidth - rcSrc.left;
 		rcSrc.right = max(rcSrc.right, 0);
 	}
 
@@ -191,7 +191,7 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 
 	CDC *pdcThis = GetDC();
 
-	BOOL bRet = dcTarget.StretchBlt(rcDst.left, rcDst.top, iDstWidth, iDstHeight
+	BOOL bRet = dcTarget.StretchBlt(rcDst.left, rcDst.top, nDstWidth, nDstHeight
 		, pdcThis, rcSrc.left, rcSrc.top, rcSrc.Width(), rcSrc.Height(), SRCCOPY);
 
 	this->ReleaseDC();

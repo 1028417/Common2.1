@@ -329,19 +329,19 @@ namespace NS_SSTL
 
 		int find(__CB_RefType_bool cb, size_t startPos = 0) const
 		{
-			int iRetPos = -1;
+			int nRetPos = -1;
 
 			(*this)([&](__RefType ref, size_t pos) {
 				if (cb(ref))
 				{
-					iRetPos = pos;
+					nRetPos = pos;
 					return false;
 				}
 
 				return true;
 			});
 
-			return iRetPos;
+			return nRetPos;
 		}
 
 		int indexOf(__ConstPtr ptr) const
