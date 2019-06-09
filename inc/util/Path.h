@@ -19,7 +19,7 @@ using TD_PathObjectList = PtrArray<CPathObject>;
 class CDirObject;
 using TD_DirObjectList = PtrArray<CDirObject>;
 
-class __UtilExt CPath : public tagFileInfo
+class __UtilExt CPath : protected tagFileInfo
 {
 	friend struct tagPathSortor;
 
@@ -89,7 +89,7 @@ public:
 	{
 		return _findFile();
 	}
-		
+	
 	void GetSubPath(TD_PathList& lstSubDir, TD_PathList& lstSubFile)
 	{
 		_GetSubPath(&lstSubDir, &lstSubFile);
@@ -124,8 +124,6 @@ public:
 	virtual void Clear();
 
 	void RemoveSubPath(set<CPath*> setDeletePaths);
-
-	bool HasFile() const;
 };
 
 class __UtilExt CListObject

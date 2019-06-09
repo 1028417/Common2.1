@@ -227,14 +227,6 @@ void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
 	});
 }
 
-bool CPath::HasFile() const
-{
-	__EnsureReturn(m_plstSubPath, false);
-	return m_plstSubPath->any([](CPath& SubPath) {
-		return !SubPath.m_bDir;
-	});
-}
-
 bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)
 {
 	TD_PathList lstSubFile;
