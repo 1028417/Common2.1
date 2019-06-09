@@ -119,29 +119,6 @@ void winfsutil::exploreFile(const wstring& strFile)
 	_shellExplore(strFile);
 }
 
-/*void winfsutil::shellExplore(const list<wstring>& lstFiles)
-{
-	wstring strExplore;
-	for (auto& strFile : lstFiles)
-	{
-		if (fsutil::fileExists(strFile) || fsutil::dirExists(strFile))
-		{
-			if (!strExplore.empty())
-			{
-				strExplore.append(L",");
-			}
-
-			strExplore.append(L'\"' + strFile + L'\"');
-		}
-	}
-	if (strExplore.empty())
-	{
-		return;
-	}
-
-	shellExplore((NULL, L"open", L"explorer", (L"/select," + strExplore).c_str(), NULL, SW_MAXIMIZE);
-}*/
-
 // 获取文件夹类型
 static wstring getFolderType()
 {
