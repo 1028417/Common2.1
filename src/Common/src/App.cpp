@@ -155,16 +155,12 @@ BOOL CMainApp::InitInstance()
 	InitMinDump();
 	
 	__AssertReturn(__super::InitInstance(), FALSE);
-
 	_init();
 
-	TCHAR pszPath[MAX_PATH];
-	(void)::GetModuleFileName(0, pszPath, MAX_PATH);
-	m_strAppPath = fsutil::GetParentDir(pszPath);
-	__AssertReturn(::SetCurrentDirectory(m_strAppPath.c_str()), FALSE);
+	__AssertReturn(::SetCurrentDirectory(fsutil::startupDir().c_str()), FALSE);
 	
 	__AssertReturn(getController().init(), FALSE);
-
+	
 	CMainWnd *pMainWnd = getView().init();
 	HWND hwndMain = pMainWnd->GetSafeHwnd();
 	__EnsureReturn(hwndMain, FALSE);

@@ -88,15 +88,8 @@ public:
 	{
 		return *this;
 	}
-
-	wstring GetAppPath(const wstring& strPath)
-	{
-		return m_strAppPath + strPath;
-	}
-
+	
 private:
-	wstring m_strAppPath;
-
 	typedef vector<CModuleApp*> ModuleVector;
 	ModuleVector m_vctModules;
 
