@@ -50,6 +50,8 @@ protected:
 	CPath *m_pParentDir = NULL;
 	
 protected:
+	TD_PathList& _findFile();
+
 	virtual bool onFindFile(TD_PathList& lstSubPath);
 
 	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir)
@@ -57,9 +59,6 @@ protected:
 		return new CPath(FileInfo, ParentDir);
 	}
 	
-private:
-	TD_PathList& _findFile();
-
 	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
 
 public:
