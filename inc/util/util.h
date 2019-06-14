@@ -40,6 +40,8 @@ using BOOL = int;
 #define MIN(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
+#define __1e6 ((UINT)1e6)
+
 #ifndef MAX
 #define MAX(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
@@ -92,6 +94,8 @@ using namespace NS_SSTL;
 #include "fsutil.h"
 
 #include "fsutil.h"
+
+#include "TxtWriter.h"
 
 #include "Path.h"
 

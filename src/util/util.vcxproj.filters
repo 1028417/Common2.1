@@ -1,24 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="sqlite\shell.c">
-      <Filter>db\sqlite</Filter>
-    </ClCompile>
+    <ClCompile Include="src\fsdlg.cpp" />
+    <ClCompile Include="src\fsutil.cpp" />
+    <ClCompile Include="src\mtutil.cpp" />
+    <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\ProFile.cpp" />
+    <ClCompile Include="src\tmutil.cpp" />
+    <ClCompile Include="src\TxtWriter.cpp" />
+    <ClCompile Include="src\winfsutil.cpp" />
+    <ClCompile Include="src\wintimer.cpp" />
+    <ClCompile Include="src\wsutil.cpp" />
     <ClCompile Include="sqlite\sqlite3.c">
       <Filter>db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="fsutil.cpp" />
-    <ClCompile Include="ProFile.cpp" />
-    <ClCompile Include="fsdlg.cpp" />
-    <ClCompile Include="Path.cpp" />
-    <ClCompile Include="SQLiteDB.cpp">
+    <ClCompile Include="sqlite\shell.c">
+      <Filter>db\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SQLiteDB.cpp">
       <Filter>db</Filter>
     </ClCompile>
-    <ClCompile Include="mtutil.cpp" />
-    <ClCompile Include="winfsutil.cpp" />
-    <ClCompile Include="wintimer.cpp" />
-    <ClCompile Include="tmutil.cpp" />
-    <ClCompile Include="wsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -82,6 +83,7 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\wsutil.h" />
+    <ClInclude Include="..\..\inc\util\TxtWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

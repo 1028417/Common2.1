@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       -= core
-#android: QT += androidextras
 
 TARGET = util
 TEMPLATE = lib
@@ -13,18 +12,19 @@ TEMPLATE = lib
 SOURCES += \
     sqlite/shell.c \
     sqlite/sqlite3.c \
-    wsutil.cpp \
-    tmutil.cpp \
-    fsutil.cpp \
-    Path.cpp \
-    SQLiteDB.cpp \
-    winfsutil.cpp \
-    wintimer.cpp \
-    mtutil.cpp
+    src/wsutil.cpp \
+    src/tmutil.cpp \
+    src/fsutil.cpp \
+    src/Path.cpp \
+    src/SQLiteDB.cpp \
+    src/winfsutil.cpp \
+    src/wintimer.cpp \
+    src/mtutil.cpp \
+    src/TxtWriter.cpp
 
 HEADERS +=\
-    sqlite/sqlite3.h \
-    sqlite/sqlite3ext.h \
+    src/sqlite/sqlite3.h \
+    src/sqlite/sqlite3ext.h \
     ../../inc/util/fsdlg.h \
     ../../inc/util/fsutil.h \
     ../../inc/util/IDB.h \
@@ -34,6 +34,7 @@ HEADERS +=\
     ../../inc/util/util.h \
     ../../inc/util/winfsutil.h \
     ../../inc/util/wintimer.h \
+    ../../inc/util/TxtWriter.h \
     ../../inc/sstl/_check.h \
     ../../inc/sstl/_define.h \
     ../../inc/sstl/_util.h \

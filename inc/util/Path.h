@@ -42,17 +42,20 @@ public:
 	}
 
 private:
-	bool m_bExists = false;
+	bool m_bDirExists = false;
 
-	TD_PathList *m_plstSubPath = NULL;
+	TD_PathList m_lstSubPath;
 
 protected:	
 	CPath *m_pParentDir = NULL;
 	
 protected:
-	TD_PathList& _findFile();
+	void _findFile();
 
-	virtual bool onFindFile(TD_PathList& lstSubPath);
+    virtual void onFindFile(TD_PathList& lstSubPath)
+    {
+        (void)lstSubPath;
+    }
 
 	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir)
 	{
@@ -76,20 +79,17 @@ public:
 		return m_bDir;
 	}
 
-	inline bool IsExists() const
+	bool DirExists() const
 	{
-		return m_bExists;
+		return m_bDirExists;
 	}
 
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
 		
-	const TD_PathList& GetSubPath()
-	{
-		return _findFile();
-	}
-	
+	const TD_PathList& GetSubPath();
+
 	void GetSubPath(TD_PathList& lstSubDir, TD_PathList& lstSubFile)
 	{
 		_GetSubPath(&lstSubDir, &lstSubFile);
@@ -103,16 +103,6 @@ public:
 	void GetSubFile(TD_PathList& lstSubFile)
 	{
 		_GetSubPath(NULL, &lstSubFile);
-	}
-
-    size_t GetSubPathCount() const
-	{
-		if (NULL == m_plstSubPath)
-		{
-			return 0;
-		}
-
-		return m_plstSubPath->size();
 	}
 
 	CPath *GetSubPath(UINT uIdx) const;
