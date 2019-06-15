@@ -6,8 +6,6 @@
 #include <Windows.h>
 #endif
 
-#include "lock.h"
-
 #include <thread>
 
 //#include <future>
@@ -163,3 +161,5 @@ public:
 		return m_vecResult;
 	}
 };
+
+#include "lock.h"

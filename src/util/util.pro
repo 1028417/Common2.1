@@ -49,7 +49,8 @@ HEADERS +=\
     ../../inc/sstl/SSet.h \
     ../../inc/sstl/sstl.h \
     ../../inc/util/tmutil.h \
-    ../../inc/util/wsutil.h
+    ../../inc/util/wsutil.h \
+    ../../inc/util/lock.h
 
 unix {
     target.path = /usr/lib
