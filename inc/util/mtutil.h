@@ -87,7 +87,7 @@ private:
 
 	volatile bool m_bPause = false;
 
-	bool m_bCancelEvent = false; // CWinEvent m_CancelEvent;
+	bool m_bCancelEvent = false;
 
 public:
 	using CB_WorkThread = function<void(UINT uThreadIndex)>;
@@ -162,4 +162,4 @@ public:
 	}
 };
 
-#include "lock.h"
+#include "mtlock.h"

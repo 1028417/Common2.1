@@ -84,7 +84,7 @@
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\wsutil.h" />
     <ClInclude Include="..\..\inc\util\TxtWriter.h" />
-    <ClInclude Include="..\..\inc\util\lock.h" />
+    <ClInclude Include="..\..\inc\util\mtlock.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

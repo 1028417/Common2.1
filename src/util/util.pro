@@ -50,7 +50,7 @@ HEADERS +=\
     ../../inc/sstl/sstl.h \
     ../../inc/util/tmutil.h \
     ../../inc/util/wsutil.h \
-    ../../inc/util/lock.h
+    ../../inc/util/mtlock.h
 
 unix {
     target.path = /usr/lib

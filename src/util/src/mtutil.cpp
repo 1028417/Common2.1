@@ -17,9 +17,9 @@ void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock
 			}));
 		}
 
-		for (auto& thr : lstThread)
+		for (auto& thread : lstThread)
 		{
-			thr.join();
+			thread.join();
 		}
 	}
 	else

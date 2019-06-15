@@ -13,7 +13,7 @@ struct tagTimerInfo
 };
 
 static map<UINT, tagTimerInfo> g_mapTimer;
-static CCSLock g_lckTimer;
+static CCASLock g_lckTimer;
 
 void __stdcall TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
