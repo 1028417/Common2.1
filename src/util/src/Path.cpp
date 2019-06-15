@@ -53,29 +53,26 @@ wstring CPath::GetParentDir() const
 	return L"";
 }
 
-bool CPath::onFindFile(TD_PathList& lstSubPath)
+void CPath::_findFile()
 {
-	return fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
+	if (m_bDirExists)
+	{
+		return;
+	}
+
+	m_lstSubPath.clear();
+
+	m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
 		{
-			lstSubPath.add(pSubPath);
+			m_lstSubPath.add(pSubPath);
 		}
-    });
-}
-
-TD_PathList& CPath::_findFile()
-{
-	if (NULL != m_plstSubPath)
-	{
-		return *m_plstSubPath;
-	}
-
-	m_plstSubPath = new TD_PathList();
-
-	m_bExists = onFindFile(*m_plstSubPath);
+	});
 	
-	m_plstSubPath->qsort([](const CPath& lhs, const CPath& rhs) {
+	onFindFile(m_lstSubPath);
+	
+	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)
 		{
 			return true;
@@ -88,15 +85,20 @@ TD_PathList& CPath::_findFile()
 
 		return false;
 	});
-	
-	return *m_plstSubPath;
+}
+
+const TD_PathList& CPath::GetSubPath()
+{
+	_findFile();
+
+	return m_lstSubPath;
 }
 
 void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 {
-	TD_PathList& lstSubPath = _findFile();
+	_findFile();
 
-	lstSubPath([&](CPath& SubPath) {
+	m_lstSubPath([&](CPath& SubPath) {
 		if (SubPath.m_bDir)
 		{
 			if (plstSubDir)
@@ -143,8 +145,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		wstring strName = lstSubDirs.back();
 		lstSubDirs.pop_back();
 
-		TD_PathList& lstSubPath = pPath->_findFile();
-
+		auto& lstSubPath = pPath->GetSubPath();
 		pPath = NULL;
 
 		lstSubPath([&](CPath& SubPath) {
@@ -178,13 +179,8 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 
 CPath *CPath::GetSubPath(UINT uIdx) const
 {
-	if (NULL == m_plstSubPath)
-	{
-		return NULL;
-	}
-
 	CPath *pSubPath = NULL;
-	m_plstSubPath->get(uIdx, [&](CPath& SubPath) {
+	m_lstSubPath.get(uIdx, [&](CPath& SubPath) {
 		pSubPath = &SubPath;
 	});
 
@@ -193,22 +189,18 @@ CPath *CPath::GetSubPath(UINT uIdx) const
 
 void CPath::Clear()
 {
-	if (NULL != m_plstSubPath)
-	{
-		(*m_plstSubPath)([](CPath& SubPath) {
-			delete &SubPath;
-		});
+	m_lstSubPath([](CPath& SubPath) {
+		delete &SubPath;
+	});
+	m_lstSubPath.clear();
 
-		delete m_plstSubPath;
-		m_plstSubPath = NULL;
-	}
+
+	m_bDirExists = false;
 }
 
 void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
 {
-	__Ensure(m_plstSubPath);
-
-	m_plstSubPath->del_ex([&](CPath& SubPath) {
+	m_lstSubPath.del_ex([&](CPath& SubPath) {
 		if (0 == setDeletePaths.erase(&SubPath))
 		{
 			return E_DelConfirm::DC_No;
