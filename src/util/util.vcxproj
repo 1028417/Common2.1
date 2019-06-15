@@ -43,6 +43,7 @@
     <ClInclude Include="..\..\inc\sstl\_check.h" />
     <ClInclude Include="..\..\inc\sstl\_define.h" />
     <ClInclude Include="..\..\inc\sstl\_util.h" />
+    <ClInclude Include="..\..\inc\util\lock.h" />
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\TxtWriter.h" />
     <ClInclude Include="..\..\inc\util\wintimer.h" />
