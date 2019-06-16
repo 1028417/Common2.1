@@ -449,10 +449,15 @@ void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& 
 {
 	bool bReportView = E_ListViewType::LVT_Report == GetView();
 	vector<wstring> vecText;
-	int iImage = 0;
+	int iImage = -1;
 	GenListItem(Object, bReportView, vecText, iImage);
 
-	__Assert(SetItem(uItem, 0, LVIF_IMAGE | LVIF_PARAM, NULL, iImage, 0, 0, (LPARAM)&Object));
+	UINT uMask = LVIF_PARAM;
+	if (iImage >= 0)
+	{
+		uMask |= LVIF_IMAGE;
+	}
+	__Assert(SetItem(uItem, 0, uMask, NULL, iImage, 0, 0, (LPARAM)&Object));
 
 	_SetItemTexts<true>(uItem, vecText, strPrefix);
 }
@@ -500,10 +505,8 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 		if (pObject)
 		{
 			vector<wstring> vecText;
-			int iImage = 0;
+			int iImage = -1;
 			GenListItem(*pObject, bReportView, vecText, iImage);
-
-			//(void)SetItem(uItem, 0, LVIF_IMAGE, NULL, iImage, 0, 0, 0);
 
 			for (auto nColumn : lstColumn)
 			{
@@ -566,9 +569,9 @@ void CObjectList::GenListItem(CListObject& Object, bool bReportView, vector<wstr
 	Object.GenListItem(bReportView, vecText, iImage);
 }
 
-void CObjectList::SetItemImage(UINT uItem, int iImage)
+void CObjectList::SetItemImage(UINT uItem, UINT uImage)
 {
-	(void)SetItem(uItem, 0, LVIF_IMAGE, NULL, iImage, 0, 0, 0);
+	(void)SetItem(uItem, 0, LVIF_IMAGE, NULL, uImage, 0, 0, 0);
 	__super::Update(uItem);
 }
 

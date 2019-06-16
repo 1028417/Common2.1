@@ -282,7 +282,7 @@ public:
 
 	void SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
 
-	void SetItemImage(UINT uItem, int iImage);
+	void SetItemImage(UINT uItem, UINT uImage);
 
 public:
 	CListObject *GetItemObject(int nItem);
