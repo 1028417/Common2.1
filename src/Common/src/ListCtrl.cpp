@@ -830,10 +830,11 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			*pResult = 1;
 			return TRUE;
 		}
-		
+
+		pwndEdit->SetMargins(2, 3);
+
 		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
-		pwndEdit->SetSel(0, -1);
 
 		/*CMainApp::async([=]() {
 			CEdit *pwndEdit = GetEditControl();

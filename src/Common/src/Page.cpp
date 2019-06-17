@@ -107,21 +107,31 @@ static CPoint g_ptLButtonDown;
 
 BOOL CPage::PreTranslateMessage(MSG* pMsg)
 {
+	static HWND s_hWndKeyDown = NULL;
+
 	switch (pMsg->message)
 	{
+	case WM_KEYDOWN:
+		s_hWndKeyDown = pMsg->hwnd;
+		
+		break;
 	case WM_KEYUP:
 	{
-		WORD uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
+		__EnsureBreak(pMsg->hwnd == s_hWndKeyDown);
 
 		map<HWND, map<UINT, UINT>>::iterator itHotKeys = m_mapMenuHotKeys.find(pMsg->hwnd);
 		if (itHotKeys != m_mapMenuHotKeys.end())
 		{
+			WORD uVkKey = GET_KEYSTATE_LPARAM(pMsg->wParam);
 			map<UINT, UINT>::iterator itHotKey = itHotKeys->second.find(uVkKey);
 			if (itHotKey != itHotKeys->second.end())
 			{
-				OnMenuCommand(itHotKey->second, uVkKey);
+				if (::GetFocus() == pMsg->hwnd)
+				{
+					OnMenuCommand(itHotKey->second, uVkKey);
 
-				return TRUE;
+					return TRUE;
+				}
 			}
 		}
 	}
