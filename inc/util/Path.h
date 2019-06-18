@@ -41,21 +41,15 @@ public:
 		Clear();
 	}
 
-private:
-	bool m_bDirExists = false;
-
-	TD_PathList m_lstSubPath;
-
 protected:	
 	CPath *m_pParentDir = NULL;
-	
-protected:
-	void _findFile();
 
-    virtual void onFindFile(TD_PathList& lstSubPath)
-    {
-        (void)lstSubPath;
-    }
+    bool m_bDirExists = false;
+
+    TD_PathList m_lstSubPath;
+
+protected:
+    virtual void _findFile();
 
 	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir)
 	{
@@ -65,7 +59,7 @@ protected:
 	void _GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile = NULL);
 
 public:
-	void SetDir(const wstring& strDir);
+    void SetDir(const wstring& strDir, bool bFindFile=false);
 
 	void SetName(const wstring& strNewName)
 	{

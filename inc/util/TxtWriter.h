@@ -38,6 +38,13 @@ public:
 	{
 	}
 
+    CTxtWriter(const wstring& strFile, bool bTrunc, E_TxtEncodeType eEncodeType, E_EOLFlag eEOLFlag = __DefEOL) :
+        m_eEncodeType(eEncodeType),
+        m_eEOLFlag(eEOLFlag)
+    {
+        (void)open(strFile, bTrunc);
+    }
+
 	~CTxtWriter()
 	{
 		close();
@@ -161,9 +168,16 @@ public:
 	}
 
 	template <typename T>
-    const CTxtWriter& operator<<(const T& num) const
+    const CTxtWriter& operator<<(const T& t) const
 	{
-		(void)write(num);
+		(void)write(t);
+		return *this;
+	}
+
+	template <typename T>
+	const CTxtWriter& operator>>(const T& t) const
+	{
+		(void)writeln(t);
 		return *this;
 	}
 
@@ -190,6 +204,12 @@ public:
 			: E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
 	{
 	}
+
+    CUnicodeTxtWriter(const wstring& strFile, bool bTrunc, E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+        CTxtWriter(strFile, bTrunc, E_UnicodeHeadOpt::UHO_LittleEndian == eHeadType ? E_TxtEncodeType::TET_Unicode_LittleEndian
+            : E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
+    {
+    }
 };
 
 #ifdef _MSC_VER
@@ -205,4 +225,9 @@ public:
 		CTxtWriter(bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
 	{
 	}
+
+    CUTF8TxtWriter(const wstring& strFile, bool bTrunc, bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+        CTxtWriter(strFile, bTrunc, bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
+    {
+    }
 };

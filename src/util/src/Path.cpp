@@ -13,12 +13,17 @@ CPath::CPath(const wstring& strName, bool bDir)
 	}
 }
 
-void CPath::SetDir(const wstring& strDir)
+void CPath::SetDir(const wstring& strDir, bool bFindFile)
 {
 	Clear();
 
 	m_bDir = true;
 	m_strName = wsutil::rtrim_r(strDir, fsutil::wcBackSlant);
+
+    if (bFindFile)
+    {
+        _findFile();
+    }
 }
 
 wstring CPath::GetName() const
@@ -69,9 +74,7 @@ void CPath::_findFile()
 			m_lstSubPath.add(pSubPath);
 		}
 	});
-	
-	onFindFile(m_lstSubPath);
-	
+		
 	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)
 		{
