@@ -48,8 +48,13 @@ protected:
 
     TD_PathList m_lstSubPath;
 
+	bool m_bFinded = false;
+
 protected:
-    virtual void _findFile();
+	virtual void _onFindFile();
+
+private:
+    void _findFile();
 
 	virtual CPath* NewSubPath(const tagFileInfo& FileInfo, CPath& ParentDir)
 	{

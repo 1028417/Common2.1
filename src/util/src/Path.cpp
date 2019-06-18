@@ -60,13 +60,18 @@ wstring CPath::GetParentDir() const
 
 void CPath::_findFile()
 {
-	if (m_bDirExists)
+	if (!m_bFinded)
 	{
-		return;
+		Clear();
+		
+		_onFindFile();
+
+		m_bFinded = true;
 	}
+}
 
-	m_lstSubPath.clear();
-
+void CPath::_onFindFile()
+{
 	m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo, *this);
 		if (pSubPath)
@@ -192,13 +197,14 @@ CPath *CPath::GetSubPath(UINT uIdx) const
 
 void CPath::Clear()
 {
+	m_bDirExists = false;
+
 	m_lstSubPath([](CPath& SubPath) {
 		delete &SubPath;
 	});
 	m_lstSubPath.clear();
 
-
-	m_bDirExists = false;
+	m_bFinded = false;
 }
 
 void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
