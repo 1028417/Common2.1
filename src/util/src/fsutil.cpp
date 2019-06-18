@@ -121,21 +121,21 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
 		strText.append(lpBuff);
 	}
 
-    const auto& strHead = __UTF8Bom;
+    const auto& strHead = CTxtWriter::__UTF8Bom;
     if (strText.substr(0, strHead.size()) == strHead)
     {
         strText.erase(0, strHead.size());
     }
     else
     {
-        const auto& strHead = __UnicodeHead_Lit;
+        const auto& strHead = CTxtWriter::__UnicodeHead_LittleEndian;
         if (strText.substr(0, strHead.size()) == strHead)
         {
             strText.erase(0, strHead.size());
         }
         else
         {
-            const auto& strHead = __UnicodeHead_Big;
+            const auto& strHead = CTxtWriter::__UnicodeHead_BigEndian;
             if (strText.substr(0, strHead.size()) == strHead)
             {
                 strText.erase(0, strHead.size());
@@ -201,7 +201,7 @@ static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 #ifdef _MSC_VER
     return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-    return QFile::copy(__QStr(strSrcFile), __QStr(strDstFile));
+    return QFile::copy(to_qstring(strSrcFile), to_qstring(strDstFile));
 #endif
 }
 
@@ -435,7 +435,7 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
 #ifndef _MSC_VER
-    QFileInfo fi(__QStr(strPath));
+    QFileInfo fi(to_qstring(strPath));
     if (!fi.exists())
     {
         return false;
@@ -467,7 +467,7 @@ bool fsutil::existFile(const wstring& strFile)
 bool fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    if (!QDir().mkpath(__QStr(strDir)))
+    if (!QDir().mkpath(to_qstring(strDir)))
     {
         return false;
     }
@@ -496,7 +496,7 @@ bool fsutil::createDir(const wstring& strDir)
 bool fsutil::removeDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-	QDir dir(__QStr(strDir));
+    QDir dir(to_qstring(strDir));
     if (!dir.rmpath(dir.absolutePath()))
     {
         return false;
@@ -519,7 +519,7 @@ bool fsutil::removeDir(const wstring& strDir)
 bool fsutil::removeFile(const wstring& strFile)
 {
 #ifdef __ANDROID__
-    if (!QFile::remove(__QStr(strFile)))
+    if (!QFile::remove(to_qstring(strFile)))
     {
         return false;
     }
@@ -548,7 +548,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
         }
     }
 
-    if (!QFile::rename(__QStr(strSrcFile), __QStr(strDstFile)))
+    if (!QFile::rename(to_qstring(strSrcFile), to_qstring(strDstFile)))
     {
         return false;
     }
@@ -587,7 +587,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 		return false;
 	}
 
-    QDir dir(__QStr(strDir));
+    QDir dir(to_qstring(strDir));
     if(!dir.exists())
     {
         return false;

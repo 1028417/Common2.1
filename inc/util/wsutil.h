@@ -3,9 +3,14 @@
 
 #include <string>
 
+#ifdef __ANDROID__
+#define to_string(x) QString::number(x).toStdString()
+#define to_wstring(x) QString::number(x).toStdWString()
+#endif
+
 #ifndef _MSC_VER
 #include <QString>
-#define __QStr(wstr) QString::fromStdWString(wstr)
+#define to_qstring(str) QString::fromStdWString(str)
 
 #ifndef QT_NO_DEBUG
 #define _DEBUG
@@ -18,16 +23,6 @@ public:
 	static const wchar_t wcSpace = L' ';
 
 	static bool checkWChar(const wstring& str);
-
-	template <typename T>
-	inline static wstring fromNum(const T& num)
-	{
-#ifdef __ANDROID__
-		return QString::number(num).toStdWString();
-#else
-		return std::to_wstring(num);
-#endif
-	}
 
 	static void trim(wstring& strText, wchar_t chr = ' ');
 	static wstring trim_r(const wstring& strText, wchar_t chr = ' ');
@@ -56,10 +51,15 @@ public:
 	static void replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace);
 
 	static wstring fromUTF8(const string& str);
+
 	static string toUTF8(const wstring& str);
+	static string toUTF8(const wchar_t *pStr);
 
 	static string toStr(const wstring& str);
+	static string toStr(const wchar_t *pStr);
+
 	static wstring fromStr(const string& str, bool bCheckUTF8=false);
+	static wstring fromStr(const char *pStr, bool bCheckUTF8=false);
 
 	template <typename T>
 	static wstring ContainerToStr(const T& container, const wstring& strSplitor)

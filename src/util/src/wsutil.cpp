@@ -157,7 +157,7 @@ bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 void wsutil::lowerCase(wstring& str)
 {
 #ifdef __ANDROID__
-	str = __QStr(str).toLower().toStdWString();
+	str = to_qstring(str).toLower().toStdWString();
 #else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif
@@ -173,7 +173,7 @@ wstring wsutil::lowerCase_r(const wstring& str)
 void wsutil::upperCase(wstring& str)
 {
 #ifdef __ANDROID__
-	str = __QStr(str).toUpper().toStdWString();
+	str = to_qstring(str).toUpper().toStdWString();
 #else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif	
@@ -214,6 +214,15 @@ using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
 #endif
 
+static inline wstring _fromUTF8(const char *pStr)
+{
+#ifndef _MSC_VER
+	return QString::fromUtf8(pStr).toStdWString();
+#else
+	return g_utf8Convert.from_bytes(pStr);
+#endif
+}
+
 wstring wsutil::fromUTF8(const string& str)
 {
 	if (str.empty())
@@ -221,31 +230,17 @@ wstring wsutil::fromUTF8(const string& str)
 		return L"";
 	}
 
+	return _fromUTF8(str.c_str());
+}
+
+static inline string _toUTF8(const wchar_t *pStr)
+{
 #ifndef _MSC_VER
-    return QString::fromUtf8(str.c_str()).toStdWString();
+    return to_qstring(pStr).toUtf8().constData();
 #else
-    return g_utf8Convert.from_bytes(str);
+	return g_utf8Convert.to_bytes(pStr);
 #endif
-}/*
-	int buffSize = ::MultiByteToWideChar(CP_UTF8,
-		0,
-		str.c_str(),
-		-1,
-		NULL,
-		0);
-	
-	vector<wchar_t> vecBuff(buffSize + 1);
-	wchar_t *pBuff = &vecBuff.front();// new wchar_t[buffSize + 1];
-	memset(pBuff, 0, sizeof(pBuff[0]) * (buffSize + 1));
-	::MultiByteToWideChar(CP_UTF8,
-		0,
-		str.c_str(),
-		-1,
-		pBuff,
-		buffSize);
-	
-	return pBuff;
-}*/
+}
 
 string wsutil::toUTF8(const wstring& str)
 {
@@ -254,64 +249,42 @@ string wsutil::toUTF8(const wstring& str)
 		return "";
 	}
 
-#ifndef _MSC_VER
-    return __QStr(str).toUtf8().constData();
-#else
-	return g_utf8Convert.to_bytes(str);
-#endif
-}/*
-    int buffSize = ::WideCharToMultiByte(CP_UTF8,
-		0,
-		str.c_str(),
-		-1,
-		NULL,
-		0,
-		NULL,
-		NULL);
+	return _toUTF8(str.c_str());
+}
 
-	vector<char> vecBuff(buffSize + 1);
-	char *pBuff = &vecBuff.front();// new char[buffSize + 1];
-	memset((void*)pBuff, 0, vecBuff.size());
-	::WideCharToMultiByte(CP_UTF8,
-		0,
-		str.c_str(),
-		-1,
-		pBuff,
-		buffSize,
-		NULL,
-		NULL);
-	
-	return pBuff;
-}*/
-
-string wsutil::toStr(const wstring& str)
+string wsutil::toUTF8(const wchar_t *pStr)
 {
-	if (str.empty())
+	if (NULL == pStr)
 	{
 		return "";
 	}
 
+	return _toUTF8(pStr);
+}
+
+static inline string _toStr(const wchar_t *pStr)
+{
 	size_t len = 0;
 #ifdef __ANDROID__
-    len = wcstombs(NULL, str.c_str(), 0);
+	len = wcstombs(NULL, pStr, 0);
 #else
-    if (wcstombs_s(&len, NULL, 0, str.c_str(), 0))
+	if (wcstombs_s(&len, NULL, 0, pStr, 0))
 	{
 		return "";
 	}
 #endif
-    if (0 == len)
-    {
-        return "";
-    }
+	if (0 == len)
+	{
+		return "";
+	}
 
 	vector<char> vecBuff(len + 1);
 	char *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
-    (void)wcstombs(pBuff, str.c_str(), len);
+	(void)wcstombs(pBuff, pStr, len);
 #else
-	if (wcstombs_s(NULL, pBuff, len, str.c_str(), len))
+	if (wcstombs_s(NULL, pBuff, len, pStr, len))
 	{
 		return "";
 	}
@@ -320,20 +293,33 @@ string wsutil::toStr(const wstring& str)
 	return pBuff;
 }
 
-static bool _checkUTF8(const string& str)
+string wsutil::toStr(const wstring& str)
 {
 	if (str.empty())
 	{
-		return false;
+		return "";
 	}
 
-	const char* pstr = str.c_str();
+	return _toStr(str.c_str());
+}
 
+string wsutil::toStr(const wchar_t *pStr)
+{
+	if (NULL == pStr)
+	{
+		return "";
+	}
+
+	return _toStr(pStr);
+}
+
+static bool _checkUTF8(const char *pStr)
+{
 	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
-	unsigned char chr = *pstr;
+	unsigned char chr = *pStr;
 	bool bAllAscii = true;
-	for (UINT uIndex = 0; pstr[uIndex] != '\0'; ++uIndex) {
-		chr = *(pstr + uIndex);
+	for (UINT uIndex = 0; pStr[uIndex] != '\0'; ++uIndex) {
+		chr = *(pStr + uIndex);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
 		if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
@@ -382,18 +368,13 @@ static bool _checkUTF8(const string& str)
 	return true;
 }
 
-static wstring _fromStr(const string& str)
+static inline wstring _fromStr(const char *pStr)
 {
-	if (str.empty())
-	{
-		return L"";
-	}
-
 	size_t len = 0;
 #ifdef __ANDROID__
-	len = mbstowcs(NULL, str.c_str(), 0);
+	len = mbstowcs(NULL, pStr, 0);
 #else
-	if (mbstowcs_s(&len, NULL, 0, str.c_str(), 0))
+	if (mbstowcs_s(&len, NULL, 0, pStr, 0))
 	{
 		return L"";
 	}
@@ -407,9 +388,9 @@ static wstring _fromStr(const string& str)
 	wchar_t *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
-	(void)mbstowcs(pBuff, str.c_str(), len);
+	(void)mbstowcs(pBuff, pStr, len);
 #else
-	if (mbstowcs_s(NULL, pBuff, len, str.c_str(), len))
+	if (mbstowcs_s(NULL, pBuff, len, pStr, len))
 	{
 		return L"";
 	}
@@ -425,10 +406,25 @@ wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
 		return L"";
 	}
 
-	if (bCheckUTF8 && _checkUTF8(str))
+	if (bCheckUTF8 && _checkUTF8(str.c_str()))
 	{
-		return fromUTF8(str);
+		return _fromUTF8(str.c_str());
 	}
 
-	return _fromStr(str);
+	return _fromStr(str.c_str());
+}
+
+wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
+{
+	if (NULL == pStr)
+	{
+		return L"";
+	}
+
+	if (bCheckUTF8 && _checkUTF8(pStr))
+	{
+		return _fromUTF8(pStr);
+	}
+
+	return _fromStr(pStr);
 }

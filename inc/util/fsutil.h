@@ -23,7 +23,7 @@ struct tagFileInfo
 
 	bool m_bDir = false;
 
-    wstring m_strName;
+	wstring m_strName;
 
 	unsigned long m_uFileSize = 0;
 
