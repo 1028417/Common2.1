@@ -24,7 +24,77 @@ enum class E_TxtEncodeType
 	TET_Utf8_WithBom
 };
 
-class __UtilExt CTxtWriter
+
+class __UtilExt ITxtWriter
+{
+public:
+    ITxtWriter(E_TxtEncodeType eEncodeType)
+        : m_eEncodeType(eEncodeType)
+    {
+    }
+
+protected:
+    E_TxtEncodeType m_eEncodeType;
+
+public:
+    virtual size_t write(const wstring& strText) const = 0;
+
+    virtual size_t writeln(const wstring& strText) const = 0;
+
+    virtual size_t write(const string& strText) const = 0;
+
+    virtual size_t writeln(const string& strText) const = 0;
+
+    virtual size_t write(const wchar_t *pStr) const = 0;
+
+    virtual size_t writeln(const wchar_t *pStr) const = 0;
+
+    virtual size_t write(const char *pStr) const = 0;
+
+    virtual size_t writeln(const char *pStr) const = 0;
+
+    template <typename T>
+    size_t write(const T& num) const
+    {
+            if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
+            {
+                    return write(to_string(num));
+            }
+            else
+    {
+                    return write(to_wstring(num));
+            }
+    }
+
+    template <typename T>
+    size_t writeln(const T& num) const
+    {
+            if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
+            {
+                    return writeln(to_string(num));
+            }
+            else
+            {
+                    return writeln(to_wstring(num));
+            }
+    }
+
+    template <typename T>
+    const ITxtWriter& operator<<(const T& t) const
+    {
+            (void)write(t);
+            return *this;
+    }
+
+    template <typename T>
+    const ITxtWriter& operator>>(const T& t) const
+    {
+            (void)writeln(t);
+            return *this;
+    }
+};
+
+class __UtilExt CTxtWriter : public ITxtWriter
 {
 public:
 	static const string __UnicodeHead_LittleEndian;
@@ -33,13 +103,13 @@ public:
 	static const string __UTF8Bom;
 
 	CTxtWriter(E_TxtEncodeType eEncodeType, E_EOLFlag eEOLFlag = __DefEOL) :
-		m_eEncodeType(eEncodeType),
+                ITxtWriter(eEncodeType),
 		m_eEOLFlag(eEOLFlag)
 	{
 	}
 
     CTxtWriter(const wstring& strFile, bool bTrunc, E_TxtEncodeType eEncodeType, E_EOLFlag eEOLFlag = __DefEOL) :
-        m_eEncodeType(eEncodeType),
+        ITxtWriter(eEncodeType),
         m_eEOLFlag(eEOLFlag)
     {
         (void)open(strFile, bTrunc);
@@ -51,8 +121,6 @@ public:
 	}
 
 private:
-	E_TxtEncodeType m_eEncodeType;
-
 	E_EOLFlag m_eEOLFlag;
 
 	FILE *m_lpFile = NULL;
@@ -81,27 +149,27 @@ private:
 public:
 	virtual bool open(const wstring& strFile, bool bTrunc);
 
-	size_t write(const wstring& strText) const
+    size_t write(const wstring& strText) const override
 	{
 		return _write(strText.c_str(), strText.size());
 	}
 
-	size_t writeln(const wstring& strText) const
+    size_t writeln(const wstring& strText) const override
 	{
 		return _write(strText.c_str(), strText.size(), true);
 	}
 
-	size_t write(const string& strText) const
+    size_t write(const string& strText) const override
 	{
 		return _write(strText.c_str(), strText.size());
 	}
 
-	size_t writeln(const string& strText) const
+    size_t writeln(const string& strText) const override
 	{
 		return _write(strText.c_str(), strText.size(), true);
 	}
 
-	size_t write(const wchar_t *pStr) const
+    size_t write(const wchar_t *pStr) const override
 	{
 		if (NULL == pStr)
 		{
@@ -111,7 +179,7 @@ public:
 		return _write(pStr, wcslen(pStr));
 	}
 
-	size_t writeln(const wchar_t* pStr) const
+    size_t writeln(const wchar_t *pStr) const override
 	{
 		if (NULL == pStr)
 		{
@@ -121,7 +189,7 @@ public:
 		return _write(pStr, wcslen(pStr), true);
 	}
 
-	size_t write(const char *pStr) const
+    size_t write(const char *pStr) const override
 	{
 		if (NULL == pStr)
 		{
@@ -131,7 +199,7 @@ public:
 		return _write(pStr, strlen(pStr));
 	}
 
-	size_t writeln(const char *pStr) const
+    size_t writeln(const char *pStr) const override
 	{
 		if (NULL == pStr)
 		{
@@ -139,49 +207,9 @@ public:
 		}
 
 		return _write(pStr, strlen(pStr), true);
-	}
+    }
 
-	template <typename T>
-	size_t write(const T& num) const
-	{
-		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
-		{
-			return write(to_string(num));
-		}
-		else
-        {
-			return write(to_wstring(num));
-		}
-	}
-
-	template <typename T>
-	size_t writeln(const T& num) const
-	{
-		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
-		{
-			return writeln(to_string(num));
-		}
-		else
-		{
-			return writeln(to_wstring(num));
-		}
-	}
-
-	template <typename T>
-    const CTxtWriter& operator<<(const T& t) const
-	{
-		(void)write(t);
-		return *this;
-	}
-
-	template <typename T>
-	const CTxtWriter& operator>>(const T& t) const
-	{
-		(void)writeln(t);
-		return *this;
-	}
-
-	bool close();
+    bool close();
 };
 
 #ifdef __ANDROID__
