@@ -129,6 +129,14 @@ public:
 
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
+	static wstring getModuleDir(wchar_t *pszModuleName=NULL)
+	{
+		wchar_t pszPath[MAX_PATH];
+		memset(pszPath, 0, sizeof pszPath);
+		::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+		return pszPath;
+	}
+
 	static void getWorkArea(CRect& rtWorkArea)
 	{
 		SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小

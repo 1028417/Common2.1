@@ -24,7 +24,6 @@ enum class E_TxtEncodeType
 	TET_Utf8_WithBom
 };
 
-
 class __UtilExt ITxtWriter
 {
 public:
@@ -92,6 +91,18 @@ public:
             (void)writeln(t);
             return *this;
     }
+
+#ifndef _MSC_VER
+    size_t write(const QString& qstr) const
+    {
+        return write(qstr.toStdWString());
+    }
+
+    size_t writeln(const QString& qstr) const
+    {
+        return writeln(qstr.toStdWString());
+    }
+#endif
 };
 
 class __UtilExt CTxtWriter : public ITxtWriter

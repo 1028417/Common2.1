@@ -157,7 +157,7 @@ bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 void wsutil::lowerCase(wstring& str)
 {
 #ifdef __ANDROID__
-	str = to_qstring(str).toLower().toStdWString();
+    str = wsutil::toQStr(str).toLower().toStdWString();
 #else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif
@@ -173,7 +173,7 @@ wstring wsutil::lowerCase_r(const wstring& str)
 void wsutil::upperCase(wstring& str)
 {
 #ifdef __ANDROID__
-	str = to_qstring(str).toUpper().toStdWString();
+    str = wsutil::toQStr(str).toUpper().toStdWString();
 #else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif	
@@ -236,7 +236,7 @@ wstring wsutil::fromUTF8(const string& str)
 static inline string _toUTF8(const wchar_t *pStr)
 {
 #ifndef _MSC_VER
-    return to_qstring(pStr).toUtf8().constData();
+    return wsutil::toQStr(pStr).toUtf8().constData();
 #else
 	return g_utf8Convert.to_bytes(pStr);
 #endif
@@ -260,57 +260,6 @@ string wsutil::toUTF8(const wchar_t *pStr)
 	}
 
 	return _toUTF8(pStr);
-}
-
-static inline string _toStr(const wchar_t *pStr)
-{
-	size_t len = 0;
-#ifdef __ANDROID__
-	len = wcstombs(NULL, pStr, 0);
-#else
-	if (wcstombs_s(&len, NULL, 0, pStr, 0))
-	{
-		return "";
-	}
-#endif
-	if (0 == len)
-	{
-		return "";
-	}
-
-	vector<char> vecBuff(len + 1);
-	char *pBuff = &vecBuff.front();
-
-#ifdef __ANDROID__
-	(void)wcstombs(pBuff, pStr, len);
-#else
-	if (wcstombs_s(NULL, pBuff, len, pStr, len))
-	{
-		return "";
-	}
-#endif
-
-	return pBuff;
-}
-
-string wsutil::toStr(const wstring& str)
-{
-	if (str.empty())
-	{
-		return "";
-	}
-
-	return _toStr(str.c_str());
-}
-
-string wsutil::toStr(const wchar_t *pStr)
-{
-	if (NULL == pStr)
-	{
-		return "";
-	}
-
-	return _toStr(pStr);
 }
 
 static bool _checkUTF8(const char *pStr)
@@ -427,4 +376,55 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 	}
 
 	return _fromStr(pStr);
+}
+
+static inline string _toStr(const wchar_t *pStr)
+{
+    size_t len = 0;
+#ifdef __ANDROID__
+    len = wcstombs(NULL, pStr, 0);
+#else
+    if (wcstombs_s(&len, NULL, 0, pStr, 0))
+    {
+        return "";
+    }
+#endif
+    if (0 == len)
+    {
+        return "";
+    }
+
+    vector<char> vecBuff(len + 1);
+    char *pBuff = &vecBuff.front();
+
+#ifdef __ANDROID__
+    (void)wcstombs(pBuff, pStr, len);
+#else
+    if (wcstombs_s(NULL, pBuff, len, pStr, len))
+    {
+        return "";
+    }
+#endif
+
+    return pBuff;
+}
+
+string wsutil::toStr(const wstring& str)
+{
+    if (str.empty())
+    {
+        return "";
+    }
+
+    return _toStr(str.c_str());
+}
+
+string wsutil::toStr(const wchar_t *pStr)
+{
+    if (NULL == pStr)
+    {
+        return "";
+    }
+
+    return _toStr(pStr);
 }

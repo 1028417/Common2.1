@@ -157,8 +157,6 @@ BOOL CMainApp::InitInstance()
 	__AssertReturn(__super::InitInstance(), FALSE);
 	_init();
 
-	__AssertReturn(::SetCurrentDirectory(fsutil::startupDir().c_str()), FALSE);
-	
 	__AssertReturn(getController().init(), FALSE);
 	
 	CMainWnd *pMainWnd = getView().init();

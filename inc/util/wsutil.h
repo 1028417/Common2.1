@@ -10,7 +10,6 @@
 
 #ifndef _MSC_VER
 #include <QString>
-#define to_qstring(str) QString::fromStdWString(str)
 
 #ifndef QT_NO_DEBUG
 #define _DEBUG
@@ -55,11 +54,18 @@ public:
 	static string toUTF8(const wstring& str);
 	static string toUTF8(const wchar_t *pStr);
 
+    static wstring fromStr(const string& str, bool bCheckUTF8=false);
+    static wstring fromStr(const char *pStr, bool bCheckUTF8=false);
+
 	static string toStr(const wstring& str);
 	static string toStr(const wchar_t *pStr);
 
-	static wstring fromStr(const string& str, bool bCheckUTF8=false);
-	static wstring fromStr(const char *pStr, bool bCheckUTF8=false);
+#ifndef _MSC_VER
+    static QString toQStr(const wstring& str)
+    {
+        return QString::fromStdWString(str);
+    }
+#endif
 
 	template <typename T>
 	static wstring ContainerToStr(const T& container, const wstring& strSplitor)

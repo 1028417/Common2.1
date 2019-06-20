@@ -86,10 +86,6 @@ void InitMinDump()
 	DisableSetUnhandledExceptionFilter();
 }
 
-
-
-
-
 void CreateDumpFile(LPCSTR lpstrDumpFilePathName, EXCEPTION_POINTERS *pException)
 {
 	// 创建Dump文件

@@ -16,15 +16,7 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 {
 	bool bExists = fsutil::existFile(strFile);
 
-	wstring strMode(bTrunc ? L"w" : L"a");
-	if (_isUtf8())
-	{
-		strMode.append(L"b,ccs=UTF-8");
-	}
-	else
-	{
-		strMode.append(L"b");
-	}
+    wstring strMode(bTrunc ? L"wb" : L"ab");
 
 #ifdef __ANDROID__
 	m_lpFile = fopen(wsutil::toStr(strFile).c_str(), wsutil::toStr(strMode).c_str());
