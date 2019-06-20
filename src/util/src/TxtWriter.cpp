@@ -25,7 +25,6 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 #endif
 	__EnsureReturn(m_lpFile, false);
 
-
 	if (!bExists || bTrunc)
 	{
 		if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)

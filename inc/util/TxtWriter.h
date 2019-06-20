@@ -158,6 +158,11 @@ private:
 	inline size_t _writeEndLine() const;
 
 public:
+	bool isOpened() const
+	{
+		return NULL != m_lpFile;
+	}
+
 	virtual bool open(const wstring& strFile, bool bTrunc);
 
     size_t write(const wstring& strText) const override

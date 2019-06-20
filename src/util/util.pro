@@ -52,17 +52,21 @@ HEADERS +=\
     ../../inc/util/wsutil.h \
     ../../inc/util/mtlock.h
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
 DEFINES += __UtilPrj
 
 INCLUDEPATH += \
     ../../inc \
     ../../inc/util
 
+android {
+DESTDIR = $$PWD/../../../Player3.1/lib
+} else {
 DESTDIR = $$PWD/../../../Player3.1/2Player
+
+unix {
+    target.path = /usr/lib
+    INSTALLS += target
+}
+}
 
 CONFIG += c++11

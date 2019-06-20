@@ -57,7 +57,7 @@ public:
 		return false;
 	}
 
-	virtual LRESULT handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+	virtual LRESULT handleModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		return 0;
 	}
