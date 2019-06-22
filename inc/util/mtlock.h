@@ -7,25 +7,29 @@
 
 using mutex_lock = std::unique_lock<mutex>;
 
-class __UtilExt CMtxLock : public mutex
+template <typename T>
+class CMtxLock : public mutex
 {
 public:
     CMtxLock() {}
 
-public:
-    void lock_to(const fn_voidvoid& cb)
-    {
-        mutex_lock lock(*this);
+    T m_data;
 
-        cb();
+public:
+    T& lock()
+    {
+        mutex::lock();
+
+        return m_data;
     }
 
-    template <typename T>
-    T lock_to(const std::function<T(void)>& cb)
+    void lock(const function<void(T& data)>& cb)
     {
-        mutex_lock lock(*this);
+        mutex::lock();
 
-        return cb();
+        cb(m_data);
+
+        mutex::unlock();
     }
 };
 
@@ -41,26 +45,36 @@ public:
 private:
     mutex m_mutex;
 
-	T m_value;
+    T m_value;
 
     condition_variable m_condVar;
 
 private:
-	using CB_CheckSignal = const std::function<bool(const T& value)>&;
-    inline bool _wait(CB_CheckSignal cbCheck, T& value, int nMs = -1)
+    using CB_CheckSignal = const std::function<bool(const T& value)>&;
+    inline bool _wait(T& value, CB_CheckSignal cbCheck=NULL, int nMs = -1)
     {
-		mutex_lock lock(m_mutex);
+        mutex_lock lock(m_mutex);
 
         if (nMs >= 0)
         {
-			if (!cbCheck(m_value))
-			{
-                if (cv_status::timeout == m_condVar.wait_for(lock, std::chrono::milliseconds(nMs)))
+            if (cbCheck)
+            {
+                if (!cbCheck(m_value))
                 {
-                    return false;
-                }
+                    if (cv_status::timeout == m_condVar.wait_for(lock, std::chrono::milliseconds(nMs)))
+                    {
+                        return false;
+                    }
 
-				if (!cbCheck(m_value))
+                    if (!cbCheck(m_value))
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                if (cv_status::timeout == m_condVar.wait_for(lock, std::chrono::milliseconds(nMs)))
                 {
                     return false;
                 }
@@ -68,7 +82,14 @@ private:
         }
         else
         {
-            while (!cbCheck(m_value))
+            if (cbCheck)
+            {
+                while (!cbCheck(m_value))
+                {
+                    m_condVar.wait(lock);
+                }
+            }
+            else
             {
                 m_condVar.wait(lock);
             }
@@ -80,37 +101,28 @@ private:
     }
 
 public:
-    T wait(CB_CheckSignal cbCheck)
+    T wait(CB_CheckSignal cbCheck=NULL)
     {
         T value;
         memset(&value, 0, sizeof value);
 
-        (void)_wait(cbCheck, value);
+        (void)_wait(value, cbCheck);
     
         return value;
     }
 
-    bool wait_for(CB_CheckSignal cbCheck, UINT uMs, T& value)
+    bool wait_for(UINT uMs, T& value, CB_CheckSignal cbCheck=NULL)
     {
-        return _wait(cbCheck, value, uMs);
+        return _wait(value, cbCheck, uMs);
     }
 
     void set(const T& value)
     {
-		mutex_lock lock(m_mutex);
+        mutex_lock lock(m_mutex);
         
         m_value = value;
         
         m_condVar.notify_one();
-    }
-
-    void reset(const T& value)
-    {
-		mutex_lock lock(m_mutex);
-
-        m_value = value;
-        
-        m_condVar.notify_all();
     }
 };
 
@@ -132,9 +144,9 @@ public:
     bool wait_for(UINT uMs)
     {
         bool bValue = false;
-        if (!TSignal::wait_for([](bool bValue) {
+        if (!TSignal::wait_for(uMs, bValue, [](bool bValue) {
 			return bValue;
-		}, uMs, bValue))
+        }))
         {
             return false;
         }
@@ -149,7 +161,7 @@ public:
 
     void reset()
     {
-        TSignal::reset(false);
+        TSignal::set(false);
     }
 };
 

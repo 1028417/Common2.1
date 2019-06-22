@@ -76,7 +76,7 @@ public:
 
 	static bool moveFile(const wstring& strSrcFile, const wstring& strDstFile);
 
-    static const wstring& workDir();
+    static wstring workDir();
     static bool setWorkDir(const wstring& strWorkDir);
 
 	enum class E_FindFindFilter

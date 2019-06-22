@@ -588,10 +588,15 @@ static wstring _getCwd()
     return strCwd;
 }
 
-static wstring g_strWorkDir = _getCwd();
+static wstring g_strWorkDir;
 
-const wstring& fsutil::workDir()
+wstring fsutil::workDir()
 {
+    if (g_strWorkDir.empty())
+    {
+        g_strWorkDir = _getCwd();
+    }
+
     return g_strWorkDir;
 }
 
