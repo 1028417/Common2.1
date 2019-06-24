@@ -80,11 +80,30 @@ BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pR
 {
 	if (WM_LBUTTONDOWN == message || WM_RBUTTONDOWN == message)
 	{
+		*pResult = 0;
+
+		UINT uFlags = 0;
 		CPoint ptPos(lParam);
-		HTREEITEM hItem = this->HitTest(ptPos);
+		HTREEITEM hItem = this->HitTest(ptPos, &uFlags);
 		if (hItem)
 		{
-			(void)this->SelectItem(hItem);
+			if (0 == (this->GetItemState(hItem, TVIS_SELECTED) & TVIS_SELECTED))
+			{
+				//(void)this->SelectItem(hItem);
+
+				if (WM_LBUTTONDOWN == message)
+				{
+					//return TRUE;
+				}
+			}
+			else
+			{
+				if (WM_LBUTTONDOWN == message)
+				{
+					//__super::EditLabel(hItem);
+					//return TRUE;
+				}
+			}
 		}
 	}
 	

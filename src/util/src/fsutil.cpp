@@ -366,38 +366,44 @@ wstring fsutil::GetFileName(const wstring& strPath)
 	return strFileName;
 }
 
-void fsutil::GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName)
+static void _GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName)
 {
-	wstring strName = GetFileName(strPath);
+	wstring strFileName;
+	fsutil::SplitPath(strPath, NULL, &strFileName);
 
-	auto pos = strName.find_last_of(fsutil::wcDot);
+	auto pos = strFileName.find_last_of(fsutil::wcDot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
 		{
-			*pstrExtName = strName.substr(pos);
+			*pstrExtName = strFileName.substr(pos);
 		}
 
-		strName = strName.substr(0, pos);
+		if (NULL != pstrTitle)
+		{
+			*pstrTitle = strFileName.substr(0, pos);
+		}
 	}
-
-	if (NULL != pstrTitle)
+	else
 	{
-		*pstrTitle = strName;
+		if (NULL != pstrTitle)
+		{
+			*pstrTitle = strFileName;
+		}
 	}
 }
 
 wstring fsutil::getFileTitle(const wstring& strPath)
 {
 	wstring strTitle;
-	GetFileName(strPath, &strTitle, NULL);
+	_GetFileName(strPath, &strTitle, NULL);
 	return strTitle;
 }
 
 wstring fsutil::GetFileExtName(const wstring& strPath)
 {
 	wstring strExtName;
-	GetFileName(strPath, NULL, &strExtName);
+	_GetFileName(strPath, NULL, &strExtName);
 	return strExtName;
 }
 
@@ -542,6 +548,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #ifdef __ANDROID__
     if (existFile(strDstFile))
     {
+        // TODO if (strSrcFile ==== strDstFile)
         if (!removeFile(strDstFile))
         {
             return false;

@@ -55,11 +55,7 @@ public:
 	static wstring GetParentDir(const wstring& strPath);
 
 	static wstring GetFileName(const wstring& strPath);
-
-	static void GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName);
-
 	static wstring getFileTitle(const wstring& strPath);
-
 	static wstring GetFileExtName(const wstring& strPath);
 
 	static bool CheckSubPath(const wstring& strDir, const wstring& strSubPath);

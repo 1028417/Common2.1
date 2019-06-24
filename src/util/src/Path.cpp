@@ -128,36 +128,32 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
 	__EnsureReturn(m_bDir, NULL);
 
-	list<wstring> lstSubDirs;
+	list<wstring> lstSubName;
 	while (!strSubPath.empty())
 	{
-		wstring strName;
-		wstring strExtName;
-		fsutil::GetFileName(strSubPath, &strName, &strExtName);
-
-		strName += strExtName;
-		if (strName.empty())
+		wstring strSubName = fsutil::GetFileName(strSubPath);
+		if (strSubName.empty())
 		{
 			break;
 		}
 		
-		lstSubDirs.push_back(strName);
+		lstSubName.push_front(strSubName);
 
 		strSubPath = fsutil::GetParentDir(strSubPath);
 	}
 	
 	CPath *pPath = this;
 
-	while (!lstSubDirs.empty() && NULL != pPath)
+	while (!lstSubName.empty() && NULL != pPath)
 	{
-		wstring strName = lstSubDirs.back();
-		lstSubDirs.pop_back();
+		wstring strSubName = lstSubName.front();
+		lstSubName.pop_front();
 
 		auto& lstSubPath = pPath->GetSubPath();
 		pPath = NULL;
 
 		lstSubPath([&](CPath& SubPath) {
-			if (lstSubDirs.empty())
+			if (lstSubName.empty())
 			{
 				if (SubPath.m_bDir != bDir)
 				{
@@ -172,7 +168,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 				}
 			}
 
-			if (wsutil::matchIgnoreCase(SubPath.m_strName, strName))
+			if (wsutil::matchIgnoreCase(SubPath.m_strName, strSubName))
 			{
 				pPath = &SubPath;
 				return false;
