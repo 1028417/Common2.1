@@ -298,7 +298,7 @@ time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 
 static inline bool _checkPathSplitor(wchar_t wch)
 {
-	return fsutil::wcBackSlant == wch || fsutil::wcSlant == wch;
+	return __wcBackSlant == wch || __wcSlant == wch;
 }
 
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
@@ -371,7 +371,7 @@ static void _GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 	wstring strFileName;
 	fsutil::SplitPath(strPath, NULL, &strFileName);
 
-	auto pos = strFileName.find_last_of(fsutil::wcDot);
+	auto pos = strFileName.find_last_of(__wcDot);
 	if (wstring::npos != pos)
 	{
 		if (NULL != pstrExtName)
@@ -597,6 +597,16 @@ static wstring _getCwd()
 
 static wstring g_strWorkDir;
 
+#ifndef __ANDROID__
+wstring fsutil::getModuleDir(wchar_t *pszModuleName)
+{
+	wchar_t pszPath[MAX_PATH];
+	memset(pszPath, 0, sizeof pszPath);
+	::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+	return GetParentDir(pszPath);
+}
+#endif
+
 wstring fsutil::workDir()
 {
     if (g_strWorkDir.empty())
@@ -614,12 +624,12 @@ bool fsutil::setWorkDir(const wstring& strWorkDir)
         return false;
     }
 
-    g_strWorkDir = strWorkDir;
+    g_strWorkDir = _getCwd();
     return true;
 }
 
-static const wstring g_wsDot(1, fsutil::wcDot);
-static const wstring g_wsDotDot(2, fsutil::wcDot);
+static const wstring g_wsDot(1, __wcDot);
+static const wstring g_wsDotDot(2, __wcDot);
 
 #ifdef __ANDROID__
 bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
@@ -669,18 +679,20 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         }
 
         tagFileInfo FileInfo;
-        if (fi.isDir())
+        FileInfo.m_bDir = fi.isDir();
+        if (!FileInfo.m_bDir)
         {
-            FileInfo.m_bDir = true;
-            FileInfo.m_strName = strFileName;
             FileInfo.m_uFileSize = fi.size();
-            FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
-            FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
             // title = fi.completeBaseName()
             // parentdir = fi.path()
             // fullPath = fi.filePath()
             // ??? fi.absoluteFilePath()
         }
+
+        FileInfo.m_strName = strFileName;
+
+        FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+        FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
 
 		cb(FileInfo);
     }
@@ -699,7 +711,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 	wstring strFind(strDir);
 	if (!_checkPathSplitor(strDir.back()))
 	{
-		strFind.append(1, fsutil::wcBackSlant);
+		strFind.append(1, __wcBackSlant);
 	}
 
 	if (E_FindFindFilter::FFP_ByPrefix == eFilter)

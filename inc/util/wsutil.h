@@ -49,6 +49,9 @@ public:
 	static void replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace);
 	static void replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace);
 
+	static wstring replaceChar_r(const wstring& str, wchar_t chrFind, wchar_t chrReplace);
+	static wstring replaceChars_r(const wstring& str, const wstring& strFindChars, wchar_t chrReplace);
+
 	static wstring fromUTF8(const string& str);
 
 	static string toUTF8(const wstring& str);

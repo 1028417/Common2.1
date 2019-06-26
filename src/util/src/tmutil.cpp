@@ -33,7 +33,7 @@ bool tmutil::timeToTM(time32_t tTime, tagTM& tm)
 
 static wstring _formatTime(const tm& atm, const wstring& strFormat)
 {
-	wchar_t lpBuff[24];
+	wchar_t lpBuff[64];
 	memset(lpBuff, 0, sizeof lpBuff);
 	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
 	{

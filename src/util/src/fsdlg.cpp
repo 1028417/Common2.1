@@ -49,7 +49,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 		TCHAR pszPath[512];
 		if (SHGetPathFromIDList(lpItemIDList, pszPath))
 		{
-			m_strInitDir = wsutil::rtrim_r(pszPath, fsutil::wcBackSlant);
+			m_strInitDir = wsutil::rtrim_r(pszPath, __wcBackSlant);
 			return m_strInitDir;
 		}
 	}
@@ -323,7 +323,7 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 	wstring strDir = m_lpstrFileName;
 	for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
 	{
-		*itrFile = strDir + fsutil::wcBackSlant + *itrFile;
+		*itrFile = strDir + __wcBackSlant + *itrFile;
 	}
 
 	return strDir;

@@ -208,6 +208,20 @@ void wsutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t chr
 	}
 }
 
+wstring wsutil::replaceChar_r(const wstring& str, wchar_t chrFind, wchar_t chrReplace)
+{
+	wstring strRet(str);
+	replaceChar(strRet, chrFind, chrReplace);
+	return strRet;
+}
+
+wstring wsutil::replaceChars_r(const wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+{
+	wstring strRet(str);
+	replaceChars(strRet, strFindChars, chrReplace);
+	return strRet;
+}
+
 #ifdef _MSC_VER
 #include <codecvt>
 using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;

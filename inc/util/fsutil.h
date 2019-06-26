@@ -31,6 +31,10 @@ struct tagFileInfo
 	time64_t m_tModifyTime = 0;
 };
 
+#define __wcDot fsutil::wcDot
+#define __wcBackSlant fsutil::wcBackSlant
+#define __wcSlant fsutil::wcSlant
+
 class __UtilExt fsutil
 {
 public:
@@ -71,6 +75,10 @@ public:
     static bool removeFile(const wstring& strFile);
 
 	static bool moveFile(const wstring& strSrcFile, const wstring& strDstFile);
+
+#ifndef __ANDROID__
+	static wstring getModuleDir(wchar_t *pszModuleName = NULL);
+#endif
 
     static wstring workDir();
     static bool setWorkDir(const wstring& strWorkDir);

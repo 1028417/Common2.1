@@ -18,7 +18,7 @@ void CPath::SetDir(const wstring& strDir, bool bFindFile)
 	Clear();
 
 	m_bDir = true;
-	m_strName = wsutil::rtrim_r(strDir, fsutil::wcBackSlant);
+	m_strName = wsutil::rtrim_r(strDir, __wcBackSlant);
 
     if (bFindFile)
     {
@@ -42,7 +42,7 @@ wstring CPath::GetPath() const
 {
 	if (NULL != m_pParentDir)
 	{
-		return m_pParentDir->GetPath() + fsutil::wcBackSlant + m_strName;
+		return m_pParentDir->GetPath() + __wcBackSlant + m_strName;
 	}
 
 	return m_strName;
