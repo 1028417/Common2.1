@@ -9,18 +9,18 @@ struct tagTimerInfo
 {
 	bool bPending = false;
 
-	WinTimer::CB_Timer cb;
+	CB_WinTimer cb;
 };
 
 static map<UINT, tagTimerInfo> g_mapTimer;
 static CCASLock g_lckTimer;
 
-void __stdcall TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+void CALLBACK TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
     (void)uMsg;
     (void)dwTime;
 
-	WinTimer::CB_Timer cb;
+	CB_WinTimer cb;
 	g_lckTimer.lock();
 	auto itr = g_mapTimer.find(idEvent);
 	if (itr != g_mapTimer.end())
@@ -41,7 +41,7 @@ void __stdcall TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		if (!cb())
 		{
-			WinTimer::killTimer(idEvent);
+			wintimer::killTimer(idEvent);
 			return;
 		}
 	}
@@ -51,25 +51,20 @@ void __stdcall TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	g_lckTimer.unlock();
 }
 
-UINT_PTR WinTimer::setTimer(UINT uElapse, const CB_Timer& cb)
+UINT_PTR wintimer::setTimer(UINT uElapse, const CB_WinTimer& cb)
 {
 	UINT_PTR idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
-
-	resetTimer(idEvent, cb);
-
-	return idEvent;
-}
-
-void WinTimer::resetTimer(UINT_PTR idEvent, const CB_Timer& cb)
-{
+	
 	g_lckTimer.lock();
 	auto& TimerInfo = g_mapTimer[idEvent];
 	TimerInfo.bPending = false;
 	TimerInfo.cb = cb;
 	g_lckTimer.unlock();
+
+	return idEvent;
 }
 
-void WinTimer::killTimer(UINT_PTR idEvent)
+void wintimer::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
 
@@ -78,62 +73,53 @@ void WinTimer::killTimer(UINT_PTR idEvent)
 	g_lckTimer.unlock();
 }
 
-bool WinTimer::_onTimer()
+bool CWinTimer::_onTimer()
 {
 	if (!m_cb())
 	{
 		m_idTimer = 0;
+		m_uElapse = 0;
 		return false;
 	}
 
 	return true;
 }
 
-void WinTimer::_set(const CB_Timer& cb, UINT uElapse)
+void CWinTimer::_set(const CB_WinTimer& cb, UINT uElapse)
 {
 	m_cb = cb;
 
-	if (0 == uElapse)
+	if (0 == uElapse || uElapse == m_uElapse)
 	{
 		return;
 	}
 
-	if (0 == m_idTimer || uElapse != m_uElapse)
-	{
-		m_uElapse = uElapse;
+	kill();
 
-		auto fn = [=]() {
-			return _onTimer();
-		};
-
-		if (0 != m_idTimer)
-		{
-			resetTimer(m_idTimer, fn);
-		}
-		else
-		{
-			m_idTimer = setTimer(uElapse, fn);
-		}
-	}
+	m_idTimer = wintimer::setTimer(uElapse, [=]() {
+		return _onTimer();
+	});
+	m_uElapse = uElapse;
 }
 
-void WinTimer::set(UINT uElapse, const CB_Timer& cb)
+void CWinTimer::set(UINT uElapse, const CB_WinTimer& cb)
 {
 	_set(cb, uElapse);
 }
 
-void WinTimer::set(const CB_Timer& cb)
+void CWinTimer::set(const CB_WinTimer& cb)
 {
 	_set(cb);
 }
 
-void WinTimer::kill()
+void CWinTimer::kill()
 {
 	if (0 != m_idTimer)
 	{
-		killTimer(m_idTimer);
+		wintimer::killTimer(m_idTimer);
 		m_idTimer = 0;
 	}
+	m_uElapse = 0;
 }
 
 #endif

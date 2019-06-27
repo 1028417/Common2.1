@@ -48,7 +48,7 @@ void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
 		}
 		else
 		{
-			(void)WinTimer::setTimer(uDelayTime, [=]() {
+			(void)wintimer::setTimer(uDelayTime, [=]() {
 				cb();
 				return false;
 			});

@@ -16,6 +16,57 @@
 #endif
 #endif
 
+class __UtilExt WString
+{
+public:
+	WString() {}
+
+	template <typename T>
+	WString(const T& t)
+	{
+		*this << t;
+	}
+
+private:
+	wstring m_str;
+
+public:
+	const wstring& str() const
+	{
+		return m_str;
+	}
+
+	const wchar_t* c_str() const
+	{
+		return m_str.c_str();
+	}
+
+	WString& operator<<(const wchar_t *pStr)
+	{
+		m_str.append(pStr);
+		return *this;
+	}
+
+	WString& operator<<(const wchar_t wc)
+	{
+		m_str.append(1, wc);
+		return *this;
+	}
+
+	WString& operator<<(const wstring& str)
+	{
+		m_str.append(str);
+		return *this;
+	}
+
+	template <typename T>
+	WString& operator<<(const T& t)
+	{
+		m_str.append(to_wstring(t));
+		return *this;
+	}
+};
+
 class __UtilExt wsutil
 {
 public:

@@ -212,7 +212,7 @@ private:
 	CString m_cstrRenameText;
 
 	vector<BOOL> m_vecAsyncTaskFlag;
-	WinTimer m_AsyncTaskTimer;
+	CWinTimer m_AsyncTaskTimer;
 
 protected:
 	void InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns = {});
