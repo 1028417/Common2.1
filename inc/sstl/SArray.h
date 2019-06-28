@@ -350,23 +350,21 @@ namespace NS_SSTL
 		template<typename T>
 		SArrayT& splice(size_t pos, size_t nRemove, const T& container)
 		{
-			if (__Super::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
-				return *this;
-			}
-
-			auto itr = m_data.end();
-			if (pos < m_data.size())
-			{
-				itr = m_data.begin() + pos;
-
-				if (0 != nRemove)
+				auto itr = m_data.end();
+				if (pos < m_data.size())
 				{
-					itr = m_data.erase(itr, itr+(nRemove-1));
-				}
-			}
+					itr = m_data.begin() + pos;
 
-			m_data.insert(itr, container.begin(), container.end());
+					if (0 != nRemove)
+					{
+						itr = m_data.erase(itr, itr + (nRemove - 1));
+					}
+				}
+
+				m_data.insert(itr, container.begin(), container.end());
+			}
 
 			return *this;
 		}

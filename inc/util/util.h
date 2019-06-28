@@ -46,6 +46,8 @@ using BOOL = int;
 #define MAX(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 
+#define __rand(uMax) ((UINT)(rand()%(uMax+1)))
+
 #define __Ensure(x) \
 	if (!(x)) \
 	{ \

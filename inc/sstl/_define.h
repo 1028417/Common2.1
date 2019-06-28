@@ -46,11 +46,7 @@ namespace NS_SSTL
 
 	template <class __PtrType>
 	using ptrlistT = ptrcontainerT<list, __PtrType>;
-
-	template <class __Type>
-	using ptrlist = ptrlistT<__Type*>;
-
-
+	
 	enum class E_DelConfirm
 	{
 		DC_Yes

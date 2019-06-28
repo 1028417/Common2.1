@@ -558,7 +558,7 @@ void CObjectList::DeleteItems(const set<UINT>& setItems)
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	for (auto itr = setItems.rbegin(); itr != setItems.rend(); itr++)
+	for (auto itr = setItems.rbegin(); itr != setItems.rend(); ++itr)
 	{
 		DeleteItem(*itr);
 	}

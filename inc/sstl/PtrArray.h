@@ -503,162 +503,202 @@ namespace NS_SSTL
 		}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
-		size_t add(T* ptr, args... others)
+		size_t insert(int nPos, T* ptr, args... others)
 		{
 			size_t uRet = 0;
 
-			(void)tagDynamicArgsExtractor<T*>::extract([&](T* ptr) {
-				if (m_data.add(ptr))
-				{
-					uRet++;
-				}
+			if (nPos < 0 || nPos >= (int)m_data.size())
+			{
+				(void)tagDynamicArgsExtractor<T*>::extract([&](T* ptr) {
+					if (m_data.add(ptr))
+					{
+						uRet++;
+					}
 
-				return true;
-			}, ptr, others...);
+					return true;
+				}, ptr, others...);
+			}
+			else
+			{
+				(void)tagDynamicArgsExtractor<T*>::extractReverse([&](T* ptr) {
+					if (m_data.add(ptr, nPos))
+					{
+						uRet++;
+					}
+
+					return true;
+				}, ptr, others...);
+			}
 
 			return uRet;
 		}
 		
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
-		size_t add(T& ref, args&... others)
+		size_t insert(int nPos, T& ref, args&... others)
+		{
+			return insert(nPos, &ref, &others...);
+		}
+
+		template<typename... args>
+		size_t insert(int nPos, __PtrType ptr, args... others)
 		{
 			size_t uRet = 0;
 
-			(void)tagDynamicArgsExtractor<T>::extract([&](T& ref) {
-				if (m_data.add(ref))
-				{
-					uRet++;
-				}
+			if (nPos < 0 || nPos >= (int)m_data.size())
+			{
+				(void)tagDynamicArgsExtractor<__PtrType>::extract([&](__PtrType ptr) {
+					if (m_data.add(ptr))
+					{
+						uRet++;
+					}
 
-				return true;
-			}, ref, others...);
+					return true;
+				}, ptr, others...);
+			}
+			else
+			{
+				(void)tagDynamicArgsExtractor<__PtrType>::extractReverse([&](__PtrType ptr) {
+					if (m_data.add(ptr, nPos))
+					{
+						uRet++;
+					}
+
+					return true;
+				}, ptr, others...);
+			}
 
 			return uRet;
+		}
+
+		template<typename... args>
+		void insert(int nPos, __RefType ref, args&... others)
+		{
+			if (nPos < 0 || nPos >= (int)m_data.size())
+			{
+				(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
+					m_data.add(ref);
+					return true;
+				}, ref, others...);
+			}
+			else
+			{
+				(void)tagDynamicArgsExtractor<__RefType>::extractReverse([&](__RefType ref) {
+					m_data.add(ref, nPos);
+					return true;
+				}, ref, others...);
+			}
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		size_t insert(int nPos, T& container)
+		{
+			if (!__Super::checkIsSelf(container))
+			{
+				return m_data.add(container, nPos);
+			}
+
+			return 0;
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		size_t insert(int nPos, const T& container)
+		{
+			if (!__Super::checkIsSelf(container))
+			{
+				return m_data.add(container, nPos);
+			}
+
+			return 0;
+		}
+
+		size_t insert(int nPos, __InitList initList)
+		{
+			return m_data.add(initList, nPos);
+		}
+
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
+		size_t add(T* ptr, args... others)
+		{
+			return insert(-1, ptr, others...);
+		}
+
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
+			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
+		size_t add(T& ref, args&... others)
+		{
+			return insert(-1, ref, others...);
 		}
 
 		template<typename... args>
 		size_t add(__PtrType ptr, args... others)
 		{
-			size_t uRet = 0;
-
-			(void)tagDynamicArgsExtractor<__PtrType>::extract([&](__PtrType ptr) {
-				if (m_data.add(ptr))
-				{
-					uRet++;
-				}
-
-				return true;
-			}, ptr, others...);
-
-			return uRet;
+			return insert(-1, ptr, others...);
 		}
 
 		template<typename... args>
 		void add(__RefType ref, args&... others)
 		{
-			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
-				m_data.add(ref);
-				return true;
-			}, ref, others...);
+			return insert(-1, ref, others...);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t add(T& container)
 		{
-			if (!__Super::checkIsSelf(container))
-			{
-				return m_data.add(container);
-			}
-
-			return 0;
+			return insert(-1, container);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t add(const T& container)
 		{
-			if (!__Super::checkIsSelf(container))
-			{
-				return m_data.add(container);
-			}
-
-			return 0;
+			return insert(-1, container);
 		}
 
 		size_t add(__InitList initList)
 		{
-			return m_data.add(initList);
+			return insert(-1, initList);
 		}
-
-		template<typename... args>
-		size_t addFront(__PtrType ptr, args... others)
+			
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
+		size_t addFront(T* ptr, args... others)
 		{
-			size_t uRet = 0;
-
-			(void)tagDynamicArgsExtractor<__PtrType>::extractReverse([&](__PtrType ptr) {
-				if (m_data.addFront(ptr))
-				{
-					uRet++;
-				}
-
-				return true;
-			}, ptr, others...);
-
-			return uRet;
-		}
-
-		template<typename... args>
-		void addFront(__RefType ref, args&... others)
-		{
-			(void)tagDynamicArgsExtractor<__RefType>::extractReverse([&](__RefType ref) {
-				m_data.addFront(ref);
-				return true;
-			}, ref, others...);
+			return insert(0, ptr, others...);
 		}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		size_t addFront(T& ref, args&... others)
 		{
-			size_t uRet = 0;
+			return insert(0, ref, others...);
+		}
 
-			(void)tagDynamicArgsExtractor<T>::extractReverse([&](T& ref) {
-				if (m_data.addFront(ref))
-				{
-					uRet++;
-				}
+		template<typename... args>
+		size_t addFront(__PtrType ptr, args... others)
+		{
+			return insert(0, ptr, others...);
+		}
 
-				return true;
-			}, ref, others...);
-
-			return uRet;
+		template<typename... args>
+		void addFront(__RefType ref, args&... others)
+		{
+			return insert(0, ref, others...);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t addFront(T& container)
 		{
-			if (__Super::checkIsSelf(container))
-			{
-				return 0;
-			}
-
-			return m_data.addFront(container);
+			return insert(0, container);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
 		size_t addFront(const T& container)
 		{
-			if (__Super::checkIsSelf(container))
-			{
-				return 0;
-			}
-
-			return m_data.addFront(container);
+			return insert(0, container);
 		}
 
 		size_t addFront(__InitList initList)
 		{
-			return m_data.addFront(initList);
+			return insert(0, initList);
 		}
 
 		bool front(__CB_RefType_void cb) const
@@ -757,6 +797,16 @@ namespace NS_SSTL
 			return *this;
 		}
 
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
+		PtrArrayT& assign(T* ptr, args... others)
+		{
+			m_data.clear();
+
+			add(ptr, others...);
+
+			return *this;
+		}
+
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
 		PtrArrayT& assign(T& ref, args&... others)
@@ -826,6 +876,14 @@ namespace NS_SSTL
 		{
 			PtrArrayT arr(*this);
 			arr.add(ref, others...);
+			return arr;
+		}
+
+		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
+		PtrArrayT concat(T* ptr, args... others) const
+		{
+			PtrArrayT arr(*this);
+			arr.add(ptr, others...);
 			return arr;
 		}
 

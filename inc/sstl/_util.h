@@ -198,7 +198,8 @@ namespace NS_SSTL
 			return T();
 		}
 
-		auto itrPrev = itr++;
+		auto itrPrev = itr;
+		++itr;
 		if (itr == container.end())
 		{
 			return *itrPrev;
@@ -307,7 +308,7 @@ namespace NS_SSTL
 		auto itr = container.end();
 		while (itr != itrBegin)
 		{
-			itr--;
+			--itr;
 			cb(*itr);
 		}
 	}

@@ -1,6 +1,10 @@
 
 #pragma once
 
+#ifdef __ANDROID__
+#define _time32 time
+#endif
+
 using time32_t = long;
 using time64_t = int64_t;
 
