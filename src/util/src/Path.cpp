@@ -18,7 +18,12 @@ void CPath::SetDir(const wstring& strDir, bool bFindFile)
 	Clear();
 
 	m_bDir = true;
-	m_strName = wsutil::rtrim_r(strDir, __wcBackSlant);
+
+#ifdef __ANDROID__
+    m_strName = wsutil::rtrim_r(strDir, __wcSlant);
+#else
+    m_strName = wsutil::rtrim_r(strDir, __wcBackSlant);
+#endif
 
     if (bFindFile)
     {
