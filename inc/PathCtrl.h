@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <TreeCtrl.h>
-#include <ListCtrl.h>
+#include "TreeCtrl.h"
+#include "ListCtrl.h"
 
 template <typename T>
 class CDirTreeT : public T

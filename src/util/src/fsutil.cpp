@@ -56,7 +56,7 @@ using FileStat = struct stat;
 using FileStat = struct _stat;
 #endif
 
-static bool getFileStat(const wstring& strFile, FileStat& fileStat)
+inline static bool getFileStat(const wstring& strFile, FileStat& fileStat)
 {
 #ifdef __ANDROID__
 	return 0 == stat(wsutil::toStr(strFile).c_str(), &fileStat);
@@ -196,7 +196,7 @@ int fsutil::GetFileSize(const wstring& strFile)
 	return fileStat.st_size;
 }
 
-static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
+inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #ifdef _MSC_VER
     return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
@@ -296,7 +296,7 @@ time64_t fsutil::GetFileModifyTime(const wstring& strFile)
 	return fileStat.st_mtime;
 }
 
-static inline bool _checkPathSplitor(wchar_t wch)
+inline static bool _checkPathSplitor(wchar_t wch)
 {
 	return __wcBackSlant == wch || __wcSlant == wch;
 }

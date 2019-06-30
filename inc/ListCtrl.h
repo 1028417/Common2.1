@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <img.h>
+#include "img.h"
 
-#include <Guard.h>
+#include "Guard.h"
 
 class CListHeader : public CHeaderCtrl
 {

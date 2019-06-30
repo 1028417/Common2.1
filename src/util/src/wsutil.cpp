@@ -228,7 +228,7 @@ using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
 #endif
 
-static inline wstring _fromUTF8(const char *pStr)
+inline static wstring _fromUTF8(const char *pStr)
 {
 #ifndef _MSC_VER
 	return QString::fromUtf8(pStr).toStdWString();
@@ -247,7 +247,7 @@ wstring wsutil::fromUTF8(const string& str)
 	return _fromUTF8(str.c_str());
 }
 
-static inline string _toUTF8(const wchar_t *pStr)
+inline static string _toUTF8(const wchar_t *pStr)
 {
 #ifndef _MSC_VER
     return wsutil::toQStr(pStr).toUtf8().constData();
@@ -331,7 +331,7 @@ static bool _checkUTF8(const char *pStr)
 	return true;
 }
 
-static inline wstring _fromStr(const char *pStr)
+static wstring _fromStr(const char *pStr)
 {
 	size_t len = 0;
 #ifdef __ANDROID__
@@ -392,7 +392,7 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 	return _fromStr(pStr);
 }
 
-static inline string _toStr(const wchar_t *pStr)
+static string _toStr(const wchar_t *pStr)
 {
     size_t len = 0;
 #ifdef __ANDROID__

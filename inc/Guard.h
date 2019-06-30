@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Page.h>
+#include "Page.h"
 
 template <class T>
 class CTouchWnd : public T
