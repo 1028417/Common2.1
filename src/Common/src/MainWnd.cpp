@@ -45,7 +45,7 @@ void CMainWnd::show()
 	ShowWindow(SW_SHOW);
 }
 
-#define __XOffset 8
+#define __XOffset 7
 #define __YOffset 1
 
 void CMainWnd::fixWorkArea()
