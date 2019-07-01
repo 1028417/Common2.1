@@ -175,7 +175,7 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		if (m_bTopMenu)
 		{
-			rcItem.bottom -= 2;
+			rcItem.top -= 3;
 		}
 
 		CString strText;

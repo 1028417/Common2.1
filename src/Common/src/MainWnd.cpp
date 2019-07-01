@@ -45,8 +45,8 @@ void CMainWnd::show()
 	ShowWindow(SW_SHOW);
 }
 
-#define __XOffset 6
-#define __YOffset 3
+#define __XOffset 8
+#define __YOffset 1
 
 void CMainWnd::fixWorkArea()
 {
@@ -56,15 +56,15 @@ void CMainWnd::fixWorkArea()
 	CMainApp::getWorkArea(rtWorkArea);
 	
 	::SetWindowPos(m_hWnd, 0, rtWorkArea.left - __XOffset, rtWorkArea.top - __YOffset
-		, rtWorkArea.Width() + __XOffset * 2 + 1, rtWorkArea.Height() + __YOffset * 2, SWP_NOZORDER | SWP_NOACTIVATE);
+		, rtWorkArea.Width() + __XOffset * 2 - 1, rtWorkArea.Height() + __YOffset * 2 + 2, SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 void CMainWnd::fullScreen()
 {
 	m_bFullScreen = true;
 	
-	::SetWindowPos(m_hWnd, 0, -__XOffset, -__YOffset, GetSystemMetrics(SM_CXSCREEN)+ __XOffset*2+1
-		, GetSystemMetrics(SM_CYSCREEN)+ __YOffset*2, SWP_NOZORDER | SWP_NOACTIVATE);
+	::SetWindowPos(m_hWnd, 0, -__XOffset, -__YOffset, GetSystemMetrics(SM_CXSCREEN)+ __XOffset * 2 - 1
+		, GetSystemMetrics(SM_CYSCREEN)+ __YOffset * 2 + 2, SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 void CMainWnd::OnMove(int x, int y)
