@@ -146,9 +146,16 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CDC dc;
 	dc.Attach(lpDrawItemStruct->hDC);
 
+	onDrawItem(dc, lpDrawItemStruct);
+
+	dc.Detach();
+}
+
+void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
 	CRect rcItem = lpDrawItemStruct->rcItem;
-	
-	auto crBk = m_bTopMenu? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
+
+	auto crBk = m_bTopMenu ? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
 	if (0 != lpDrawItemStruct->itemID && lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		crBk = m_bTopMenu ? RGB(204, 232, 255) : RGB(229, 243, 255);
@@ -166,26 +173,28 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			(void)dc.SelectObject(&font);
 		}
 
+		if (m_bTopMenu)
+		{
+			rcItem.bottom -= 2;
+		}
+
 		CString strText;
 		this->GetMenuString(lpDrawItemStruct->itemID, strText, MF_BYCOMMAND);
-		dc.DrawText(strText, &rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		
+		dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
 		(void)dc.SelectObject(pFontPrev);
 	}
 	else
 	{
 		CRect rcLine;
-		rcLine.left = rcItem.left+10;
-		rcLine.right = rcItem.right-10;
+		rcLine.left = rcItem.left + 10;
+		rcLine.right = rcItem.right - 10;
 		rcLine.top = (rcItem.top + rcItem.bottom) / 2;
 		rcLine.bottom = rcLine.top + 1;
 
 		dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
 	}
 
-	onDrawItem(dc, lpDrawItemStruct);
-
-	dc.Detach();
 }
 
 void CMenuGuard::EnableItem(UINT uIDItem, BOOL bEnable)
