@@ -524,3 +524,10 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 {
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
+
+const CRect& CMainApp::getWorkArea()
+{
+	static CRect rtWorkArea;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);
+	return rtWorkArea;
+}

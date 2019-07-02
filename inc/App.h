@@ -129,11 +129,8 @@ public:
 
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
-	static void getWorkArea(CRect& rtWorkArea)
-	{
-		SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);    // 获得工作区大小
-	}
-
+	static const CRect& getWorkArea();
+	
 	static bool getKeyState(UINT uKey)
 	{
 		return ::GetKeyState(uKey) < 0;
