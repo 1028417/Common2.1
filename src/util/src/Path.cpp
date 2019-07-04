@@ -196,6 +196,22 @@ CPath *CPath::GetSubPath(UINT uIdx) const
 	return pSubPath;
 }
 
+void CPath::RemoveSubPath(CPath *pSubPath)
+{
+	if (0 != m_lstSubPath.del(pSubPath))
+	{
+		delete pSubPath;
+	}
+}
+
+void CPath::RemoveSelf()
+{
+	if (NULL != m_pParentDir)
+	{
+		m_pParentDir->RemoveSubPath(this);
+	}
+}
+
 void CPath::Clear()
 {
 	m_bDirExists = false;
@@ -206,27 +222,6 @@ void CPath::Clear()
 	m_lstSubPath.clear();
 
 	m_bFinded = false;
-}
-
-void CPath::RemoveSubPath(set<CPath*> setDeletePaths)
-{
-	m_lstSubPath.del_ex([&](CPath& SubPath) {
-		if (0 == setDeletePaths.erase(&SubPath))
-		{
-			return E_DelConfirm::DC_No;
-		}
-		else
-		{
-			if (setDeletePaths.empty())
-			{
-				return E_DelConfirm::DC_YesAbort;
-			}
-			else
-			{
-				return E_DelConfirm::DC_Yes;
-			}
-		}
-	});
 }
 
 bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)

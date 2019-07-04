@@ -265,7 +265,7 @@ public:
 
 	int InsertObject(CListObject& Object, int nItem=-1, const wstring& strPrefix=L"");
 
-	void UpdateItem(UINT uItem);
+	void UpdateItem(UINT uItem, CListObject *pObject=NULL);
 	void UpdateItems();
 
 	void UpdateColumns(const list<UINT>& lstColumn);
@@ -279,8 +279,6 @@ public:
 	BOOL DeleteObject(const CListObject *pObject);
 	void DeleteObjects(const set<CListObject*>& setDeleteObjects);
 	void DeleteItems(const set<UINT>& setItems);
-
-	void SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
 
 	void SetItemImage(UINT uItem, UINT uImage);
 
@@ -327,6 +325,8 @@ protected:
 	virtual void OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault);
 
 private:
+	void _SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
+
 	template <bool _clear_other>
 	void _SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix = L"");
 

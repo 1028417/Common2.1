@@ -86,7 +86,7 @@ public:
 	wstring GetPath() const;
 
 	wstring GetParentDir() const;
-		
+	
 	const TD_PathList& GetSubPath();
 
 	void GetSubPath(TD_PathList& lstSubDir, TD_PathList& lstSubFile)
@@ -110,9 +110,11 @@ public:
 
 	bool enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb);
 
-	virtual void Clear();
+	void RemoveSubPath(CPath *pSubPath);
 
-	void RemoveSubPath(set<CPath*> setDeletePaths);
+	void RemoveSelf();
+
+	virtual void Clear();
 };
 
 class __UtilExt CListObject

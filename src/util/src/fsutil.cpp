@@ -121,21 +121,21 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
 		strText.append(lpBuff);
 	}
 
-    const auto& strHead = CTxtWriter::__UTF8Bom;
+    cauto& strHead = CTxtWriter::__UTF8Bom;
     if (strText.substr(0, strHead.size()) == strHead)
     {
         strText.erase(0, strHead.size());
     }
     else
     {
-        const auto& strHead = CTxtWriter::__UnicodeHead_LittleEndian;
+        cauto& strHead = CTxtWriter::__UnicodeHead_LittleEndian;
         if (strText.substr(0, strHead.size()) == strHead)
         {
             strText.erase(0, strHead.size());
         }
         else
         {
-            const auto& strHead = CTxtWriter::__UnicodeHead_BigEndian;
+            cauto& strHead = CTxtWriter::__UnicodeHead_BigEndian;
             if (strText.substr(0, strHead.size()) == strHead)
             {
                 strText.erase(0, strHead.size());
@@ -416,7 +416,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(_checkPathSplitor(*strDir.rbegin()) || _checkPathSplitor(strSubPath[size]), false);
 
 #ifdef __ANDROID__
-	const auto& _strDir = wsutil::toStr(strDir);
+	cauto& _strDir = wsutil::toStr(strDir);
 	return 0 == strncasecmp(_strDir.c_str(), wsutil::toStr(strSubPath).c_str(), _strDir.size());
 #else
 	return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);

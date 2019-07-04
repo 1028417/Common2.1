@@ -402,7 +402,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 	lstObjects([&](CListObject& object) {
 		if (nItem < nPrevCount)
 		{
-			SetItemObject(nItem, object);//, strPrefix);
+			_SetItemObject(nItem, object);//, strPrefix);
 		}
 		else
 		{
@@ -440,12 +440,12 @@ int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& str
 
 	nItem = __super::InsertItem(nItem, NULL);
 	
-	SetItemObject(nItem, Object, strPrefix);
+	_SetItemObject(nItem, Object, strPrefix);
 	
 	return nItem;
 }
 
-void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
+void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
 	bool bReportView = E_ListViewType::LVT_Report == GetView();
 	vector<wstring> vecText;
@@ -462,14 +462,18 @@ void CObjectList::SetItemObject(UINT uItem, CListObject& Object, const wstring& 
 	_SetItemTexts<true>(uItem, vecText, strPrefix);
 }
 
-void CObjectList::UpdateItem(UINT uItem)
+void CObjectList::UpdateItem(UINT uItem, CListObject *pObject)
 {
 	__Ensure(m_hWnd);
 
-	auto pObject = GetItemObject(uItem);
+	if (NULL == pObject)
+	{
+		pObject = GetItemObject(uItem);
+	}
+
 	if (NULL != pObject)
 	{
-		SetItemObject(uItem, *pObject);
+		_SetItemObject(uItem, *pObject);
 	}
 	else
 	{
