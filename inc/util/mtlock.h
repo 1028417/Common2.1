@@ -31,6 +31,15 @@ public:
 
         mutex::unlock();
     }
+
+    void get(T& data)
+    {
+        mutex::lock();
+
+        data = m_data;
+
+        mutex::unlock();
+    }
 };
 
 template <typename T>
