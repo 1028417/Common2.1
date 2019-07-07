@@ -333,7 +333,7 @@ static bool _checkUTF8(const char *pStr)
 
 static wstring _fromStr(const char *pStr)
 {
-	setlocale(LC_CTYPE, "chs");
+    setlocale(LC_CTYPE, "chs");
 
 	size_t len = 0;
 #ifdef __ANDROID__
@@ -349,7 +349,7 @@ static wstring _fromStr(const char *pStr)
 		return L"";
 	}
 
-	vector<wchar_t> vecBuff(len);
+	vector<wchar_t> vecBuff(len + 1);
 	wchar_t *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
@@ -396,7 +396,7 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 
 static string _toStr(const wchar_t *pStr)
 {
-	setlocale(LC_CTYPE, "chs");
+    setlocale(LC_CTYPE, "chs");
 
     size_t len = 0;
 #ifdef __ANDROID__
@@ -412,7 +412,7 @@ static string _toStr(const wchar_t *pStr)
         return "";
     }
 
-    vector<char> vecBuff(len);
+    vector<char> vecBuff(len + 1);
     char *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
