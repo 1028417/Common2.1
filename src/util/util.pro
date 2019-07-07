@@ -23,8 +23,6 @@ SOURCES += \
     src/TxtWriter.cpp
 
 HEADERS +=\
-    src/sqlite/sqlite3.h \
-    src/sqlite/sqlite3ext.h \
     ../../inc/util/fsdlg.h \
     ../../inc/util/fsutil.h \
     ../../inc/util/IDB.h \
