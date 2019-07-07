@@ -29,11 +29,15 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
 
 bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 {
-	string t_strData;
-	__EnsureReturn(GetData(uRow, uColumn, t_strData), false);
-	
-	strData = wsutil::fromUTF8(t_strData);
-	
+	__EnsureReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, false);
+	__EnsureReturn(m_pData, false);
+
+	char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
+	if (NULL != lpData)
+	{
+		strData = wsutil::fromUTF8(lpData);
+	}
+
 	return true;
 }
 
@@ -57,7 +61,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
 	return true;
 }
 
-bool CSQLiteDBResult::_getData(UINT uRow, const function<void(const string&)>& cb)
+/*bool CSQLiteDBResult::_getData(UINT uRow, const function<void(const string&)>& cb)
 {
 	__EnsureReturn(uRow < m_uRowCount, false);
 	__EnsureReturn(m_pData, false);
@@ -86,10 +90,23 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<string>& arrData)
 }
 
 bool CSQLiteDBResult::GetData(UINT uRow, SArray<wstring>& arrData)
-{
-	return _getData(uRow, [&](const string& strData) {
-		arrData.add(wsutil::fromUTF8(strData));
-	});
+{	__EnsureReturn(uRow < m_uRowCount, false);
+	__EnsureReturn(m_pData, false);
+
+	for (UINT uColumn = 0; uColumn < m_uColumnCount; uColumn++)
+	{
+		char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
+		if (NULL != lpData)
+		{
+			arrData.add(wsutil::fromUTF8(lpData));
+		}
+		else
+		{
+			arrData.add(L"");
+		}
+	}
+
+	return true;
 }
 
 bool CSQLiteDBResult::GetData(UINT uRow, SArray<int>& arrValue)
@@ -104,7 +121,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<double>& arrValue)
 	return _getData(uRow, [&](const string& strData) {
 		arrValue.add(atof(strData.c_str()));
 	});
-}
+}*/
 
 
 //CSQLiteDB

@@ -33,13 +33,13 @@ public:
 	bool GetData(UINT uRow, UINT uColumn, int& nValue) override;
 	bool GetData(UINT uRow, UINT uColumn, double& dbValue) override;
 
-	bool GetData(UINT uRow, SArray<string>& arrData) override;
+	/*bool GetData(UINT uRow, SArray<string>& arrData) override;
 	bool GetData(UINT uRow, SArray<wstring>& arrData) override;
 	bool GetData(UINT uRow, SArray<int>& arrValue) override;
 	bool GetData(UINT uRow, SArray<double>& arrValue) override;
 	
 private:
-	bool _getData(UINT uRow, const function<void(const string&)>& cb);
+	bool _getData(UINT uRow, const function<void(const string&)>& cb);*/
 };
 
 

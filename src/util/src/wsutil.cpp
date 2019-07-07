@@ -325,7 +325,7 @@ static bool _checkUTF8(const char *pStr)
 		return false;
 	}
 	if (bAllAscii) { //如果全部都是ASCII, 也是UTF8
-		return true;
+		return false;
 	}
 
 	return true;
@@ -333,6 +333,8 @@ static bool _checkUTF8(const char *pStr)
 
 static wstring _fromStr(const char *pStr)
 {
+	setlocale(LC_CTYPE, "chs");
+
 	size_t len = 0;
 #ifdef __ANDROID__
 	len = mbstowcs(NULL, pStr, 0);
@@ -347,18 +349,18 @@ static wstring _fromStr(const char *pStr)
 		return L"";
 	}
 
-	vector<wchar_t> vecBuff(len + 1);
+	vector<wchar_t> vecBuff(len);
 	wchar_t *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
 	(void)mbstowcs(pBuff, pStr, len);
 #else
-	if (mbstowcs_s(NULL, pBuff, len, pStr, len))
+	if (mbstowcs_s(NULL, pBuff, len, pStr, len-1))
 	{
 		return L"";
 	}
 #endif
-
+	
 	return pBuff;
 }
 
@@ -394,6 +396,8 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 
 static string _toStr(const wchar_t *pStr)
 {
+	setlocale(LC_CTYPE, "chs");
+
     size_t len = 0;
 #ifdef __ANDROID__
     len = wcstombs(NULL, pStr, 0);
@@ -408,13 +412,13 @@ static string _toStr(const wchar_t *pStr)
         return "";
     }
 
-    vector<char> vecBuff(len + 1);
+    vector<char> vecBuff(len);
     char *pBuff = &vecBuff.front();
 
 #ifdef __ANDROID__
     (void)wcstombs(pBuff, pStr, len);
 #else
-    if (wcstombs_s(NULL, pBuff, len, pStr, len))
+    if (wcstombs_s(NULL, pBuff, len, pStr, len-1))
     {
         return "";
     }

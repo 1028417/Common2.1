@@ -21,10 +21,10 @@ public:
 	virtual bool GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
 	virtual bool GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
 	
-	virtual bool GetData(UINT uRow, SArray<string>& arrData) = 0;
+	/*virtual bool GetData(UINT uRow, SArray<string>& arrData) = 0;
 	virtual bool GetData(UINT uRow, SArray<wstring>& arrData) = 0;
 	virtual bool GetData(UINT uRow, SArray<int>& arrValue) = 0;
-	virtual bool GetData(UINT uRow, SArray<double>& arrValue) = 0;
+	virtual bool GetData(UINT uRow, SArray<double>& arrValue) = 0;*/
 };
 
 class IDB

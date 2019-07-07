@@ -85,6 +85,7 @@ void CPath::_onFindFile()
 		}
 	});
 		
+#ifdef _MSC_VER
 	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)
 		{
@@ -98,6 +99,7 @@ void CPath::_onFindFile()
 
 		return false;
 	});
+#endif
 }
 
 const TD_PathList& CPath::GetSubPath()
