@@ -376,7 +376,7 @@ static void _GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *ps
 	{
 		if (NULL != pstrExtName)
 		{
-			*pstrExtName = strFileName.substr(pos);
+			*pstrExtName = strFileName.substr(pos+1);
 		}
 
 		if (NULL != pstrTitle)
@@ -597,16 +597,6 @@ static wstring _getCwd()
 
 static wstring g_strWorkDir;
 
-#ifndef __ANDROID__
-wstring fsutil::getModuleDir(wchar_t *pszModuleName)
-{
-	wchar_t pszPath[MAX_PATH];
-	memset(pszPath, 0, sizeof pszPath);
-	::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
-	return GetParentDir(pszPath);
-}
-#endif
-
 wstring fsutil::workDir()
 {
     if (g_strWorkDir.empty())
@@ -627,6 +617,16 @@ bool fsutil::setWorkDir(const wstring& strWorkDir)
     g_strWorkDir = _getCwd();
     return true;
 }
+
+#ifndef __ANDROID__
+wstring fsutil::getModuleDir(wchar_t *pszModuleName)
+{
+	wchar_t pszPath[MAX_PATH];
+	memset(pszPath, 0, sizeof pszPath);
+	::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+	return GetParentDir(pszPath);
+}
+#endif
 
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
