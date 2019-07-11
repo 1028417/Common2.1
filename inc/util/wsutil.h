@@ -27,14 +27,57 @@ public:
 		*this << t;
 	}
 
+        template <typename T>
+        WString& operator =(const T& t)
+        {
+            m_str.clear();
+            *this << t;
+            return *this;
+        }
+
 private:
 	wstring m_str;
 
 public:
+        wstring& operator ->()
+        {
+            return m_str;
+        }
+
+        const wstring& operator ->() const
+        {
+            return m_str;
+        }
+
+        wstring& operator *()
+        {
+            return m_str;
+        }
+
+        const wstring& operator *() const
+        {
+            return m_str;
+        }
+
+        operator wstring& ()
+        {
+            return m_str;
+        }
+
+        operator const wstring& () const
+        {
+            return m_str;
+        }
+
 	const wstring& str() const
 	{
 		return m_str;
 	}
+
+        operator const wchar_t* () const
+        {
+            return m_str.c_str();
+        }
 
 	const wchar_t* c_str() const
 	{
@@ -65,6 +108,13 @@ public:
 		m_str.append(to_wstring(t));
 		return *this;
 	}
+
+        template <typename T>
+        WString& append(const T& t)
+        {
+            *this << t;
+            return *this;
+        }
 };
 
 class __UtilExt wsutil
