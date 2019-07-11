@@ -146,68 +146,68 @@ private:
     wstring m_str;
 
 public:
-        wstring& operator ->()
-        {
-            return m_str;
-        }
+    wstring& operator ->()
+    {
+        return m_str;
+    }
 
-        const wstring& operator ->() const
-        {
-            return m_str;
-        }
+    const wstring& operator ->() const
+    {
+        return m_str;
+    }
 
-        wstring& operator *()
-        {
-            return m_str;
-        }
+    wstring& operator *()
+    {
+        return m_str;
+    }
 
-        const wstring& operator *() const
-        {
-            return m_str;
-        }
+    const wstring& operator *() const
+    {
+        return m_str;
+    }
 
-        operator wstring& ()
-        {
-            return m_str;
-        }
+    operator wstring& ()
+    {
+        return m_str;
+    }
 
-        operator const wstring& () const
-        {
-            return m_str;
-        }
+    operator const wstring& () const
+    {
+        return m_str;
+    }
 
-        operator const wchar_t* () const
-        {
-            return m_str.c_str();
-        }
+    operator const wchar_t* () const
+    {
+        return m_str.c_str();
+    }
 
 #ifndef _MSC_VER
-        operator QString() const
-        {
-            return wsutil::toQStr(m_str);
-        }
+    operator QString() const
+    {
+        return wsutil::toQStr(m_str);
+    }
 
-        QString qstr() const
-        {
-            return wsutil::toQStr(m_str);
-        }
+    QString qstr() const
+    {
+        return wsutil::toQStr(m_str);
+    }
 #endif
 
-        const wstring& str() const
-        {
-                return m_str;
-        }
+    const wstring& str() const
+    {
+        return m_str;
+    }
 
     const wchar_t* c_str() const
     {
         return m_str.c_str();
     }
 
-        WString& operator<<(const WString& other)
-        {
-                m_str.append(other.m_str);
-                return *this;
-        }
+    WString& operator<<(const WString& other)
+    {
+            m_str.append(other.m_str);
+            return *this;
+    }
 
     WString& operator<<(const wchar_t *pStr)
     {
@@ -234,18 +234,18 @@ public:
         return *this;
     }
 
-        template <typename T>
-        WString& append(const T& t)
-        {
-            *this << t;
-            return *this;
-        }
+    template <typename T>
+    WString& append(const T& t)
+    {
+        *this << t;
+        return *this;
+    }
 
-        template <typename T>
-        wstring operator +(const T& t)
-        {
-            WString ret(*this);
-            ret << t;
-            return ret;
-        }
+    template <typename T>
+    wstring& operator +(const T& t)
+    {
+        WString ret(*this);
+        ret << t;
+        return ret;
+    }
 };
