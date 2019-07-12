@@ -42,8 +42,8 @@ public:
 	static const wchar_t wcBackSlant = L'\\';
 	static const wchar_t wcSlant = L'/';
 
-	static bool loadBinary(const wstring& strFile, vector<char>& vecText, UINT uReadSize = 0);
-	
+	static bool loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize = 0);
+
 	static bool loadTxt(const wstring& strFile, string& strText);
 	static bool loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter = '\n');
 	static bool loadTxt(const wstring& strFile, SVector<string>& vecLineText, char cdelimiter = '\n');
@@ -92,4 +92,62 @@ public:
 	using CB_FindFile = const function<void(const tagFileInfo&)>&;
 	static bool findFile(const wstring& strDir, CB_FindFile cb
 		, E_FindFindFilter eFilter = E_FindFindFilter::FFP_None, const wstring& strFilter = L"");
+};
+
+#include <fstream>
+
+class ibstream : public ifstream
+{
+public:
+	~ibstream()
+	{
+		close();
+	}
+
+	ibstream() {}
+
+	ibstream(const wstring& strFile)
+	{
+		open(strFile);
+	}
+
+	void open(const wstring& strFile)
+	{
+		ifstream::open(
+#ifdef _MSC_VER
+			strFile
+#else
+			wsutil::toStr(strFile)
+#endif
+			, ios_base::binary);
+	}
+};
+
+class obstream : public ofstream
+{
+public:
+	~obstream()
+	{
+		close();
+	}
+
+	obstream() {}
+
+	obstream(const wstring& strFile, bool bTrunc)
+	{
+		open(strFile, bTrunc);
+	}
+
+	void open(const wstring& strFile, bool bTrunc)
+	{
+        auto mode = bTrunc ? ios_base::trunc | ios_base::binary : ios_base::binary;
+
+		ofstream::open(
+#ifdef _MSC_VER
+			strFile
+#else
+			wsutil::toStr(strFile)
+#endif
+			, mode);
+	}
 };

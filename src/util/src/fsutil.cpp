@@ -4,52 +4,6 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 
-#include <fstream>
-
-class ibstream : public ifstream
-{
-public:
-	ibstream() {}
-
-	ibstream(const wstring& strFile)
-	{
-		open(strFile);
-	}
-
-	void open(const wstring& strFile)
-	{
-		ifstream::open(
-#ifdef _MSC_VER
-			strFile
-#else
-			wsutil::toStr(strFile)
-#endif
-            , ios_base::binary);
-	}
-};
-
-class obstream : public ofstream
-{
-public:
-	obstream() {}
-
-	obstream(const wstring& strFile, bool bTrunc)
-	{
-		open(strFile, bTrunc);
-	}
-
-	void open(const wstring& strFile, bool bTrunc)
-	{
-		ofstream::open(
-#ifdef _MSC_VER
-			strFile
-#else
-			wsutil::toStr(strFile)
-#endif
-            , bTrunc ? ios_base::binary | ios_base::trunc : ios_base::binary);
-	}
-};
-
 #ifdef __ANDROID__
 using FileStat = struct stat;
 #else
@@ -99,8 +53,6 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 			}
 		}
 	}
-
-	fs.close();
 
 	return true;
 }
