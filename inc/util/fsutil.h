@@ -89,8 +89,8 @@ public:
 		, FFP_ByPrefix
 		, FFP_ByExt
 	};
-	using CB_FindFile = const function<void(const tagFileInfo&)>&;
-	static bool findFile(const wstring& strDir, CB_FindFile cb
+    using CB_FindFile = const function<bool(const tagFileInfo&)>&;
+    static bool findFile(const wstring& strDir, CB_FindFile cb
 		, E_FindFindFilter eFilter = E_FindFindFilter::FFP_None, const wstring& strFilter = L"");
 };
 

@@ -583,12 +583,12 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
 
-#ifdef __ANDROID__
 bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
 {
+#ifdef __ANDROID__
 	if (strDir.empty())
 	{
-		return false;
+        return false;
 	}
 
     QDir dir(wsutil::toQStr(strDir));
@@ -646,18 +646,13 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
         FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
 
-		cb(FileInfo);
+        cb(FileInfo);
     }
 
-    return true;
-}
-
 #else
-bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
-{
 	if (strDir.empty())
 	{
-		return false;
+        return false;
 	}
 	
 	wstring strFind(strDir);
@@ -684,7 +679,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 	auto hFindFile = ::FindFirstFileW(strFind.c_str(), &FindData);
 	if (INVALID_HANDLE_VALUE == hFindFile)
 	{
-		return false;
+        return false;
 	}
 
     wstring strFileName;
@@ -710,11 +705,14 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 		FileInfo.m_tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
 		FileInfo.m_tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
 
-		cb(FileInfo);
+        if (!cb(FileInfo))
+        {
+            break;
+        }
 	} while (::FindNextFileW(hFindFile, &FindData));
 
-	(void)::FindClose(hFindFile);
-
-	return true;
-}
+	(void)::FindClose(hFindFile);    
 #endif
+
+    return true;
+}

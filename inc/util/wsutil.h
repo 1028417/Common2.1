@@ -242,7 +242,7 @@ public:
     }
 
     template <typename T>
-    WString operator +(const T& t)
+    WString operator +(const T& t) const
     {
         WString ret(*this);
         ret << t;

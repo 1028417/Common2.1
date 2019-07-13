@@ -83,6 +83,7 @@ void CPath::_onFindFile()
 		{
 			m_lstSubPath.add(pSubPath);
 		}
+        return true;
 	});
 		
 #ifdef _MSC_VER
