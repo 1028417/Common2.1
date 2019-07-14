@@ -20,6 +20,15 @@
     <ClCompile Include="src\SQLiteDB.cpp">
       <Filter>db</Filter>
     </ClCompile>
+    <ClCompile Include="json\json_reader.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_value.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_writer.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -95,6 +104,9 @@
     </Filter>
     <Filter Include="sstl">
       <UniqueIdentifier>{6aae0b5e-872e-4adb-8ed6-f60039352119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{39119b3a-9925-414d-a880-282438b9cfc7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
