@@ -20,7 +20,10 @@ SOURCES += \
     src/winfsutil.cpp \
     src/wintimer.cpp \
     src/mtutil.cpp \
-    src/TxtWriter.cpp
+    src/TxtWriter.cpp \
+    json/json_reader.cpp \
+    json/json_value.cpp \
+    json/json_writer.cpp
 
 HEADERS +=\
     ../../inc/util/fsdlg.h \

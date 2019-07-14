@@ -22,6 +22,10 @@
  * It is an internal header that must not be exposed.
  */
 
+#ifdef __ANDROID__
+#define JSONCPP_NO_LOCALE_SUPPORT
+#endif
+
 namespace Json {
 static char getDecimalPoint() {
 #ifdef JSONCPP_NO_LOCALE_SUPPORT

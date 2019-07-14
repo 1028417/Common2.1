@@ -170,10 +170,10 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 		rcSrc.right = nImgWidth;
 
 		rcSrc.top = LONG(nImgHeight - nImgWidth*fNeedHWRate) / 2;
-		rcSrc.top = max(rcSrc.top, 0);
+		rcSrc.top = MAX(rcSrc.top, 0);
 
 		rcSrc.bottom = nImgHeight - rcSrc.top;
-		rcSrc.bottom = max(rcSrc.bottom, 0);
+		rcSrc.bottom = MAX(rcSrc.bottom, 0);
 	}
 	else
 	{
@@ -181,10 +181,10 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 		rcSrc.bottom = nImgHeight;
 
 		rcSrc.left = LONG(nImgWidth - nImgHeight / fNeedHWRate) / 2;
-		rcSrc.left = max(rcSrc.left, 0);
+		rcSrc.left = MAX(rcSrc.left, 0);
 		
 		rcSrc.right = nImgWidth - rcSrc.left;
-		rcSrc.right = max(rcSrc.right, 0);
+		rcSrc.right = MAX(rcSrc.right, 0);
 	}
 
 	(void)dcTarget.SetStretchBltMode(bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);

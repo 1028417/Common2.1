@@ -1074,7 +1074,7 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			return false;
 		}
 
-		UINT uCount = min((UINT)GetItemCount(), m_vecAsyncTaskFlag.size());
+		UINT uCount = MIN((UINT)GetItemCount(), m_vecAsyncTaskFlag.size());
 		for (UINT uItem = (UINT)nTopItem; uItem < uCount; uItem++)
 		{
 			BOOL& bAsyncTaskFlag = m_vecAsyncTaskFlag[uItem];

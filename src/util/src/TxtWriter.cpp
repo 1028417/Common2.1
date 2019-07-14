@@ -12,38 +12,77 @@ const string CTxtWriter::__UnicodeHead_BigEndian({ (char)0xfe, (char)0xff });
 
 const string CTxtWriter::__UTF8Bom({ (char)0xef, (char)0xbb, (char)0xbf });
 
+bool CTxtWriter::_open(const wstring& strFile, bool bTrunc)
+{
+#ifdef __ANDROID__
+    return _open(wsutil::toStr(strFile), bTrunc);
+
+#else
+	wstring strMode(bTrunc ? L"wb" : L"ab");
+	
+	(void)_wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
+
+	return NULL != m_lpFile;
+#endif
+}
+
+bool CTxtWriter::_open(const string& strFile, bool bTrunc)
+{
+	string strMode(bTrunc ? "wb" : "ab");
+
+#ifdef __ANDROID__
+	m_lpFile = fopen(strFile.c_str(), strMode.c_str());
+#else
+	(void)fopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
+#endif
+
+	return NULL != m_lpFile;
+}
+
+void CTxtWriter::_writeHead()
+{
+	if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
+	{
+		string strHead = __UnicodeHead_LittleEndian;
+		(void)_fwrite(strHead.c_str(), strHead.size());
+	}
+	else if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
+	{
+		string strHead = __UnicodeHead_BigEndian;
+		(void)_fwrite(strHead.c_str(), strHead.size());
+	}
+	else if (E_TxtEncodeType::TET_Utf8_WithBom == m_eEncodeType)
+	{
+		string strBom = __UTF8Bom;
+		(void)_fwrite(strBom.c_str(), strBom.size());
+	}
+}
+
 bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 {
 	bool bExists = fsutil::existFile(strFile);
 
-    wstring strMode(bTrunc ? L"wb" : L"ab");
-
-#ifdef __ANDROID__
-	m_lpFile = fopen(wsutil::toStr(strFile).c_str(), wsutil::toStr(strMode).c_str());
-#else
-	__EnsureReturn(0 == _wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str()), false);
-#endif
-	__EnsureReturn(m_lpFile, false);
+	__EnsureReturn(_open(strFile, bTrunc), false);
 
 	if (!bExists || bTrunc)
 	{
-		if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
-		{
-			string strHead = __UnicodeHead_LittleEndian;
-			(void)_fwrite(strHead.c_str(), strHead.size());
-		}
-		else if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
-		{
-			string strHead = __UnicodeHead_BigEndian;
-			(void)_fwrite(strHead.c_str(), strHead.size());
-		}
-		else if (E_TxtEncodeType::TET_Utf8_WithBom == m_eEncodeType)
-		{
-			string strBom = __UTF8Bom;
-			(void)_fwrite(strBom.c_str(), strBom.size());
-		}
+		_writeHead();
 	}
 	
+	return true;
+}
+
+bool CTxtWriter::open(const string& strFile, bool bTrunc)
+{
+	bool bExists = fsutil::existFile(wsutil::fromStr(strFile));
+
+	__EnsureReturn(_open(strFile, bTrunc), false);
+
+	if (!bExists || bTrunc)
+	{
+		_writeHead();
+	}
+
 	return true;
 }
 

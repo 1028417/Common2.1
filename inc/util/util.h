@@ -40,11 +40,11 @@ using BOOL = int;
 #define MIN(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
-#define __1e6 ((UINT)1e6)
-
 #ifndef MAX
 #define MAX(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
+
+#define __1e6 ((UINT)1e6)
 
 #define __srand srand((UINT)_time32(NULL));
 #define __rand(uMax) ((UINT)(rand()%(uMax+1)))
@@ -87,7 +87,7 @@ using namespace std;
 #include <functional>
 using fn_voidvoid = function<void()>;
 
-#include "sstl/sstl.h"
+#include "../sstl/sstl.h"
 using namespace NS_SSTL;
 
 #include "wsutil.h"
@@ -115,3 +115,6 @@ using namespace NS_SSTL;
 #endif
 
 #include "mtutil.h"
+
+#undef min
+#undef max

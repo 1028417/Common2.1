@@ -126,6 +126,13 @@ public:
         (void)open(strFile, bTrunc);
     }
 
+    CTxtWriter(const string& strFile, bool bTrunc, E_TxtEncodeType eEncodeType, E_EOLFlag eEOLFlag = __DefEOL) :
+        ITxtWriter(eEncodeType),
+        m_eEOLFlag(eEOLFlag)
+    {
+        (void)open(strFile, bTrunc);
+    }
+
 	~CTxtWriter()
 	{
 		close();
@@ -149,6 +156,11 @@ private:
 			|| E_TxtEncodeType::TET_Utf8_WithBom == m_eEncodeType;
 	}
 
+	bool _open(const wstring& strFile, bool bTrunc);
+	bool _open(const string& strFile, bool bTrunc);
+
+	void _writeHead();
+
 	inline size_t _fwrite(const void *pData, size_t size) const;
 
 	size_t _write(const char *pStr, size_t len, bool bEndLine = false) const;
@@ -163,7 +175,8 @@ public:
 		return NULL != m_lpFile;
 	}
 
-	virtual bool open(const wstring& strFile, bool bTrunc);
+	bool open(const wstring& strFile, bool bTrunc);
+	bool open(const string& strFile, bool bTrunc);
 
     size_t write(const wstring& strText) const override
 	{
@@ -240,38 +253,49 @@ enum class E_UnicodeHeadOpt
 	UHO_BigEndian,
 };
 
-class __UtilExt CUnicodeTxtWriter : public CTxtWriter
+class __UtilExt CUnicodeWriter : public CTxtWriter
 {
 public:
-	CUnicodeTxtWriter(E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+	CUnicodeWriter(E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
 		CTxtWriter(E_UnicodeHeadOpt::UHO_LittleEndian == eHeadType ? E_TxtEncodeType::TET_Unicode_LittleEndian
 			: E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
 	{
 	}
 
-    CUnicodeTxtWriter(const wstring& strFile, bool bTrunc, E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
-        CTxtWriter(strFile, bTrunc, E_UnicodeHeadOpt::UHO_LittleEndian == eHeadType ? E_TxtEncodeType::TET_Unicode_LittleEndian
-            : E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
-    {
-    }
+	CUnicodeWriter(const wstring& strFile, bool bTrunc, E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+		CTxtWriter(strFile, bTrunc, E_UnicodeHeadOpt::UHO_LittleEndian == eHeadType ? E_TxtEncodeType::TET_Unicode_LittleEndian
+			: E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
+	{
+	}
+
+    CUnicodeWriter(const string& strFile, bool bTrunc, E_UnicodeHeadOpt eHeadType = __DefUnicodeHeadOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+		CTxtWriter(strFile, bTrunc, E_UnicodeHeadOpt::UHO_LittleEndian == eHeadType ? E_TxtEncodeType::TET_Unicode_LittleEndian
+			: E_TxtEncodeType::TET_Unicode_BigEndian, eEOLFlag)
+	{
+	}
 };
 
 #ifdef _MSC_VER
-#define __DefUTF8BomOpt true
+#define __DefUTF8BomOpt false
 #else
 #define __DefUTF8BomOpt false
 #endif
 
-class __UtilExt CUTF8TxtWriter : public CTxtWriter
+class __UtilExt CUTF8Writer : public CTxtWriter
 {
 public:
-	CUTF8TxtWriter(bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+	CUTF8Writer(bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
 		CTxtWriter(bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
 	{
 	}
 
-    CUTF8TxtWriter(const wstring& strFile, bool bTrunc, bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
-        CTxtWriter(strFile, bTrunc, bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
-    {
-    }
+	CUTF8Writer(const wstring& strFile, bool bTrunc, bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+		CTxtWriter(strFile, bTrunc, bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
+	{
+	}
+
+	CUTF8Writer(const string& strFile, bool bTrunc, bool bWithBom = __DefUTF8BomOpt, E_EOLFlag eEOLFlag = __DefEOL) :
+		CTxtWriter(strFile, bTrunc, bWithBom ? E_TxtEncodeType::TET_Utf8_WithBom : E_TxtEncodeType::TET_Utf8_NoBom, eEOLFlag)
+	{
+	}
 };

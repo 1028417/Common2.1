@@ -340,7 +340,7 @@ void CDockView::setViewStyle(const tagViewStyle& ViewStyle)
 {
 	m_ViewStyle = ViewStyle;
 
-	m_ViewStyle.uMaxDockSize = max(m_ViewStyle.uMaxDockSize, m_ViewStyle.uDockSize);
+	m_ViewStyle.uMaxDockSize = MAX(m_ViewStyle.uMaxDockSize, m_ViewStyle.uDockSize);
 
 	if (0 == m_ViewStyle.uMinDockSize)
 	{
@@ -348,7 +348,7 @@ void CDockView::setViewStyle(const tagViewStyle& ViewStyle)
 	}
 	else
 	{
-		m_ViewStyle.uMinDockSize = min(m_ViewStyle.uMinDockSize, m_ViewStyle.uDockSize);
+		m_ViewStyle.uMinDockSize = MIN(m_ViewStyle.uMinDockSize, m_ViewStyle.uDockSize);
 	}
 }
 
