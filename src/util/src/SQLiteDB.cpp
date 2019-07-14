@@ -51,6 +51,15 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
 	return true;
 }
 
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, bool& bValue)
+{
+    int nValue = 0;
+    __EnsureReturn(GetData(uRow, uColumn, nValue), false);
+
+    bValue = nValue != 0;
+    return true;
+}
+
 bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
 {
 	string strData;
