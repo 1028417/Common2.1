@@ -525,9 +525,17 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
 
-const CRect& CMainApp::getWorkArea()
+const CRect& CMainApp::getWorkArea(bool bFullScreen)
 {
-	static CRect rtWorkArea;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, rtWorkArea, 0);
-	return rtWorkArea;
+	static CRect rcWorkArea;
+	if (bFullScreen)
+	{
+		rcWorkArea.SetRect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+	}
+	else
+	{
+		::SystemParametersInfo(SPI_GETWORKAREA, 0, rcWorkArea, 0);
+	}
+
+	return rcWorkArea;
 }

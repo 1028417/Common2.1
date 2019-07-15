@@ -78,11 +78,7 @@ public:
 		return MessageBox(cstrText, L"", uType);
 	}*/
 
-	void show();
-
-	void fixWorkArea();
-
-	void fullScreen();
+	void fixWorkArea(bool bFullScreen);
 
 private:
 	void resizeView(bool bManual=false);
@@ -103,5 +99,7 @@ private:
 	void OnDestroy();
 
 protected:
+	virtual void _fixWorkArea(CRect& rcWorkArea, bool bFullScreen);
+
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 };

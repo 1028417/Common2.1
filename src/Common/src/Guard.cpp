@@ -59,63 +59,211 @@ void CRedrawLockGuard::Unlock()
 	}
 }
 
-void CMenuEx::_setOwnerDraw()
+bool CMenuEx::Popup(HMENU hMenu, CWnd *pWnd)
 {
-	int nItemCount = this->GetMenuItemCount();
-	for (int nItem = 0; nItem < nItemCount; nItem++)
+	bool bRet = true;
+	if (Attach(hMenu))
 	{
-		UINT uItemID = this->GetMenuItemID(nItem);
-		
-		if (-1 == uItemID)//子菜单
+		POINT ptCursor{ 0, 0 };
+		(void)::GetCursorPos(&ptCursor);
+		bRet = TRUE == this->TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
+
+		Detach();
+	}
+
+	m_mapMenuItemInfos.clear();
+	
+	return bRet;
+}
+
+bool CMenuEx::Popup(HMENU hMenu, UINT uItemHeight, float fFontSize, CWnd *pWnd)
+{
+	m_uItemHeight = uItemHeight;
+	m_fFontSize = fFontSize;
+
+	return Popup(hMenu, pWnd);
+}
+
+static int cloneMenu(HMENU hDst, HMENU hSrc)
+{
+	int nCount = 0;
+
+	for (int nSrc = 0, nDst = GetMenuItemCount(hDst); nSrc<GetMenuItemCount(hSrc); nSrc++)
+	{
+		CString strMenuStr(L'\0', 256);
+		MENUITEMINFO mii;
+		memset(&mii, 0, sizeof mii);
+		mii.cbSize = sizeof(mii);
+		mii.fMask = 0
+			| MIIM_CHECKMARKS //Retrieves or sets the hbmpChecked and hbmpUnchecked members. 
+			| MIIM_DATA //Retrieves or sets the dwItemData member. 
+			| MIIM_ID //Retrieves or sets the wID member. 
+			| MIIM_STATE //Retrieves or sets the fState member. 
+			| MIIM_SUBMENU //Retrieves or sets the hSubMenu member. 
+			| MIIM_TYPE //Retrieves or sets the fType and dwTypeData members. 
+			| 0;
+		mii.dwTypeData = (LPTSTR)(LPCTSTR)strMenuStr;
+		mii.cch = strMenuStr.GetLength();
+
+		VERIFY(GetMenuItemInfo(hSrc, nSrc, TRUE, &mii));
+		strMenuStr.Trim();
+
+		if (mii.hSubMenu)
 		{
-			m_lstSubMenu.push_back(CMenuEx(m_uItemHeight, m_uMenuWidth, m_fFontSize));
-			m_lstSubMenu.back().Attach(this->GetSubMenu(nItem)->m_hMenu, FALSE); //递归调用
+			HMENU hSub = CreatePopupMenu();
+			cloneMenu(hSub, mii.hSubMenu);
+			mii.hSubMenu = hSub;
 		}
 
-		CString strText;
-		this->GetMenuString(nItem, strText, MF_BYPOSITION);
+		InsertMenuItem(hDst, nDst++, TRUE, &mii);
+		nCount++;
+	}
 
-		tagMENUITEMINFOW mmi;
-		memset(&mmi, 0, sizeof(mmi));
-		mmi.cbSize = sizeof(mmi);
-		mmi.fMask = MIIM_SUBMENU;
-		if (CMenu::GetMenuItemInfo(nItem, &mmi, TRUE) && NULL != mmi.hSubMenu)
+	return nCount;
+}
+
+bool CMenuEx::clonePopup(HMENU hMenu, CWnd *pWnd)
+{
+	HMENU hPopupMenu = ::CreatePopupMenu();
+	if (NULL == hPopupMenu)
+	{
+		return false;
+	}
+	(void)cloneMenu(hPopupMenu, hMenu);
+
+	return Popup(hPopupMenu, pWnd);
+}
+
+bool CMenuEx::clonePopup(HMENU hMenu, UINT uItemHeight, float fFontSize, CWnd *pWnd)
+{
+	m_uItemHeight = uItemHeight;
+	m_fFontSize = fFontSize;
+	return clonePopup(hMenu, pWnd);
+}
+
+bool CMenuEx::Attach(HMENU hMenu)
+{
+	if (!__super::Attach(hMenu))
+	{
+		return false;
+	}
+
+	UINT uAvilbleCount = 0;
+	int nPrevSpliterPos = -1;
+	int nItemCount = this->GetMenuItemCount();
+	for (int nItem = nItemCount-1; nItem >= 0; nItem--)
+	{
+		int nItemID = (int)this->GetMenuItemID(nItem);
+		if (-1 == nItemID) // 子菜单
 		{
-			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)mmi.hSubMenu, strText);
+			HMENU hSubMenu = this->GetSubMenu(nItem)->m_hMenu;
+
+			m_lstSubMenu.push_back(CMenuEx(*this, true));
+			auto& SubMenu = m_lstSubMenu.back();
+			if (!SubMenu.Attach(hSubMenu))
+			{
+				m_lstSubMenu.pop_back();
+				(void)this->RemoveMenu(nItem, MF_BYPOSITION);
+				continue;
+			}
+
+			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)hSubMenu);
+		}
+		else if (0 == nItemID) // 分隔条
+		{
+			if (uAvilbleCount == nPrevSpliterPos + 1)
+			{
+				(void)this->RemoveMenu(nItem, MF_BYPOSITION);
+				continue;
+			}
+
+			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_SEPARATOR);
+			nPrevSpliterPos = uAvilbleCount;
 		}
 		else
 		{
-			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW, uItemID, strText);
+			auto itr = m_mapMenuItemInfos.find((UINT)nItemID);
+			if (itr != m_mapMenuItemInfos.end())
+			{
+				cauto& MenuItemInfo = itr->second;
+
+				if (MenuItemInfo.bDelete || MenuItemInfo.bDisable)
+				{
+					(void)this->RemoveMenu(nItem, MF_BYPOSITION);
+					//(void)this->EnableMenuItem(uIDItem, MF_GRAYED);
+					continue;
+				}
+			}
+
+			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW, (UINT)nItemID);
+		}
+
+		uAvilbleCount++;
+	}
+
+	if (uAvilbleCount > 0)
+	{
+		if (0 == this->GetMenuItemID(0))
+		{
+			(void)this->RemoveMenu(0, MF_BYPOSITION);
+			uAvilbleCount--;
 		}
 	}
-}
 
-HMENU CMenuEx::Detach()
-{
-	if (NULL == m_hMenuAttach)
+	if (0 == uAvilbleCount)
 	{
-		return NULL;
-	}
-	
-	m_hMenuAttach = NULL;
-	
-	return __super::Detach();
-}
-
-BOOL CMenuEx::Attach(HMENU hMenu, BOOL bTopMenu)
-{
-	BOOL bRet = __super::Attach(hMenu);
-	if (!bRet)
-	{
-		return FALSE;
+		Detach();
+		return false;
 	}
 
-	m_hMenuAttach = hMenu;
-	m_bTopMenu = bTopMenu;
+	return true;
+}
 
-	_setOwnerDraw();
+void CMenuEx::Detach()
+{
+	for (auto& SubMenu : m_lstSubMenu)
+	{
+		SubMenu.Detach();
+	}
+	m_lstSubMenu.clear();
 
-	return TRUE;
+	(void)__super::Detach();
+}
+
+void CMenuEx::EnableItem(UINT uIDItem, bool bEnable)
+{
+	m_mapMenuItemInfos[uIDItem].bDisable = !bEnable;
+}
+
+void CMenuEx::EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEnable)
+{
+	for (auto& uIDItem : ilIDItems)
+	{
+		m_mapMenuItemInfos[uIDItem].bDisable = !bEnable;
+	}
+}
+
+void CMenuEx::CheckItem(UINT uIDItem)
+{
+	m_mapMenuItemInfos[uIDItem].bChecked = true;
+}
+
+void CMenuEx::DeleteItem(UINT uIDItem)
+{
+	m_mapMenuItemInfos[uIDItem].bDelete = true;
+}
+
+void CMenuEx::DeleteItem(const std::initializer_list<UINT>& ilIDItems)
+{
+	for (auto& uIDItem : ilIDItems)
+	{
+		m_mapMenuItemInfos[uIDItem].bDelete = true;
+	}
+}
+
+void CMenuEx::SetItemText(UINT uIDItem, const CString& cstrText)
+{
+	m_mapMenuItemInfos[uIDItem].strText = cstrText;
 }
 
 #define __CXOffsetTopMenu 6
@@ -154,15 +302,26 @@ void CMenuEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	CRect rcItem = lpDrawItemStruct->rcItem;
+	int nItemID = lpDrawItemStruct->itemID;
 
 	auto crBk = m_bTopMenu ? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
-	if (0 != lpDrawItemStruct->itemID && lpDrawItemStruct->itemState & ODS_SELECTED)
+	if (0 != nItemID && lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		crBk = m_bTopMenu ? RGB(204, 232, 255) : RGB(229, 243, 255);
 	}
 	dc.FillSolidRect(&rcItem, crBk);
 
-	if (0 != lpDrawItemStruct->itemID)
+	if (0 == nItemID) // 分隔条
+	{
+		CRect rcLine;
+		rcLine.left = rcItem.left + 10;
+		rcLine.right = rcItem.right - 10;
+		rcLine.top = (rcItem.top + rcItem.bottom) / 2;
+		rcLine.bottom = rcLine.top + 1;
+
+		dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
+	}
+	else
 	{
 		dc.SetBkMode(TRANSPARENT);
 
@@ -179,190 +338,82 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		}
 
 		CString strText;
-		this->GetMenuString(lpDrawItemStruct->itemID, strText, MF_BYCOMMAND);
-		dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		if (nItemID > 0)
+		{
+			auto itr = m_mapMenuItemInfos.find((UINT)nItemID);
+			if (itr != m_mapMenuItemInfos.end())
+			{
+				strText = itr->second.strText;
 
+				if (itr->second.bChecked)
+				{
+					dc.DrawText(L" √", rcItem, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				}
+			}
+		}
+
+		if (strText.IsEmpty())
+		{
+			this->GetMenuString((UINT)nItemID, strText, MF_BYCOMMAND);
+		}
+		dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		
 		(void)dc.SelectObject(pFontPrev);
 	}
-	else
-	{
-		CRect rcLine;
-		rcLine.left = rcItem.left + 10;
-		rcLine.right = rcItem.right - 10;
-		rcLine.top = (rcItem.top + rcItem.bottom) / 2;
-		rcLine.bottom = rcLine.top + 1;
-
-		dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
-	}
-
 }
 
-void CMenuGuard::EnableItem(UINT uIDItem, BOOL bEnable)
+void CMenuGuard::EnableItem(UINT uIDItem, bool bEnable)
 {
-	m_mapMenuItemInfos[uIDItem].bEnable = TRUE==bEnable;
+	m_menu.EnableItem(uIDItem, bEnable);
 }
 
-void CMenuGuard::EnableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable)
+void CMenuGuard::EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEnable)
 {
-	for (auto& uIDItem : ilIDItems)
-	{
-		EnableItem(uIDItem, bEnable);
-	}
+	m_menu.EnableItem(ilIDItems, bEnable);
 }
 
-void CMenuGuard::DisableItem(UINT uIDItem)
+void CMenuGuard::CheckItem(UINT uIDItem)
 {
-	EnableItem(uIDItem, FALSE);
-}
-
-void CMenuGuard::DisableItem(const std::initializer_list<UINT>& ilIDItems, BOOL bEnable)
-{
-	EnableItem(ilIDItems, FALSE);
+	m_menu.CheckItem(uIDItem);
 }
 
 void CMenuGuard::DeleteItem(UINT uIDItem)
 {
-	m_mapMenuItemInfos[uIDItem].bDelete = true;
+	m_menu.DeleteItem(uIDItem);
 }
 
 void CMenuGuard::DeleteItem(const std::initializer_list<UINT>& ilIDItems)
 {
-	for (auto& uIDItem : ilIDItems)
-	{
-		DeleteItem(uIDItem);
-	}
+	m_menu.DeleteItem(ilIDItems);
 }
 
 void CMenuGuard::SetItemText(UINT uIDItem, const CString& cstrText)
 {
-	m_mapMenuItemInfos[uIDItem].strText = cstrText;
+	m_menu.SetItemText(uIDItem, cstrText);
 }
 
-BOOL CMenuGuard::_popup(HMENU hMenu, CWnd *pWnd, UINT uItemHeight, float fFontSize)
-{
-	POINT ptCursor{0,0};
-	(void)::GetCursorPos(&ptCursor);
-
-	CMenuEx menu(uItemHeight + 2, m_uMenuWidth, fFontSize, hMenu);
-	return menu.TrackPopupMenu(0, ptCursor.x, ptCursor.y, pWnd);
-}
-
-BOOL CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
+bool CMenuGuard::Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
-	__AssertReturn(hMenu, FALSE);
+	__AssertReturn(hMenu, false);
 	
-	HMENU hSubMenu = ::GetSubMenu(hMenu, 0);
-
-	for (auto& pr : m_mapMenuItemInfos)
-	{
-		auto& uIDItem = pr.first;
-		auto& MenuItemInfo = pr.second;
-		
-		if (!MenuItemInfo.strText.IsEmpty())
-		{
-			(void)::ModifyMenu(hSubMenu, uIDItem, MF_BYCOMMAND | MF_STRING, uIDItem, MenuItemInfo.strText);
-		}
-
-		if (!MenuItemInfo.bEnable)
-		{
-			if (!m_bShowDisable)
-			{
-				(void)::RemoveMenu(hSubMenu, uIDItem, MF_BYCOMMAND);
-			}
-			else
-			{
-				(void)::EnableMenuItem(hSubMenu, uIDItem, MF_GRAYED);
-			}
-		}
-	}
-
-	m_mapMenuItemInfos.clear();
-
-	int nCount = ::GetMenuItemCount(hSubMenu);
-	if (nCount > 0)
-	{
-		while (nCount > 0 && 0 == ::GetMenuItemID(hSubMenu, 0))
-		{
-			(void)::RemoveMenu(hSubMenu, 0, MF_BYPOSITION);
-			nCount--;
-		}
-
-		while (nCount > 0 && 0 == ::GetMenuItemID(hSubMenu, nCount - 1))
-		{
-			(void)::RemoveMenu(hSubMenu, nCount - 1, MF_BYPOSITION);
-			nCount--;
-		}
-	}
-	
-	BOOL bRet = FALSE;
-	if (nCount > 0)
-	{
-		bRet = _popup(hSubMenu, pWnd, uItemHeight, fFontSize);
-	}
+	bool bRet = m_menu.Popup(::GetSubMenu(hMenu, 0), uItemHeight + 2, fFontSize, pWnd);
 
 	(void)::DestroyMenu(hMenu);
 
 	return bRet;
 }
 
-static int clonePopupMenu(HMENU hDst, HMENU hSrc)
+bool CMenuGuard::clonePopup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 {
-	int nCount = 0;
-
-	for (int nSrc = 0, nDst = GetMenuItemCount(hDst); nSrc<GetMenuItemCount(hSrc); nSrc++)
-	{
-		CString strMenuStr(L'\0', 256);
-		MENUITEMINFO mii;
-		memset(&mii, 0, sizeof mii);
-		mii.cbSize = sizeof(mii);
-		mii.fMask = 0
-			| MIIM_CHECKMARKS //Retrieves or sets the hbmpChecked and hbmpUnchecked members. 
-			| MIIM_DATA //Retrieves or sets the dwItemData member. 
-			| MIIM_ID //Retrieves or sets the wID member. 
-			| MIIM_STATE //Retrieves or sets the fState member. 
-			| MIIM_SUBMENU //Retrieves or sets the hSubMenu member. 
-			| MIIM_TYPE //Retrieves or sets the fType and dwTypeData members. 
-			| 0;
-		mii.dwTypeData = (LPTSTR)(LPCTSTR)strMenuStr;
-		mii.cch = strMenuStr.GetLength();
-
-		VERIFY(GetMenuItemInfo(hSrc, nSrc, TRUE, &mii));
-		strMenuStr.Trim();
-
-		if (mii.hSubMenu)
-		{
-			HMENU hSub = CreatePopupMenu();
-			clonePopupMenu(hSub, mii.hSubMenu);
-			mii.hSubMenu = hSub;
-		}
-
-		InsertMenuItem(hDst, nDst++, TRUE, &mii);
-		nCount++;
-	}
-
-	return nCount;
-}
-
-BOOL CMenuGuard::PopupEx(CWnd *pWnd, UINT uItemHeight, float fFontSize)
-{
-	HMENU hPopupMenu = ::CreatePopupMenu();
-	if (NULL == hPopupMenu)
-	{
-		return FALSE;
-	}
-
 	HMENU hMenu = m_resModule.loadMenu(m_uIDMenu);
-	if (NULL == hMenu)
-	{
-		return FALSE;
-	}
+	__AssertReturn(hMenu, false);
 
-	(void)clonePopupMenu(hPopupMenu, hMenu);
-
+	bool bRet = m_menu.clonePopup(hMenu, uItemHeight + 2, fFontSize, pWnd);
+	
 	(void)::DestroyMenu(hMenu);
 
-	return _popup(hPopupMenu, pWnd, uItemHeight, fFontSize);
+	return bRet;
 }
 
 bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)

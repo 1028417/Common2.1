@@ -129,7 +129,7 @@ public:
 
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
-	static const CRect& getWorkArea();
+	static const CRect& getWorkArea(bool bFullScreen);
 	
 	static bool getKeyState(UINT uKey)
 	{

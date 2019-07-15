@@ -32,52 +32,25 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 	return TRUE;
 }
 
-void CMainWnd::show()
+void CMainWnd::fixWorkArea(bool bFullScreen)
 {
-	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
-	{
-		if (!m_bFullScreen)
-		{
-			fixWorkArea();
-		}
-	}
+	m_bFullScreen = bFullScreen;
 
-	ShowWindow(SW_SHOW);
+	CRect rcWorkArea = CMainApp::getWorkArea(bFullScreen);
+	_fixWorkArea(rcWorkArea, bFullScreen);
 }
 
-#define __XOffset 7
-#define __YOffset 1
-
-void CMainWnd::fixWorkArea()
+void CMainWnd::_fixWorkArea(CRect& rcWorkArea, bool bFullScreen)
 {
-	m_bFullScreen = false;
-	
-	cauto& rtWorkArea = CMainApp::getWorkArea();
-	
-	::SetWindowPos(m_hWnd, HWND_NOTOPMOST, rtWorkArea.left - __XOffset, rtWorkArea.top - __YOffset
-		, rtWorkArea.Width() + __XOffset * 2 - 1, rtWorkArea.Height() + __YOffset * 2 + 2, SWP_NOZORDER | SWP_NOACTIVATE);
-}
-
-void CMainWnd::fullScreen()
-{
-	m_bFullScreen = true;
-	
-	::SetWindowPos(m_hWnd, HWND_TOPMOST, -__XOffset, -__YOffset, GetSystemMetrics(SM_CXSCREEN)+ __XOffset * 2 - 1
-		, GetSystemMetrics(SM_CYSCREEN)+ __YOffset * 2 + 2, SWP_NOZORDER | SWP_NOACTIVATE);
+	::SetWindowPos(m_hWnd, HWND_NOTOPMOST, rcWorkArea.left, rcWorkArea.top
+		, rcWorkArea.Width(), rcWorkArea.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 void CMainWnd::OnMove(int x, int y)
 {
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		if (!m_bFullScreen)
-		{
-			fixWorkArea();
-		}
-		//else
-		//{
-		//	this->fullScreen();
-		//}
+		fixWorkArea(m_bFullScreen);
 	}
 }
 
@@ -90,14 +63,7 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		if (!m_bFullScreen)
-		{
-			fixWorkArea();
-		}
-		//else
-		//{
-		//	this->fullScreen();
-		//}
+		fixWorkArea(m_bFullScreen);
 	}
 
 	CRect rcClient;
