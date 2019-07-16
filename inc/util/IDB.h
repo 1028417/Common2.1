@@ -16,16 +16,12 @@ public:
 	virtual const UINT& GetColumnCount() = 0;
 	virtual const UINT& GetRowCount() = 0;
 
+	virtual bool GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
 	virtual bool GetData(UINT uRow, UINT uColumn, int& nValue) = 0;
+	virtual bool GetData(UINT uRow, UINT uColumn, UINT& uValue) = 0;
     virtual bool GetData(UINT uRow, UINT uColumn, bool& bValue) = 0;
 	virtual bool GetData(UINT uRow, UINT uColumn, double& dbValue) = 0;
-	virtual bool GetData(UINT uRow, UINT uColumn, string& strValue) = 0;
-	virtual bool GetData(UINT uRow, UINT uColumn, wstring& strValue) = 0;
-	
-	/*virtual bool GetData(UINT uRow, SArray<string>& arrData) = 0;
-	virtual bool GetData(UINT uRow, SArray<wstring>& arrData) = 0;
-	virtual bool GetData(UINT uRow, SArray<int>& arrValue) = 0;
-	virtual bool GetData(UINT uRow, SArray<double>& arrValue) = 0;*/
 };
 
 class IDB

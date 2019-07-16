@@ -28,19 +28,12 @@ public:
 		return m_uRowCount;
 	}
 
-	bool GetData(UINT uRow, UINT uColumn, string& strData) override;
 	bool GetData(UINT uRow, UINT uColumn, wstring& strData) override;
+	bool GetData(UINT uRow, UINT uColumn, string& strData) override;
 	bool GetData(UINT uRow, UINT uColumn, int& nValue) override;
+	bool GetData(UINT uRow, UINT uColumn, UINT& uValue) override;
     bool GetData(UINT uRow, UINT uColumn, bool& bValue) override;
 	bool GetData(UINT uRow, UINT uColumn, double& dbValue) override;
-
-	/*bool GetData(UINT uRow, SArray<string>& arrData) override;
-	bool GetData(UINT uRow, SArray<wstring>& arrData) override;
-	bool GetData(UINT uRow, SArray<int>& arrValue) override;
-	bool GetData(UINT uRow, SArray<double>& arrValue) override;
-	
-private:
-	bool _getData(UINT uRow, const function<void(const string&)>& cb);*/
 };
 
 

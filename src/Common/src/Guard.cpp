@@ -243,9 +243,9 @@ void CMenuEx::EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEna
 	}
 }
 
-void CMenuEx::CheckItem(UINT uIDItem)
+void CMenuEx::CheckItem(UINT uIDItem, bool bCheck)
 {
-	m_mapMenuItemInfos[uIDItem].bChecked = true;
+	m_mapMenuItemInfos[uIDItem].bChecked = bCheck;
 }
 
 void CMenuEx::DeleteItem(UINT uIDItem)
@@ -347,7 +347,7 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 				if (itr->second.bChecked)
 				{
-					dc.DrawText(L" ¡Ì", rcItem, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+					dc.DrawText(L"  ¡Ì", rcItem, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 				}
 			}
 		}
@@ -372,9 +372,9 @@ void CMenuGuard::EnableItem(const std::initializer_list<UINT>& ilIDItems, bool b
 	m_menu.EnableItem(ilIDItems, bEnable);
 }
 
-void CMenuGuard::CheckItem(UINT uIDItem)
+void CMenuGuard::CheckItem(UINT uIDItem, bool bCheck)
 {
-	m_menu.CheckItem(uIDItem);
+	m_menu.CheckItem(uIDItem, bCheck);
 }
 
 void CMenuGuard::DeleteItem(UINT uIDItem)

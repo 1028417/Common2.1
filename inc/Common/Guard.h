@@ -165,7 +165,7 @@ public:
 	void EnableItem(UINT uIDItem, bool bEnable);
 	void EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEnable);
 
-	void CheckItem(UINT uIDItem);
+	void CheckItem(UINT uIDItem, bool bCheck = true);
 
 	void DeleteItem(UINT uIDItem);
 	void DeleteItem(const std::initializer_list<UINT>& ilIDItems);
@@ -194,15 +194,15 @@ public:
 	void EnableItem(UINT uIDItem, bool bEnable);
 	void EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEnable);
 
-	void CheckItem(UINT uIDItem);
+	void CheckItem(UINT uIDItem, bool bCheck = true);
 
 	void DeleteItem(UINT uIDItem);
 	void DeleteItem(const std::initializer_list<UINT>& ilIDItems);
 
 	void SetItemText(UINT uIDItem, const CString& cstrText);
 	
-	bool Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize=0);
-	bool clonePopup(CWnd *pWnd, UINT uItemHeight, float fFontSize=0);
+	bool Popup(CWnd *pWnd, UINT uItemHeight, float fFontSize = 0);
+	bool clonePopup(CWnd *pWnd, UINT uItemHeight, float fFontSize = 0);
 };
 
 using CB_CompatableFont = function<void(LOGFONT&)>;
