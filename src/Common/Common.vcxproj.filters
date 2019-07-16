@@ -54,12 +54,6 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="..\..\inc\App.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\DockView.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\MainWnd.h">
       <Filter>src\app</Filter>
     </ClInclude>
@@ -69,35 +63,41 @@
     <ClInclude Include="..\..\inc\Page.h">
       <Filter>src\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\CDispatch.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\DragDrop.h">
+    <ClInclude Include="..\..\inc\Common\TreeCtrl.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\img.h">
+    <ClInclude Include="..\..\inc\Common\PathCtrl.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\ListCtrl.h">
+    <ClInclude Include="..\..\inc\Common\ListCtrl.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\PathCtrl.h">
+    <ClInclude Include="..\..\inc\Common\img.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\TreeCtrl.h">
+    <ClInclude Include="..\..\inc\Common\DragDrop.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\Common.h">
+    <ClInclude Include="..\..\inc\Common\CDispatch.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\DialogT.h">
+    <ClInclude Include="..\..\inc\Common\Common.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\Guard.h">
+    <ClInclude Include="..\..\inc\Common\DialogT.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\ProgressDlg.h">
+    <ClInclude Include="..\..\inc\Common\Guard.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\ProgressDlg.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\App.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\DockView.h">
+      <Filter>src\app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

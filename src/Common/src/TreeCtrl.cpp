@@ -223,9 +223,19 @@ void CObjectCheckTree::SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckSta
 	this->SetParentItemsImageState(hItem);
 }
 
+void CObjectCheckTree::SetCheckState(CTreeObject& Object, E_CheckState eCheckState)
+{
+	SetItemCheckState(getTreeItem(Object), eCheckState);
+}
+
 E_CheckState CObjectCheckTree::GetItemCheckState(HTREEITEM hItem)
 {
 	return (E_CheckState)(__super::GetItemState(hItem, TVIS_STATEIMAGEMASK) >>12);
+}
+
+E_CheckState CObjectCheckTree::GetCheckState(CTreeObject& Object)
+{
+	return GetItemCheckState(getTreeItem(Object));
 }
 
 void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)

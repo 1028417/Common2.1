@@ -57,8 +57,14 @@ protected:
 
 class __CommonExt CObjectTree: public CBaseTree
 {
+public:
+	CObjectTree() {}
+
 private:
 	map<const CTreeObject*, HTREEITEM> m_mapTreeObject;
+
+protected:
+	CTreeObject *GetItemObject(HTREEITEM hItem);
 
 public:
 	inline HTREEITEM getTreeItem(const CTreeObject *pObject)
@@ -85,9 +91,7 @@ public:
 	void UpdateImage(CTreeObject& Object);
 
 	CTreeObject *GetSelectedObject();
-
-	CTreeObject *GetItemObject(HTREEITEM hItem);
-
+	
 	CTreeObject *GetParentObject(CTreeObject& Object);
 	
 	void GetAllObjects(TD_TreeObjectList& lstObjects);
@@ -153,9 +157,8 @@ private:
 public:
 	HTREEITEM InsertObject(CTreeObject& Object, CTreeObject *pParentObject=NULL);
 
-	E_CheckState GetItemCheckState(HTREEITEM hItem);
-
-	void SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState);
+	void SetCheckState(CTreeObject& Object, E_CheckState eCheckState);
+	E_CheckState GetCheckState(CTreeObject& Object);
 	
 	void GetAllObjects(TD_TreeObjectList& lstObjects);
 
@@ -164,6 +167,9 @@ public:
 	void GetCheckedObjects(TD_TreeObjectList& lstObjects);
 
 private:
+	void SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState);
+	E_CheckState GetItemCheckState(HTREEITEM hItem);
+
 	void SetChildItemsImageState(HTREEITEM hItem);
 	void SetParentItemsImageState(HTREEITEM hItem);
 
