@@ -62,11 +62,10 @@ public:
 
 private:
 	map<const CTreeObject*, HTREEITEM> m_mapTreeObject;
-
-protected:
+	
+public:
 	CTreeObject *GetItemObject(HTREEITEM hItem);
 
-public:
 	inline HTREEITEM getTreeItem(const CTreeObject *pObject)
 	{
 		auto itr = m_mapTreeObject.find(pObject);
