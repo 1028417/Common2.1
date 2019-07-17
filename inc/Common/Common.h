@@ -102,7 +102,7 @@ public:
 		}
 		if (0 == uHeight)
 		{
-			uHeight = CMainApp::getWorkArea(true).Width() * 4/5;
+			uHeight = CMainApp::getWorkArea(true).Height() * 4/5;
 		}
 
 		wstring strRet;
