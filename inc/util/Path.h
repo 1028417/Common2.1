@@ -145,15 +145,11 @@ public:
 	CTreeObject() {}
 
 public:
-	virtual wstring GetTreeText() const
-	{
-		return L"";
-	}
+	virtual wstring GetTreeText() const	{ return L""; }
 
-	virtual int GetTreeImage()
-	{
-		return 0;
-	}
+	virtual int GetTreeImage() { return 0; }
+
+	virtual bool hasCheckState() const { return true; }
 
 	virtual void GetTreeChilds(TD_TreeObjectList&) {}
 };

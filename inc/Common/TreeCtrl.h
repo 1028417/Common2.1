@@ -156,23 +156,24 @@ private:
 public:
 	HTREEITEM InsertObject(CTreeObject& Object, CTreeObject *pParentObject=NULL);
 
-	void SetCheckState(CTreeObject& Object, E_CheckState eCheckState);
+	void SetCheckState(CTreeObject& Object, bool bCheck);
 	E_CheckState GetCheckState(CTreeObject& Object);
 	
-	void GetAllObjects(TD_TreeObjectList& lstObjects);
-
-	void GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState);
-	
+	void GetAllObjects(TD_TreeObjectList& lstObjects);		
 	void GetCheckedObjects(TD_TreeObjectList& lstObjects);
 
 private:
-	void SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState);
-	E_CheckState GetItemCheckState(HTREEITEM hItem);
+	inline void _setImgMask(HTREEITEM hItem, E_CheckState eCheckState);
 
-	void SetChildItemsImageState(HTREEITEM hItem);
-	void SetParentItemsImageState(HTREEITEM hItem);
+	void _setCheckState(HTREEITEM hItem, E_CheckState eCheckState);
+	E_CheckState _getCheckState(HTREEITEM hItem);
+
+	void _setChildsState(HTREEITEM hItem, E_CheckState eCheckState);
+	void _updateParentState(HTREEITEM hItem);
 
 	void _onItemClick(HTREEITEM hItem);
+
+	void _getAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState);
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;

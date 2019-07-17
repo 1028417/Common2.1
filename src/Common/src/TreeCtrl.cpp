@@ -209,72 +209,47 @@ HTREEITEM CObjectCheckTree::InsertObject(CTreeObject& Object, CTreeObject *pPare
 {
 	HTREEITEM hItem = __super::InsertObject(Object, pParentObject);
 
-	(void)__super::SetItemState(hItem, INDEXTOSTATEIMAGEMASK(CS_Unchecked), TVIS_STATEIMAGEMASK);
+	auto eCheckState = Object.hasCheckState() ? CS_Unchecked : CS_Nocheck;
+	_setImgMask(hItem, eCheckState);
 
 	return hItem;
 }
 
-void CObjectCheckTree::SetItemCheckState(HTREEITEM hItem, E_CheckState eCheckState)
+void CObjectCheckTree::_setImgMask(HTREEITEM hItem, E_CheckState eCheckState)
 {
 	(void)__super::SetItemState(hItem, INDEXTOSTATEIMAGEMASK(eCheckState), TVIS_STATEIMAGEMASK);
-
-	this->SetChildItemsImageState(hItem);
-
-	this->SetParentItemsImageState(hItem);
 }
 
-void CObjectCheckTree::SetCheckState(CTreeObject& Object, E_CheckState eCheckState)
+void CObjectCheckTree::_setCheckState(HTREEITEM hItem, E_CheckState eCheckState)
 {
-	SetItemCheckState(getTreeItem(Object), eCheckState);
+	_setImgMask(hItem, eCheckState);
+
+	_setChildsState(hItem, eCheckState);
+
+	_updateParentState(hItem);
 }
 
-E_CheckState CObjectCheckTree::GetItemCheckState(HTREEITEM hItem)
+void CObjectCheckTree::SetCheckState(CTreeObject& Object, bool bCheck)
+{
+	if (Object.hasCheckState())
+	{
+		_setCheckState(getTreeItem(Object), bCheck? CS_Checked:CS_Unchecked);
+	}
+}
+
+E_CheckState CObjectCheckTree::_getCheckState(HTREEITEM hItem)
 {
 	return (E_CheckState)(__super::GetItemState(hItem, TVIS_STATEIMAGEMASK) >>12);
 }
 
 E_CheckState CObjectCheckTree::GetCheckState(CTreeObject& Object)
 {
-	return GetItemCheckState(getTreeItem(Object));
-}
-
-void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)
-{
-	list<HTREEITEM> lstItems;
-	__super::GetAllItems(lstItems);
-
-	for (list<HTREEITEM>::iterator itItem = lstItems.begin()
-		; itItem != lstItems.end(); ++itItem)
+	if (!Object.hasCheckState())
 	{
-		lstObjects.add(__super::GetItemObject(*itItem));
+		return CS_Nocheck;
 	}
-}
 
-void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
-{
-	TD_TreeObjectList lstTreeObjects;
-	__super::GetAllObjects(lstTreeObjects);
-
-	lstTreeObjects([&](CTreeObject& TreeObject) {
-		if (eCheckState == this->GetItemCheckState(getTreeItem(&TreeObject)))
-		{
-			lstObjects.add(TreeObject);
-		}
-	});
-}
-
-void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
-{
-	TD_TreeObjectList lstChekedObjects;
-	this->GetAllObjects(lstChekedObjects, CS_Checked);
-
-	HTREEITEM hParentItem = NULL;
-	lstChekedObjects([&](CTreeObject& CheckedObject) {
-		if (!lstChekedObjects.includes(GetParentObject(CheckedObject)))
-		{
-			lstObjects.add(CheckedObject);
-		}
-	});
+	return _getCheckState(getTreeItem(Object));
 }
 
 BOOL CObjectCheckTree::PreTranslateMessage(MSG* pMsg)
@@ -306,88 +281,115 @@ BOOL CObjectCheckTree::PreTranslateMessage(MSG* pMsg)
 void CObjectCheckTree::_onItemClick(HTREEITEM hItem)
 {
 	__Ensure(hItem);
-
-	if (hItem)
+	
+	E_CheckState eCheckState = _getCheckState(hItem);
+	if (CS_Nocheck == eCheckState)
 	{
-		E_CheckState eCheckState = (E_CheckState)this->GetItemCheckState(hItem);
-		if (eCheckState != CS_Checked)
-		{
-			eCheckState = CS_Checked;
-		}
-		else
-		{
-			eCheckState = CS_Unchecked;
-		}
+		return;
+	}
 
-		this->SetItemCheckState(hItem, eCheckState);
+	if (eCheckState != CS_Checked)
+	{
+		eCheckState = CS_Checked;
+	}
+	else
+	{
+		eCheckState = CS_Unchecked;
+	}
+	_setCheckState(hItem, eCheckState);
 
-		if (m_cbCheckChanged)
-		{
-			m_cbCheckChanged(eCheckState);
-		}
+	if (m_cbCheckChanged)
+	{
+		m_cbCheckChanged(eCheckState);
 	}
 }
 
-void CObjectCheckTree::SetChildItemsImageState(HTREEITEM hItem)
+void CObjectCheckTree::_setChildsState(HTREEITEM hItem, E_CheckState eCheckState)
 {
-	UINT uState = __super::GetItemState(hItem, TVIS_STATEIMAGEMASK);
-
-	HTREEITEM hChildItem = __super::GetChildItem(hItem);
-
-	while (hChildItem)
+	hItem = __super::GetChildItem(hItem);
+	while (hItem)
 	{
-		(void)__super::SetItemState(hChildItem, uState, TVIS_STATEIMAGEMASK);
-
-		if (__super::GetChildItem(hChildItem))
+		if (_getCheckState(hItem) != CS_Nocheck)
 		{
-			this->SetChildItemsImageState(hChildItem);
+			_setImgMask(hItem, eCheckState);
+			
+			if (GetChildItem(hItem))
+			{
+				_setChildsState(hItem, eCheckState);
+			}
 		}
 
-		hChildItem = __super::GetNextItem(hChildItem, TVGN_NEXT);
+		hItem = __super::GetNextItem(hItem, TVGN_NEXT);
 	}
 }
 
-void CObjectCheckTree::SetParentItemsImageState(HTREEITEM hItem)
+void CObjectCheckTree::_updateParentState(HTREEITEM hItem)
 {
-	HTREEITEM hParentItem = hItem;
-
-	HTREEITEM hChildItem = NULL;
-	
-	UINT uChildState = 0;
-
-	UINT uChildState2 = 0;
-
-	
-	while (hParentItem = __super::GetParentItem(hParentItem))
+	while (hItem = __super::GetParentItem(hItem))
 	{
-		if (CS_Nocheck == this->GetItemCheckState(hParentItem))
+		if (CS_Nocheck == _getCheckState(hItem))
 		{
 			continue;
 		}
 
-		hChildItem = __super::GetChildItem(hParentItem);
-		ASSERT(hChildItem);
-
-		uChildState = this->GetItemCheckState(hChildItem);
-
+		HTREEITEM hChildItem = __super::GetChildItem(hItem);
+		E_CheckState eChildState = _getCheckState(hChildItem);
 		while (hChildItem = __super::GetNextItem(hChildItem, TVGN_NEXT))
 		{
-			uChildState2 = this->GetItemCheckState(hChildItem);
-
-			if (CS_Nocheck == uChildState2)
+			E_CheckState eChildState2 = _getCheckState(hChildItem);
+			if (CS_Nocheck == eChildState2)
 			{
 				continue;
 			}
 
-			if (uChildState != uChildState2)
+			if (eChildState != eChildState2)
 			{
-				uChildState = CS_Grayed;
+				eChildState = CS_Grayed;
 				break;
 			}
 		}
 
-		(void)__super::SetItemState(hParentItem, INDEXTOSTATEIMAGEMASK(uChildState), TVIS_STATEIMAGEMASK);
+		_setImgMask(hItem, eChildState);
 	}
+}
+
+void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)
+{
+	list<HTREEITEM> lstItems;
+	__super::GetAllItems(lstItems);
+
+	for (list<HTREEITEM>::iterator itItem = lstItems.begin()
+		; itItem != lstItems.end(); ++itItem)
+	{
+		lstObjects.add(__super::GetItemObject(*itItem));
+	}
+}
+
+void CObjectCheckTree::_getAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
+{
+	TD_TreeObjectList lstTreeObjects;
+	__super::GetAllObjects(lstTreeObjects);
+
+	lstTreeObjects([&](CTreeObject& TreeObject) {
+		if (eCheckState == GetCheckState(TreeObject))
+		{
+			lstObjects.add(TreeObject);
+		}
+	});
+}
+
+void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
+{
+	TD_TreeObjectList lstChekedObjects;
+	_getAllObjects(lstChekedObjects, CS_Checked);
+
+	HTREEITEM hParentItem = NULL;
+	lstChekedObjects([&](CTreeObject& CheckedObject) {
+		if (!lstChekedObjects.includes(GetParentObject(CheckedObject)))
+		{
+			lstObjects.add(CheckedObject);
+		}
+	});
 }
 
 
