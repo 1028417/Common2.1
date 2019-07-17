@@ -98,16 +98,16 @@ public:
 
 		if (0 == uWidth)
 		{
-			uWidth = CMainApp::getWorkArea(true).Width() / 3;
+			uWidth = CMainApp::getWorkArea(true).Width() *2/5;
 		}
 		if (0 == uHeight)
 		{
-			uHeight = CMainApp::getWorkArea(true).Height() * 4/5;
+			uHeight = CMainApp::getWorkArea(true).Height() *4/5;
 		}
 
 		wstring strRet;
 		CMainApp::GetMainApp()->thread([&]() {
-			return CFolderDlg::Show(hWndOwner, lpszInitialDir, lpszTitle, lpszMessage
+			strRet = CFolderDlg::Show(hWndOwner, lpszInitialDir, lpszTitle, lpszMessage
 				, lpszOKButton, lpszCancelButton, uWidth, uHeight);
 		});
 		return strRet;
