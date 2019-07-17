@@ -9,6 +9,9 @@ QT       -= core
 TARGET = util
 TEMPLATE = lib
 
+#CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++1y #gnu++1y
+
 SOURCES += \
     sqlite/shell.c \
     sqlite/sqlite3.c \
@@ -70,4 +73,3 @@ unix {
 }
 }
 
-CONFIG += c++11

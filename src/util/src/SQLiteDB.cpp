@@ -228,13 +228,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 
     __EnsureReturn(SQLITE_OK == m_nRetCode && pData, NULL);
 	
-	CSQLiteDBResult* pSQLiteDBResult = new CSQLiteDBResult;
-	pSQLiteDBResult->m_uColumnCount = (UINT)nColumnCount;
-	pSQLiteDBResult->m_uRowCount = (UINT)nRowCount;
-
-	pSQLiteDBResult->m_pData = pData;
-
-	return pSQLiteDBResult;
+	return new CSQLiteDBResult((UINT)nColumnCount, (UINT)nRowCount, pData);;
 }
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)

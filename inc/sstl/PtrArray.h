@@ -780,58 +780,46 @@ namespace NS_SSTL
 		}
 
 		template<typename... args>
-		PtrArrayT& assign(__PtrType ptr, args... others)
+		void assign(__PtrType ptr, args... others)
 		{
 			m_data.clear();
 			add(ptr, others...);
-			
-			return *this;
 		}
 
 		template<typename... args>
-		PtrArrayT& assign(__RefType ref, args&... others)
+		void assign(__RefType ref, args&... others)
 		{
 			m_data.clear();
 			add(ref, others...);
-
-			return *this;
 		}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>>
-		PtrArrayT& assign(T* ptr, args... others)
+		void assign(T* ptr, args... others)
 		{
 			m_data.clear();
-
 			add(ptr, others...);
-
-			return *this;
 		}
 
 		template <typename T, typename... args, typename = checkNotSameType_t<T, __DataType>
 			, typename = checkNotSameType_t<T, __PtrType>, typename = checkNotContainer_t<T>>
-		PtrArrayT& assign(T& ref, args&... others)
+		void assign(T& ref, args&... others)
 		{
 			m_data.clear();
-
 			add(ref, others...);
-
-			return *this;
 		}
 			
-		PtrArrayT& assign(__ContainerType&& container)
+		void assign(__ContainerType&& container)
 		{
 			__Super::swap(container);
-			return *this;
 		}
 
-		PtrArrayT& assign(PtrArrayT&& arr)
+		void assign(PtrArrayT&& arr)
 		{
 			__Super::swap(arr);
-			return *this;
 		}
 
 		template <typename T>
-		PtrArrayT& assign(T& container)
+		void assign(T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -839,12 +827,10 @@ namespace NS_SSTL
 
 				add(container);
 			}
-
-			return *this;
 		}
 
 		template <typename T>
-		PtrArrayT& assign(const T& container)
+		void assign(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -852,15 +838,12 @@ namespace NS_SSTL
 
 				add(container);
 			}
-
-			return *this;
 		}
 
-		PtrArrayT& assign(__InitList initList)
+		void assign(__InitList initList)
 		{
 			m_data.clear();
 			m_data.add(initList);
-			return *this;
 		}
 
 		template<typename... args>
@@ -920,15 +903,13 @@ namespace NS_SSTL
 		}
 
 		template<typename... args>
-		PtrArrayT& splice(size_t pos, size_t nRemove, __PtrType v, args... others)
+		void splice(size_t pos, size_t nRemove, __PtrType v, args... others)
 		{
 			__Super::splice(pos, nRemove, v, others...);
-
-			return *this;
 		}
 
 		template<typename... args>
-		PtrArrayT& splice(size_t pos, size_t nRemove, __RefType ref, args&... others)
+		void splice(size_t pos, size_t nRemove, __RefType ref, args&... others)
 		{
 			vector<__PtrType> vec;
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
@@ -937,41 +918,31 @@ namespace NS_SSTL
 			}, ref, others...);
 
 			__Super::splice(pos, nRemove, vec);
-
-			return *this;
 		}
 
 		template<typename T>
-		PtrArrayT& splice(size_t pos, size_t nRemove, T& container)
+		void splice(size_t pos, size_t nRemove, T& container)
 		{
 			__Super::splice(pos, nRemove, container);
-
-			return *this;
 		}
 
 		template<typename T>
-		PtrArrayT& splice(size_t pos, size_t nRemove, const T& container)
+		void splice(size_t pos, size_t nRemove, const T& container)
 		{
 			__Super::splice(pos, nRemove, container);
-
-			return *this;
 		}
 
-        PtrArrayT& splice(size_t pos, size_t nRemove, __InitList initList)
+		void splice(size_t pos, size_t nRemove, __InitList initList)
 		{
 			__Super::splice(pos, nRemove, initList);
-
-			return *this;
 		}
 
-		PtrArrayT& splice(size_t pos, size_t nRemove)
+		void splice(size_t pos, size_t nRemove)
 		{
             __Super::splice(pos, nRemove, __InitList());
-
-			return *this;
 		}
 
-		PtrArrayT& qsort(__CB_Sort_T<__DataType> cb)
+		void qsort(__CB_Sort_T<__DataType> cb)
 		{
 			__Super::qsort([&](__PtrType lhs, __PtrType rhs) {
                 if (NULL != lhs && NULL != rhs)
@@ -981,8 +952,6 @@ namespace NS_SSTL
 
                 return false;
             });
-
-			return *this;
 		}
 
 	public:
@@ -1095,47 +1064,5 @@ namespace NS_SSTL
 		}
 	};
 }
-
-//class iterator
-//{
-//	friend class PtrArrayT;
-//
-//private:
-//	__CItrType m_itr;
-//
-//	iterator(const __CItrType& itr)
-//		: m_itr(itr)
-//	{
-//	}
-//
-//public:
-//	operator __PtrType()
-//	{
-//		return *m_itr;
-//	}
-//
-//	__PtrType operator*()
-//	{
-//		return *m_itr;
-//	}
-//
-//	bool operator==(const iterator& other)
-//	{
-//		return m_itr == other.m_itr;
-//	}
-//
-//	iterator& operator++()
-//	{
-//		++m_itr;
-//		return *this;
-//	}
-//
-//	iterator operator++(int)
-//	{
-//		iterator prev = *this;
-//		++m_itr;
-//		return prev;
-//	}
-//};
 
 #endif // __PtrArray_H

@@ -82,13 +82,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		//template <typename T>
-		//SListT& operator=(T&t)
-		//{
-		//	__Super::assign(t);
-		//	return *this;
-		//}
-		
 	public:
 		__RItrType rbegin()
 		{
@@ -138,32 +131,56 @@ namespace NS_SSTL
 			return -1;
 		}
 
+		__DataRef add(__DataConstRef data)
+		{
+			_add(data);
+			return m_data.back();
+		}
+
+		template<typename... args>
+		void add(__DataConstRef data, const args&... others)
+		{
+			__Super::add(data, others...);
+		}
+
+		void add(__InitList initList)
+		{
+			__Super::add(initList);
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		void add(const T& container)
+		{
+			__Super::add(container);
+		}
+
 		template<typename T>
-		SListT& addFront(const T& container)
+		void addFront(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
 				m_data.insert(m_data.begin(), container.begin(), container.end());
 			}
-
-			return *this;
 		}
 
-		SListT& addFront(__InitList initList)
+		void addFront(__InitList initList)
 		{
 			addFront<__InitList>(initList);
-			return *this;
 		}
 
 		template<typename... args>
-		SListT& addFront(__DataConstRef data, const args&... others)
+		void addFront(__DataConstRef data, const args&... others)
 		{
 			(void)tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
 				m_data.push_front(data);
 				return true;
 			}, data, others...);
+		}
 
-			return *this;
+		__DataRef addFront(__DataConstRef data)
+		{
+			m_data.push_front(data);
+			return m_data.frnt();
 		}
 
 		bool popBack()
@@ -206,25 +223,19 @@ namespace NS_SSTL
 		}
 		
 	public:
-		SListT& sort()
+		void sort()
 		{
 			m_data.sort(tagTrySort<__DataType>());
-			
-			return *this;
 		}
 
-		SListT& sort(__CB_Sort_T<__DataType> cb)
+		void sort(__CB_Sort_T<__DataType> cb)
 		{
 			m_data.sort(tagSort<__DataType>(cb));
-			
-			return *this;
 		}
 
-		SListT& Reverse()
+		void Reverse()
 		{
 			reverse(m_data.begin(), m_data.end());
-
-			return *this;
 		}
 
 	public:

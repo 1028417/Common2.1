@@ -219,7 +219,7 @@ namespace NS_SSTL
 		}
 
 		template<typename T>
-		ArrListT& addFront(const T& container)
+		void addFront(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -228,25 +228,28 @@ namespace NS_SSTL
 					m_ptrArray.addFront(m_data.front());
 				});
 			}
-
-			return *this;
 		}
 
-		ArrListT& addFront(__InitList initList)
+		void addFront(__InitList initList)
 		{
 			addFront<__InitList>(initList);
 		}
 
 		template<typename... args>
-		ArrListT& addFront(__DataConstRef data, const args&... others)
+		void addFront(__DataConstRef data, const args&... others)
 		{
 			(void)tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
 				m_data.push_front(data);
 				m_ptrArray.addFront(m_data.front());
 				return true;
 			}, data, others...);
+		}
 
-			return *this;
+		__DataRef addFront(__DataConstRef data)
+		{
+			m_data.push_front(data);
+			m_ptrArray.addFront(m_data.front());
+			return m_data.frnt();
 		}
 
 		bool popBack()
@@ -275,7 +278,7 @@ namespace NS_SSTL
 			});
 		}
 
-		ArrListT& qsort(__CB_Sort_T<__DataType> cb)
+		void qsort(__CB_Sort_T<__DataType> cb)
 		{
 			//__Super::sort(cb);
 			//m_ptrArray.assign(m_data);
@@ -289,16 +292,12 @@ namespace NS_SSTL
 
 				return false;
 			});
-
-			return *this;
 		}
 
-		ArrListT& Reverse()
+		void Reverse()
 		{
 			reverse(m_data.begin(), m_data.end());
 			m_ptrArray.Reverse();
-
-			return *this;
 		}
 
 		ArrListT slice(int startPos, int endPos=-1) const

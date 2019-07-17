@@ -76,40 +76,6 @@ void CBaseTree::GetChildItems(HTREEITEM hItem, list<HTREEITEM>& lstItems)
 	}
 }
 
-BOOL CBaseTree::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
-{
-	if (WM_LBUTTONDOWN == message || WM_RBUTTONDOWN == message)
-	{
-		*pResult = 0;
-
-		UINT uFlags = 0;
-		CPoint ptPos(lParam);
-		HTREEITEM hItem = this->HitTest(ptPos, &uFlags);
-		if (hItem)
-		{
-			if (0 == (this->GetItemState(hItem, TVIS_SELECTED) & TVIS_SELECTED))
-			{
-				//(void)this->SelectItem(hItem);
-
-				if (WM_LBUTTONDOWN == message)
-				{
-					//return TRUE;
-				}
-			}
-			else
-			{
-				if (WM_LBUTTONDOWN == message)
-				{
-					//__super::EditLabel(hItem);
-					//return TRUE;
-				}
-			}
-		}
-	}
-	
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
-}
-
 BOOL CBaseTree::PreTranslateMessage(MSG* pMsg)
 {
 	if (WM_KEYUP == pMsg->message)
@@ -254,8 +220,9 @@ E_CheckState CObjectCheckTree::GetCheckState(CTreeObject& Object)
 
 BOOL CObjectCheckTree::PreTranslateMessage(MSG* pMsg)
 {
-	if (WM_KEYUP == pMsg->message)
+	switch (pMsg->message)
 	{
+	case WM_KEYUP:
 		if (pMsg->hwnd == m_hWnd)
 		{
 			if (VK_SPACE == GET_KEYSTATE_LPARAM(pMsg->wParam))
@@ -263,17 +230,26 @@ BOOL CObjectCheckTree::PreTranslateMessage(MSG* pMsg)
 				_onItemClick(__super::GetSelectedItem());
 			}
 		}
-	}
-	else if (WM_LBUTTONDOWN == pMsg->message)
+
+		break;
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONDBLCLK:
 	{
 		CPoint ptPos(pMsg->lParam);
 		UINT uFlag = 0;
 		HTREEITEM hItem = __super::HitTest(ptPos, &uFlag);
 		if (TVHT_ONITEMSTATEICON == uFlag)
 		{
+			if (WM_LBUTTONDBLCLK == pMsg->message)
+			{
+				return TRUE;
+			}
+
 			_onItemClick(hItem);
 		}
 	}
+	break;
+	};
 
 	return __super::PreTranslateMessage(pMsg);
 }
@@ -365,7 +341,7 @@ void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 	}
 }
 
-void CObjectCheckTree::_getAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
+void CObjectCheckTree::GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState)
 {
 	TD_TreeObjectList lstTreeObjects;
 	__super::GetAllObjects(lstTreeObjects);
@@ -381,17 +357,12 @@ void CObjectCheckTree::_getAllObjects(TD_TreeObjectList& lstObjects, E_CheckStat
 void CObjectCheckTree::GetCheckedObjects(TD_TreeObjectList& lstObjects)
 {
 	TD_TreeObjectList lstChekedObjects;
-	_getAllObjects(lstChekedObjects, CS_Checked);
+	GetAllObjects(lstChekedObjects, CS_Checked);
 
-	HTREEITEM hParentItem = NULL;
-	lstChekedObjects([&](CTreeObject& CheckedObject) {
-		if (!lstChekedObjects.includes(GetParentObject(CheckedObject)))
-		{
-			lstObjects.add(CheckedObject);
-		}
+	lstObjects = lstChekedObjects.filter([&](CTreeObject& TreeObject) {
+		return !lstChekedObjects.includes(GetParentObject(TreeObject));
 	});
 }
-
 
 void CObjectTree::SetRootObject(CTreeObject& Object)
 {

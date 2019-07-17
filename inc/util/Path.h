@@ -149,7 +149,7 @@ public:
 
 	virtual int GetTreeImage() { return 0; }
 
-	virtual bool hasCheckState() const { return true; }
+	virtual bool hasCheckState() { return true; }
 
 	virtual void GetTreeChilds(TD_TreeObjectList&) {}
 };

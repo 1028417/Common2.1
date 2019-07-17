@@ -5,9 +5,13 @@
 class CSQLiteDB;
 class __UtilExt CSQLiteDBResult : public IDBResult
 {
-friend CSQLiteDB;
 public:
-	CSQLiteDBResult() {}
+	CSQLiteDBResult(UINT uColumnCount, UINT uRowCount, char ** pData)
+		: m_uColumnCount(uColumnCount)
+		, m_uRowCount(uRowCount)
+		, m_pData(pData)
+	{
+	}
 
 	~CSQLiteDBResult();
 

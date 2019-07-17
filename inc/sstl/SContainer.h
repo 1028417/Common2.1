@@ -285,57 +285,50 @@ namespace NS_SSTL
 		}
 		
 	public:
-		SContainerT& swap(SContainerT& container)
+		void swap(SContainerT& container)
 		{
 			_swap(container.m_data);
-			return *this;
 		}
 
-		SContainerT& swap(__ContainerType& container)
+		void swap(__ContainerType& container)
 		{
 			_swap(container);
-			return *this;
 		}
 
 		template<typename... args>
-		SContainerT& assign(__DataConstRef data, const args&... others)
+		void assign(__DataConstRef data, const args&... others)
 		{
 			clear();
-
 			add(data, others...);
-
-			return *this;
 		}
 
-		SContainerT assign(__ContainerType&& container)
+		void assign(__ContainerType&& container)
 		{
 			_swap(container);
 		}
 
-		SContainerT& assign(SContainerT&& container)
+		void assign(SContainerT&& container)
 		{
-			return swap(container);
+			swap(container);
 		}
 
-		SContainerT& assign(__InitList initList)
+		void assign(__InitList initList)
 		{
-			return assign<__InitList>(initList);
+			assign<__InitList>(initList);
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
-		SContainerT& assign(const T& container)
+		void assign(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
-				return *this;
+				return;
 			}
 
 			//clear();
 			
 			__ContainerType tmp(container.begin(), container.end());
 			_swap(tmp);
-
-			return *this;
 		}
 
 		template<typename... args>

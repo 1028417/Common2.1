@@ -39,16 +39,12 @@ protected:
 
 	void GetChildItems(HTREEITEM hItem, list<HTREEITEM>& lstItems);
 
-public:
 	virtual void PreSubclassWindow() override;
-
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
-
-	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 	
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
-protected:
+	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+
 	virtual BOOL handleNMNotify(NMHDR& NMHDR) { return FALSE; }
 };
 
@@ -159,7 +155,8 @@ public:
 	void SetCheckState(CTreeObject& Object, bool bCheck);
 	E_CheckState GetCheckState(CTreeObject& Object);
 	
-	void GetAllObjects(TD_TreeObjectList& lstObjects);		
+	void GetAllObjects(TD_TreeObjectList& lstObjects);
+	void GetAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState);
 	void GetCheckedObjects(TD_TreeObjectList& lstObjects);
 
 private:
@@ -172,8 +169,6 @@ private:
 	void _updateParentState(HTREEITEM hItem);
 
 	void _onItemClick(HTREEITEM hItem);
-
-	void _getAllObjects(TD_TreeObjectList& lstObjects, E_CheckState eCheckState);
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;

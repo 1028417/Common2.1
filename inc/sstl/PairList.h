@@ -43,7 +43,7 @@ namespace NS_SSTL
 		
 		explicit PairListT(__FirstConstRef first, __SecondConstRef second)
 		{
-			_add({ first, second });
+            __Super::_add({ first, second });
 		}
 		
 		template<typename... args>
@@ -311,12 +311,64 @@ namespace NS_SSTL
 			adaptor().forSecond(cb);
 		}
 		
-		inline PairListT& addPair(__FirstConstRef first, __SecondConstRef second)
+		__DataRef add(__FirstConstRef first, __SecondConstRef second)
 		{
-			__Super::_add({ first, second });
-			return *this;
+            __Super::_add({ first, second });
+			return m_data.back();
 		}
-		
+
+		__DataRef add(__DataConstRef data)
+		{
+            __Super::_add(data);
+			return m_data.back();
+		}
+
+		template<typename... args>
+		void add(__DataConstRef data, const args&... others)
+		{
+			__Super::add(data, others...);
+		}
+
+		void add(__InitList initList)
+		{
+			__Super::add(initList);
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		void add(const T& container)
+		{
+			__Super::add(container);
+		}
+
+		template<typename... args>
+		void addFront(__DataConstRef data, const args&... others)
+		{
+			__Super::addFront(data, others...);
+		}
+
+		void addFront(__InitList initList)
+		{
+			__Super::addFront(initList);
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		void addFront(const T& container)
+		{
+			__Super::addFront(container);
+		}
+
+		__DataRef addFront(__DataConstRef data)
+		{
+			m_data.push_front(data);
+			return m_data.frnt();
+		}
+
+		__DataRef addFront(__FirstConstRef first, __SecondConstRef second)
+		{
+			m_data.push_front({ first, second });
+			return *m_data.frnt();
+		}
+
 	public:
 		template <typename CB>
 		SArray<__FirstType> firsts(const CB& cb) const
@@ -348,10 +400,9 @@ namespace NS_SSTL
 		RET mapFirst(const CB& cb) const
 		{
 			RET lst;
-
 			for (auto& pr : m_data)
 			{
-				lst.addPair(cb(pr.first), pr.second);
+				lst.add(cb(pr.first), pr.second);
 			}
 
 			return lst;
@@ -361,10 +412,9 @@ namespace NS_SSTL
 		RET mapSecond(const CB& cb) const
 		{
 			RET lst;
-
 			for (auto& pr : m_data)
 			{
-				lst.addPair(pr.first, cb(pr.second));
+				lst.add(pr.first, cb(pr.second));
 			}
 
 			return lst;
@@ -374,12 +424,11 @@ namespace NS_SSTL
 		PairListT filter(const CB& cb) const
 		{
 			PairListT lst;
-
 			for (auto& pr : m_data)
 			{
 				if (cb(pr.first, pr.second))
 				{
-					lst.addPair(pr.first, pr.second);
+					lst.add(pr);
 				}
 			}
 
@@ -390,12 +439,11 @@ namespace NS_SSTL
 		PairListT filterFirst(const CB& cb) const
 		{
 			PairListT lst;
-
 			for (auto& pr : m_data)
 			{
 				if (cb(pr.first))
 				{
-					lst.addPair(pr.first, pr.second);
+					lst.add(pr);
 				}
 			}
 
@@ -411,7 +459,7 @@ namespace NS_SSTL
 			{
 				if (cb(pr.second))
 				{
-					lst.addPair(pr.first, pr.second);
+					lst.add(pr);
 				}
 			}
 
@@ -474,49 +522,39 @@ namespace NS_SSTL
 			return false;
 		}
 
-		PairListT& qsort(__CB_Sort_T<__PairType> cb)
+		void qsort(__CB_Sort_T<__PairType> cb)
 		{
 			__Super::qsort(cb);
-
-			return *this;
 		}
 
-		PairListT& qsortFirst()
+		void qsortFirst()
 		{
 			tagTrySort<__FirstType> trySort;
             __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return trySort(pr1.first, pr2.first);
 			});
-
-			return *this;
 		}
 
-		PairListT& qsortFirst(__CB_Sort_T<__FirstType> cb)
+		void qsortFirst(__CB_Sort_T<__FirstType> cb)
 		{
             __Super::sort([&](__PairRef pr1, __PairRef pr2) {
                 return cb(pr1.first, pr2.first);
 			});
-
-			return *this;
 		}
 
-		PairListT& qsortSecond()
+		void qsortSecond()
 		{
 			tagTrySort<__SecondType> trySort;
             __Super::qsort([&](__PairRef pr1, __PairRef pr2) {
                 return trySort(pr1.second, pr2.second);
 			});
-
-			return *this;
 		}
 
-		PairListT& qsortSecond(__CB_Sort_T<__SecondType> cb)
+		void qsortSecond(__CB_Sort_T<__SecondType> cb)
 		{
-            __Super::qsort([&](__PairRef pr1, __PairRef pr2) {
-                return cb(pr1.second, pr2.second);
+			__Super::qsort([&](__PairRef pr1, __PairRef pr2) {
+				return cb(pr1.second, pr2.second);
 			});
-
-			return *this;
 		}
 
 	private:

@@ -243,31 +243,58 @@ namespace NS_SSTL
 			return nRetPos;
 		}
 
+		// TODO insert(uPos)
+
+		__DataRef add(__DataConstRef data)
+		{
+			_add(data);
+			return m_data.back();
+		}
+
+		template<typename... args>
+		void add(__DataConstRef data, const args&... others)
+		{
+			__Super::add(data, others...);
+		}
+
+		void add(__InitList initList)
+		{
+			__Super::add(initList);
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		void add(const T& container)
+		{
+			__Super::add(container);
+		}
+
 		template<typename T>
-		SArrayT& addFront(const T& container)
+		void addFront(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
 				m_data.insert(m_data.begin(), container.begin(), container.end());
 			}
-
-			return *this;
 		}
 
-		SArrayT& addFront(__InitList initList)
+		void addFront(__InitList initList)
 		{
-			return addFront<__InitList>(initList);
+			addFront<__InitList>(initList);
 		}
 
 		template<typename... args>
-		SArrayT& addFront(__DataConstRef data, const args&... others)
+		void addFront(__DataConstRef data, const args&... others)
 		{
 			(void)tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
 				m_data.insert(m_data.begin(), data);
 				return true;
 			}, data, others...);
+		}
 
-			return *this;
+		__DataRef addFront(__DataConstRef data)
+		{
+			m_data.insert(m_data.begin(), data);
+			return m_data.front();
 		}
 
 		bool popBack()
@@ -309,46 +336,40 @@ namespace NS_SSTL
 			return true;
 		}
 
-		SArrayT& qsort()
+		void qsort()
 		{
 			size_t size = m_data.size();
 			if (size > 1)
 			{
 				NS_SSTL::qsort<__DataType>(&m_data.front(), size);
 			}
-
-			return *this;
 		}
 
-		SArrayT& qsort(__CB_Sort_T<__DataType> cb)
+		void qsort(__CB_Sort_T<__DataType> cb)
 		{
 			size_t size = m_data.size();
 			if (size > 1)
 			{
 				NS_SSTL::qsort<__DataType>(&m_data.front(), size, cb);
 			}
-
-			return *this;
 		}
 
-		SArrayT& Reverse()
+		void Reverse()
 		{
 			reverse(m_data.begin(), m_data.end());
-
-			return *this;
 		}
 
 	public:
 		template<typename... args>
-		SArrayT& splice(size_t pos, size_t nRemove, __DataConstRef data, const args&... others)
+		void splice(size_t pos, size_t nRemove, __DataConstRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
 			extractDataTypeArgs(vecData, data, others...);
-			return splice(pos, nRemove, vecData);
+			splice(pos, nRemove, vecData);
 		}
 
 		template<typename T>
-		SArrayT& splice(size_t pos, size_t nRemove, const T& container)
+		void splice(size_t pos, size_t nRemove, const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -365,16 +386,14 @@ namespace NS_SSTL
 
 				m_data.insert(itr, container.begin(), container.end());
 			}
-
-			return *this;
 		}
 
-		SArrayT& splice(size_t pos, size_t nRemove, __InitList initList)
+		void splice(size_t pos, size_t nRemove, __InitList initList)
 		{
-			return splice(pos, nRemove, initList);
+            splice(pos, nRemove, initList);
 		}
 
-		SArrayT& splice(size_t pos, size_t nRemove)
+		void splice(size_t pos, size_t nRemove)
 		{
 			return splice(pos, nRemove, __InitList());
 		}

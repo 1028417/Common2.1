@@ -100,13 +100,6 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		//template<typename T>
-		//SMapT& operator=(T&t)
-		//{
-		//	__Super::assign(t);
-		//	return *this;
-		//}
-
 		template<typename CB>
 		void operator() (const CB& cb)
 		{
