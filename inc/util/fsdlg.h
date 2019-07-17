@@ -57,13 +57,6 @@ public:
 	}
 
 private:
-	void _setOpt(const tagFileDlgOpt& opt);
-	
-	bool _show(bool bSaveFile);
-
-	wstring _getMultSel(list<wstring>& lstFiles);
-
-private:
 	OPENFILENAME m_ofn;
 
 	TCHAR m_lpstrFilter[512];
@@ -73,6 +66,14 @@ private:
 	wstring m_strTitle;
 
 	TCHAR m_lpstrFileName[10240];
+
+protected:
+	void _setOpt(const tagFileDlgOpt& opt);
+
+private:
+	bool _show(bool bSaveFile);
+
+	wstring _getMultSel(list<wstring>& lstFiles);
 
 public:
 	wstring ShowSave();
