@@ -11,7 +11,7 @@ public:
 	}
 
 public:
-	wstring m_strInitDir;
+	wstring m_strInitialDir;
 
 	wstring m_strTitle;
 	
@@ -24,7 +24,7 @@ public:
 	int m_nHeight = 0;
 
 public:
-	wstring Show(HWND hWndOwner, LPCWSTR lpszInitDir=NULL, LPCWSTR lpszTitle=NULL, LPCWSTR lpszMessage=NULL
+	wstring Show(HWND hWndOwner, LPCWSTR lpszInitialDir=NULL, LPCWSTR lpszTitle=NULL, LPCWSTR lpszMessage=NULL
 		, LPCWSTR lpszOKButton=NULL, LPCWSTR lpszCancelButton=NULL, UINT uWidth=0, UINT uHeight=0);
 
 	static int __stdcall BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpParam);

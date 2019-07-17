@@ -3,12 +3,12 @@
 
 #include <ShlObj.h>
 
-wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle, LPCWSTR lpszMessage
+wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszMessage
 	, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, UINT uWidth, UINT uHeight)
 {
-	if (lpszInitDir)
+	if (lpszInitialDir)
 	{
-		m_strInitDir = lpszInitDir;
+		m_strInitialDir = lpszInitialDir;
 	}
 
 	if (lpszTitle)
@@ -49,8 +49,8 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitDir, LPCWSTR lpszTitle,
 		TCHAR pszPath[512];
 		if (SHGetPathFromIDList(lpItemIDList, pszPath))
 		{
-			m_strInitDir = wsutil::rtrim_r(pszPath, __wcBackSlant);
-			return m_strInitDir;
+			m_strInitialDir = wsutil::rtrim_r(pszPath, __wcBackSlant);
+			return m_strInitialDir;
 		}
 	}
 
@@ -68,9 +68,9 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 	{
 		case BFFM_INITIALIZED:
 			{
-				if (!pInstance->m_strInitDir.empty())
+				if (!pInstance->m_strInitialDir.empty())
 				{
-					(void)::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, (LPARAM)pInstance->m_strInitDir.c_str());
+					(void)::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, (LPARAM)pInstance->m_strInitialDir.c_str());
 				}
 
 				if (!pInstance->m_strTitle.empty())
@@ -78,7 +78,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 					SetWindowText(hWnd, pInstance->m_strTitle.c_str());
 				}
 
-				wstring strMessage = pInstance->m_strMessage + L"\n\n" + pInstance->m_strInitDir;
+				wstring strMessage = pInstance->m_strMessage + L"\n\n" + pInstance->m_strInitialDir;
 				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 1, (LPARAM)strMessage.c_str());
 
 				if (!pInstance->m_strOKButton.empty())
