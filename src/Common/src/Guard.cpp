@@ -416,7 +416,7 @@ bool CMenuGuard::clonePopup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 	return bRet;
 }
 
-bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
+bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 {
 	if (NULL != m_hObject)
 	{
@@ -451,6 +451,11 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 		logFont.lfWeight = m_lfWeight;
 	}
 
+	if (m_bItalic)
+	{
+		logFont.lfItalic = 1;
+	}
+
 	if (m_bUnderline)
 	{
 		logFont.lfUnderline = 1;
@@ -469,7 +474,7 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 	return true;
 }
 
-bool CCompatableFont::create(CDC& dc, const CB_CompatableFont& cb)
+bool CCompatableFont::_create(CDC& dc, const CB_CompatableFont& cb)
 {
 	auto pFont = dc.GetCurrentFont();
 	if (NULL == pFont)
@@ -480,7 +485,7 @@ bool CCompatableFont::create(CDC& dc, const CB_CompatableFont& cb)
 	return create(*pFont, cb);
 }
 
-bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
+bool CCompatableFont::_create(CWnd& wnd, const CB_CompatableFont& cb)
 {
 	CFont *pFont = wnd.GetFont();
 	if (NULL == pFont)
@@ -496,37 +501,56 @@ bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
 	return true;
 }
 
-bool CCompatableFont::create(CFont& font, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
+{
+	return _create(font, cb);
+}
+
+bool CCompatableFont::create(CDC& dc, const CB_CompatableFont& cb)
+{
+	return _create(dc, cb);
+}
+
+bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
+{
+	return _create(wnd, cb);
+}
+
+bool CCompatableFont::create(CFont& font, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
 {
 	m_fFontSizeOffset = fFontSizeOffset;
 	m_lfWeight = lfWeight;
+	m_bItalic = bItalic;
 	m_bUnderline = bUnderline;
 
-	return create(font);
+	return _create(font);
 }
 
-bool CCompatableFont::create(CDC& dc, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+bool CCompatableFont::create(CDC& dc, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
 {
 	m_fFontSizeOffset = fFontSizeOffset;
 	m_lfWeight = lfWeight;
+	m_bItalic = bItalic;
 	m_bUnderline = bUnderline;
 
-	return create(dc);
+	return _create(dc);
 }
 
-bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
 {
 	m_fFontSizeOffset = fFontSizeOffset;
 	m_lfWeight = lfWeight;
+	m_bItalic = bItalic;
 	m_bUnderline = bUnderline;
-	return create(wnd);
+
+	return _create(wnd);
 }
 
-bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
 {
 	if (NULL == m_hObject)
 	{
-		if (!create(wnd, fFontSizeOffset, lfWeight, bUnderline))
+		if (!create(wnd, fFontSizeOffset, lfWeight, bItalic, bUnderline))
 		{
 			return false;
 		}

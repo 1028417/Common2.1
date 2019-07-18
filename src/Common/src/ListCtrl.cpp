@@ -107,9 +107,7 @@ BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 		__AssertReturn(m_CompatableFont.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
-	__AssertReturn(m_fontUnderline.create(*this, [](LOGFONT& logFont) {
-		logFont.lfUnderline = 1;
-	}), FALSE);
+	__AssertReturn(m_fontUnderline.create(*this, 0, false, false, true), FALSE);
 
 	return TRUE;
 }
