@@ -210,22 +210,26 @@ using CB_CompatableFont = function<void(LOGFONT&)>;
 class __CommonExt CCompatableFont : public CFont
 {
 public:
-	CCompatableFont(float fFontSizeOffset=0)
+	CCompatableFont(float fFontSizeOffset=0, bool lfWeight=false, bool bUnderline=false)
 		: m_fFontSizeOffset(fFontSizeOffset)
+		, m_lfWeight(lfWeight)
+		, m_bUnderline(bUnderline)
 	{
 	}
 
 private:
 	float m_fFontSizeOffset = 0;
+	LONG m_lfWeight = 0;
+	bool m_bUnderline = false;
 
 public:
-	bool create(CFont& font, const CB_CompatableFont& cb = NULL);
+	bool create(CFont& font, const CB_CompatableFont& cb);
+	bool create(CDC& dc, const CB_CompatableFont& cb);
+	bool create(CWnd& wnd, const CB_CompatableFont& cb);
 
-	bool create(CDC& dc, const CB_CompatableFont& cb = NULL);
+	bool create(CFont& font, float fFontSizeOffset = 0, bool lfWeight = false, bool bUnderline = false);
+	bool create(CDC& dc, float fFontSizeOffset = 0, bool lfWeight = false, bool bUnderline = false);
+	bool create(CWnd& wnd, float fFontSizeOffset = 0, bool lfWeight = false, bool bUnderline = false);
 
-	bool create(CWnd& wnd, const CB_CompatableFont& cb = NULL);
-
-	bool create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb = NULL);
-
-	bool setFont(CWnd& wnd, float fFontSizeOffset);
+	bool setFont(CWnd& wnd, float fFontSizeOffset = 0, bool lfWeight = false, bool bUnderline = false);
 };

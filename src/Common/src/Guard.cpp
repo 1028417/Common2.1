@@ -446,6 +446,16 @@ bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
 		logFont.lfHeight -= nOffset;
 	}
 
+	if (0 != m_lfWeight)
+	{
+		logFont.lfWeight = m_lfWeight;
+	}
+
+	if (m_bUnderline)
+	{
+		logFont.lfUnderline = 1;
+	}
+
 	if (cb)
 	{
 		cb(logFont);
@@ -486,18 +496,37 @@ bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
 	return true;
 }
 
-bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, const CB_CompatableFont& cb)
+bool CCompatableFont::create(CFont& font, float fFontSizeOffset, bool lfWeight, bool bUnderline)
 {
 	m_fFontSizeOffset = fFontSizeOffset;
+	m_lfWeight = lfWeight;
+	m_bUnderline = bUnderline;
 
-	return create(wnd, cb);
+	return create(font);
 }
 
-bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset)
+bool CCompatableFont::create(CDC& dc, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+{
+	m_fFontSizeOffset = fFontSizeOffset;
+	m_lfWeight = lfWeight;
+	m_bUnderline = bUnderline;
+
+	return create(dc);
+}
+
+bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, bool lfWeight, bool bUnderline)
+{
+	m_fFontSizeOffset = fFontSizeOffset;
+	m_lfWeight = lfWeight;
+	m_bUnderline = bUnderline;
+	return create(wnd);
+}
+
+bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset, bool lfWeight, bool bUnderline)
 {
 	if (NULL == m_hObject)
 	{
-		if (!create(wnd, fFontSizeOffset))
+		if (!create(wnd, fFontSizeOffset, lfWeight, bUnderline))
 		{
 			return false;
 		}
