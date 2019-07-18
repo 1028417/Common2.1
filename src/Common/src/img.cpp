@@ -19,17 +19,51 @@ void CCompDC::getBitmap(const function<void(CBitmap&)>& cb)
 	}
 }
 
-bool CCompDC::create(CDC *pDC, UINT cx, UINT cy)
+bool CCompDC::_create(HDC hDC)
 {
-	__AssertReturn(m_CompDC.CreateCompatibleDC(pDC), false);
+	if (NULL == hDC)
+	{
+		hDC = ::GetDC(NULL);
+	}
 
-	__AssertReturn(m_CompBitmap.CreateCompatibleBitmap(pDC, cx, cy), FALSE);
+	HDC hCompDC = ::CreateCompatibleDC(hDC);
+	__AssertReturn(hCompDC, false);
 
+	if (!m_CompDC.Attach(hCompDC))
+	{
+		(void)::DeleteDC(hCompDC);
+		return false;
+	}
+
+	return true;
+}
+
+bool CCompDC::create(UINT cx, UINT cy, HDC hDC)
+{
+	if (NULL == hDC)
+	{
+		hDC = ::GetDC(NULL);
+	}
+	__EnsureReturn(_create(hDC), false);
+
+	HBITMAP hCompBitmap = ::CreateCompatibleBitmap(hDC, cx, cy);
+	if (NULL == hCompBitmap)
+	{
+		(void)m_CompDC.DeleteDC();
+		return false;
+	}
+	if (!m_CompBitmap.Attach(hCompBitmap))
+	{
+		(void)::DeleteObject(hCompBitmap);
+		return false;
+	}
 	m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(m_CompBitmap);
 
-	m_prevBrush = m_CompDC.SelectObject(pDC->GetCurrentBrush());
-	m_prevPen = m_CompDC.SelectObject(pDC->GetCurrentPen());
-	m_prevFont = m_CompDC.SelectObject(pDC->GetCurrentFont());
+	//__AssertReturn(m_CompBitmap.CreateCompatibleBitmap(pDC, cx, cy), false);
+	
+	//m_prevBrush = m_CompDC.SelectObject(pDC->GetCurrentBrush());
+	//m_prevPen = m_CompDC.SelectObject(pDC->GetCurrentPen());
+	//m_prevFont = m_CompDC.SelectObject(pDC->GetCurrentFont());
 
 	m_cx = cx;
 	m_cy = cy;
@@ -37,9 +71,9 @@ bool CCompDC::create(CDC *pDC, UINT cx, UINT cy)
 	return true;
 }
 
-bool CCompDC::create(CDC *pDC, HBITMAP hBitmap)
+bool CCompDC::create(HBITMAP hBitmap, HDC hDC)
 {
-	__AssertReturn(m_CompDC.CreateCompatibleDC(pDC), false);
+	__EnsureReturn(_create(hDC), false);
 
 	m_hbmpPrev = (HBITMAP)m_CompDC.SelectObject(hBitmap);
 
@@ -52,12 +86,12 @@ bool CCompDC::create(CDC *pDC, HBITMAP hBitmap)
 	return true;
 }
 
-bool CCompDC::create(CDC *pDC, HICON hIcon)
+bool CCompDC::create(HICON hIcon, HDC hDC)
 {
 	ICONINFO iconInfo;
 	GetIconInfo(hIcon, &iconInfo);
 
-	if (!create(pDC, iconInfo.hbmColor))
+	if (!create(iconInfo.hbmColor, hDC))
 	{
 		return false;
 	}
@@ -72,13 +106,13 @@ void CCompDC::destroy()
 {
 	if (m_CompDC)
 	{
-		if (NULL != m_hbmpPrev)
+		/*if (NULL != m_hbmpPrev)
 		{
 			(void)m_CompDC.SelectObject(m_hbmpPrev);
 			m_hbmpPrev = NULL;
-		}
+		}*/
 
-		if (NULL != m_prevBrush)
+		/*if (NULL != m_prevBrush)
 		{
 			(void)m_CompDC.SelectObject(m_prevBrush);
 			m_prevBrush = NULL;
@@ -92,7 +126,7 @@ void CCompDC::destroy()
 		{
 			(void)m_CompDC.SelectObject(m_prevFont);
 			m_prevFont = NULL;
-		}
+		}*/
 
 		(void)m_CompDC.DeleteDC();
 	}
@@ -208,11 +242,8 @@ BOOL CImg::InitCompDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT c
 	m_rcDst = { 0, 0, (int)cx, (int)cy };
 
 	m_bHalfToneMode = bHalfToneMode;
-
-	CDC *pDC = CDC::FromHandle(::GetDC(NULL));
-	__AssertReturn(pDC, FALSE);
-
-	__AssertReturn(m_CompDC.create(pDC, cx, cy), FALSE);
+	
+	__AssertReturn(m_CompDC.create(cx, cy), FALSE);
 
 	if (NULL != prcMargin)
 	{
@@ -267,14 +298,11 @@ BOOL CImglst::Init(UINT cx, UINT cy)
 {
 	__AssertReturn(Create(cx, cy, ILC_COLOR32, 0, 0), FALSE);
 
+	__AssertReturn(m_CompDC.create(cx, cy), FALSE);
+	
 	m_cx = cx;
 	m_cy = cy;
 
-	CDC *pDC = CDC::FromHandle(::GetDC(NULL));
-	__AssertReturn(pDC, FALSE);
-
-	__AssertReturn(m_CompDC.create(pDC, cx, cy), FALSE);
-	
 	return TRUE;
 }
 

@@ -129,6 +129,32 @@ public:
 
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
+	static int msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd);
+	
+	static void showTipMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
+	{
+		(void)msgBox(strMsg, strTitle, MB_OK, pWnd);
+	}
+
+	static void showTipMsg(const wstring& strMsg, CWnd *pWnd = NULL)
+	{
+		showTipMsg(strMsg, L"Ã· æ", pWnd);
+	}
+
+	static void showTipMsg(const wstring& strMsg, class CPage& wndPage);
+
+	static bool showWarnMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
+	{
+		return IDYES == msgBox(strMsg, strTitle, MB_YESNO, pWnd);
+	}
+
+	static bool showWarnMsg(const wstring& strMsg, CWnd *pWnd = NULL)
+	{
+		return showWarnMsg(strMsg, L"æØ∏Ê", pWnd);
+	}
+
+	static bool showWarnMsg(const wstring& strMsg, class CPage& wndPage);
+	
 	static const CRect& getWorkArea(bool bFullScreen);
 	
 	static bool getKeyState(UINT uKey)

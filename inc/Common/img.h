@@ -6,9 +6,7 @@
 class __CommonExt CCompDC
 {
 public:
-	CCompDC()
-	{
-	}
+	CCompDC() {}
 
 	~CCompDC()
 	{
@@ -24,9 +22,12 @@ private:
 
 	HBITMAP m_hbmpPrev = NULL;
 
-	CGdiObject *m_prevBrush = NULL;
-	CGdiObject *m_prevPen = NULL;
-	CGdiObject *m_prevFont = NULL;
+	//CGdiObject *m_prevBrush = NULL;
+	//CGdiObject *m_prevPen = NULL;
+	//CGdiObject *m_prevFont = NULL;
+
+private:
+	bool _create(HDC hDC=NULL);
 
 public:
 	CDC* operator ->()
@@ -41,11 +42,11 @@ public:
 
 	void getBitmap(const function<void(CBitmap&)>& cb);
 
-	bool create(CDC *pDC, UINT cx, UINT cy);
+	bool create(UINT cx, UINT cy, HDC hDC=NULL);
 
-	bool create(CDC *pDC, HBITMAP hBitmap);
+	bool create(HBITMAP hBitmap, HDC hDC = NULL);
 
-	bool create(CDC *pDC, HICON hIcon);
+	bool create(HICON hIcon, HDC hDC=NULL);
 
 	void destroy();
 };
@@ -120,9 +121,7 @@ enum class E_ImglstType
 class __CommonExt CImglst : public CImageList
 {
 public:
-	CImglst()
-	{
-	}
+	CImglst() {}
 
 private:
 	UINT m_cx = 0;

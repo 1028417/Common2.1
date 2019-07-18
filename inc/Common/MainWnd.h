@@ -62,21 +62,11 @@ public:
 	
 	BOOL SetStatusText(UINT uPart, const CString& cstrText);
 
-	CDockView *GetView(E_DockViewType eViewType);
-
 	CDockView* CreateView(CPage& Page, const tagViewStyle& ViewStyle);
 
 	BOOL AddPage(CPage& Page, E_DockViewType eViewType);
 
 	BOOL ActivePage(CPage& Page);
-
-	//BOOL SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage = -1);
-
-	/*int MessageBox(const CString& cstrText, const CString& cstrTitle, UINT uType = MB_OK);
-	int MessageBox(const CString& cstrText, UINT uType = MB_OK)
-	{
-		return MessageBox(cstrText, L"", uType);
-	}*/
 
 	void fixWorkArea(bool bFullScreen);
 

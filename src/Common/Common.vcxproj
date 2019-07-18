@@ -170,10 +170,10 @@
     <ClInclude Include="..\..\inc\Common\DragDrop.h" />
     <ClInclude Include="..\..\inc\Common\Guard.h" />
     <ClInclude Include="..\..\inc\Common\img.h" />
-    <ClInclude Include="..\..\inc\MainWnd.h" />
+    <ClInclude Include="..\..\inc\Common\MainWnd.h" />
     <ClInclude Include="..\..\inc\Common\ListCtrl.h" />
-    <ClInclude Include="..\..\inc\ModuleApp.h" />
-    <ClInclude Include="..\..\inc\Page.h" />
+    <ClInclude Include="..\..\inc\Common\ModuleApp.h" />
+    <ClInclude Include="..\..\inc\Common\Page.h" />
     <ClInclude Include="..\..\inc\Common\PathCtrl.h" />
     <ClInclude Include="..\..\inc\Common\ProgressDlg.h" />
     <ClInclude Include="..\..\inc\Common\TreeCtrl.h" />

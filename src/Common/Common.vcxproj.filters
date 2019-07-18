@@ -54,15 +54,6 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="..\..\inc\MainWnd.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\ModuleApp.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\Page.h">
-      <Filter>src\app</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\Common\TreeCtrl.h">
       <Filter>src\ctrl</Filter>
     </ClInclude>
@@ -97,6 +88,15 @@
       <Filter>src\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\Common\DockView.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\Page.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\ModuleApp.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\MainWnd.h">
       <Filter>src\app</Filter>
     </ClInclude>
   </ItemGroup>

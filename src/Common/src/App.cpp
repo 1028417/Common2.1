@@ -131,31 +131,24 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 	return bFlag ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
-static void _init()
-{
-	INITCOMMONCONTROLSEX InitCtrls;
-	InitCtrls.dwSize = sizeof(InitCtrls);
-
-	InitCtrls.dwICC = ICC_WIN95_CLASSES;
-	InitCommonControlsEx(&InitCtrls);
-
-	(void)AfxOleInit();
-	//(void)::OleInitialize(NULL);
-
-	AfxEnableControlContainer();
-
-	GdiplusStartupInput gdiplusStartupInput;
-	ULONG_PTR gdiplusToken = 0;
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-}
-
 BOOL CMainApp::InitInstance()
 {
 	extern void InitMinDump();
 	InitMinDump();
 	
 	__AssertReturn(__super::InitInstance(), FALSE);
-	_init();
+
+	/*INITCOMMONCONTROLSEX InitCtrls;
+	InitCtrls.dwSize = sizeof(InitCtrls);
+	InitCtrls.dwICC = ICC_WIN95_CLASSES;
+	InitCommonControlsEx(&InitCtrls);*/
+
+	(void)AfxOleInit(); //(void)::OleInitialize(NULL);
+	//AfxEnableControlContainer();
+	
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken = 0;
+	(void)GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	__AssertReturn(getController().init(), FALSE);
 	
@@ -208,6 +201,9 @@ BOOL CMainApp::InitInstance()
 		delete m_pMainWnd;
 		m_pMainWnd = NULL;
 	}
+
+	AfxOleTerm();
+	(void)GdiplusShutdown(gdiplusToken);
 
 	return FALSE;
 }
@@ -523,6 +519,35 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 {
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
+}
+
+int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
+{
+	if (NULL == pWnd)
+	{
+		pWnd = CMainApp::GetMainApp()->m_pMainWnd;
+	}
+
+	wstring strText(L"  ");
+	strText.append(strMsg);
+
+	int nAppend = (50 - (int)strMsg.size()) / 2;
+	if (nAppend > 0)
+	{
+		strText.append(nAppend, ' ');
+	}
+
+	return pWnd->MessageBox(strText.c_str(), (L" " + strTitle).c_str(), nType);
+}
+
+void CMainApp::showTipMsg(const wstring& strMsg, class CPage& wndPage)
+{
+	showTipMsg(strMsg, (wstring)wndPage.GetTitle());
+}
+
+bool CMainApp::showWarnMsg(const wstring& strMsg, class CPage& wndPage)
+{
+	return showWarnMsg(strMsg, (wstring)wndPage.GetTitle());
 }
 
 const CRect& CMainApp::getWorkArea(bool bFullScreen)
