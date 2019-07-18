@@ -210,14 +210,13 @@ using CB_CompatableFont = function<void(LOGFONT&)>;
 class __CommonExt CCompatableFont : public CFont
 {
 public:
-	CCompatableFont(float fFontSizeOffset=0, bool lfWeight=false, bool bItalic=false, bool bUnderline=false)
+	CCompatableFont() {}/*float fFontSizeOffset = 0, bool lfWeight = false, bool bItalic = false, bool bUnderline = false)
 		: m_fFontSizeOffset(fFontSizeOffset)
 		, m_lfWeight(lfWeight)
 		, m_bItalic(bItalic)
 		, m_bUnderline(bUnderline)
 	{
-
-	}
+	}*/
 
 private:
 	float m_fFontSizeOffset = 0;
