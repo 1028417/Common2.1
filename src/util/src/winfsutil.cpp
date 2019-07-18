@@ -120,7 +120,7 @@ void winfsutil::exploreFile(const wstring& strFile)
 }
 
 // 获取文件夹类型
-static wstring getFolderType()
+/*static wstring getFolderType()
 {
 	SHFILEINFO info;
 	if (SHGetFileInfo(L"folder",
@@ -152,7 +152,7 @@ static wstring getFileType(const wstring& extention)
 	}
 
 	return L"";
-}
+}*/
 
 // 获取文件夹图标
 HICON winfsutil::getFolderIcon()
