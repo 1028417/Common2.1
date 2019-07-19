@@ -171,11 +171,27 @@ BOOL CObjectCheckTree::InitCtrl()
 	return TRUE;
 }
 
+void CObjectCheckTree::SetRootObject(CTreeObject& Object, bool bShowNocheck)
+{
+	m_bShowNocheck = bShowNocheck;
+
+	__super::SetRootObject(Object);
+}
+
 HTREEITEM CObjectCheckTree::InsertObject(CTreeObject& Object, CTreeObject *pParentObject)
 {
+	auto eCheckState = CS_Unchecked;
+	if (!Object.hasCheckState())
+	{
+		if (!m_bShowNocheck)
+		{
+			return NULL;
+		}
+		eCheckState = CS_Nocheck;
+	}
+
 	HTREEITEM hItem = __super::InsertObject(Object, pParentObject);
 
-	auto eCheckState = Object.hasCheckState() ? CS_Unchecked : CS_Nocheck;
 	_setImgMask(hItem, eCheckState);
 
 	return hItem;

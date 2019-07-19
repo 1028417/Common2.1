@@ -51,7 +51,7 @@ protected:
 
 //CObjectTree
 
-class __CommonExt CObjectTree: public CBaseTree
+class __CommonExt CObjectTree : public CBaseTree
 {
 public:
 	CObjectTree() {}
@@ -61,10 +61,10 @@ private:
 	
 public:
 	CTreeObject *GetItemObject(HTREEITEM hItem);
-
-	inline HTREEITEM getTreeItem(const CTreeObject *pObject)
+	
+	inline HTREEITEM getTreeItem(const CTreeObject& Object)
 	{
-		auto itr = m_mapTreeObject.find(pObject);
+		auto itr = m_mapTreeObject.find(&Object);
 		if (itr == m_mapTreeObject.end())
 		{
 			return NULL;
@@ -73,9 +73,13 @@ public:
 		return itr->second;
 	}
 
-	inline HTREEITEM getTreeItem(const CTreeObject& Object)
+	inline HTREEITEM getTreeItem(const CTreeObject *pObject)
 	{
-		return getTreeItem(&Object);
+		if (NULL == pObject)
+		{
+			return NULL;
+		}
+		return getTreeItem(*pObject);
 	}
 
 	void SetRootObject(CTreeObject& Object);
@@ -127,13 +131,21 @@ enum E_CheckState
 // CObjectCheckTree
 class __CommonExt CObjectCheckTree : public CObjectTree
 {
+	DECLARE_MESSAGE_MAP()
+
 public:
 	~CObjectCheckTree()
 	{
 		(void)m_StateImageList.DeleteImageList();
 	}
 
-	DECLARE_MESSAGE_MAP()
+private:
+	bool m_bShowNocheck = true;
+
+	function<void(E_CheckState)> m_cbCheckChanged;
+
+//protected:
+	CImageList m_StateImageList;
 
 public:
 	BOOL InitCtrl();
@@ -143,13 +155,9 @@ public:
 		m_cbCheckChanged = cbCheckChanged;
 	}
 
-protected:
-	CImageList m_StateImageList;
-
-private:
-	function<void(E_CheckState)> m_cbCheckChanged;
-
 public:
+	void SetRootObject(CTreeObject& Object, bool bShowNocheck=false);
+
 	HTREEITEM InsertObject(CTreeObject& Object, CTreeObject *pParentObject=NULL);
 
 	void SetCheckState(CTreeObject& Object, bool bCheck);
