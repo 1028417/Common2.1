@@ -22,6 +22,12 @@ public:
 	virtual bool GetData(UINT uRow, UINT uColumn, UINT& uValue) = 0;
     virtual bool GetData(UINT uRow, UINT uColumn, bool& bValue) = 0;
 	virtual bool GetData(UINT uRow, UINT uColumn, double& dbValue) = 0;
+
+	virtual bool GetData(UINT uRow, SArray<wstring>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<string>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<int>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<UINT>& arrData) = 0;
+	virtual bool GetData(UINT uRow, SArray<double>& arrData) = 0;
 };
 
 class IDB

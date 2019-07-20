@@ -799,9 +799,9 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 				*pResult = CDRF_NEWFONT;
 
-				bool bSkipDefault = false;
-				OnCustomDraw(*pLVCD, bSkipDefault);
-				if (bSkipDefault)
+				tagLvCustomDraw lvcd(*pLVCD);
+				OnCustomDraw(lvcd);
+				if (lvcd.bSkipDefault)
 				{
 					*pResult = CDRF_SKIPDEFAULT;
 				}
@@ -911,11 +911,11 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	return FALSE;
 }
 
-void CObjectList::OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)
+void CObjectList::OnCustomDraw(tagLvCustomDraw& lvcd)
 {
 	if (m_para.cbCustomDraw)
 	{
-		m_para.cbCustomDraw(lvcd, bSkipDefault);
+		m_para.cbCustomDraw(lvcd);
 	}
 }
 

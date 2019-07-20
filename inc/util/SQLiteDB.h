@@ -21,6 +21,9 @@ private:
 
 	char ** m_pData = NULL;
 
+private:
+	bool _getData(UINT uRow, const function<void(const string&)>& cb);
+
 public:
 	const UINT& GetColumnCount() override
 	{
@@ -38,6 +41,12 @@ public:
 	bool GetData(UINT uRow, UINT uColumn, UINT& uValue) override;
     bool GetData(UINT uRow, UINT uColumn, bool& bValue) override;
 	bool GetData(UINT uRow, UINT uColumn, double& dbValue) override;
+
+	bool GetData(UINT uRow, SArray<wstring>& arrData) override;
+	bool GetData(UINT uRow, SArray<string>& arrData) override;
+	bool GetData(UINT uRow, SArray<int>& arrData) override;
+	bool GetData(UINT uRow, SArray<UINT>& arrData) override;
+	bool GetData(UINT uRow, SArray<double>& arrData) override;
 };
 
 

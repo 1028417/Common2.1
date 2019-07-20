@@ -137,10 +137,32 @@ public:
 	}
 };
 
+struct tagLvCustomDraw
+{
+	tagLvCustomDraw(NMLVCUSTOMDRAW& lvcd)
+		: hDC(lvcd.nmcd.hdc)
+		, uItem(lvcd.nmcd.dwItemSpec)
+		, nSubItem(lvcd.iSubItem)
+		, rcItem(lvcd.nmcd.rc)
+		, clrText(lvcd.clrText)
+		, clrTextBk(lvcd.clrTextBk)
+	{
+	}
+
+	const HDC hDC;
+	const UINT uItem;
+	const int nSubItem;
+	const RECT& rcItem;
+	COLORREF& clrText;
+	COLORREF& clrTextBk;
+
+	bool bSkipDefault = false;
+};
+
 class __CommonExt CObjectList : public CTouchWnd<CListCtrl>
 {
 public:
-	using CB_LVCostomDraw = function<void(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault)>;
+	using CB_LVCustomDraw = function<void(tagLvCustomDraw& lvcd)>;
 	using CB_ListViewChanged = function<void(E_ListViewType)>;
 
 	using CB_LButtonHover = function<void(const CPoint&)>;
@@ -174,7 +196,7 @@ public:
 		UINT uTileWidth = 0;
 		UINT uTileHeight = 0;
 
-		CB_LVCostomDraw cbCustomDraw;
+		CB_LVCustomDraw cbCustomDraw;
 		CB_ListViewChanged cbViewChanged;
 		CB_TrackMouseEvent cbMouseEvent;
 	};
@@ -237,7 +259,7 @@ public:
 
 	void SetTileSize(ULONG cx, ULONG cy);
 
-	void SetCusomDrawNotify(const CB_LVCostomDraw& cbCustomDraw = NULL)
+	void SetCusomDrawNotify(const CB_LVCustomDraw& cbCustomDraw = NULL)
 	{
 		m_bCusomDrawNotify = true;
 		m_para.cbCustomDraw = cbCustomDraw;
@@ -322,7 +344,7 @@ protected:
 
 	void ChangeListCtrlView(short zDelta);
 
-	virtual void OnCustomDraw(NMLVCUSTOMDRAW& lvcd, bool& bSkipDefault);
+	virtual void OnCustomDraw(tagLvCustomDraw& lvcd);
 
 private:
 	void _SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix=L"");
