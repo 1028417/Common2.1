@@ -10,6 +10,12 @@
 #include <QTime>
 #endif
 
+#ifdef __ANDROID__
+#define __fseek lseek64
+#else
+#define __fseek _fseeki64
+#endif
+
 struct tagFileInfo
 {
 	tagFileInfo()
