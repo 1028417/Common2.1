@@ -527,9 +527,6 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #include <direct.h>
 #define getcwd _getcwd
 #define chdir _chdir
-
-#else
-#include <unistd.h>
 #endif
 
 static wstring _getCwd()

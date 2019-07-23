@@ -6,7 +6,7 @@
 
 QT       -= core
 
-TARGET = util
+TARGET = xutil
 TEMPLATE = lib
 
 #CONFIG += c++11
@@ -63,9 +63,9 @@ INCLUDEPATH += \
     ../../inc/util
 
 android {
-DESTDIR = $$PWD/../../../Player3.1/lib
+DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
 } else {
-DESTDIR = $$PWD/../../../Player3.1/2Player
+DESTDIR = $$PWD/../../../XMusic/bin
 
 unix {
     target.path = /usr/lib
