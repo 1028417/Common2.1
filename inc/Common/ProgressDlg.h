@@ -32,7 +32,7 @@ private:
 
 	CCASLock m_csLock;
 	
-	BOOL m_bFinished = false;
+	bool m_bFinished = false;
 
 	CString m_cstrStatusText;
 

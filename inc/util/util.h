@@ -1,8 +1,13 @@
 
 #pragma once
 
-#include <stdint.h>
+#ifdef _MSC_VER
 #include <stddef.h>
+#include <stdint.h>
+#else
+#include <sys/types.h>
+#include <unistd.h>
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4251)

@@ -56,11 +56,7 @@ public:
 	template <typename CB>
 	static void start(const CB& cb)
     {
-#ifdef __ANDROID__
-        std::thread(cb).detach();
-#else
-        std::thread(cb).detach();
-#endif
+		thread(cb).detach();
     }
 
 	inline static void usleep(UINT uMS = 0)

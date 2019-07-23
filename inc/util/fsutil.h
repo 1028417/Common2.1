@@ -11,7 +11,8 @@
 #endif
 
 #ifdef __ANDROID__
-#define __fseek lseek64
+#include <unistd.h>
+#define __fseek(f, offset, whence) lseek64((int)f, offset, whence)
 #else
 #define __fseek _fseeki64
 #endif

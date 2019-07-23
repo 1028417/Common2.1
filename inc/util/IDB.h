@@ -1,13 +1,5 @@
 #pragma once
 
-#include <string>
-using namespace std;
-
-typedef unsigned int UINT;
-
-#include "../sstl/sstl.h"
-using namespace NS_SSTL;
-
 class __UtilExt IDBResult
 {
 public:

@@ -5,7 +5,7 @@
 
 #include <afxcmn.h>			// MFC 对 Windows 公共控件的支持
 
-#include "../util/util.h"
+#include "util.h"
 
 #ifdef __CommonPrj
 #define __CommonExt __dllexport
@@ -140,7 +140,7 @@ public:
 	{
 		wstring strRet;
 		CMainApp::GetMainApp()->thread([&]() {
-			strRet = ShowSave();
+			strRet = CFileDlg::ShowSave();
 		});
 		return strRet;
 	}
@@ -149,7 +149,7 @@ public:
 	{
 		wstring strRet;
 		CMainApp::GetMainApp()->thread([&]() {
-			strRet = ShowOpenSingle();
+			strRet = CFileDlg::ShowOpenSingle();
 		});
 		return strRet;
 	}
@@ -158,7 +158,7 @@ public:
 	{
 		wstring strRet;
 		CMainApp::GetMainApp()->thread([&]() {
-			strRet = ShowOpenMulti(lstFiles);
+			strRet = CFileDlg::ShowOpenMulti(lstFiles);
 		});
 		return strRet;
 	}

@@ -99,6 +99,9 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 private:
+	void _start();
+	void _run(class CMainWnd& MainWnd);
+
 	static BOOL _RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo);
 	
 	bool _HandleHotkey(LPARAM lParam);
@@ -129,31 +132,31 @@ public:
 
 	E_DoEventsResult DoEvents(bool bOnce=false);
 
-	static int msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd);
+	static int showMsg(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd);
 	
-	static void showTipMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
+	static void showMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
 	{
-		(void)msgBox(strMsg, strTitle, MB_OK, pWnd);
+		(void)showMsg(strMsg, strTitle, MB_OK, pWnd);
 	}
 
-	static void showTipMsg(const wstring& strMsg, CWnd *pWnd = NULL)
+	static void showMsg(const wstring& strMsg, CWnd *pWnd = NULL)
 	{
-		showTipMsg(strMsg, L"提示", pWnd);
+		showMsg(strMsg, L"提示", pWnd);
 	}
 
-	static void showTipMsg(const wstring& strMsg, class CPage& wndPage);
+	static void showMsg(const wstring& strMsg, class CPage& wndPage);
 
-	static bool showWarnMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
+	static bool showConfirmMsg(const wstring& strMsg, const wstring& strTitle, CWnd *pWnd = NULL)
 	{
-		return IDYES == msgBox(strMsg, strTitle, MB_YESNO, pWnd);
+		return IDYES == showMsg(strMsg, strTitle, MB_YESNO, pWnd);
 	}
 
-	static bool showWarnMsg(const wstring& strMsg, CWnd *pWnd = NULL)
+	static bool showConfirmMsg(const wstring& strMsg, CWnd *pWnd = NULL)
 	{
-		return showWarnMsg(strMsg, L"警告", pWnd);
+		return showConfirmMsg(strMsg, L"警告", pWnd);
 	}
 
-	static bool showWarnMsg(const wstring& strMsg, class CPage& wndPage);
+	static bool showConfirmMsg(const wstring& strMsg, class CPage& wndPage);
 	
 	static const CRect& getWorkArea(bool bFullScreen);
 	
