@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include <Page.h>
+#include "Page.h"
 
 #include "MainWnd.h"
 

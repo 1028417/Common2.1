@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include <App.h>
+#include "App.h"
 
 #include "MainWnd.h"
 
@@ -150,11 +150,22 @@ BOOL CMainApp::InitInstance()
 	ULONG_PTR gdiplusToken = 0;
 	(void)GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-	__AssertReturn(getController().init(), FALSE);
-	
+	_start();
+
+	AfxOleTerm();
+
+	(void)GdiplusShutdown(gdiplusToken);
+
+	return FALSE;
+}
+
+void CMainApp::_start()
+{
+	__Assert(getController().init());
+
 	CMainWnd *pMainWnd = getView().init();
 	HWND hwndMain = pMainWnd->GetSafeHwnd();
-	__EnsureReturn(hwndMain, FALSE);
+	__Ensure(hwndMain);
 	m_pMainWnd = pMainWnd;
 
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)
@@ -165,21 +176,11 @@ BOOL CMainApp::InitInstance()
 		}
 	}
 
-	__AssertReturn(getController().start(), FALSE);
-
-	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
+	if (getController().start())
 	{
-		if (!(*itModule)->OnReady(*pMainWnd))
-		{
-			return FALSE;
-		}
-	}
+		_run(*pMainWnd);
 
-	__super::Run();
-
-	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
-	{
-		__EnsureReturn((*itModule)->OnQuit(), FALSE);
+		getController().stop();
 	}
 
 	//for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
@@ -192,20 +193,24 @@ BOOL CMainApp::InitInstance()
 	//}
 
 	getView().close();
+}
 
-	getController().stop();
-
-	if (NULL != m_pMainWnd)
+void CMainApp::_run(CMainWnd& MainWnd)
+{
+	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
 	{
-		(void)m_pMainWnd->DestroyWindow();
-		delete m_pMainWnd;
-		m_pMainWnd = NULL;
+		if (!(*itModule)->OnReady(MainWnd))
+		{
+			return;
+		}
 	}
 
-	AfxOleTerm();
-	(void)GdiplusShutdown(gdiplusToken);
+	(void)__super::Run();
 
-	return FALSE;
+	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
+	{
+		(void)(*itModule)->OnQuit();
+	}
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
@@ -521,7 +526,7 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
 
-int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
+int CMainApp::showMsg(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
 {
 	if (NULL == pWnd)
 	{
@@ -540,14 +545,14 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 	return pWnd->MessageBox(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
 
-void CMainApp::showTipMsg(const wstring& strMsg, class CPage& wndPage)
+void CMainApp::showMsg(const wstring& strMsg, class CPage& wndPage)
 {
-	showTipMsg(strMsg, (wstring)wndPage.GetTitle());
+	showMsg(strMsg, (wstring)wndPage.GetTitle(), &wndPage);
 }
 
-bool CMainApp::showWarnMsg(const wstring& strMsg, class CPage& wndPage)
+bool CMainApp::showConfirmMsg(const wstring& strMsg, class CPage& wndPage)
 {
-	return showWarnMsg(strMsg, (wstring)wndPage.GetTitle());
+	return showConfirmMsg(strMsg, (wstring)wndPage.GetTitle());
 }
 
 const CRect& CMainApp::getWorkArea(bool bFullScreen)

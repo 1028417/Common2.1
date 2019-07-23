@@ -49,6 +49,8 @@ static LONG MyUnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInfo)
 	wstring 	strDumpFile = tmutil::formatTime64(L"pc_crash_%Y%m%d_%H%M%S.dmp");
 	CreateMiniDump(pExceptionInfo, strDumpFile);
 	
+	exit(0);
+
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 

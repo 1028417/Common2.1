@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include <ModuleApp.h>
+#include "ModuleApp.h"
 
-#include <App.h>
+#include "App.h"
 
 void CResModule::ActivateResource()
 {

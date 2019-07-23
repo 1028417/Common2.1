@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 
-#include <img.h>
+#include "img.h"
 
 void CCompDC::getBitmap(const function<void(CBitmap&)>& cb)
 {

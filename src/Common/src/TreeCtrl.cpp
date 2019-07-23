@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 
-#include <TreeCtrl.h>
+#include "TreeCtrl.h"
 
 BEGIN_MESSAGE_MAP(CBaseTree, CTreeCtrl)
 END_MESSAGE_MAP()

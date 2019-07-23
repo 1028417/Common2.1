@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include <MainWnd.h>
+#include "MainWnd.h"
 
-#include <app.h>
+#include "app.h"
 
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()
@@ -191,23 +191,6 @@ BOOL CMainWnd::ActivePage(CPage& Page)
 	return m_mapDockViews.any([&](auto& pr) {
 		return pr.second->SetPageTitle(Page, cstrTitle, iImage);
 	});
-}*/
-
-/*int CMainWnd::MessageBox(const CString& cstrText, const CString& cstrTitle, UINT uType)
-{
-	LPCTSTR pszTitle = NULL;
-	if (!cstrTitle.IsEmpty())
-	{
-		pszTitle = cstrTitle;
-	}
-	else
-	{
-		pszTitle = m_WndInfo.strText.c_str();
-	}
-
-	int nResult = __super::MessageBox(cstrText, pszTitle, uType);
-
-	return nResult;
 }*/
 
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include <DockView.h>
+#include "DockView.h"
 
 #define __Offset 8
 

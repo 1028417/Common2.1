@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include <ProgressDlg.h>
+#include "ProgressDlg.h"
 
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -36,7 +36,7 @@ BOOL CProgressDlg::OnInitDialog()
 
 	(void)this->SetWindowText(m_strTitle.c_str());
 
-	m_bFinished = FALSE;
+	m_bFinished = false;
 
 	(void)this->start(1, [&](UINT) {
 		if (m_fnWork)
@@ -125,7 +125,7 @@ LRESULT CProgressDlg::OnEndProgress(WPARAM wParam, LPARAM lParam)
 {
 	_endProgress();
 	
-	m_bFinished = TRUE;
+	m_bFinished = true;
 	
 	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"Íê³É");
 
@@ -176,7 +176,7 @@ void CProgressDlg::OnCancel()
 
 void CProgressDlg::Close()
 {
-	m_bFinished = TRUE;
+	m_bFinished = true;
 
 	this->PostMessage(WM_SYSCOMMAND, SC_CLOSE);
 }
