@@ -1,11 +1,11 @@
 
 #include "util.h"
 
-static const wchar_t g_wchEolN[] = { L'\n' };
-static const wchar_t g_wchEolRN[] = { L'\r', L'\n' };
+static const wchar_t g_pwcEolN[] = { L'\n' };
+static const wchar_t g_pwcEolRN[] = { L'\r', L'\n' };
 
-static const char g_chEolN[] = { '\n' };
-static const char g_chEolRN[] = { '\r', '\n' };
+static const char g_pchEolN[] = { '\n' };
+static const char g_pchEolRN[] = { '\r', '\n' };
 
 const string CTxtWriter::__UnicodeHead_LittleEndian({ (char)0xff, (char)0xfe });
 const string CTxtWriter::__UnicodeHead_BigEndian({ (char)0xfe, (char)0xff });
@@ -41,7 +41,7 @@ bool CTxtWriter::_open(const string& strFile, bool bTrunc)
 
 void CTxtWriter::_writeHead()
 {
-	if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
+	if (E_TxtEncodeType::TET_Unicode_LittleEndian == m_eEncodeType)
 	{
 		string strHead = __UnicodeHead_LittleEndian;
 		(void)_fwrite(strHead.c_str(), strHead.size());
@@ -168,22 +168,22 @@ size_t CTxtWriter::_writeEndLine() const
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-			return _fwrite(g_wchEolN, sizeof g_wchEolN);
+			return _fwrite(g_pwcEolN, sizeof g_pwcEolN);
 		}
 		else
 		{
-			return _fwrite(g_wchEolRN, sizeof g_wchEolRN);
+			return _fwrite(g_pwcEolRN, sizeof g_pwcEolRN);
 		}
 	}
 	else
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-			return _fwrite(g_chEolN, sizeof g_chEolN);
+			return _fwrite(g_pchEolN, sizeof g_pchEolN);
 		}
 		else
 		{
-			return _fwrite(g_chEolRN, sizeof g_chEolRN);
+			return _fwrite(g_pchEolRN, sizeof g_pchEolRN);
 		}
 	}
 }

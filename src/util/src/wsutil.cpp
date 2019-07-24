@@ -58,51 +58,34 @@ wstring wsutil::rtrim_r(const wstring& strText, wchar_t chr)
 
 void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
 {
-	size_t startPos = 0;
-	while (true)
-	{
-		auto pos = strText.find(wcSplitor, startPos);
-		if (wstring::npos == pos)
+    auto fn = [&](const wstring& strSub) {
+        if (bTrim && wcSplitor != L' ')
 		{
-			break;
-		}
-
-		if (pos > startPos)
-		{
-			auto strSub = strText.substr(startPos, pos - startPos);
-			if (bTrim)
+            cauto& str = trim_r(strSub);
+            if (!str.empty())
 			{
-				trim(strSub);
-				if (!strSub.empty())
-				{
-					vecRet.push_back(strSub);
-				}
-			}
-			else
-			{
-				vecRet.push_back(strSub);
-			}
-		}
-		
-		startPos = pos + 1;
-	}
-
-	if (startPos < strText.size())
-	{
-		if (bTrim)
-		{
-			auto strTail = strText.substr(startPos);
-			trim(strTail);
-
-			if (!strTail.empty())
-			{
-				vecRet.push_back(strTail);
+                vecRet.push_back(str);
 			}
 		}
 		else
 		{
-			vecRet.push_back(strText.substr(startPos));
+			vecRet.push_back(strSub);
 		}
+	};
+
+	size_t pos = 0;
+	while ((pos = strText.find_first_not_of(wcSplitor, pos)) != wstring::npos)
+	{
+		auto nextPos = strText.find(wcSplitor, pos);
+		if (wstring::npos == nextPos)
+		{
+			fn(strText.substr(pos));
+			break;
+		}
+		
+		fn(strText.substr(pos, nextPos - pos));
+		
+		pos = nextPos + 1;
 	}
 }
 

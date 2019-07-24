@@ -82,7 +82,7 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
 	return true;
 }
 
-bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>& cb, char cdelimiter)
+bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>& cb)
 {
 	string strText;
 	if (!loadTxt(strFile, strText))
@@ -91,16 +91,30 @@ bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>
 	}
 
 	size_t prePos = 0;
-	size_t pos = strText.find(cdelimiter, prePos);
-	while (string::npos != pos)
+	size_t pos = 0;
+	while (true)
 	{
-		if (!cb(strText.substr(prePos, pos - prePos)))
+		pos = strText.find('\n', prePos);
+		if (string::npos == pos)
+		{
+			break;
+		}
+
+		string strSub = strText.substr(prePos, pos - prePos);
+		if (!strSub.empty())
+		{
+			if ('\r' == *strText.rbegin())
+			{
+				strSub.pop_back();
+			}
+		}
+
+		if (!cb(strSub))
 		{
 			return true;
 		}
 		
 		prePos = pos + 1;
-		pos = strText.find(cdelimiter, prePos);
 	}
 
 	if (prePos < strText.size())
@@ -111,12 +125,12 @@ bool fsutil::loadTxt(const wstring& strFile, const function<bool(const string&)>
 	return true;
 }
 
-bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText, char cdelimiter)
+bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 {
 	return loadTxt(strFile, [&](const string& strText) {
 		vecLineText.add(strText);
 		return true;
-	}, cdelimiter);
+	});
 }
 
 inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
