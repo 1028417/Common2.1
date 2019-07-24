@@ -1,24 +1,6 @@
 ﻿
 #include "util.h"
 
-#include <sys/utime.h>
-#include <sys/stat.h>
-
-#ifdef __ANDROID__
-using FileStat = struct stat;
-#else
-using FileStat = struct _stat;
-#endif
-
-inline static bool getFileStat(const wstring& strFile, FileStat& fileStat)
-{
-#ifdef __ANDROID__
-	return 0 == stat(wsutil::toStr(strFile).c_str(), &fileStat);
-#else
-	return 0 == _wstat(strFile.c_str(), &fileStat);
-#endif
-}
-
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
 	ibstream fs(strFile);
@@ -137,17 +119,6 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText, char 
 	}, cdelimiter);
 }
 
-int fsutil::GetFileSize(const wstring& strFile)
-{
-	FileStat fileStat;
-	if (!getFileStat(strFile, fileStat))
-	{
-		return -1;
-	}
-
-	return fileStat.st_size;
-}
-
 inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #ifdef _MSC_VER
@@ -219,8 +190,9 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 
 	if (bSyncModifyTime)
 	{
-		FileStat fileStat;
-		if (getFileStat(strSrcFile, fileStat))
+		tagFileStat stat;
+		memset(&stat, 0, sizeof stat);
+		if (fileStat(strSrcFile, stat))
 		{
 #ifdef __ANDROID__
             struct timeval timeVal[] = {
@@ -228,8 +200,8 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
                    };
             utimes(wsutil::toStr(strDstFile).c_str(), timeVal);
 #else
-			struct _utimbuf timbuf { fileStat.st_atime, fileStat.st_mtime };
-			(void)_wutime(strDstFile.c_str(), &timbuf);
+            struct _utimbuf timbuf { stat.st_atime, stat.st_mtime };
+            (void)_wutime(strDstFile.c_str(), &timbuf);
 #endif
 		}
 	}
@@ -237,15 +209,190 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool
 	return true;
 }
 
-time64_t fsutil::GetFileModifyTime(const wstring& strFile)
+bool fsutil::fileStat(FILE *lpFile, tagFileStat& stat)
 {
-	FileStat fileStat;
-	if (!getFileStat(strFile, fileStat))
+#ifdef __ANDROID__
+    return 0 == ::fstat(_fileno(lpFile), &stat);
+#else
+    return 0 == _fstat(_fileno(lpFile), &stat);
+#endif
+}
+
+bool fsutil::fileStat(const wstring& strFile, tagFileStat& stat)
+{
+#ifdef __ANDROID__
+    return 0 == ::stat(wsutil::toStr(strFile).c_str(), &stat);
+#else
+	return 0 == _wstat(strFile.c_str(), &stat);
+#endif
+}
+
+bool fsutil::fileStat32(FILE *lpFile, tagFileStat32& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(lpFile, stat);
+#else
+	return 0 == _fstat32(_fileno(lpFile), &stat);
+#endif
+}
+
+bool fsutil::fileStat32(const wstring& strFile, tagFileStat32& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(strFile, stat);
+#else
+	return 0 == _wstat32(strFile.c_str(), &stat);
+#endif
+}
+
+bool fsutil::fileStat32_64(FILE *lpFile, tagFileStat32_64& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(lpFile, stat);
+#else
+	return 0 == _fstat32i64(_fileno(lpFile), &stat);
+#endif
+}
+
+bool fsutil::fileStat32_64(const wstring& strFile, tagFileStat32_64& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(strFile, stat);
+#else
+	return 0 == _wstat32i64(strFile.c_str(), &stat);
+#endif
+}
+
+bool fsutil::fileStat64(FILE *lpFile, tagFileStat64& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(lpFile, stat);
+#else
+	return 0 == _fstat64(_fileno(lpFile), &stat);
+#endif
+}
+
+bool fsutil::fileStat64(const wstring& strFile, tagFileStat64& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(strFile, stat);
+#else
+	return 0 == _wstat64(strFile.c_str(), &stat);
+#endif
+}
+
+bool fsutil::fileStat64_32(FILE *lpFile, tagFileStat64_32& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(lpFile, stat);
+#else
+	return 0 == _fstat64i32(_fileno(lpFile), &stat);
+#endif
+}
+
+bool fsutil::fileStat64_32(const wstring& strFile, tagFileStat64_32& stat)
+{
+#ifdef __ANDROID__
+    return fileStat(strFile, stat);
+#else
+	return 0 == _wstat64i32(strFile.c_str(), &stat);
+#endif
+}
+
+int fsutil::GetFileSize(FILE *lpFile)
+{
+	tagFileStat32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32(lpFile, stat))
 	{
 		return -1;
 	}
 
-	return fileStat.st_mtime;
+	return stat.st_size;
+}
+
+int fsutil::GetFileSize(const wstring& strFile)
+{
+	tagFileStat32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32(strFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_size;
+}
+
+int64_t fsutil::GetFileSize64(FILE *lpFile)
+{
+	tagFileStat64_32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat64_32(lpFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_size;
+}
+
+int64_t fsutil::GetFileSize64(const wstring& strFile)
+{
+	tagFileStat64_32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat64_32(strFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_size;
+}
+
+time32_t fsutil::GetFileModifyTime(FILE *lpFile)
+{
+	tagFileStat32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32(lpFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_mtime;
+}
+
+time32_t fsutil::GetFileModifyTime(const wstring& strFile)
+{
+	tagFileStat32 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32(strFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_mtime;
+}
+
+time64_t fsutil::GetFileModifyTime64(FILE *lpFile)
+{
+	tagFileStat32_64 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32_64(lpFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_mtime;
+}
+
+time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
+{
+	tagFileStat32_64 stat;
+	memset(&stat, 0, sizeof stat);
+	if (!fileStat32_64(strFile, stat))
+	{
+		return -1;
+	}
+
+	return stat.st_mtime;
 }
 
 inline static bool _checkPathSplitor(wchar_t wch)
@@ -521,6 +668,19 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #endif
 
     return true;
+}
+
+#ifdef __ANDROID__
+#include <unistd.h>
+#endif
+int64_t fsutil::seekFile(FILE *lpFile, int64_t offset, E_SeekFileFlag eFlag)
+{
+#ifdef __ANDROID__
+    return lseek64(_fileno(lpFile), offset, (int)eFlag);
+#else
+    (void)_fseeki64(lpFile, offset, (int)eFlag);
+    return _ftelli64(lpFile);
+#endif
 }
 
 #ifdef _MSC_VER
