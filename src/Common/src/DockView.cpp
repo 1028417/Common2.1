@@ -105,7 +105,7 @@ void CViewTab::SetTabStyle(E_TabStyle eTabStyle)
 
 BOOL CViewTab::SetFontSize(float fFontSizeOffset)
 {	
-	return m_CompatableFont.setFont(*this, fFontSizeOffset);
+	return m_font.setFont(*this, fFontSizeOffset);
 }
 
 void CViewTab::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
@@ -144,9 +144,7 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 			tme.dwHoverTime = HOVER_DEFAULT;
 			m_nTrackMouseFlag = ::TrackMouseEvent(&tme);
 		}
-
-		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseMove, CPoint(lParam));
-
+		
 		break;
 	case WM_MOUSELEAVE:
 		m_nTrackMouseFlag = 0;
@@ -398,10 +396,10 @@ BOOL CDockView::AddPage(CPage& Page)
 	if (Page.m_bAutoActive)
 	{
 		m_wndTabCtrl.SetTrackMouse([&](E_TrackMouseEvent eMouseEvent, const CPoint& point) {
-			__Ensure(::GetActiveWindow() == this->GetTopLevelParent()->GetSafeHwnd());
-			
 			__Ensure(E_TrackMouseEvent::LME_MouseHover == eMouseEvent);
 
+			//__Ensure(::GetActiveWindow() == this->GetTopLevelParent()->GetSafeHwnd());
+			
 			tagTCHITTESTINFO htInfo;
 			htInfo.pt = point;
 			htInfo.flags = TCHT_ONITEM;

@@ -24,7 +24,7 @@ BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 {
 	if (0 != fFontSizeOffset)
 	{
-		__EnsureReturn(m_CompatableFont.setFont(*this, fFontSizeOffset), FALSE);
+		__EnsureReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	m_uHeight = uHeight;
@@ -56,7 +56,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 
 	if (!m_para.lstColumns.empty())
 	{
-		InitColumn(m_para.lstColumns, m_para.setUnderlineColumns);
+		InitColumn(m_para.lstColumns);
 	}
 
 	if (0 != m_para.uHeaderHeight || 0 != m_para.fHeaderFontSize)
@@ -79,22 +79,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 	{
 		SetTileSize(m_para.uTileWidth, m_para.uTileHeight);
 	}
-
-	if (m_para.cbCustomDraw)
-	{
-		m_bCusomDrawNotify = true;
-	}
 	
-	if (m_para.cbViewChanged)
-	{
-		m_bAutoChange = true;
-	}
-
-	if (m_para.cbMouseEvent)
-	{
-		m_nTrackMouseFlag = 0;
-	}
-
 	return TRUE;
 }
 
@@ -104,7 +89,7 @@ BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 
 	if (0 != fFontSizeOffset)
 	{
-		__AssertReturn(m_CompatableFont.setFont(*this, fFontSizeOffset), FALSE);
+		__AssertReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
 	__AssertReturn(m_fontUnderline.create(*this, 0, false, false, true), FALSE);
@@ -190,7 +175,7 @@ E_ListViewType CObjectList::GetView()
 	return m_para.eViewType;
 }
 
-void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& setUnderlineColumns)
+void CObjectList::InitColumn(const TD_ListColumn& lstColumns)
 {
 	m_uColumnCount = 0;
 	for (auto& column : lstColumns)
@@ -199,13 +184,6 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns, const set<UINT>& s
 			, column.bCenter ? LVCFMT_CENTER : LVCFMT_LEFT, column.uWidth);
 
 		m_uColumnCount++;
-	}
-
-	if (!setUnderlineColumns.empty())
-	{
-		m_para.setUnderlineColumns = setUnderlineColumns;
-
-		m_bCusomDrawNotify = true;
 	}
 }
 
@@ -237,13 +215,6 @@ void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 	LvTileViewInfo.sizeTile = { (LONG)cx, (LONG)cy };
 	LvTileViewInfo.dwMask = LVTVIM_TILESIZE;
 	(void)SetTileViewInfo(&LvTileViewInfo);
-}
-
-void CObjectList::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)
-{
-	m_para.cbMouseEvent = cbMouseEvent;
-
-	m_nTrackMouseFlag = 0;
 }
 
 template <bool _clear_other>
@@ -768,48 +739,44 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	switch (NMHDR.code)
 	{
 	case NM_CUSTOMDRAW:
-	{
-		__EnsureBreak(m_bCusomDrawNotify);
-		LPNMLVCUSTOMDRAW pLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(&NMHDR);
-		auto& nmcd = pLVCD->nmcd;
-
-		if (CDDS_PREPAINT == nmcd.dwDrawStage)
+		if (m_cbCustomDraw)
 		{
-			*pResult = CDRF_NOTIFYITEMDRAW;
-		}
-		else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
-		{
-			*pResult = CDRF_NOTIFYSUBITEMDRAW;
-		}
-		else
-		{
-			/*#define BkgColor_Select RGB(204, 232, 255)
-						pLVCD->clrTextBk = BkgColor_Select;*/
-
-			if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
+			LPNMLVCUSTOMDRAW pLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(&NMHDR);
+			auto& nmcd = pLVCD->nmcd;
+			if (CDDS_PREPAINT == nmcd.dwDrawStage)
 			{
-				if (m_para.setUnderlineColumns.find(pLVCD->iSubItem) != m_para.setUnderlineColumns.end())
+				*pResult = CDRF_NOTIFYITEMDRAW;
+			}
+			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
+			{
+				*pResult = CDRF_NOTIFYSUBITEMDRAW;
+			}
+			else
+			{
+				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 				{
-					(void)::SelectObject(nmcd.hdc, m_fontUnderline);
-				}
-				else
-				{
-					(void)::SelectObject(nmcd.hdc, m_CompatableFont);
-				}
+					tagLvCustomDraw lvcd(*pLVCD);
+					m_cbCustomDraw(lvcd);
 
-				*pResult = CDRF_NEWFONT;
-
-				tagLvCustomDraw lvcd(*pLVCD);
-				OnCustomDraw(lvcd);
-				if (lvcd.bSkipDefault)
-				{
-					*pResult = CDRF_SKIPDEFAULT;
+					if (lvcd.bSkipDefault)
+					{
+						*pResult = CDRF_SKIPDEFAULT;
+					}
+				
+					if (lvcd.bSetUnderline)
+					{
+						(void)::SelectObject(nmcd.hdc, m_fontUnderline);
+						*pResult |= CDRF_NEWFONT;
+					}
+					else
+					{
+						(void)::SelectObject(nmcd.hdc, m_font);
+					}
 				}
 			}
+
+			return TRUE;
 		}
-	}
-	
-	return TRUE;
 	
 	break;
 	case LVN_BEGINLABELEDIT:
@@ -896,42 +863,16 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	}
 
 	break;
-	case NM_CLICK:
-		m_bDblClick = false;
-
-		break;
-	case NM_DBLCLK:
-		m_bDblClick = true;
-
-		break;
-	default:
-		break;
 	}
 	
 	return FALSE;
-}
-
-void CObjectList::OnCustomDraw(tagLvCustomDraw& lvcd)
-{
-	if (m_para.cbCustomDraw)
-	{
-		m_para.cbCustomDraw(lvcd);
-	}
-}
-
-void CObjectList::OnTrackMouseEvent(E_TrackMouseEvent eMouseEvent, const CPoint& point)
-{
-	if (m_para.cbMouseEvent)
-	{
-		m_para.cbMouseEvent(eMouseEvent, point);
-	}
 }
 
 BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	if (WM_MOUSEWHEEL == message)
 	{
-		if (m_bAutoChange)
+		if (m_cbViewChanged)
 		{
 			UINT uFlag = GET_FLAGS_LPARAM(wParam);
 			if (uFlag & MK_CONTROL)
@@ -951,40 +892,46 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 			}
 		}
 	}
-	else if (-1 != m_nTrackMouseFlag)
+	else if (WM_LBUTTONDBLCLK == message)
 	{
-		if (WM_MOUSEMOVE == message)
+		m_cbLButtondown = NULL;
+	}
+	else
+	{
+		if (m_cbTrackMouseEvent)
 		{
-			if (0 == m_nTrackMouseFlag)
+			if (WM_MOUSEMOVE == message)
 			{
-				TRACKMOUSEEVENT tme;
-				memset(&tme, 0, sizeof tme);
-				tme.cbSize = sizeof(tme);
-				tme.hwndTrack = m_hWnd;
-				tme.dwFlags = TME_LEAVE | TME_HOVER;
-				tme.dwHoverTime = HOVER_DEFAULT;
-				m_nTrackMouseFlag = ::TrackMouseEvent(&tme);
+				if (!m_bTrackingMouse)
+				{
+					TRACKMOUSEEVENT tme;
+					memset(&tme, 0, sizeof tme);
+					tme.cbSize = sizeof(tme);
+					tme.hwndTrack = m_hWnd;
+					tme.dwFlags = TME_LEAVE | TME_HOVER;
+					tme.dwHoverTime = HOVER_DEFAULT;
+					m_bTrackingMouse = TRUE==::TrackMouseEvent(&tme);
+				}
+
+				return TRUE;
 			}
+			else if (WM_MOUSELEAVE == message)
+			{
+				m_bTrackingMouse = false;
 
-			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseMove, CPoint(lParam));
-			return TRUE;
-		}
-		else if (WM_MOUSELEAVE == message)
-		{
-			m_nTrackMouseFlag = 0;
+				m_cbTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
+				return TRUE;
+			}
+			else if (WM_MOUSEHOVER == message)
+			{
+				//m_bTrackingMouse = false;
 
-			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
-			return TRUE;
-		}
-		else if (WM_MOUSEHOVER == message)
-		{
-			//m_nTrackMouseFlag = 0;
-
-			OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
-			return TRUE;
+				m_cbTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
+				return TRUE;
+			}
 		}
 	}
-	
+
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
@@ -1025,9 +972,9 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 			m_para.eViewType = lpViewType[nIndex];
 
-			if (m_para.cbViewChanged)
+			if (m_cbViewChanged)
 			{
-				m_para.cbViewChanged(m_para.eViewType);
+				m_cbViewChanged(m_para.eViewType);
 			}
 
 			SetView(m_para.eViewType);
@@ -1048,6 +995,17 @@ UINT CObjectList::GetHeaderHeight()
 	CListCtrl::GetHeaderCtrl()->GetWindowRect(&rcHeader);
 
 	return (UINT)rcHeader.Height();
+}
+
+const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
+{
+	static LVHITTESTINFO htinfo;
+	memset(&htinfo, 0, sizeof htinfo);
+
+	htinfo.pt = ptPos;
+	(void)__super::HitTest(&htinfo);
+
+	return htinfo;
 }
 
 void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
@@ -1117,4 +1075,16 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 
 		return false;
 	});
+}
+
+void CObjectList::AsyncLButtondown(const fn_voidvoid& cb)
+{
+	m_cbLButtondown = cb;
+
+	CMainApp::async([&]() {
+		if (m_cbLButtondown)
+		{
+			m_cbLButtondown();
+		}
+	}, 300);
 }

@@ -263,7 +263,6 @@ void CMainWnd::setDockSize(CDockView &wndTargetView, UINT x, UINT y)
 		break;
 	default:
 		return;
-		break;
 	}
 
 	resizeView(true);

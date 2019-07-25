@@ -141,33 +141,11 @@ inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFil
 	//return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
 #endif
 
-	ibstream srcStream;
-	try
-	{
-		srcStream.open(strSrcFile);
-	}
-	catch (...)
-	{
-	}
-	__EnsureReturn(srcStream && srcStream.is_open(), false);
+	ibstream srcStream(strSrcFile);
+	__EnsureReturn(srcStream, false);
 
-	if (!fsutil::removeFile(strDstFile))
-	{
-		return false;
-	}
-
-	obstream dstStream;
-	try
-	{
-		dstStream.open(strDstFile, true);
-	}
-	catch (...)
-	{
-	}
-	if (!dstStream || !dstStream.is_open())
-	{
-		return false;
-	}
+	obstream dstStream(strDstFile, true);
+	__EnsureReturn(dstStream, false);
 
 	if (NULL != lpFileHead && uHeadSize != 0)
 	{
@@ -175,7 +153,7 @@ inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFil
 	}
 
 	char lpBuffer[1024]{ 0 };
-	try
+	//try
 	{
 		while (!srcStream.eof())
 		{
@@ -184,12 +162,16 @@ inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFil
 			if (size > 0)
 			{
 				dstStream.write(lpBuffer, size);
+				if (!dstStream.good())
+				{
+					return false;
+				}
 			}
 		}
 	}
-	catch (...)
+	//catch (...)
 	{
-		return false;
+		//return false;
 	}
 
 	return true;
@@ -587,27 +569,32 @@ bool fsutil::existFile(const wstring& strFile)
 bool fsutil::createDir(const wstring& strDir)
 {
 #ifdef __ANDROID__
-    if (!QDir().mkpath(wsutil::toQStr(strDir)))
-    {
-        return false;
-    }
+	if (!QDir().mkpath(wsutil::toQStr(strDir)))
+	{
+		return false;
+	}
 
 #else
-    if (!::CreateDirectory(strDir.c_str(), NULL))
-    {
-        if (ERROR_ALREADY_EXISTS != ::GetLastError())
-        {
-            if (!createDir(fsutil::GetParentDir(strDir)))
-            {
-                return false;
-            }
+	if (!::CreateDirectory(strDir.c_str(), NULL))
+	{
+		auto ret = ::GetLastError();
+		if (ERROR_PATH_NOT_FOUND == ret)
+		{
+			if (!createDir(fsutil::GetParentDir(strDir)))
+			{
+				return false;
+			}
 
-            if (!::CreateDirectory(strDir.c_str(), NULL))
-            {
-                return false;
-            }
-        }
-    }
+			if (!::CreateDirectory(strDir.c_str(), NULL))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
 #endif
 
     return true;
