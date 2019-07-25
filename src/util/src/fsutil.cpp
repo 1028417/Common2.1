@@ -133,71 +133,72 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 	});
 }
 
-inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile)
+inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile, const char *lpFileHead = NULL, size_t uHeadSize = 0)
 {
 #ifdef _MSC_VER
-    return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+	//return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-    return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
+	//return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
 #endif
-}
 
-/*ibstream srcStream;
-try
-{
-	srcStream.open(strSrcFile);
-}
-catch (...)
-{
-}
-__EnsureReturn(srcStream && srcStream.is_open(), false);
-
-if (!removeFile(strDstFile))
-{
-	srcStream.close();
-	return false;
-}
-
-obstream dstStream;
-try
-{
-	dstStream.open(strDstFile, true);
-}
-catch (...)
-{
-}
-if (!dstStream || !dstStream.is_open())
-{
-	srcStream.close();
-	return false;
-}
-
-bool bResult = true;
-
-char lpBuffer[1024]{ 0 };
-try
-{
-	while (!srcStream.eof())
+	ibstream srcStream;
+	try
 	{
-		srcStream.read(lpBuffer, sizeof lpBuffer);
-		auto size = srcStream.gcount();
-		if (size > 0)
+		srcStream.open(strSrcFile);
+	}
+	catch (...)
+	{
+	}
+	__EnsureReturn(srcStream && srcStream.is_open(), false);
+
+	if (!fsutil::removeFile(strDstFile))
+	{
+		return false;
+	}
+
+	obstream dstStream;
+	try
+	{
+		dstStream.open(strDstFile, true);
+	}
+	catch (...)
+	{
+	}
+	if (!dstStream || !dstStream.is_open())
+	{
+		return false;
+	}
+
+	if (NULL != lpFileHead && uHeadSize != 0)
+	{
+		dstStream.write(lpFileHead, uHeadSize);
+	}
+
+	char lpBuffer[1024]{ 0 };
+	try
+	{
+		while (!srcStream.eof())
 		{
-			dstStream.write(lpBuffer, size);
+			srcStream.read(lpBuffer, sizeof lpBuffer);
+			auto size = srcStream.gcount();
+			if (size > 0)
+			{
+				dstStream.write(lpBuffer, size);
+			}
 		}
 	}
-}
-catch (...)
-{
-	bResult = false;
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
-srcStream.close();
-dstStream.close();*/
-
-bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile, bool bSyncModifyTime)
+bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile
+	, bool bSyncModifyTime, const char *lpFileHead, size_t uHeadSize)
 {
-	if (!_copyFile(strSrcFile, strDstFile))
+	if (!_copyFile(strSrcFile, strDstFile, lpFileHead, uHeadSize))
 	{
 		return false;
 	}
@@ -339,9 +340,9 @@ int fsutil::GetFileSize(const wstring& strFile)
 
 int64_t fsutil::GetFileSize64(FILE *lpFile)
 {
-	tagFileStat64_32 stat;
+	tagFileStat32_64 stat;
 	memset(&stat, 0, sizeof stat);
-	if (!fileStat64_32(lpFile, stat))
+	if (!fileStat32_64(lpFile, stat))
 	{
 		return -1;
 	}
@@ -351,9 +352,9 @@ int64_t fsutil::GetFileSize64(FILE *lpFile)
 
 int64_t fsutil::GetFileSize64(const wstring& strFile)
 {
-	tagFileStat64_32 stat;
+	tagFileStat32_64 stat;
 	memset(&stat, 0, sizeof stat);
-	if (!fileStat64_32(strFile, stat))
+	if (!fileStat32_64(strFile, stat))
 	{
 		return -1;
 	}
@@ -387,9 +388,9 @@ time32_t fsutil::GetFileModifyTime(const wstring& strFile)
 
 time64_t fsutil::GetFileModifyTime64(FILE *lpFile)
 {
-	tagFileStat32_64 stat;
+	tagFileStat64_32 stat;
 	memset(&stat, 0, sizeof stat);
-	if (!fileStat32_64(lpFile, stat))
+	if (!fileStat64_32(lpFile, stat))
 	{
 		return -1;
 	}
@@ -399,9 +400,9 @@ time64_t fsutil::GetFileModifyTime64(FILE *lpFile)
 
 time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
 {
-	tagFileStat32_64 stat;
+	tagFileStat64_32 stat;
 	memset(&stat, 0, sizeof stat);
-	if (!fileStat32_64(strFile, stat))
+	if (!fileStat64_32(strFile, stat))
 	{
 		return -1;
 	}
