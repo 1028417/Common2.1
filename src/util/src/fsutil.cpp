@@ -133,14 +133,17 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 	});
 }
 
-inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFile, const char *lpFileHead = NULL, size_t uHeadSize = 0)
+bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #ifdef _MSC_VER
-	//return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+    return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-	//return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
+    return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
 #endif
+}
 
+static bool _copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const char *lpFileHead = NULL, size_t uHeadSize = 0)
+{
 	ibstream srcStream(strSrcFile);
 	__EnsureReturn(srcStream, false);
 
@@ -153,34 +156,27 @@ inline static bool _copyFile(const wstring& strSrcFile, const wstring& strDstFil
 	}
 
 	char lpBuffer[1024]{ 0 };
-	//try
-	{
-		while (!srcStream.eof())
-		{
-			srcStream.read(lpBuffer, sizeof lpBuffer);
-			auto size = srcStream.gcount();
-			if (size > 0)
-			{
-				dstStream.write(lpBuffer, size);
-				if (!dstStream.good())
-				{
-					return false;
-				}
-			}
-		}
-	}
-	//catch (...)
-	{
-		//return false;
-	}
+    while (!srcStream.eof())
+    {
+        srcStream.read(lpBuffer, sizeof lpBuffer);
+        auto size = srcStream.gcount();
+        if (size > 0)
+        {
+            dstStream.write(lpBuffer, size);
+            if (!dstStream.good())
+            {
+                return false;
+            }
+        }
+    }
 
 	return true;
 }
 
-bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile
+bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile
 	, bool bSyncModifyTime, const char *lpFileHead, size_t uHeadSize)
 {
-	if (!_copyFile(strSrcFile, strDstFile, lpFileHead, uHeadSize))
+    if (!_copyFileEx(strSrcFile, strDstFile, lpFileHead, uHeadSize))
 	{
 		return false;
 	}
