@@ -674,7 +674,25 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 int64_t fsutil::seekFile(FILE *lpFile, int64_t offset, E_SeekFileFlag eFlag)
 {
 #ifdef __ANDROID__
-    return lseek64(_fileno(lpFile), offset, (int)eFlag);
+    //(void)fseek(lpFile, (long)offset, (int)eFlag);
+    //return ftell(lpFile);
+
+    if (feof(lpFile))
+    {
+       rewind(lpFile);
+    }
+    else
+    {
+        setbuf(lpFile, NULL);
+    }
+
+    auto fno = _fileno(lpFile);
+    auto nRet = lseek64(fno, offset, (int)eFlag);
+    if (nRet >= 0)
+    {
+        return nRet;
+    }
+    return lseek64(fno, 0, SEEK_CUR);
 #else
     (void)_fseeki64(lpFile, offset, (int)eFlag);
     return _ftelli64(lpFile);
