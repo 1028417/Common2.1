@@ -755,47 +755,49 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			{
 				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 				{
-					tagLvCustomDraw lvcd(*pLVCD, m_para.crText);
+					tagLVCustomDraw lvcd(*pLVCD, m_para.crText);
 					m_cbCustomDraw(lvcd);
 
 					if (lvcd.bSkipDefault)
 					{
 						*pResult = CDRF_SKIPDEFAULT;
 					}
-					
-					cauto& uTextAlpha = lvcd.uTextAlpha;
-					if (0 != uTextAlpha && uTextAlpha <= 255)
-					{
-						auto pb = (BYTE*)&lvcd.crText;
-						int r = *pb;
-						int g = pb[1];
-						int b = pb[2];
-
-						pb = (BYTE*)&lvcd.crBkg;
-						r = r + (-r + 255)*uTextAlpha/255;
-						g = g + (-g + 255)*uTextAlpha/255;
-						b = b + (-b + 255)*uTextAlpha/255;
-
-						lvcd.crText = RGB(r,g,b);
-					}
-
-					if (0 != lvcd.fFontSizeOffset)
-					{
-						(void)m_fontCustom.DeleteObject();
-						if (m_fontCustom.create(m_font, lvcd.fFontSizeOffset, 0, false, lvcd.bSetUnderline))
-						{
-							(void)::SelectObject(nmcd.hdc, m_fontCustom);
-							*pResult |= CDRF_NEWFONT;
-						}
-					}
-					else if (lvcd.bSetUnderline)
-					{
-						(void)::SelectObject(nmcd.hdc, m_fontUnderline);
-						*pResult |= CDRF_NEWFONT;
-					}
 					else
 					{
-						(void)::SelectObject(nmcd.hdc, m_font);
+						cauto& uTextAlpha = lvcd.uTextAlpha;
+						if (0 != uTextAlpha && uTextAlpha <= 255)
+						{
+							auto pb = (BYTE*)&lvcd.crText;
+							int r = *pb;
+							int g = pb[1];
+							int b = pb[2];
+
+							pb = (BYTE*)&lvcd.crBkg;
+							r = r + (-r + 255)*uTextAlpha / 255;
+							g = g + (-g + 255)*uTextAlpha / 255;
+							b = b + (-b + 255)*uTextAlpha / 255;
+
+							lvcd.crText = RGB(r, g, b);
+						}
+
+						if (0 != lvcd.fFontSizeOffset)
+						{
+							(void)m_fontCustom.DeleteObject();
+							if (m_fontCustom.create(m_font, lvcd.fFontSizeOffset, 0, false, lvcd.bSetUnderline))
+							{
+								(void)::SelectObject(nmcd.hdc, m_fontCustom);
+								*pResult |= CDRF_NEWFONT;
+							}
+						}
+						else if (lvcd.bSetUnderline)
+						{
+							(void)::SelectObject(nmcd.hdc, m_fontUnderline);
+							*pResult |= CDRF_NEWFONT;
+						}
+						else
+						{
+							(void)::SelectObject(nmcd.hdc, m_font);
+						}
 					}
 				}
 			}

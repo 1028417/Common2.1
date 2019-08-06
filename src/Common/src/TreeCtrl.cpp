@@ -129,7 +129,7 @@ BOOL CBaseTree::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESUL
 		NMHDR *pNMHDR = (NMHDR*)lParam;
 		if (NULL != pNMHDR)
 		{
-			if (handleNMNotify(*pNMHDR))
+			if (handleNMNotify(*pNMHDR, pResult))
 			{
 				return TRUE;
 			}
@@ -484,9 +484,58 @@ void CObjectTree::GetAllObjects(TD_TreeObjectList& lstObjects)
 	}
 }
 
-BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR)
+BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 {
-	if (TVN_ENDLABELEDIT == NMHDR.code)
+	switch (NMHDR.code)
+	{
+	case NM_CUSTOMDRAW:
+		if (m_cbCustomDraw)
+		{
+			LPNMTVCUSTOMDRAW pTVCD = reinterpret_cast<LPNMTVCUSTOMDRAW>(&NMHDR);
+			auto& nmcd = pTVCD->nmcd;
+			if (CDDS_PREPAINT == nmcd.dwDrawStage)
+			{
+				*pResult = CDRF_NOTIFYITEMDRAW;
+			}
+			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
+			{
+				*pResult = CDRF_NOTIFYSUBITEMDRAW;
+			}
+			else
+			{
+				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
+				{
+					tagTVCustomDraw tvcd(*pTVCD, GetTextColor());
+					m_cbCustomDraw(tvcd);
+
+					if (tvcd.bSkipDefault)
+					{
+						*pResult = CDRF_SKIPDEFAULT;
+					}
+
+					cauto& uTextAlpha = tvcd.uTextAlpha;
+					if (0 != uTextAlpha && uTextAlpha <= 255)
+					{
+						auto pb = (BYTE*)&tvcd.crText;
+						int r = *pb;
+						int g = pb[1];
+						int b = pb[2];
+
+						pb = (BYTE*)&tvcd.crBkg;
+						r = r + (-r + 255)*uTextAlpha / 255;
+						g = g + (-g + 255)*uTextAlpha / 255;
+						b = b + (-b + 255)*uTextAlpha / 255;
+
+						tvcd.crText = RGB(r, g, b);
+					}
+				}
+			}
+
+			return TRUE;
+		}
+
+		break;
+	case TVN_ENDLABELEDIT:
 	{
 		NMTVDISPINFO *pTVDispInfo = reinterpret_cast<NMTVDISPINFO*>(&NMHDR);
 
@@ -500,5 +549,8 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR)
 		__EnsureReturn(cstrNewName != pObject->GetTreeText().c_str(), TRUE);
 	}
 
-	return __super::handleNMNotify(NMHDR);
+	break;
+	}
+
+	return __super::handleNMNotify(NMHDR, pResult);
 }
