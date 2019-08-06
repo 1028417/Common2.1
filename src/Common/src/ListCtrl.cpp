@@ -92,7 +92,7 @@ BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 		__AssertReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
 	}
 
-	__AssertReturn(m_fontUnderline.create(*this, 0, false, false, true), FALSE);
+	__AssertReturn(m_fontUnderline.create(*this, 0, 0, false, true), FALSE);
 
 	return TRUE;
 }
@@ -762,8 +762,33 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 					{
 						*pResult = CDRF_SKIPDEFAULT;
 					}
-				
-					if (lvcd.bSetUnderline)
+					
+					cauto& uTextAlpha = lvcd.uTextAlpha;
+					if (0 != uTextAlpha && uTextAlpha <= 255)
+					{
+						auto pb = (BYTE*)&lvcd.clrText;
+						int r = *pb;
+						int g = pb[1];
+						int b = pb[2];
+
+						pb = (BYTE*)&lvcd.clrTextBk;
+						r = r + (-r + pb[0])*uTextAlpha/255;
+						g = g + (-g + pb[1])*uTextAlpha/255;
+						b = b + (-b + pb[2])*uTextAlpha/255;
+
+						lvcd.clrText = RGB(r,g,b);
+					}
+
+					if (0 != lvcd.fFontSizeOffset)
+					{
+						(void)m_fontCustom.DeleteObject();
+						if (m_fontCustom.create(m_font, lvcd.fFontSizeOffset, 0, false, lvcd.bSetUnderline))
+						{
+							(void)::SelectObject(nmcd.hdc, m_fontCustom);
+							*pResult |= CDRF_NEWFONT;
+						}
+					}
+					else if (lvcd.bSetUnderline)
 					{
 						(void)::SelectObject(nmcd.hdc, m_fontUnderline);
 						*pResult |= CDRF_NEWFONT;

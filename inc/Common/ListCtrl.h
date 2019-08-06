@@ -140,21 +140,26 @@ public:
 struct tagLvCustomDraw
 {
 	tagLvCustomDraw(NMLVCUSTOMDRAW& lvcd)
-		: hDC(lvcd.nmcd.hdc)
+		: rcPos(lvcd.nmcd.rc)
+		, hDC(lvcd.nmcd.hdc)
 		, uItem(lvcd.nmcd.dwItemSpec)
 		, nSubItem(lvcd.iSubItem)
-		, rcItem(lvcd.nmcd.rc)
-		, clrText(lvcd.clrText)
 		, clrTextBk(lvcd.clrTextBk)
+		, clrText(lvcd.clrText)
 	{
 	}
+
+	const RECT& rcPos;
 
 	const HDC hDC;
 	const UINT uItem;
 	const int nSubItem;
-	const RECT& rcItem;
-	COLORREF& clrText;
+	
 	COLORREF& clrTextBk;
+	COLORREF& clrText;
+	BYTE uTextAlpha = 0;
+
+	float fFontSizeOffset = 0;
 
 	bool bSetUnderline = false;
 
@@ -219,6 +224,7 @@ private:
 
 	CCompatableFont m_font;
 	CCompatableFont m_fontUnderline;
+	CCompatableFont m_fontCustom;
 
 	CListHeader m_wndHeader;
 
