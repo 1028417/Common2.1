@@ -499,35 +499,28 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			}
 			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 			{
-				*pResult = CDRF_NOTIFYSUBITEMDRAW;
-			}
-			else
-			{
-				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
+				tagTVCustomDraw tvcd(*pTVCD);
+				m_cbCustomDraw(tvcd);
+
+				if (tvcd.bSkipDefault)
 				{
-					tagTVCustomDraw tvcd(*pTVCD, GetTextColor());
-					m_cbCustomDraw(tvcd);
+					*pResult = CDRF_SKIPDEFAULT;
+				}
 
-					if (tvcd.bSkipDefault)
-					{
-						*pResult = CDRF_SKIPDEFAULT;
-					}
+				cauto& uTextAlpha = tvcd.uTextAlpha;
+				if (0 != uTextAlpha && uTextAlpha <= 255)
+				{
+					auto pb = (BYTE*)&tvcd.crText;
+					int r = *pb;
+					int g = pb[1];
+					int b = pb[2];
 
-					cauto& uTextAlpha = tvcd.uTextAlpha;
-					if (0 != uTextAlpha && uTextAlpha <= 255)
-					{
-						auto pb = (BYTE*)&tvcd.crText;
-						int r = *pb;
-						int g = pb[1];
-						int b = pb[2];
+					pb = (BYTE*)&tvcd.crBkg;
+					r = r + (-r + 255)*uTextAlpha / 255;
+					g = g + (-g + 255)*uTextAlpha / 255;
+					b = b + (-b + 255)*uTextAlpha / 255;
 
-						pb = (BYTE*)&tvcd.crBkg;
-						r = r + (-r + 255)*uTextAlpha / 255;
-						g = g + (-g + 255)*uTextAlpha / 255;
-						b = b + (-b + 255)*uTextAlpha / 255;
-
-						tvcd.crText = RGB(r, g, b);
-					}
+					tvcd.crText = RGB(r, g, b);
 				}
 			}
 

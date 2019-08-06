@@ -755,7 +755,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			{
 				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 				{
-					tagLVCustomDraw lvcd(*pLVCD, m_para.crText);
+					tagLVCustomDraw lvcd(*pLVCD);
+					lvcd.crText = m_para.crText;
 					m_cbCustomDraw(lvcd);
 
 					if (lvcd.bSkipDefault)
@@ -804,8 +805,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 			return TRUE;
 		}
-	
-	break;
+		
+		break;
 	case LVN_BEGINLABELEDIT:
 	{
 		CEdit *pwndEdit = GetEditControl();
