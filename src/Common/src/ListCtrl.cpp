@@ -755,7 +755,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			{
 				if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 				{
-					tagLvCustomDraw lvcd(*pLVCD);
+					tagLvCustomDraw lvcd(*pLVCD, m_para.crText);
 					m_cbCustomDraw(lvcd);
 
 					if (lvcd.bSkipDefault)
@@ -766,17 +766,17 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 					cauto& uTextAlpha = lvcd.uTextAlpha;
 					if (0 != uTextAlpha && uTextAlpha <= 255)
 					{
-						auto pb = (BYTE*)&lvcd.clrText;
+						auto pb = (BYTE*)&lvcd.crText;
 						int r = *pb;
 						int g = pb[1];
 						int b = pb[2];
 
-						pb = (BYTE*)&lvcd.clrTextBk;
-						r = r + (-r + pb[0])*uTextAlpha/255;
-						g = g + (-g + pb[1])*uTextAlpha/255;
-						b = b + (-b + pb[2])*uTextAlpha/255;
+						pb = (BYTE*)&lvcd.crBkg;
+						r = r + (-r + 255)*uTextAlpha/255;
+						g = g + (-g + 255)*uTextAlpha/255;
+						b = b + (-b + 255)*uTextAlpha/255;
 
-						lvcd.clrText = RGB(r,g,b);
+						lvcd.crText = RGB(r,g,b);
 					}
 
 					if (0 != lvcd.fFontSizeOffset)
