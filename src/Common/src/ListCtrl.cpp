@@ -757,8 +757,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 				{
 					tagLVCustomDraw lvcd(*pLVCD);
 					lvcd.crText = m_para.crText;
-					m_cbCustomDraw(lvcd);
 
+					m_cbCustomDraw(lvcd);
 					if (lvcd.bSkipDefault)
 					{
 						*pResult = CDRF_SKIPDEFAULT;

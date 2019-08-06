@@ -50,6 +50,15 @@ HTREEITEM CBaseTree::InsertItem(HTREEITEM hParentItem, LPCTSTR lpszItem, DWORD_P
 	return hItem;
 }
 
+void CBaseTree::RedrawItem(HTREEITEM hItem)
+{
+	CRect rcItem;
+	if (GetItemRect(hItem, rcItem, FALSE))
+	{
+		this->InvalidateRect(rcItem);
+	}
+}
+
 void CBaseTree::GetAllItems(list<HTREEITEM>& lstItems)
 {
 	HTREEITEM hRootItem = this->GetRootItem();
@@ -500,8 +509,17 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 			{
 				tagTVCustomDraw tvcd(*pTVCD);
-				m_cbCustomDraw(tvcd);
+				if (GetSelectedObject() == tvcd.pObject)
+				{
+					tvcd.crBkg = BkgColor_Select;
+				}
+				else
+				{
+					tvcd.crBkg = GetBkColor();
+				}
+				tvcd.crText = GetTextColor();
 
+				m_cbCustomDraw(tvcd);
 				if (tvcd.bSkipDefault)
 				{
 					*pResult = CDRF_SKIPDEFAULT;
@@ -516,9 +534,9 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 					int b = pb[2];
 
 					pb = (BYTE*)&tvcd.crBkg;
-					r = r + (-r + 255)*uTextAlpha / 255;
-					g = g + (-g + 255)*uTextAlpha / 255;
-					b = b + (-b + 255)*uTextAlpha / 255;
+					r = r + (-r + pb[0])*uTextAlpha / 255;
+					g = g + (-g + pb[1])*uTextAlpha / 255;
+					b = b + (-b + pb[2])*uTextAlpha / 255;
 
 					tvcd.crText = RGB(r, g, b);
 				}
