@@ -509,7 +509,9 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 			{
 				tagTVCustomDraw tvcd(*pTVCD);
-				if (GetSelectedObject() == tvcd.pObject)
+				tvcd.crText = GetTextColor();
+
+				if (nmcd.uItemState & CDIS_SELECTED)
 				{
 					tvcd.crBkg = BkgColor_Select;
 				}
@@ -517,7 +519,7 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 				{
 					tvcd.crBkg = GetBkColor();
 				}
-				tvcd.crText = GetTextColor();
+				nmcd.uItemState &= ~CDIS_FOCUS;
 
 				m_cbCustomDraw(tvcd);
 				if (tvcd.bSkipDefault)
@@ -534,9 +536,9 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 					int b = pb[2];
 
 					pb = (BYTE*)&tvcd.crBkg;
-					r = r + (-r + pb[0])*uTextAlpha / 255;
-					g = g + (-g + pb[1])*uTextAlpha / 255;
-					b = b + (-b + pb[2])*uTextAlpha / 255;
+					r += (-r + pb[0])*uTextAlpha / 255;
+					g += (-g + pb[1])*uTextAlpha / 255;
+					b += (-b + pb[2])*uTextAlpha / 255;
 
 					tvcd.crText = RGB(r, g, b);
 				}

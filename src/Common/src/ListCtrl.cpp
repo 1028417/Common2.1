@@ -416,10 +416,9 @@ int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& str
 
 void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
 {
-	bool bReportView = E_ListViewType::LVT_Report == GetView();
 	vector<wstring> vecText;
 	int iImage = -1;
-	GenListItem(Object, bReportView, vecText, iImage);
+	GenListItem(Object, isReportView(), vecText, iImage);
 
 	UINT uMask = LVIF_PARAM;
 	if (iImage >= 0)
@@ -469,7 +468,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 	
-	bool bReportView = E_ListViewType::LVT_Report == GetView();
+	bool bReportView = isReportView();
 
 	UINT uItemCount = (UINT)GetItemCount();
 	for (UINT uItem = 0; uItem < uItemCount; uItem++)
@@ -750,6 +749,13 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 			else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 			{
 				*pResult = CDRF_NOTIFYSUBITEMDRAW;
+
+				if (isReportView())
+				{
+					nmcd.uItemState &= ~CDIS_SELECTED;
+				}
+
+				nmcd.uItemState &= ~CDIS_FOCUS;
 			}
 			else
 			{
@@ -757,6 +763,16 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 				{
 					tagLVCustomDraw lvcd(*pLVCD);
 					lvcd.crText = m_para.crText;
+
+					if (isReportView() && GetItemState(lvcd.uItem, LVIS_SELECTED))
+					{
+						lvcd.crBkg = BkgColor_Select;
+						*pResult = CDRF_NEWFONT;
+					}
+					else
+					{
+						lvcd.crBkg = RGB(255, 255, 255);
+					}
 
 					m_cbCustomDraw(lvcd);
 					if (lvcd.bSkipDefault)
@@ -774,9 +790,9 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 							int b = pb[2];
 
 							pb = (BYTE*)&lvcd.crBkg;
-							r = r + (-r + 255)*uTextAlpha / 255;
-							g = g + (-g + 255)*uTextAlpha / 255;
-							b = b + (-b + 255)*uTextAlpha / 255;
+							r += (-r + pb[0])*uTextAlpha / 255;
+							g += (-g + pb[1])*uTextAlpha / 255;
+							b += (-b + pb[2])*uTextAlpha / 255;
 
 							lvcd.crText = RGB(r, g, b);
 						}
@@ -787,13 +803,13 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 							if (m_fontCustom.create(m_font, lvcd.fFontSizeOffset, 0, false, lvcd.bSetUnderline))
 							{
 								(void)::SelectObject(nmcd.hdc, m_fontCustom);
-								*pResult |= CDRF_NEWFONT;
+								*pResult = CDRF_NEWFONT;
 							}
 						}
 						else if (lvcd.bSetUnderline)
 						{
 							(void)::SelectObject(nmcd.hdc, m_fontUnderline);
-							*pResult |= CDRF_NEWFONT;
+							*pResult = CDRF_NEWFONT;
 						}
 						else
 						{
@@ -1014,7 +1030,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 UINT CObjectList::GetHeaderHeight()
 {
-	if (E_ListViewType::LVT_Report != GetView())
+	if (!isReportView())
 	{
 		return 0;
 	}
@@ -1047,7 +1063,7 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 	m_vecAsyncTaskFlag.assign((size_t)nItemCount, FALSE);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
-		if (E_ListViewType::LVT_Report != GetView())
+		if (!isReportView())
 		{
 			return false;
 		}
