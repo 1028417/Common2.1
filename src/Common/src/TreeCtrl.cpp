@@ -502,27 +502,28 @@ void CObjectTree::handleCustomDraw(NMTVCUSTOMDRAW& tvnmcd, LRESULT* pResult)
 	}
 	else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 	{
-		tagTVCustomDraw tvcd(tvnmcd);
-		tvcd.crText = GetTextColor();
-
+		tvnmcd.clrText = GetTextColor();
 		if (nmcd.uItemState & CDIS_SELECTED)
 		{
-			tvcd.crBkg = BkgColor_Select;
+			tvnmcd.clrTextBk = BkgColor_Select;
 		}
 		else
 		{
-			tvcd.crBkg = GetBkColor();
+			tvnmcd.clrTextBk = GetBkColor();
 		}
 		nmcd.uItemState &= ~CDIS_FOCUS;
 		
-		if (m_cbCustomDraw)
+		if (!m_cbCustomDraw)
 		{
-			m_cbCustomDraw(tvcd);
-			if (tvcd.bSkipDefault)
-			{
-				*pResult = CDRF_SKIPDEFAULT;
-				return;
-			}
+			return;
+		}
+
+		tagTVCustomDraw tvcd(tvnmcd);
+		m_cbCustomDraw(tvcd);
+		if (tvcd.bSkipDefault)
+		{
+			*pResult = CDRF_SKIPDEFAULT;
+			return;
 		}
 		
 		cauto& uTextAlpha = tvcd.uTextAlpha;

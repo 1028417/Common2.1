@@ -772,9 +772,15 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 	}
 	else
 	{
-		if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage && m_cbCustomDraw)
+		if (!m_cbCustomDraw)
+		{
+			return;
+		}
+
+		if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 		{
 			tagLVCustomDraw lvcd(lvnmcd);
+			auto crBkg = lvcd.crBkg;
 
 			m_cbCustomDraw(lvcd);
 			if (lvcd.bSkipDefault)
@@ -783,10 +789,18 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 				return;
 			}
 			
+			if (lvcd.crBkg != crBkg)
+			{
+				if (GetItemState(lvcd.uItem, LVIS_SELECTED))
+				{
+					lvcd.crBkg = crBkg;
+				}
+			}
+
 			cauto& uTextAlpha = lvcd.uTextAlpha;
 			if (0 != uTextAlpha && uTextAlpha <= 255)
 			{
-				auto pb = (BYTE*)&m_para.crText;
+				auto pb = (BYTE*)&lvcd.crText;
 				int r = *pb;
 				int g = pb[1];
 				int b = pb[2];
