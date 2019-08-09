@@ -780,6 +780,7 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 		if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 		{
 			tagLVCustomDraw lvcd(lvnmcd);
+			lvcd.crText = m_para.crText;
 			auto crBkg = lvcd.crBkg;
 
 			m_cbCustomDraw(lvcd);

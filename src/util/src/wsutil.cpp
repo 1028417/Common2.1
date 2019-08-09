@@ -3,7 +3,7 @@
 
 #include <locale>
 
-#ifdef _MSC_VER
+/*#ifdef _MSC_VER
 static const char *CN_LOCALE_STRING = "Chinese_china";
 static const locale g_locale_CN(CN_LOCALE_STRING);
 //static const locale g_locale_CN("");
@@ -14,7 +14,17 @@ static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_loc
 #include <QCollator>
 static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
 static const QCollator& g_collate_CN = QCollator(g_locale_CN);
-#endif
+#endif*/
+
+static class __init
+{
+public:
+	__init()
+	{
+		setlocale(LC_COLLATE, "chs");
+		setlocale(LC_CTYPE, "chs");
+	}
+} init;
 
 bool wsutil::checkWChar(const wstring& str)
 {
@@ -99,62 +109,25 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
 	}
 }
 
-int wsutil::compareUseCNCollate(const wstring& lhs, const wstring& rhs)
-{    
-#ifdef _MSC_VER
-	return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
-		, rhs.c_str(), rhs.c_str() + rhs.size());
-#else
-    return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
-#endif
-}
-
-int wsutil::compareIgnoreCase(const wstring& str1, const wstring& str2, size_t size)
+int wsutil::collate(const wstring& lhs, const wstring& rhs)
 {
-#ifdef __ANDROID__
-    if (0 == size)
-    {
-        size = MIN(str1.size(), str2.size()) + 1;
-    }
-    return wcsncmp(str1.c_str(), str2.c_str(), size);
-
-#else
-	if (0 != size)
-    {
-        return _wcsnicmp(str1.c_str(), str2.c_str(), size);
-	}
-	else
-	{
-		return _wcsicmp(str1.c_str(), str2.c_str());
-	}
-#endif
+	return wcscoll(lhs.c_str(), rhs.c_str());
+	//return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size(), rhs.c_str(), rhs.c_str() + rhs.size());
 }
 
 bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 {
-	return 0 == compareIgnoreCase(str1, str2);
+#ifdef __ANDROID__
+	return 0 == toQStr(str1).compare(toQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
+#else
+	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+#endif
 }
-
-//int wsutil::findIgnoreCase(const wstring& str, const wstring& strToFind)
-//{
-//	if (str.size() < strToFind.size())
-//	{
-//		return -1;
-//	}
-//
-//	size_t pos = lowerCase(str).find(lowerCase(strToFind));
-//	if (wstring::npos == pos)
-//	{
-//		return -1;
-//	}
-//
-//	return pos;
-//}
 
 void wsutil::lowerCase(wstring& str)
 {
 #ifdef __ANDROID__
-    str = wsutil::toQStr(str).toLower().toStdWString();
+    str = toQStr(str).toLower().toStdWString();
 #else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif
@@ -170,7 +143,7 @@ wstring wsutil::lowerCase_r(const wstring& str)
 void wsutil::upperCase(wstring& str)
 {
 #ifdef __ANDROID__
-    str = wsutil::toQStr(str).toUpper().toStdWString();
+    str = toQStr(str).toUpper().toStdWString();
 #else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #endif	
@@ -330,8 +303,6 @@ static bool _checkUTF8(const char *pStr)
 
 static wstring _fromStr(const char *pStr)
 {
-    setlocale(LC_CTYPE, "chs");
-
 	size_t len = 0;
 #ifdef __ANDROID__
 	len = mbstowcs(NULL, pStr, 0);
@@ -393,8 +364,6 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 
 static string _toStr(const wchar_t *pStr)
 {
-    setlocale(LC_CTYPE, "chs");
-
     size_t len = 0;
 #ifdef __ANDROID__
     len = wcstombs(NULL, pStr, 0);

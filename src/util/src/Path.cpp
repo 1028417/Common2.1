@@ -95,7 +95,7 @@ void CPath::_onFindFile()
 #ifndef __ANDROID__
 		if (lhs.m_bDir == rhs.m_bDir)
 		{
-			return wsutil::compareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
+			return wsutil::collate(lhs.m_strName, rhs.m_strName) < 0;
 		}  
 #endif
         return false;

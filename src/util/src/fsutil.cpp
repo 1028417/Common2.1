@@ -772,6 +772,8 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     dir.setFilter(QDir::Dirs | QDir::Files);
     dir.setSorting(QDir::DirsFirst);
 
+    QString qsFilter = wsutil::toQStr(strFilter);
+
     QFileInfoList list = dir.entryInfoList();
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
     {
@@ -797,7 +799,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 
         if (E_FindFindFilter::FFP_ByPrefix == eFilter)
         {
-            if (0 != wsutil::compareIgnoreCase(strFileName, strFilter, strFilter.size()))
+            if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
             {
                 continue;
             }
@@ -808,10 +810,6 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         if (!FileInfo.m_bDir)
         {
             FileInfo.m_uFileSize = fi.size();
-            // title = fi.completeBaseName()
-            // parentdir = fi.path()
-            // fullPath = fi.filePath()
-            // ??? fi.absoluteFilePath()
         }
 
         FileInfo.m_strName = strFileName;
