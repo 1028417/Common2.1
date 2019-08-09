@@ -85,22 +85,21 @@ void CPath::_onFindFile()
 		}
         return true;
 	});
-		
-#ifdef _MSC_VER
+
 	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
 		if (lhs.m_bDir && !rhs.m_bDir)
 		{
 			return true;
 		}
 
+#ifndef __ANDROID__
 		if (lhs.m_bDir == rhs.m_bDir)
 		{
 			return wsutil::compareUseCNCollate(lhs.m_strName, rhs.m_strName) < 0;
-		}
-
-		return false;
-	});
+		}  
 #endif
+        return false;
+    });
 }
 
 const TD_PathList& CPath::GetSubPath()

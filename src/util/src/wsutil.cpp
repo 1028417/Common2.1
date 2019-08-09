@@ -2,9 +2,19 @@
 #include "util.h"
 
 #include <locale>
-//static const locale g_locale_CN("Chinese_china");
-static const locale g_locale_CN("");
+
+#ifdef _MSC_VER
+static const char *CN_LOCALE_STRING = "Chinese_china";
+static const locale g_locale_CN(CN_LOCALE_STRING);
+//static const locale g_locale_CN("");
 static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
+
+#else
+#include <QLocale>
+#include <QCollator>
+static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
+static const QCollator& g_collate_CN = QCollator(g_locale_CN);
+#endif
 
 bool wsutil::checkWChar(const wstring& str)
 {
@@ -90,9 +100,13 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
 }
 
 int wsutil::compareUseCNCollate(const wstring& lhs, const wstring& rhs)
-{
+{    
+#ifdef _MSC_VER
 	return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
 		, rhs.c_str(), rhs.c_str() + rhs.size());
+#else
+    return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
+#endif
 }
 
 int wsutil::compareIgnoreCase(const wstring& str1, const wstring& str2, size_t size)
