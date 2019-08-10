@@ -47,7 +47,13 @@ wstring CPath::GetPath() const
 {
 	if (NULL != m_pParentDir)
 	{
-		return m_pParentDir->GetPath() + __wcBackSlant + m_strName;
+        return m_pParentDir->GetPath() +
+#ifdef __ANDROID__
+                __wcSlant
+#else
+                __wcBackSlant
+#endif
+                + m_strName;
 	}
 
 	return m_strName;
