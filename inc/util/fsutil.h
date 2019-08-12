@@ -155,7 +155,7 @@ public:
 		, E_FindFindFilter eFilter = E_FindFindFilter::FFP_None, const wstring& strFilter = L"")
 	{
 		return _findFile(strDir, [&](const tagFileInfo& fileInfo) {
-			return cb(fileInfo)
+            return cb(fileInfo);
 		}, eFilter, strFilter);
 	}
 
