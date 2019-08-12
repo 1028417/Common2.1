@@ -135,7 +135,7 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-#ifdef _MSC_VER
+#if __winvc
     return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
     return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
@@ -187,7 +187,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile
 		memset(&stat, 0, sizeof stat);
 		if (fileStat(strSrcFile, stat))
 		{
-#ifdef __ANDROID__
+#if __android
             struct timeval timeVal[] = {
                        {0,0}, {0,0}
                    };
@@ -204,7 +204,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile
 
 bool fsutil::fileStat(FILE *lpFile, tagFileStat& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return 0 == ::fstat(_fileno(lpFile), &stat);
 #else
     return 0 == _fstat(_fileno(lpFile), &stat);
@@ -213,7 +213,7 @@ bool fsutil::fileStat(FILE *lpFile, tagFileStat& stat)
 
 bool fsutil::fileStat(const wstring& strFile, tagFileStat& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return 0 == ::stat(wsutil::toStr(strFile).c_str(), &stat);
 #else
 	return 0 == _wstat(strFile.c_str(), &stat);
@@ -222,7 +222,7 @@ bool fsutil::fileStat(const wstring& strFile, tagFileStat& stat)
 
 bool fsutil::fileStat32(FILE *lpFile, tagFileStat32& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(lpFile, stat);
 #else
 	return 0 == _fstat32(_fileno(lpFile), &stat);
@@ -231,7 +231,7 @@ bool fsutil::fileStat32(FILE *lpFile, tagFileStat32& stat)
 
 bool fsutil::fileStat32(const wstring& strFile, tagFileStat32& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(strFile, stat);
 #else
 	return 0 == _wstat32(strFile.c_str(), &stat);
@@ -240,7 +240,7 @@ bool fsutil::fileStat32(const wstring& strFile, tagFileStat32& stat)
 
 bool fsutil::fileStat32_64(FILE *lpFile, tagFileStat32_64& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(lpFile, stat);
 #else
 	return 0 == _fstat32i64(_fileno(lpFile), &stat);
@@ -249,7 +249,7 @@ bool fsutil::fileStat32_64(FILE *lpFile, tagFileStat32_64& stat)
 
 bool fsutil::fileStat32_64(const wstring& strFile, tagFileStat32_64& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(strFile, stat);
 #else
 	return 0 == _wstat32i64(strFile.c_str(), &stat);
@@ -258,7 +258,7 @@ bool fsutil::fileStat32_64(const wstring& strFile, tagFileStat32_64& stat)
 
 bool fsutil::fileStat64(FILE *lpFile, tagFileStat64& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(lpFile, stat);
 #else
 	return 0 == _fstat64(_fileno(lpFile), &stat);
@@ -267,7 +267,7 @@ bool fsutil::fileStat64(FILE *lpFile, tagFileStat64& stat)
 
 bool fsutil::fileStat64(const wstring& strFile, tagFileStat64& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(strFile, stat);
 #else
 	return 0 == _wstat64(strFile.c_str(), &stat);
@@ -276,7 +276,7 @@ bool fsutil::fileStat64(const wstring& strFile, tagFileStat64& stat)
 
 bool fsutil::fileStat64_32(FILE *lpFile, tagFileStat64_32& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(lpFile, stat);
 #else
 	return 0 == _fstat64i32(_fileno(lpFile), &stat);
@@ -285,7 +285,7 @@ bool fsutil::fileStat64_32(FILE *lpFile, tagFileStat64_32& stat)
 
 bool fsutil::fileStat64_32(const wstring& strFile, tagFileStat64_32& stat)
 {
-#ifdef __ANDROID__
+#if __android
     return fileStat(strFile, stat);
 #else
 	return 0 == _wstat64i32(strFile.c_str(), &stat);
@@ -507,7 +507,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 
 	__EnsureReturn(_checkPathSplitor(*strDir.rbegin()) || _checkPathSplitor(strSubPath[size]), false);
 
-#ifdef __ANDROID__
+#if __android
 	cauto& _strDir = wsutil::toStr(strDir);
 	return 0 == strncasecmp(_strDir.c_str(), wsutil::toStr(strSubPath).c_str(), _strDir.size());
 #else
@@ -532,7 +532,7 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 
 bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
-#ifndef _MSC_VER
+#if !__winvc
     QFileInfo fi(wsutil::toQStr(strPath));
     if (!fi.exists())
     {
@@ -564,7 +564,7 @@ bool fsutil::existFile(const wstring& strFile)
 
 bool fsutil::createDir(const wstring& strDir)
 {
-#ifdef __ANDROID__
+#if __android
 	if (!QDir().mkpath(wsutil::toQStr(strDir)))
 	{
 		return false;
@@ -598,7 +598,7 @@ bool fsutil::createDir(const wstring& strDir)
 
 bool fsutil::removeDir(const wstring& strDir)
 {
-#ifdef __ANDROID__
+#if __android
     QDir dir(wsutil::toQStr(strDir));
     if (!dir.rmpath(dir.absolutePath()))
     {
@@ -621,7 +621,7 @@ bool fsutil::removeDir(const wstring& strDir)
 
 bool fsutil::removeFile(const wstring& strFile)
 {
-#ifdef __ANDROID__
+#if __android
     if (!QFile::remove(wsutil::toQStr(strFile)))
     {
         return false;
@@ -642,7 +642,7 @@ bool fsutil::removeFile(const wstring& strFile)
 
 bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-#ifdef __ANDROID__
+#if __android
     if (existFile(strDstFile))
     {
         // TODO if (strSrcFile ==== strDstFile)
@@ -668,12 +668,12 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
     return true;
 }
 
-#ifdef __ANDROID__
+#if __android
 #include <unistd.h>
 #endif
 int64_t fsutil::seekFile(FILE *lpFile, int64_t offset, E_SeekFileFlag eFlag)
 {
-#ifdef __ANDROID__
+#if __android
     //(void)fseek(lpFile, (long)offset, (int)eFlag);
     //return ftell(lpFile);
 
@@ -699,7 +699,7 @@ int64_t fsutil::seekFile(FILE *lpFile, int64_t offset, E_SeekFileFlag eFlag)
 #endif
 }
 
-#ifdef _MSC_VER
+#if __winvc
 #include <direct.h>
 #define getcwd _getcwd
 #define chdir _chdir
@@ -743,7 +743,7 @@ bool fsutil::setWorkDir(const wstring& strWorkDir)
     return true;
 }
 
-#ifndef __ANDROID__
+#if !__android
 wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 {
 	wchar_t pszPath[MAX_PATH];
@@ -758,7 +758,7 @@ static const wstring g_wsDotDot(2, __wcDot);
 
 bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
 {
-#ifdef __ANDROID__
+#if __android
 	if (strDir.empty())
 	{
         return false;

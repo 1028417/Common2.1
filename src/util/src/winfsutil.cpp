@@ -1,5 +1,5 @@
 ﻿
-#ifndef __ANDROID__
+#if !__android
 
 #include "util.h"
 

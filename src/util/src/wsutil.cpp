@@ -3,7 +3,7 @@
 
 #include <locale>
 
-/*#ifdef _MSC_VER
+/*#if __winvc
 static const char *CN_LOCALE_STRING = "Chinese_china";
 static const locale g_locale_CN(CN_LOCALE_STRING);
 //static const locale g_locale_CN("");
@@ -117,7 +117,7 @@ int wsutil::collate(const wstring& lhs, const wstring& rhs)
 
 bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 {
-#ifdef __ANDROID__
+#if __android
 	return 0 == toQStr(str1).compare(toQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
 #else
 	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
@@ -126,7 +126,7 @@ bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 
 void wsutil::lowerCase(wstring& str)
 {
-#ifdef __ANDROID__
+#if __android
     str = toQStr(str).toLower().toStdWString();
 #else
 	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
@@ -142,7 +142,7 @@ wstring wsutil::lowerCase_r(const wstring& str)
 
 void wsutil::upperCase(wstring& str)
 {
-#ifdef __ANDROID__
+#if __android
     str = toQStr(str).toUpper().toStdWString();
 #else
 	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
@@ -192,7 +192,7 @@ wstring wsutil::replaceChars_r(const wstring& str, const wstring& strFindChars, 
 	return strRet;
 }
 
-#ifdef _MSC_VER
+#if __winvc
 #include <codecvt>
 using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
@@ -200,7 +200,7 @@ static utf8_convert g_utf8Convert;
 
 inline static wstring _fromUTF8(const char *pStr)
 {
-#ifndef _MSC_VER
+#if !__winvc
 	return QString::fromUtf8(pStr).toStdWString();
 #else
 	return g_utf8Convert.from_bytes(pStr);
@@ -219,7 +219,7 @@ wstring wsutil::fromUTF8(const string& str)
 
 inline static string _toUTF8(const wchar_t *pStr)
 {
-#ifndef _MSC_VER
+#if !__winvc
     return wsutil::toQStr(pStr).toUtf8().constData();
 #else
 	return g_utf8Convert.to_bytes(pStr);
@@ -304,7 +304,7 @@ static bool _checkUTF8(const char *pStr)
 static wstring _fromStr(const char *pStr)
 {
 	size_t len = 0;
-#ifdef __ANDROID__
+#if __android
 	len = mbstowcs(NULL, pStr, 0);
 #else
 	if (mbstowcs_s(&len, NULL, 0, pStr, 0))
@@ -320,7 +320,7 @@ static wstring _fromStr(const char *pStr)
 	vector<wchar_t> vecBuff(len + 1);
 	wchar_t *pBuff = &vecBuff.front();
 
-#ifdef __ANDROID__
+#if __android
 	(void)mbstowcs(pBuff, pStr, len);
 #else
 	if (mbstowcs_s(NULL, pBuff, len, pStr, len-1))
@@ -365,7 +365,7 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 static string _toStr(const wchar_t *pStr)
 {
     size_t len = 0;
-#ifdef __ANDROID__
+#if __android
     len = wcstombs(NULL, pStr, 0);
 #else
     if (wcstombs_s(&len, NULL, 0, pStr, 0))
@@ -381,7 +381,7 @@ static string _toStr(const wchar_t *pStr)
     vector<char> vecBuff(len + 1);
     char *pBuff = &vecBuff.front();
 
-#ifdef __ANDROID__
+#if __android
     (void)wcstombs(pBuff, pStr, len);
 #else
     if (wcstombs_s(NULL, pBuff, len, pStr, len-1))

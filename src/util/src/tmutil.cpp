@@ -14,7 +14,7 @@ bool tmutil::timeToTM(time32_t tTime, tagTM& tm)
 {
 	struct tm _tm;
 
-#ifdef __ANDROID__
+#if __android
     if (localtime_r(&tTime, &_tm))
     {
         return L"";
@@ -52,7 +52,7 @@ wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
 
     struct tm _tm;
 
-#ifdef __ANDROID__
+#if __android
     if (localtime_r(&tTime, &_tm))
     {
         return L"";
@@ -67,7 +67,7 @@ wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
     return _formatTime(_tm, strFormat);
 }
 
-#ifndef __ANDROID__
+#if !__android
 bool tmutil::time64ToTM(time64_t time, tagTM& tm)
 {
     struct tm _tm;

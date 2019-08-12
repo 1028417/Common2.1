@@ -14,7 +14,7 @@ const string CTxtWriter::__UTF8Bom({ (char)0xef, (char)0xbb, (char)0xbf });
 
 bool CTxtWriter::_open(const wstring& strFile, bool bTrunc)
 {
-#ifdef __ANDROID__
+#if __android
     return _open(wsutil::toStr(strFile), bTrunc);
 
 #else
@@ -30,7 +30,7 @@ bool CTxtWriter::_open(const string& strFile, bool bTrunc)
 {
 	string strMode(bTrunc ? "wb" : "ab");
 
-#ifdef __ANDROID__
+#if __android
 	m_lpFile = fopen(strFile.c_str(), strMode.c_str());
 #else
 	(void)fopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
