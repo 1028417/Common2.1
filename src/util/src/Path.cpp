@@ -20,9 +20,9 @@ void CPath::SetDir(const wstring& strDir, bool bFindFile)
 	m_bDir = true;
 
 #if __android
-    m_strName = wsutil::rtrim_r(strDir, __wcSlant);
+    m_strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 #else
-    m_strName = wsutil::rtrim_r(strDir, __wcBackSlant);
+    m_strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 #endif
 
     if (bFindFile)
@@ -49,9 +49,9 @@ wstring CPath::GetPath() const
 	{
         return m_pParentDir->GetPath() +
 #if __android
-                __wcSlant
+                __wcFSSlant
 #else
-                __wcBackSlant
+                __wcFSSlant
 #endif
                 + m_strName;
 	}

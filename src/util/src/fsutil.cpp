@@ -388,9 +388,9 @@ time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
 	return stat.st_mtime;
 }
 
-inline static bool _checkPathSplitor(wchar_t wch)
+inline static bool _checkFSSlant(wchar_t wch)
 {
-	return __wcBackSlant == wch || __wcSlant == wch;
+	return fsutil::wcBackSlant == wch || fsutil::wcSlant == wch;
 }
 
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
@@ -398,7 +398,7 @@ void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFi
 	int size = strPath.size();
 	for (int pos = size - 1; pos>=0; pos--)
 	{
-		if (_checkPathSplitor(strPath[pos]))
+		if (_checkFSSlant(strPath[pos]))
 		{
 			if (NULL != pstrDir)
 			{
@@ -425,7 +425,7 @@ wstring fsutil::GetRootDir(const wstring& strPath)
 	int size = strPath.size();
 	for (int pos = 1; pos < size; pos++)
 	{
-		if (_checkPathSplitor(strPath[pos]))
+		if (_checkFSSlant(strPath[pos]))
 		{
 			return strPath.substr(1, pos-1);
 		}
@@ -439,7 +439,7 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 	__EnsureReturn(!strPath.empty(), L"");
 
 	wstring t_strPath = strPath;
-	if (_checkPathSplitor(t_strPath.back()))
+	if (_checkFSSlant(t_strPath.back()))
 	{
 		t_strPath.pop_back();
 	}
@@ -505,7 +505,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(_checkPathSplitor(*strDir.rbegin()) || _checkPathSplitor(strSubPath[size]), false);
+	__EnsureReturn(_checkFSSlant(*strDir.rbegin()) || _checkFSSlant(strSubPath[size]), false);
 
 #if __android
 	cauto& _strDir = wsutil::toStr(strDir);
@@ -827,9 +827,9 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
 	}
 	
 	wstring strFind(strDir);
-	if (!_checkPathSplitor(strDir.back()))
+	if (!_checkFSSlant(strDir.back()))
 	{
-		strFind.append(1, __wcBackSlant);
+		strFind.append(1, __wcFSSlant);
 	}
 
 	if (E_FindFindFilter::FFP_ByPrefix == eFilter)
