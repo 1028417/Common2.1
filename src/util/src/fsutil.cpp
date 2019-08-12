@@ -756,7 +756,7 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
 
-bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
+bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
 {
 #ifdef __ANDROID__
 	if (strDir.empty())

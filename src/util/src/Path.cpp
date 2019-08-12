@@ -89,7 +89,6 @@ void CPath::_onFindFile()
 		{
 			m_lstSubPath.add(pSubPath);
 		}
-        return true;
 	});
 
 	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
