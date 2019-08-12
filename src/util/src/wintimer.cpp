@@ -1,7 +1,7 @@
 
-#if !__android
-
 #include "util.h"
+
+#if !__android
 
 #include <Windows.h>
 
