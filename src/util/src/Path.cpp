@@ -81,20 +81,24 @@ void CPath::_onFindFile()
 		}
 	});
 
-	m_lstSubPath.qsort([](const CPath& lhs, const CPath& rhs) {
-		if (lhs.m_bDir && !rhs.m_bDir)
-		{
-			return true;
-		}
-
-#if !__android
-		if (lhs.m_bDir == rhs.m_bDir)
-		{
-			return wsutil::collate(lhs.m_strName, rhs.m_strName) < 0;
-		}  
-#endif
-        return false;
+    m_lstSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
+        return _sortCompare(lhs, rhs) < 0;
     });
+}
+
+int CPath::_sortCompare(const CPath& rhs) const
+{
+    if (m_bDir && !rhs.m_bDir)
+    {
+        return -1;
+    }
+
+    if (m_bDir == rhs.m_bDir)
+    {
+        return wsutil::collate(m_strName, rhs.m_strName);
+    }
+
+    return 1;
 }
 
 const TD_PathList& CPath::GetSubPath()
