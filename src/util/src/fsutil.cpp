@@ -388,11 +388,6 @@ time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
 	return stat.st_mtime;
 }
 
-inline static bool _checkFSSlant(wchar_t wch)
-{
-	return fsutil::wcBackSlant == wch || fsutil::wcSlant == wch;
-}
-
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
 	int size = strPath.size();
