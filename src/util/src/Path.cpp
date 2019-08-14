@@ -81,6 +81,11 @@ void CPath::_onFindFile()
 		}
 	});
 
+	_sortSubPath();
+}
+
+void CPath::_sortSubPath()
+{
     m_lstSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
         return _sortCompare(lhs, rhs) < 0;
     });
