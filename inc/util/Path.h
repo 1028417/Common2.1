@@ -24,9 +24,7 @@ class __UtilExt CPath : protected tagFileInfo
 	friend struct tagPathSortor;
 
 public:
-	CPath()
-	{
-	}
+	CPath() {}
 
 	CPath(const wstring& strName, bool bDir);
 

@@ -100,7 +100,7 @@ int CPath::_sortCompare(const CPath& rhs) const
 
     if (m_bDir == rhs.m_bDir)
     {
-        return wsutil::collate(m_strName, rhs.m_strName);
+        return wsutil::collate(GetName(), rhs.GetName());
     }
 
     return 1;
@@ -179,7 +179,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 				}
 			}
 
-			if (wsutil::matchIgnoreCase(SubPath.m_strName, strSubName))
+			if (wsutil::matchIgnoreCase(SubPath.GetName(), strSubName))
 			{
 				pPath = &SubPath;
 				return false;
