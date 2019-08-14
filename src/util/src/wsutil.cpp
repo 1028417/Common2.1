@@ -111,10 +111,11 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
 int wsutil::collate(const wstring& lhs, const wstring& rhs)
 {
 #if __android
-	return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
-		, rhs.c_str(), rhs.c_str() + rhs.size());
+    return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
 #else
 	return wcscoll(lhs.c_str(), rhs.c_str());
+    //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
+        //, rhs.c_str(), rhs.c_str() + rhs.size());
 #endif
 }
 
