@@ -100,11 +100,11 @@ static void _shellExplore(const wstring& strSelFile, const wstring& strDir=L"", 
 		{
 			strPara.append(L",/root");
 		}
-		strPara.append(L"," + strDir);
+		strPara.append(L", \"" + strDir + L"\"");
 	}
 	else if (!strSelFile.empty())
 	{
-		strPara.append(L",/select," + strSelFile);
+		strPara.append(L",/select, \"" + strSelFile + L"\"");
 	}
 
     (void)::ShellExecuteW(hWnd, L"open", L"explorer",  strPara.c_str(), NULL, SW_MAXIMIZE);

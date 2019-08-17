@@ -359,12 +359,6 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 
 	CRedrawLockGuard RedrawLockGuard(*this);
 
-	bool bFlag = (E_ListViewType::LVT_List == GetView());	
-	if (bFlag)
-	{
-		SetView(E_ListViewType::LVT_Tile);
-	}
-
 	DeselectAll();
 
 	int nItem = 0;//nPos;
@@ -386,8 +380,9 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 		(void)DeleteItem(nMaxItem);
 	}
 
-	if (bFlag)
+	if (E_ListViewType::LVT_List == GetView())
 	{
+		SetView(E_ListViewType::LVT_Tile);
 		SetView(E_ListViewType::LVT_List);
 	}
 }
@@ -751,16 +746,6 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 		if (GetItemState(nmcd.dwItemSpec, LVIS_SELECTED))
 		{
 			lvnmcd.clrTextBk = BkgColor_Select;
-
-			if (!bReportView)
-			{
-				CDC dc;
-				if (dc.Attach(nmcd.hdc))
-				{
-					dc.FillSolidRect(&nmcd.rc, BkgColor_Select);
-					dc.Detach();
-				}
-			}
 		}
 		else
 		{
