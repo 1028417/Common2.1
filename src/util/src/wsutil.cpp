@@ -3,17 +3,17 @@
 
 #include <locale>
 
-#if __android
+/*#if __android
 	#include <QLocale>
 	#include <QCollator>
 	static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
 	static const QCollator& g_collate_CN = QCollator(g_locale_CN);
-/*#else
+#else
 	static const char *CN_LOCALE_STRING = "Chinese_china";
 	static const locale g_locale_CN(CN_LOCALE_STRING);
 	//static const locale g_locale_CN("");
-	static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);*/
-#endif
+    static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
+#endif*/
 
 static class __init
 {
@@ -21,7 +21,11 @@ public:
 	__init()
 	{
 		setlocale(LC_COLLATE, "chs");
-		setlocale(LC_CTYPE, "chs");
+		setlocale(LC_CTYPE, "chs");        
+ /*
+#if __android
+        g_collate_CN.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive)
+#endif*/
 	}
 } init;
 
@@ -110,9 +114,10 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
 
 int wsutil::collate(const wstring& lhs, const wstring& rhs)
 {
-	return wcscoll(lhs.c_str(), rhs.c_str());
+    return wcscoll(lhs.c_str(), rhs.c_str());
+
 #if __android
-    return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
+    //return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
 #else
     //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
         //, rhs.c_str(), rhs.c_str() + rhs.size());

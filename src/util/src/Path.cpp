@@ -100,7 +100,12 @@ int CPath::_sortCompare(const CPath& rhs) const
 
     if (m_bDir == rhs.m_bDir)
     {
+#if __android
+        return wsutil::toQStr(GetName()).compare(wsutil::toQStr(rhs.GetName()), Qt::CaseSensitivity::CaseInsensitive);
+                //.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
+#else
         return wsutil::collate(GetName(), rhs.GetName());
+#endif
     }
 
     return 1;
