@@ -129,6 +129,20 @@ void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 	});
 }
 
+bool CPath::hasSubDir() const
+{
+	return m_lstSubPath.any([&](CPath& subPath) {
+		return subPath.IsDir();
+	});
+}
+
+bool CPath::hasSubFile() const
+{
+	return m_lstSubPath.any([&](CPath& subPath) {
+		return !subPath.IsDir();
+	});
+}
+
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
 	__EnsureReturn(m_bDir, NULL);
@@ -154,10 +168,9 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		wstring strSubName = lstSubName.front();
 		lstSubName.pop_front();
 
-		auto& lstSubPath = pPath->GetSubPath();
 		pPath = NULL;
 
-		lstSubPath([&](CPath& SubPath) {
+		pPath->GetSubPath()([&](CPath& SubPath) {
 			if (lstSubName.empty())
 			{
 				if (SubPath.m_bDir != bDir)
