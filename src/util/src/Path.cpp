@@ -65,19 +65,19 @@ void CPath::_findFile()
 	{
 		Clear();
 		
-		_onFindFile();
+		_onFindFile(m_lstSubPath);
 
 		m_bFinded = true;
 	}
 }
 
-void CPath::_onFindFile(bool bSort)
+void CPath::_onFindFile(TD_PathList& lstSubPath, bool bSort)
 {
 	m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
 		CPath *pSubPath = NewSubPath(FileInfo);
 		if (pSubPath)
 		{
-			m_lstSubPath.add(pSubPath);
+			lstSubPath.add(pSubPath);
 		}
 	});
 
@@ -129,16 +129,16 @@ void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 	});
 }
 
-bool CPath::hasSubDir() const
+bool CPath::hasSubDir()
 {
-	return m_lstSubPath.any([&](CPath& subPath) {
+	return GetSubPath().any([&](CPath& subPath) {
 		return subPath.IsDir();
 	});
 }
 
-bool CPath::hasSubFile() const
+bool CPath::hasSubFile()
 {
-	return m_lstSubPath.any([&](CPath& subPath) {
+	return GetSubPath().any([&](CPath& subPath) {
 		return !subPath.IsDir();
 	});
 }

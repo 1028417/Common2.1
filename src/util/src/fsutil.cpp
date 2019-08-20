@@ -747,9 +747,9 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
             continue;
         }
 
-        if (E_FindFindFilter::FFP_ByExt == eFilter)
+        if (E_FindFindFilter::FFP_ByExt == eFilter && pstrFilter)
         {
-            if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), strFilter))
+            if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
             {
                 continue;
             }
