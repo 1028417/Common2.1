@@ -186,16 +186,6 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	return pPath;
 }
 
-CPath *CPath::GetSubPath(UINT uIdx) const
-{
-	CPath *pSubPath = NULL;
-	m_lstSubPath.get(uIdx, [&](CPath& SubPath) {
-		pSubPath = &SubPath;
-	});
-
-	return pSubPath;
-}
-
 void CPath::RemoveSubPath(CPath *pSubPath)
 {
 	if (0 != m_lstSubPath.del(pSubPath))
