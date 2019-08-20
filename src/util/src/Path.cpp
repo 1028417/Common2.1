@@ -71,24 +71,22 @@ void CPath::_findFile()
 	}
 }
 
-void CPath::_onFindFile()
+void CPath::_onFindFile(bool bSort)
 {
 	m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
-		CPath *pSubPath = NewSubPath(FileInfo, *this);
+		CPath *pSubPath = NewSubPath(FileInfo);
 		if (pSubPath)
 		{
 			m_lstSubPath.add(pSubPath);
 		}
 	});
 
-	_sortSubPath();
-}
-
-void CPath::_sortSubPath()
-{
-    m_lstSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
-        return _sortCompare(lhs, rhs) < 0;
-    });
+	if (bSort)
+	{
+		m_lstSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
+			return _sortCompare(lhs, rhs) < 0;
+		});
+	}
 }
 
 int CPath::_sortCompare(const CPath& rhs) const
@@ -111,18 +109,9 @@ int CPath::_sortCompare(const CPath& rhs) const
     return 1;
 }
 
-const TD_PathList& CPath::GetSubPath()
-{
-	_findFile();
-
-	return m_lstSubPath;
-}
-
 void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 {
-	_findFile();
-
-	m_lstSubPath([&](CPath& SubPath) {
+	GetSubPath()([&](CPath& SubPath) {
 		if (SubPath.m_bDir)
 		{
 			if (plstSubDir)

@@ -142,7 +142,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 #endif
 }
 
-static bool _copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const char *lpFileHead = NULL, size_t uHeadSize = 0)
+bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
 {
 	ibstream srcStream(strSrcFile);
 	__EnsureReturn(srcStream, false);
@@ -150,52 +150,23 @@ static bool _copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 	obstream dstStream(strDstFile, true);
 	__EnsureReturn(dstStream, false);
 
-	if (NULL != lpFileHead && uHeadSize != 0)
-	{
-		dstStream.write(lpFileHead, uHeadSize);
-	}
-
 	char lpBuffer[1024]{ 0 };
-    while (!srcStream.eof())
-    {
-        srcStream.read(lpBuffer, sizeof lpBuffer);
-        auto size = srcStream.gcount();
-        if (size > 0)
-        {
-            dstStream.write(lpBuffer, size);
-            if (!dstStream.good())
-            {
-                return false;
-            }
-        }
-    }
-
-	return true;
-}
-
-bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile
-	, bool bSyncModifyTime, const char *lpFileHead, size_t uHeadSize)
-{
-    if (!_copyFileEx(strSrcFile, strDstFile, lpFileHead, uHeadSize))
+	while (!srcStream.eof())
 	{
-		return false;
-	}
-
-	if (bSyncModifyTime)
-	{
-		tagFileStat stat;
-		memset(&stat, 0, sizeof stat);
-		if (fileStat(strSrcFile, stat))
+		srcStream.read(lpBuffer, sizeof lpBuffer);
+		auto size = srcStream.gcount();
+		if (size > 0)
 		{
-#if __android
-            struct timeval timeVal[] = {
-                       {0,0}, {0,0}
-                   };
-            utimes(wsutil::toStr(strDstFile).c_str(), timeVal);
-#else
-            struct _utimbuf timbuf { stat.st_atime, stat.st_mtime };
-            (void)_wutime(strDstFile.c_str(), &timbuf);
-#endif
+			if (cb)
+			{
+				cb(lpBuffer, (size_t)size);
+			}
+
+			dstStream.write(lpBuffer, size);
+			if (!dstStream.good())
+			{
+				return false;
+			}
 		}
 	}
 
@@ -307,7 +278,7 @@ int fsutil::GetFileSize(FILE *lpFile)
 int fsutil::GetFileSize(const wstring& strFile)
 {
 	tagFileStat32 stat;
-	memset(&stat, 0, sizeof stat);
+ 	memset(&stat, 0, sizeof stat);
 	if (!fileStat32(strFile, stat))
 	{
 		return -1;
@@ -751,7 +722,7 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
 
-bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wstring& strFilter)
+bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
 #if __android
 	if (strDir.empty())
@@ -766,8 +737,6 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
     }
     dir.setFilter(QDir::Dirs | QDir::Files);
     dir.setSorting(QDir::DirsFirst);
-
-    QString qsFilter = wsutil::toQStr(strFilter);
 
     QFileInfoList list = dir.entryInfoList();
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
@@ -792,8 +761,9 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
             continue;
         }
 
-        if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+        if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
         {
+			QString qsFilter = wsutil::toQStr(pstrFilter);
             if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
             {
                 continue;
@@ -827,13 +797,13 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
 		strFind.append(1, __wcFSSlant);
 	}
 
-	if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+	if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
 	{
-		strFind.append(strFilter).append(L"*");
+		strFind.append(pstrFilter).append(L"*");
 	}
-	else if (E_FindFindFilter::FFP_ByExt == eFilter)
+	else if (E_FindFindFilter::FFP_ByExt == eFilter && pstrFilter)
 	{
-		strFind.append(L"*.").append(strFilter);
+		strFind.append(L"*.").append(pstrFilter);
 	}
 	else
 	{
