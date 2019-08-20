@@ -771,16 +771,16 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
         }
 
         tagFileInfo FileInfo;
-        FileInfo.m_bDir = fi.isDir();
-        if (!FileInfo.m_bDir)
+        FileInfo.bDir = fi.isDir();
+        if (!FileInfo.bDir)
         {
-            FileInfo.m_uFileSize = fi.size();
+            FileInfo.uFileSize = fi.size();
         }
 
-        FileInfo.m_strName = strFileName;
+        FileInfo.strName = strFileName;
 
-        FileInfo.m_tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
-        FileInfo.m_tModifyTime = fi.lastModified().toTime_t();
+        FileInfo.tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+        FileInfo.tModifyTime = fi.lastModified().toTime_t();
 
         cb(FileInfo);
     }
