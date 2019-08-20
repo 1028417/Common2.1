@@ -167,9 +167,7 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	{
 		wstring strSubName = lstSubName.front();
 		lstSubName.pop_front();
-
-		pPath = NULL;
-
+		
 		pPath->GetSubPath()([&](CPath& SubPath) {
 			if (lstSubName.empty())
 			{
