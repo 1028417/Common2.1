@@ -90,7 +90,9 @@ public:
 
 	wstring GetParentDir() const;
 
-	void findFile(bool bScanAll = false);
+	void findFile();
+
+	bool scan();
 
 	size_t size() 
 	{

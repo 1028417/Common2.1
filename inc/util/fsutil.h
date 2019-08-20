@@ -177,7 +177,7 @@ public:
 	}
 
 private:
-    using CB_FindFile = const function<bool(const tagFileInfo&)>&;
+    using CB_FindFile = const function<bool(tagFileInfo&)>&;
     static bool _findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter);
 };
 

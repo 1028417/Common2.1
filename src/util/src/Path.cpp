@@ -54,40 +54,62 @@ wstring CPath::GetParentDir() const
 	return L"";
 }
 
-void CPath::findFile(bool bScanAll)
+void CPath::findFile()
 {
-	if (bScanAll || !m_bFinded)
+	if (m_bFinded)
 	{
-		if (bScanAll)
+		return;
+	}
+	m_bFinded = true;
+
+	m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
+		FileInfo.pParent = this;
+		CPath *pSubPath = NewSubPath(FileInfo);
+		if (NULL == pSubPath)
 		{
-			Clear();
+			return;
+		}
+			
+		m_lstSubPath.add(pSubPath);
+	});
+
+	_sort(m_lstSubPath);
+}
+
+bool CPath::scan()
+{
+	Clear();
+
+	m_bFinded = true;
+
+	m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
+		FileInfo.pParent = this;
+		CPath *pSubPath = NewSubPath(FileInfo);
+		if (NULL == pSubPath)
+		{
+			return;
 		}
 
-		m_bFinded = true;
-
-		m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
-			FileInfo.pParent = this;
-			CPath *pSubPath = NewSubPath(FileInfo);
-			if (NULL == pSubPath)
+		if (FileInfo.bDir)
+		{
+			if (!pSubPath->scan())
 			{
+				delete pSubPath;
 				return;
 			}
-			
-			if (bScanAll && FileInfo.bDir)
-			{
-				pSubPath->findFile(true);
-				if (pSubPath->size() == 0)
-				{
-					delete pSubPath;
-					return;
-				}
-			}
+		}
 
-			m_lstSubPath.add(pSubPath);
-		});
+		m_lstSubPath.add(pSubPath);
+	});
 
-		_sort(m_lstSubPath);
+	if (!m_lstSubPath)
+	{
+		return false;
 	}
+
+	_sort(m_lstSubPath);
+
+	return true;
 }
 
 void CPath::_sort(TD_PathList& lstSubPath)
