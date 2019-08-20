@@ -58,14 +58,15 @@ void CPath::findFile(bool bScanAll)
 {
 	if (bScanAll || !m_bFinded)
 	{
-		m_bFinded = true;
-
 		if (bScanAll)
 		{
 			Clear();
 		}
 
-		m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
+		m_bFinded = true;
+
+		m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
+			FileInfo.pParent = this;
 			CPath *pSubPath = NewSubPath(FileInfo);
 			if (NULL == pSubPath)
 			{
