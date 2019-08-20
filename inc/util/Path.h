@@ -43,11 +43,11 @@ protected:
 	CPath *m_pParentDir = NULL;
 
 private:
-    bool m_bDirExists = false;
+	bool m_bFinded = false;
+	
+	bool m_bDirExists = false;
 
     TD_PathList m_lstSubPath;
-
-	bool m_bFinded = false;
 
 private:
 	void _findFile();
@@ -104,7 +104,6 @@ public:
 	}
 
 	bool hasSubDir();
-
 	bool hasSubFile();
 
 	inline const TD_PathList& GetSubPath()

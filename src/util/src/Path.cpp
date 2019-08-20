@@ -63,11 +63,11 @@ void CPath::_findFile()
 {
 	if (!m_bFinded)
 	{
-		Clear();
-		
-		_onFindFile(m_lstSubPath);
-
 		m_bFinded = true;
+
+		m_bDirExists = false;
+
+		_onFindFile(m_lstSubPath);
 	}
 }
 
