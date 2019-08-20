@@ -89,20 +89,20 @@ void CPath::_onFindFile(TD_PathList& lstSubPath, bool bSort)
 	}
 }
 
-int CPath::_sortCompare(const CPath& rhs) const
+int CPath::_sortCompare(const CPath& lhs, const CPath& rhs) const
 {
-    if (m_bDir && !rhs.m_bDir)
+    if (lhs.m_bDir && !rhs.m_bDir)
     {
         return -1;
     }
 
-    if (m_bDir == rhs.m_bDir)
+    if (lhs.m_bDir == rhs.m_bDir)
     {
 #if __android
-        return wsutil::toQStr(GetName()).compare(wsutil::toQStr(rhs.GetName()), Qt::CaseSensitivity::CaseInsensitive);
+        return wsutil::toQStr(lhs.GetName()).compare(wsutil::toQStr(rhs.GetName()), Qt::CaseSensitivity::CaseInsensitive);
                 //.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
 #else
-        return wsutil::collate(GetName(), rhs.GetName());
+        return wsutil::collate(lhs.GetName(), rhs.GetName());
 #endif
     }
 

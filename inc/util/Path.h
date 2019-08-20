@@ -62,14 +62,9 @@ private:
 protected:
 	virtual void _onFindFile(TD_PathList& lstSubPath, bool bSort=true);
 
-    virtual int _sortCompare(const CPath& lhs, const CPath& rhs) const
-    {
-        return lhs._sortCompare(rhs);
-    }
-
+	virtual int _sortCompare(const CPath& lhs, const CPath& rhs) const;
+    
 public:
-	virtual int _sortCompare(const CPath& rhs) const;
-
     void SetDir(const wstring& strDir, bool bFindFile=false);
 
 	void SetName(const wstring& strNewName)
