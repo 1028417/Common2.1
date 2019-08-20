@@ -13,18 +13,13 @@ CPath::CPath(const wstring& strName, bool bDir)
 	}
 }
 
-void CPath::SetDir(const wstring& strDir, bool bFindFile)
+void CPath::SetDir(const wstring& strDir)
 {
 	Clear();
 
 	m_FileInfo.bDir = true;
 
 	m_FileInfo.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
-
-    if (bFindFile)
-    {
-        _findFile();
-    }
 }
 
 wstring CPath::GetName() const
@@ -59,18 +54,35 @@ wstring CPath::GetParentDir() const
 	return L"";
 }
 
-void CPath::_findFile()
+void CPath::findFile(bool bScanAll)
 {
-	if (!m_bFinded)
+	if (bScanAll || !m_bFinded)
 	{
 		m_bFinded = true;
 
+		if (bScanAll)
+		{
+			Clear();
+		}
+
 		m_bDirExists = fsutil::findFile(this->GetPath(), [&](const tagFileInfo& FileInfo) {
 			CPath *pSubPath = NewSubPath(FileInfo);
-			if (pSubPath)
+			if (NULL == pSubPath)
 			{
-				m_lstSubPath.add(pSubPath);
+				return;
 			}
+			
+			if (bScanAll && FileInfo.bDir)
+			{
+				pSubPath->findFile(true);
+				if (pSubPath->size() == 0)
+				{
+					delete pSubPath;
+					return;
+				}
+			}
+
+			m_lstSubPath.add(pSubPath);
 		});
 
 		_sort(m_lstSubPath);
@@ -210,14 +222,14 @@ void CPath::RemoveSelf()
 
 void CPath::Clear()
 {
-	m_bDirExists = false;
-
 	m_lstSubPath([](CPath& SubPath) {
 		delete &SubPath;
 	});
 	m_lstSubPath.clear();
 
 	m_bFinded = false;
+
+	m_bDirExists = false;
 }
 
 bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)
