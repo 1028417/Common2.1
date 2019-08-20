@@ -9,7 +9,7 @@ CPath::CPath(const wstring& strName, bool bDir)
 	}
 	else
 	{
-		m_strName = strName;
+		m_FileInfo.strName = strName;
 	}
 }
 
@@ -17,9 +17,9 @@ void CPath::SetDir(const wstring& strDir, bool bFindFile)
 {
 	Clear();
 
-	m_bDir = true;
+	m_FileInfo.bDir = true;
 
-    m_strName = wsutil::rtrim_r(strDir, __wcFSSlant);
+	m_FileInfo.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 
     if (bFindFile)
     {
@@ -29,31 +29,31 @@ void CPath::SetDir(const wstring& strDir, bool bFindFile)
 
 wstring CPath::GetName() const
 {
-	if (NULL != m_pParentDir)
+	if (NULL != m_FileInfo.pParent)
 	{
-		return m_strName;
+		return m_FileInfo.strName;
 	}
 	else
 	{
-		return fsutil::GetFileName(m_strName);
+		return fsutil::GetFileName(m_FileInfo.strName);
 	}
 }
 
 wstring CPath::GetPath() const
 {
-	if (NULL != m_pParentDir)
+	if (NULL != m_FileInfo.pParent)
 	{
-        return m_pParentDir->GetPath() + __wcFSSlant + m_strName;
+        return m_FileInfo.pParent->GetPath() + __wcFSSlant + m_FileInfo.strName;
 	}
 
-	return m_strName;
+	return m_FileInfo.strName;
 }
 
 wstring CPath::GetParentDir() const
 {
-	if (NULL != m_pParentDir)
+	if (NULL != m_FileInfo.pParent)
 	{
-		return m_pParentDir->GetPath();
+		return m_FileInfo.pParent->GetPath();
 	}
 
 	return L"";
@@ -86,12 +86,12 @@ void CPath::_sort(TD_PathList& lstSubPath)
 
 int CPath::_sortCompare(const CPath& lhs, const CPath& rhs) const
 {
-    if (lhs.m_bDir && !rhs.m_bDir)
+    if (lhs.IsDir() && !rhs.IsDir())
     {
         return -1;
     }
 
-    if (lhs.m_bDir == rhs.m_bDir)
+    if (lhs.IsDir() == rhs.IsDir())
     {
 #if __android
         return wsutil::toQStr(lhs.GetName()).compare(wsutil::toQStr(rhs.GetName()), Qt::CaseSensitivity::CaseInsensitive);
@@ -107,7 +107,7 @@ int CPath::_sortCompare(const CPath& lhs, const CPath& rhs) const
 void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
 {
 	GetSubPath()([&](CPath& SubPath) {
-		if (SubPath.m_bDir)
+		if (SubPath.IsDir())
 		{
 			if (plstSubDir)
 			{
@@ -140,7 +140,7 @@ bool CPath::hasSubFile()
 
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
-	__EnsureReturn(m_bDir, NULL);
+	__EnsureReturn(m_FileInfo.bDir, NULL);
 
 	list<wstring> lstSubName;
 	while (!strSubPath.empty())
@@ -166,14 +166,14 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		pPath->GetSubPath()([&](CPath& SubPath) {
 			if (lstSubName.empty())
 			{
-				if (SubPath.m_bDir != bDir)
+				if (SubPath.IsDir() != bDir)
 				{
 					return true;
 				}
 			}
 			else
 			{
-				if (!SubPath.m_bDir)
+				if (!SubPath.IsDir())
 				{
 					return true;
 				}
@@ -202,9 +202,9 @@ void CPath::RemoveSubPath(CPath *pSubPath)
 
 void CPath::RemoveSelf()
 {
-	if (NULL != m_pParentDir)
+	if (NULL != m_FileInfo.pParent)
 	{
-		m_pParentDir->RemoveSubPath(this);
+		m_FileInfo.pParent->RemoveSubPath(this);
 	}
 }
 

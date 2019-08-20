@@ -835,11 +835,11 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
         }
 
 		tagFileInfo FileInfo;
-		FileInfo.m_bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-        FileInfo.m_strName = strFileName;
-		FileInfo.m_uFileSize = FindData.nFileSizeLow;
-		FileInfo.m_tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
-		FileInfo.m_tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
+		FileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        FileInfo.strName = strFileName;
+		FileInfo.uFileSize = FindData.nFileSizeLow;
+		FileInfo.tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
+		FileInfo.tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
 
         if (!cb(FileInfo))
         {
