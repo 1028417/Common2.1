@@ -83,7 +83,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 void CMainApp::thread(const fn_void& cb)
 {
 	bool bExit = false;
-	mtutil::thread([&]() {
+	std::thread thr([&]() {
 		cb();
 
 		bExit = true;
@@ -100,6 +100,8 @@ void CMainApp::thread(const fn_void& cb)
 			(void)::DispatchMessage(&msg);
 		}
 	}
+
+	thr.join();
 }
 
 E_DoEventsResult CMainApp::DoEvents(bool bOnce)
