@@ -80,10 +80,10 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 	}
 }
 
-void CMainApp::thread(const fn_voidvoid& cb)
+void CMainApp::thread(const fn_void& cb)
 {
 	bool bExit = false;
-	mtutil::start([&]() {
+	mtutil::thread([&]() {
 		cb();
 
 		bExit = true;

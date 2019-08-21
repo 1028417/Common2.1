@@ -112,6 +112,8 @@ void CPath::_sort(TD_PathList& paSubPath)
 
 bool CPath::scan(const CB_PathScan& cb)
 {
+    mtutil::usleep(1);
+
 	_findFile();
 	if (!cb(*this, m_paSubFile))
 	{

@@ -1131,7 +1131,7 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 	});
 }
 
-void CObjectList::AsyncLButtondown(const fn_voidvoid& cb)
+void CObjectList::AsyncLButtondown(const fn_void& cb)
 {
 	m_cbLButtondown = cb;
 
