@@ -35,7 +35,9 @@ BOOL CPathList::InitCtrl(COLORREF crText, float fFontSize, const CSize& szImglst
 
 void CPathList::SetPath(CPathObject& dir)
 {
-	__super::SetObjects(TD_ListObjectList(TD_PathObjectList(dir.GetSubPath())));
+	TD_PathObjectList paPathObject(dir.dirs());
+	paPathObject.add(dir.files());
+	__super::SetObjects(TD_ListObjectList(paPathObject));
 }
 
 BOOL CPathList::IsFileItem(int nItem)

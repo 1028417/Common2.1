@@ -54,35 +54,17 @@ wstring CPath::GetParentDir() const
 	return L"";
 }
 
-void CPath::findFile()
+void CPath::_findFile()
 {
-	if (m_bFinded)
+	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
 	{
-		return;
-	}
-	m_bFinded = true;
-
-	m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
-		FileInfo.pParent = this;
-		CPath *pSubPath = NewSubPath(FileInfo);
-		if (NULL == pSubPath)
-		{
-			return;
-		}
-			
-		m_lstSubPath.add(pSubPath);
-	});
-
-	_sort(m_lstSubPath);
+		(void)_onFindFile(m_paSubDir, m_paSubFile);
+    }
 }
 
-bool CPath::scan()
+void CPath::_onFindFile(TD_PathList& paSubDir, TD_PathList& paSubFile)
 {
-	Clear();
-
-	m_bFinded = true;
-
-	m_bDirExists = fsutil::findFile(this->GetPath(), [&](tagFileInfo& FileInfo) {
+	(void)_findFile([&](tagFileInfo& FileInfo) {
 		FileInfo.pParent = this;
 		CPath *pSubPath = NewSubPath(FileInfo);
 		if (NULL == pSubPath)
@@ -92,85 +74,59 @@ bool CPath::scan()
 
 		if (FileInfo.bDir)
 		{
-			if (!pSubPath->scan())
-			{
-				delete pSubPath;
-				return;
-			}
+			paSubDir.add(pSubPath);
 		}
-
-		m_lstSubPath.add(pSubPath);
+		else
+		{
+			paSubFile.add(pSubPath);
+		}
 	});
 
-	if (!m_lstSubPath)
+	_sort(paSubDir);
+	_sort(paSubFile);
+}
+
+inline static int _sort(const wstring& lhs, const wstring& rhs)
+{
+#if __android
+	return wsutil::toQStr(lhs).compare(wsutil::toQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
+	//.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
+#else
+	return wsutil::collate(lhs, rhs);
+#endif
+
+	return 1;
+}
+
+int CPath::_sort(const CPath& lhs, const CPath& rhs) const
+{
+	return ::_sort(lhs.GetName(), rhs.GetName());
+}
+
+void CPath::_sort(TD_PathList& paSubPath)
+{
+	paSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
+		return _sort(lhs, rhs) < 0;
+	});
+}
+
+bool CPath::scan(const CB_PathScan& cb)
+{
+	_findFile();
+	if (!cb(*this, m_paSubFile))
 	{
 		return false;
 	}
 
-	_sort(m_lstSubPath);
+	for (auto pSubDir : m_paSubDir)
+	{
+		if (!pSubDir->scan(cb))
+		{
+			return false;
+		}
+	}
 
 	return true;
-}
-
-void CPath::_sort(TD_PathList& lstSubPath)
-{
-	lstSubPath.qsort([&](const CPath& lhs, const CPath& rhs) {
-		return _sortCompare(lhs, rhs) < 0;
-	});
-}
-
-int CPath::_sortCompare(const CPath& lhs, const CPath& rhs) const
-{
-    if (lhs.IsDir() && !rhs.IsDir())
-    {
-        return -1;
-    }
-
-    if (lhs.IsDir() == rhs.IsDir())
-    {
-#if __android
-        return wsutil::toQStr(lhs.GetName()).compare(wsutil::toQStr(rhs.GetName()), Qt::CaseSensitivity::CaseInsensitive);
-                //.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
-#else
-        return wsutil::collate(lhs.GetName(), rhs.GetName());
-#endif
-    }
-
-    return 1;
-}
-
-void CPath::_GetSubPath(TD_PathList *plstSubDir, TD_PathList *plstSubFile)
-{
-	GetSubPath()([&](CPath& SubPath) {
-		if (SubPath.IsDir())
-		{
-			if (plstSubDir)
-			{
-				plstSubDir->add(SubPath);
-			}
-		}
-		else
-		{
-			if (plstSubFile)
-			{
-				plstSubFile->add(SubPath);
-			}
-		}
-	});
-}
-
-bool CPath::hasSubDir()
-{
-	return GetSubPath().any([&](CPath& subPath) {
-		return subPath.IsDir();
-	});
-}
-
-bool CPath::hasSubFile()
-{
-	return GetSubPath().any([&](CPath& subPath) {
-		return !subPath.IsDir();
-	});
 }
 
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
@@ -198,22 +154,8 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		wstring strSubName = lstSubName.front();
 		lstSubName.pop_front();
 		
-		pPath->GetSubPath()([&](CPath& SubPath) {
-			if (lstSubName.empty())
-			{
-				if (SubPath.IsDir() != bDir)
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (!SubPath.IsDir())
-				{
-					return true;
-				}
-			}
-
+		cauto& paSubPath = (!lstSubName.empty() || bDir) ? pPath->dirs() : pPath->files();
+		paSubPath([&](CPath& SubPath) {
 			if (wsutil::matchIgnoreCase(SubPath.GetName(), strSubName))
 			{
 				pPath = &SubPath;
@@ -227,55 +169,50 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	return pPath;
 }
 
-void CPath::RemoveSubPath(CPath *pSubPath)
-{
-	if (0 != m_lstSubPath.del(pSubPath))
-	{
-		delete pSubPath;
-	}
-}
-
 void CPath::RemoveSelf()
 {
 	if (NULL != m_FileInfo.pParent)
 	{
-		m_FileInfo.pParent->RemoveSubPath(this);
+		m_FileInfo.pParent->Remove(this);
+	}
+}
+
+void CPath::Remove(CPath *pSubPath)
+{
+	if (NULL == pSubPath)
+	{
+		return;
+	}
+
+	if (pSubPath->IsDir())
+	{
+		if (0 != m_paSubDir.del(pSubPath))
+		{
+			delete pSubPath;
+		}
+	}
+	else
+	{
+		if (0 != m_paSubFile.del(pSubPath))
+		{
+			delete pSubPath;
+		}
 	}
 }
 
 void CPath::Clear()
 {
-	m_lstSubPath([](CPath& SubPath) {
-		delete &SubPath;
-	});
-	m_lstSubPath.clear();
-
-	m_bFinded = false;
-
-	m_bDirExists = false;
-}
-
-bool CPath::enumSubFile(const function<bool(CPath& dir, TD_PathList& lstSubFile)>& cb)
-{
-	TD_PathList lstSubFile;
-	GetSubFile(lstSubFile);
-	if (lstSubFile)
+	for (auto p : m_paSubDir)
 	{
-		if (!cb(*this, lstSubFile))
-		{
-			return false;
-		}
+		delete p;
 	}
+	m_paSubDir.clear();
 
-	TD_PathList lstSubDir;
-	GetSubDir(lstSubDir);
-	for (auto pSubDir : lstSubDir)
+	for (auto p : m_paSubDir)
 	{
-		if (!pSubDir->enumSubFile(cb))
-		{
-			return false;
-		}
+		delete p;
 	}
+	m_paSubFile.clear();
 
-	return true;
+	m_eFindFileStatus = E_FindFileStatus::FFS_None;
 }
