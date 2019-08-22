@@ -3,13 +3,13 @@
 
 CPath::CPath(const wstring& strName, bool bDir)
 {
-    m_FileInfo.strName = strName;
+    m_fi.strName = strName;
 
 	if (bDir)
     {
-        wsutil::rtrim(m_FileInfo.strName, __wcFSSlant);
+        wsutil::rtrim(m_fi.strName, __wcFSSlant);
 
-        m_FileInfo.bDir = true;
+        m_fi.bDir = true;
     }
 }
 
@@ -17,39 +17,51 @@ void CPath::SetDir(const wstring& strPath)
 {
 	Clear();
 
-    m_FileInfo.strName = strPath;
-    wsutil::rtrim(m_FileInfo.strName, __wcFSSlant);
+    m_fi.strName = strPath;
+    wsutil::rtrim(m_fi.strName, __wcFSSlant);
 
-    m_FileInfo.bDir = true;
+    m_fi.bDir = true;
 }
 
 wstring CPath::GetName() const
 {
-	if (NULL != m_FileInfo.pParent)
+    if (NULL != m_fi.pParent)
 	{
-		return m_FileInfo.strName;
+        return m_fi.strName;
 	}
 	else
 	{
-		return fsutil::GetFileName(m_FileInfo.strName);
+        return fsutil::GetFileName(m_fi.strName);
 	}
 }
 
 wstring CPath::GetPath() const
 {
-	if (NULL != m_FileInfo.pParent)
+    if (NULL != m_fi.pParent)
 	{
-        return m_FileInfo.pParent->GetPath() + __wcFSSlant + m_FileInfo.strName;
+        return m_fi.pParent->GetPath() + __wcFSSlant + m_fi.strName;
 	}
 
-	return m_FileInfo.strName;
+    return m_fi.strName;
 }
 
-wstring CPath::GetParentDir() const
+wstring CPath::oppPath() const
 {
-	if (NULL != m_FileInfo.pParent)
+    if (NULL != m_fi.pParent)
+    {
+		WString strOppPath(m_fi.pParent->oppPath());
+		strOppPath << __wcFSSlant << m_fi.strName;
+		return strOppPath;
+    }
+
+    return L"";
+}
+
+wstring CPath::parentPath() const
+{
+    if (m_fi.pParent)
 	{
-		return m_FileInfo.pParent->GetPath();
+        return m_fi.pParent->GetPath();
 	}
 
 	return L"";
@@ -134,7 +146,7 @@ bool CPath::scan(const CB_PathScan& cb)
 
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
-	__EnsureReturn(m_FileInfo.bDir, NULL);
+    __EnsureReturn(m_fi.bDir, NULL);
 
 	list<wstring> lstSubName;
 	while (!strSubPath.empty())
@@ -174,9 +186,9 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 
 void CPath::RemoveSelf()
 {
-	if (NULL != m_FileInfo.pParent)
+    if (NULL != m_fi.pParent)
 	{
-		m_FileInfo.pParent->Remove(this);
+        m_fi.pParent->Remove(this);
 	}
 }
 
@@ -187,7 +199,7 @@ void CPath::Remove(CPath *pSubPath)
 		return;
 	}
 
-	if (pSubPath->IsDir())
+    if (pSubPath->m_FileInfo.bDir)
 	{
 		if (0 != m_paSubDir.del(pSubPath))
 		{
