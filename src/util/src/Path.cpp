@@ -123,7 +123,12 @@ void CPath::_sort(TD_PathList& paSubPath)
 	});
 }
 
-bool CPath::scan(const CB_PathScan& cb)
+void CPath::scan(const CB_PathScan& cb)
+{
+	(void)_scan(cb);
+}
+
+bool CPath::_scan(const CB_PathScan& cb)
 {
     mtutil::usleep(1);
 
@@ -135,7 +140,7 @@ bool CPath::scan(const CB_PathScan& cb)
 
 	for (auto pSubDir : m_paSubDir)
 	{
-		if (!pSubDir->scan(cb))
+		if (!pSubDir->_scan(cb))
 		{
 			return false;
 		}
