@@ -724,12 +724,12 @@ static const wstring g_wsDotDot(2, __wcDot);
 
 bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
-#if __android
 	if (strDir.empty())
 	{
-        return false;
+		return false;
 	}
 
+#if __android
     QDir dir(wsutil::toQStr(strDir));
     if(!dir.exists())
     {
@@ -786,11 +786,6 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
     }
 
 #else
-	if (strDir.empty())
-	{
-        return false;
-	}
-	
 	wstring strFind(strDir);
 	if (!_checkFSSlant(strDir.back()))
 	{

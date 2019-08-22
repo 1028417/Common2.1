@@ -3,23 +3,24 @@
 
 CPath::CPath(const wstring& strName, bool bDir)
 {
+    m_FileInfo.strName = strName;
+
 	if (bDir)
-	{
-		SetDir(strName);
-	}
-	else
-	{
-		m_FileInfo.strName = strName;
-	}
+    {
+        wsutil::rtrim(m_FileInfo.strName, __wcFSSlant);
+
+        m_FileInfo.bDir = true;
+    }
 }
 
-void CPath::SetDir(const wstring& strDir)
+void CPath::SetDir(const wstring& strPath)
 {
 	Clear();
 
-	m_FileInfo.bDir = true;
+    m_FileInfo.strName = strPath;
+    wsutil::rtrim(m_FileInfo.strName, __wcFSSlant);
 
-	m_FileInfo.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
+    m_FileInfo.bDir = true;
 }
 
 wstring CPath::GetName() const
