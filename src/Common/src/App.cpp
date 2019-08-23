@@ -165,7 +165,7 @@ void CMainApp::_start()
 {
 	__Assert(getController().init());
 
-	CMainWnd *pMainWnd = getView().init();
+	CMainWnd *pMainWnd = getView().show();
 	HWND hwndMain = pMainWnd->GetSafeHwnd();
 	__Ensure(hwndMain);
 	m_pMainWnd = pMainWnd;
@@ -566,7 +566,7 @@ const CRect& CMainApp::getWorkArea(bool bFullScreen)
 	}
 	else
 	{
-		::SystemParametersInfo(SPI_GETWORKAREA, 0, rcWorkArea, 0);
+		(void)::SystemParametersInfo(SPI_GETWORKAREA, 0, rcWorkArea, 0);
 	}
 
 	return rcWorkArea;
