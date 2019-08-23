@@ -791,6 +791,26 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
     }
 
 #else
+
+	if (strDir.empty())
+	{
+		std::list<std::wstring> lstDrivers;
+		winfsutil::getSysDrivers(lstDrivers);
+		for (cauto& strDriver : lstDrivers)
+		{
+			tagFileInfo FileInfo;
+			FileInfo.bDir = true;
+			FileInfo.strName = strDriver;
+			if (!cb(FileInfo))
+			{
+				break;
+			}
+		}
+
+		return true;
+	}
+
+
 	wstring strFind(strDir);
 	if (!_checkFSSlant(strDir.back()))
 	{
