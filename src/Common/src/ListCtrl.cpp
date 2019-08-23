@@ -1135,10 +1135,10 @@ void CObjectList::AsyncLButtondown(const fn_void& cb)
 {
 	m_cbLButtondown = cb;
 
-	CMainApp::async([&]() {
+	CMainApp::async(300, [&]() {
 		if (m_cbLButtondown)
 		{
 			m_cbLButtondown();
 		}
-	}, 300);
+	});
 }

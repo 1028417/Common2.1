@@ -50,7 +50,10 @@ void CMainWnd::OnMove(int x, int y)
 {
 	if (0 == m_WndInfo.uWidth || 0 == m_WndInfo.uHeight)
 	{
-		fixWorkArea(m_bFullScreen);
+		if (x > 0 && y >= 0)
+		{
+			fixWorkArea(m_bFullScreen);
+		}
 	}
 }
 
