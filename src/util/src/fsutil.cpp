@@ -747,27 +747,32 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
             continue;
         }
 
-        if (E_FindFindFilter::FFP_ByExt == eFilter && pstrFilter)
-        {
-            if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
-            {
-                continue;
-            }
-        }
+		cauto& strFileName = fi.fileName().toStdWString();
+		if (g_wsDot == strFileName || g_wsDotDot == strFileName)
+		{
+			continue;
+		}
 
-        cauto& strFileName = fi.fileName().toStdWString();
-        if(strFileName == g_wsDot || strFileName == g_wsDotDot)
-        {
-            continue;
-        }
-
-        if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
-        {
-			QString qsFilter = wsutil::toQStr(pstrFilter);
-            if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
-            {
-                continue;
-            }
+		if (pstrFilter)
+		{
+			if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+			{
+				QString qsFilter = wsutil::toQStr(pstrFilter);
+				if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
+				{
+					continue;
+				}
+			}
+			else if (!fi.isDir())
+			{
+				if (E_FindFindFilter::FFP_ByExt == eFilter)
+				{
+					if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
+					{
+						continue;
+					}
+				}
+			}
         }
 
         tagFileInfo FileInfo;
@@ -824,7 +829,7 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
         }
 
         strFileName = FindData.cFileName;
-        if(strFileName == g_wsDot || strFileName == g_wsDotDot)
+        if(g_wsDot == strFileName || g_wsDotDot == strFileName)
         {
             continue;
         }

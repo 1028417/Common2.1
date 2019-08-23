@@ -1,26 +1,20 @@
 
 #include "util.h"
 
-CPath::CPath(const wstring& strName, bool bDir)
+CPath::CPath(const wstring& strDir)
 {
-    m_fi.strName = strName;
+	m_fi.bDir = true;
 
-	if (bDir)
-    {
-        wsutil::rtrim(m_fi.strName, __wcFSSlant);
-
-        m_fi.bDir = true;
-    }
+	m_fi.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 }
 
-void CPath::SetDir(const wstring& strPath)
+void CPath::SetDir(const wstring& strDir)
 {
 	Clear();
 
-    m_fi.strName = strPath;
-    wsutil::rtrim(m_fi.strName, __wcFSSlant);
-
     m_fi.bDir = true;
+
+	m_fi.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 }
 
 wstring CPath::GetName() const
@@ -35,11 +29,11 @@ wstring CPath::GetName() const
 	}
 }
 
-wstring CPath::GetPath() const
+wstring CPath::absPath() const
 {
-    if (NULL != m_fi.pParent)
+    if (m_fi.pParent)
 	{
-        return m_fi.pParent->GetPath() + __wcFSSlant + m_fi.strName;
+        return m_fi.pParent->absPath() + __wcFSSlant + m_fi.strName;
 	}
 
     return m_fi.strName;
@@ -47,7 +41,7 @@ wstring CPath::GetPath() const
 
 wstring CPath::oppPath() const
 {
-    if (NULL != m_fi.pParent)
+    if (m_fi.pParent)
     {
 		WString strOppPath(m_fi.pParent->oppPath());
 		strOppPath << __wcFSSlant << m_fi.strName;
@@ -55,16 +49,6 @@ wstring CPath::oppPath() const
     }
 
     return L"";
-}
-
-wstring CPath::parentPath() const
-{
-    if (m_fi.pParent)
-	{
-        return m_fi.pParent->GetPath();
-	}
-
-	return L"";
 }
 
 void CPath::_findFile()
