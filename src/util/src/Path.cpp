@@ -19,7 +19,7 @@ void CPath::SetDir(const wstring& strDir)
 
 wstring CPath::GetName() const
 {
-    if (NULL != m_fi.pParent)
+    if (m_fi.pParent)
 	{
         return m_fi.strName;
 	}
