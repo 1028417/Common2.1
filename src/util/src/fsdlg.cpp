@@ -3,7 +3,7 @@
 
 #include <ShlObj.h>
 
-wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszMessage
+wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszTip
 	, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, UINT uWidth, UINT uHeight)
 {
 	if (lpszInitialDir)
@@ -16,9 +16,9 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		m_strTitle = lpszTitle;
 	}
 
-	if (lpszMessage)
+	if (lpszTip)
 	{
-		m_strMessage = lpszMessage;
+		m_strTip = lpszTip;
 	}
 
 	if (lpszOKButton)
@@ -78,8 +78,8 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 					SetWindowText(hWnd, pInstance->m_strTitle.c_str());
 				}
 
-				wstring strMessage = pInstance->m_strMessage + L"\n\n" + pInstance->m_strInitialDir;
-				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 1, (LPARAM)strMessage.c_str());
+				cauto& strTip = pInstance->m_strTip + L"\n\n" + pInstance->m_strInitialDir;
+				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 1, (LPARAM)strTip.c_str());
 
 				if (!pInstance->m_strOKButton.empty())
 				{
@@ -166,7 +166,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 			}
 		case BFFM_SELCHANGED:
 			{
-				wstring strMessage = pInstance->m_strMessage;
+				WString strTip = pInstance->m_strTip;
 
 				TCHAR pszPath[512];
 				if (SHGetPathFromIDList((LPITEMIDLIST)lParam, pszPath))
@@ -178,11 +178,11 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 					else
 					{
 						::EnableWindow(hWndOkButton, TRUE);
-						strMessage = strMessage + L"\n\n" + pszPath;
+						strTip << L"\n\n" << pszPath;
 					}
 				}
 
-				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 0, (LPARAM)strMessage.c_str());
+				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 0, (LPARAM)strTip.c_str());
 
 				break;
 			}

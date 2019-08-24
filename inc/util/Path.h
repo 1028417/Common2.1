@@ -54,21 +54,7 @@ protected:
     const tagFileInfo& m_FileInfo = m_fi;
 
 private:
-	template <typename CB>
-	inline bool _findFile(const CB& cb)
-	{
-		if (!fsutil::findFile(this->absPath(), cb))
-		{
-			m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
-			return false;
-		}
-
-		m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
-
-		return true;
-	}
-
-	virtual CPath* NewSubPath(const tagFileInfo& FileInfo)
+	virtual CPath* _newSubPath(const tagFileInfo& FileInfo)
 	{
 		return new CPath(FileInfo);
 	}
@@ -209,7 +195,7 @@ public:
 	}
 
 protected:
-	virtual CPath* NewSubPath(const tagFileInfo& FileInfo) override
+	virtual CPath* _newSubPath(const tagFileInfo& FileInfo) override
 	{
 		return new CPathObject(FileInfo);
 	}
@@ -233,7 +219,7 @@ public:
 	}
 
 protected:
-	virtual CPath* NewSubPath(const tagFileInfo& FileInfo) override
+	virtual CPath* _newSubPath(const tagFileInfo& FileInfo) override
 	{
 		if (FileInfo.bDir)
 		{

@@ -61,9 +61,9 @@ void CPath::_findFile()
 
 void CPath::_onFindFile(TD_PathList& paSubDir, TD_PathList& paSubFile)
 {
-	(void)_findFile([&](tagFileInfo& FileInfo) {
+	bool bRet = fsutil::findFile(this->absPath(), [&](tagFileInfo& FileInfo) {
 		FileInfo.pParent = this;
-		CPath *pSubPath = NewSubPath(FileInfo);
+		CPath *pSubPath = _newSubPath(FileInfo);
 		if (NULL == pSubPath)
 		{
 			return;
@@ -79,6 +79,8 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_PathList& paSubFile)
 		}
 	});
 
+	m_eFindFileStatus = bRet ? E_FindFileStatus::FFS_Exists : E_FindFileStatus::FFS_NotExists;
+		
 	_sort(paSubDir);
 	_sort(paSubFile);
 }

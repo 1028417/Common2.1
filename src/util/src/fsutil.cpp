@@ -722,7 +722,19 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
 
-bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
+/*
+    std::list<std::wstring> lstDrivers;
+    winfsutil::getSysDrivers(lstDrivers);
+    for (cauto& strDriver : lstDrivers)
+    {
+        tagFileInfo FileInfo;
+        FileInfo.bDir = true;
+        FileInfo.strName = strDriver;
+        cb(FileInfo);
+    }
+*/
+
+bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
 	if (strDir.empty())
 	{
@@ -794,22 +806,8 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
 
 	if (strDir.empty())
 	{
-		std::list<std::wstring> lstDrivers;
-		winfsutil::getSysDrivers(lstDrivers);
-		for (cauto& strDriver : lstDrivers)
-		{
-			tagFileInfo FileInfo;
-			FileInfo.bDir = true;
-			FileInfo.strName = strDriver;
-			if (!cb(FileInfo))
-			{
-				break;
-			}
-		}
-
-		return true;
-	}
-
+        return false;
+    }
 
 	wstring strFind(strDir);
 	if (!_checkFSSlant(strDir.back()))
@@ -861,10 +859,7 @@ bool fsutil::_findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter e
 		FileInfo.tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
 		FileInfo.tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
 
-        if (!cb(FileInfo))
-        {
-            break;
-        }
+		cb(FileInfo);
 	} while (::FindNextFileW(hFindFile, &FindData));
 
 	(void)::FindClose(hFindFile);    

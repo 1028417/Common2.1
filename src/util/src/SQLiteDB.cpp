@@ -163,13 +163,20 @@ CSQLiteDB::CSQLiteDB(const wstring& strFile)
 
 bool CSQLiteDB::Connect(const wstring& strPara)
 {
-	__EnsureReturn(!m_hDB, false);
+    if (m_hDB)
+    {
+        return false;
+    }
+
+    m_strFile.clear();
+
 #if __android
     string strFile = wsutil::toUTF8(strPara);
     m_nRetCode = sqlite3_open(strFile.c_str(), (sqlite3**)&m_hDB);
 #else
     m_nRetCode = sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB);
 #endif
+
     __EnsureReturn(SQLITE_OK == m_nRetCode, false);
 	__EnsureReturn(m_hDB, false);
 
