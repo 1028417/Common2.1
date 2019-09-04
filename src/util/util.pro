@@ -65,7 +65,7 @@ INCLUDEPATH += \
 android {
 DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
 } else {
-DESTDIR = $$PWD/../../../XMusic/bin
+DESTDIR = $$PWD/../../bin
 
 unix {
     target.path = /usr/lib
