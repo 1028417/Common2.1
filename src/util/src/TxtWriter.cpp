@@ -14,15 +14,15 @@ const string CTxtWriter::__UTF8Bom({ (char)0xef, (char)0xbb, (char)0xbf });
 
 bool CTxtWriter::_open(const wstring& strFile, bool bTrunc)
 {
-#if __android
-    return _open(wsutil::toStr(strFile), bTrunc);
+#if __windows
+    wstring strMode(bTrunc ? L"wb" : L"ab");
+
+    (void)_wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
+
+    return NULL != m_lpFile;
 
 #else
-	wstring strMode(bTrunc ? L"wb" : L"ab");
-	
-	(void)_wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
-
-	return NULL != m_lpFile;
+    return _open(wsutil::toStr(strFile), bTrunc);
 #endif
 }
 
@@ -30,10 +30,10 @@ bool CTxtWriter::_open(const string& strFile, bool bTrunc)
 {
 	string strMode(bTrunc ? "wb" : "ab");
 
-#if __android
-	m_lpFile = fopen(strFile.c_str(), strMode.c_str());
-#else
+#if __windows
 	(void)fopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
+#else
+    m_lpFile = fopen(strFile.c_str(), strMode.c_str());
 #endif
 
 	return NULL != m_lpFile;
@@ -117,7 +117,7 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 		size += _writeEndLine();
 	}
 
-#ifdef _DEBUG
+#if __isdebug
 	(void)fflush(m_lpFile);
 #endif
 
@@ -155,7 +155,7 @@ size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 		size += _writeEndLine();
 	}
 
-#ifdef _DEBUG
+#if __isdebug
 	(void)fflush(m_lpFile);
 #endif
 

@@ -1,7 +1,7 @@
 ﻿
 #include "util.h"
 
-#if !__android
+#if __windows
 
 time64_t winfsutil::transFileTime(const FILETIME& ft)
 {

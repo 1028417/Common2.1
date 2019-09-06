@@ -87,11 +87,11 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_PathList& paSubFile)
 
 inline static int _sort(const wstring& lhs, const wstring& rhs)
 {
-#if __android
-	return wsutil::toQStr(lhs).compare(wsutil::toQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
-	//.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
+#if __windows
+    return wsutil::collate(lhs, rhs);
 #else
-	return wsutil::collate(lhs, rhs);
+    return wsutil::toQStr(lhs).compare(wsutil::toQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
+    //.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
 #endif
 
 	return 1;

@@ -14,16 +14,16 @@ bool tmutil::timeToTM(time32_t tTime, tagTM& tm)
 {
 	struct tm _tm;
 
-#if __android
-    if (localtime_r(&tTime, &_tm))
-    {
-        return L"";
-    }
-#else
+#if __windows
     if (_localtime32_s(&_tm, &tTime))
 	{
 		return false;
 	}
+#else
+    if (localtime_r(&tTime, &_tm))
+    {
+        return L"";
+    }
 #endif
 
 	tm = _tm;
@@ -52,22 +52,22 @@ wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
 
     struct tm _tm;
 
-#if __android
-    if (localtime_r(&tTime, &_tm))
-    {
-        return L"";
-    }
-#else
+#if __windows
     if (_localtime32_s(&_tm, &tTime))
 	{
 		return L"";
 	}
+#else
+    if (localtime_r(&tTime, &_tm))
+    {
+        return L"";
+    }
 #endif
 
     return _formatTime(_tm, strFormat);
 }
 
-#if !__android
+#if __windows
 bool tmutil::time64ToTM(time64_t time, tagTM& tm)
 {
     struct tm _tm;

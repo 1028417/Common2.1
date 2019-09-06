@@ -3,16 +3,16 @@
 
 #include <locale>
 
-/*#if __android
-	#include <QLocale>
-	#include <QCollator>
-	static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
-	static const QCollator& g_collate_CN = QCollator(g_locale_CN);
-#else
+/*#if __windows
 	static const char *CN_LOCALE_STRING = "Chinese_china";
 	static const locale g_locale_CN(CN_LOCALE_STRING);
 	//static const locale g_locale_CN("");
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
+#else
+    #include <QLocale>
+    #include <QCollator>
+    static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
+    static const QCollator& g_collate_CN = QCollator(g_locale_CN);
 #endif*/
 
 static class __init
@@ -23,7 +23,7 @@ public:
 		setlocale(LC_COLLATE, "chs");
 		setlocale(LC_CTYPE, "chs");        
  /*
-#if __android
+#if !__windows
         g_collate_CN.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive)
 #endif*/
 	}
@@ -116,29 +116,29 @@ int wsutil::collate(const wstring& lhs, const wstring& rhs)
 {
     return wcscoll(lhs.c_str(), rhs.c_str());
 
-#if __android
-    //return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
-#else
+#if __windows
     //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
         //, rhs.c_str(), rhs.c_str() + rhs.size());
+#else
+    //return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
 #endif
 }
 
 bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 {
-#if __android
-	return 0 == toQStr(str1).compare(toQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
+#if __windows
+    return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #else
-	return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+    return 0 == toQStr(str1).compare(toQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
 #endif
 }
 
 void wsutil::lowerCase(wstring& str)
 {
-#if __android
-    str = toQStr(str).toLower().toStdWString();
+#if __windows
+    (void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
+    str = toQStr(str).toLower().toStdWString();
 #endif
 }
 
@@ -151,10 +151,10 @@ wstring wsutil::lowerCase_r(const wstring& str)
 
 void wsutil::upperCase(wstring& str)
 {
-#if __android
-    str = toQStr(str).toUpper().toStdWString();
+#if __windows
+    (void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
+    str = toQStr(str).toUpper().toStdWString();
 #endif	
 }
 
@@ -313,13 +313,13 @@ static bool _checkUTF8(const char *pStr)
 static wstring _fromStr(const char *pStr)
 {
 	size_t len = 0;
-#if __android
-	len = mbstowcs(NULL, pStr, 0);
+#if __windows
+    if (mbstowcs_s(&len, NULL, 0, pStr, 0))
+    {
+        return L"";
+    }
 #else
-	if (mbstowcs_s(&len, NULL, 0, pStr, 0))
-	{
-		return L"";
-	}
+    len = mbstowcs(NULL, pStr, 0);
 #endif
 	if (0 == len)
 	{
@@ -329,13 +329,13 @@ static wstring _fromStr(const char *pStr)
 	vector<wchar_t> vecBuff(len + 1);
 	wchar_t *pBuff = &vecBuff.front();
 
-#if __android
-	(void)mbstowcs(pBuff, pStr, len);
+#if __windows
+    if (mbstowcs_s(NULL, pBuff, len, pStr, len-1))
+    {
+        return L"";
+    }
 #else
-	if (mbstowcs_s(NULL, pBuff, len, pStr, len-1))
-	{
-		return L"";
-	}
+    (void)mbstowcs(pBuff, pStr, len);
 #endif
 	
 	return pBuff;
@@ -374,13 +374,13 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
 static string _toStr(const wchar_t *pStr)
 {
     size_t len = 0;
-#if __android
-    len = wcstombs(NULL, pStr, 0);
-#else
+#if __windows
     if (wcstombs_s(&len, NULL, 0, pStr, 0))
     {
         return "";
     }
+#else
+    len = wcstombs(NULL, pStr, 0);
 #endif
     if (0 == len)
     {
@@ -390,13 +390,13 @@ static string _toStr(const wchar_t *pStr)
     vector<char> vecBuff(len + 1);
     char *pBuff = &vecBuff.front();
 
-#if __android
-    (void)wcstombs(pBuff, pStr, len);
-#else
+#if __windows
     if (wcstombs_s(NULL, pBuff, len, pStr, len-1))
     {
         return "";
     }
+#else
+    (void)wcstombs(pBuff, pStr, len);
 #endif
 
     return pBuff;
