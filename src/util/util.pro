@@ -65,12 +65,11 @@ INCLUDEPATH += \
 android {
 DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
 } else {
-DESTDIR = $$PWD/../../bin
-
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
+    macx {
+        DESTDIR = $$PWD/../../bin/macx
+    } else {
+        DESTDIR = $$PWD/../../bin
+    }
 }
 
 MOC_DIR = $$PWD/../../build/xutil
