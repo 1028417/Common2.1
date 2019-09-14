@@ -18,7 +18,8 @@
     <ClCompile Include="json\json_reader.cpp" />
     <ClCompile Include="json\json_value.cpp" />
     <ClCompile Include="json\json_writer.cpp" />
-    <ClCompile Include="src\fsdlg.cpp" />
+    <ClCompile Include="src\util.cpp" />
+    <ClCompile Include="src\winfsdlg.cpp" />
     <ClCompile Include="src\mtutil.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\ProFile.cpp" />
@@ -50,7 +51,7 @@
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\TxtWriter.h" />
     <ClInclude Include="..\..\inc\util\wintimer.h" />
-    <ClInclude Include="..\..\inc\util\fsdlg.h" />
+    <ClInclude Include="..\..\inc\util\winfsdlg.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h" />
     <ClInclude Include="..\..\inc\util\IDB.h" />
     <ClInclude Include="..\..\inc\util\mtutil.h" />

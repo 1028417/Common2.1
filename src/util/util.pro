@@ -26,10 +26,10 @@ SOURCES += \
     src/TxtWriter.cpp \
     json/json_reader.cpp \
     json/json_value.cpp \
-    json/json_writer.cpp
+    json/json_writer.cpp \
+    src/util.cpp
 
 HEADERS +=\
-    ../../inc/util/fsdlg.h \
     ../../inc/util/fsutil.h \
     ../../inc/util/IDB.h \
     ../../inc/util/mtutil.h \

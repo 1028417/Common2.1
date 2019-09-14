@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\fsdlg.cpp" />
     <ClCompile Include="src\fsutil.cpp" />
     <ClCompile Include="src\mtutil.cpp" />
     <ClCompile Include="src\Path.cpp" />
@@ -29,6 +28,8 @@
     <ClCompile Include="json\json_writer.cpp">
       <Filter>json</Filter>
     </ClCompile>
+    <ClCompile Include="src\winfsdlg.cpp" />
+    <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -44,7 +45,6 @@
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\Path.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h" />
-    <ClInclude Include="..\..\inc\util\fsdlg.h" />
     <ClInclude Include="..\..\inc\util\IDB.h">
       <Filter>db</Filter>
     </ClInclude>
@@ -94,6 +94,7 @@
     <ClInclude Include="..\..\inc\util\wsutil.h" />
     <ClInclude Include="..\..\inc\util\TxtWriter.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
+    <ClInclude Include="..\..\inc\util\winfsdlg.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

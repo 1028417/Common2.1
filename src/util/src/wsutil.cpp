@@ -409,6 +409,10 @@ string wsutil::toStr(const wstring& str)
         return "";
     }
 
+#if __mac
+    return QString::fromStdWString(str).toStdString();
+#endif
+
     return _toStr(str.c_str());
 }
 
@@ -418,6 +422,10 @@ string wsutil::toStr(const wchar_t *pStr)
     {
         return "";
     }
+
+#if __mac
+    return QString::fromStdWString(pStr).toStdString();
+#endif
 
     return _toStr(pStr);
 }
