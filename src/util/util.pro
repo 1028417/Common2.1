@@ -72,7 +72,7 @@ DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
     }
 }
 
-MOC_DIR = $$PWD/../../build/xutil
-RCC_DIR = $$PWD/../../build/xutil
-UI_DIR = $$PWD/../../build/xutil
-OBJECTS_DIR = $$PWD/../../build/xutil
+MOC_DIR = $$PWD/../../../build/xutil
+RCC_DIR = $$PWD/../../../build/xutil
+UI_DIR = $$PWD/../../../build/xutil
+OBJECTS_DIR = $$PWD/../../../build/xutil
