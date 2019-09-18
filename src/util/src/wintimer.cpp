@@ -2,9 +2,6 @@
 #include "util.h"
 
 #if __windows
-
-#include <Windows.h>
-
 struct tagTimerInfo
 {
 	bool bPending = false;
