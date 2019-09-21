@@ -1,6 +1,8 @@
 
 #include "util.h"
 
+#if __windows
+
 #include <ShlObj.h>
 
 wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszTip
@@ -166,9 +168,9 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 			}
 		case BFFM_SELCHANGED:
 			{
-				WString strTip = pInstance->m_strTip;
+                wstring strTip = pInstance->m_strTip;
 
-				TCHAR pszPath[512];
+				wchar_t pszPath[512];
 				if (SHGetPathFromIDList((LPITEMIDLIST)lParam, pszPath))
 				{
 					if (!fsutil::existDir(pszPath))
@@ -178,7 +180,7 @@ int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
 					else
 					{
 						::EnableWindow(hWndOkButton, TRUE);
-						strTip << L"\n\n" << pszPath;
+						strTip.append(L"\n\n").append(pszPath);
 					}
 				}
 
@@ -333,3 +335,5 @@ UINT CFileDlg::GetSelFilterIndex() const
 {
 	return m_ofn.nFilterIndex;
 }
+
+#endif
