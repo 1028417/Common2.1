@@ -4,7 +4,7 @@
 #include <Dbghelp.h>
 #pragma comment(lib, "Dbghelp.lib")
 
-#include "util.h"
+#include "util/util.h"
 
 static inline void CreateMiniDump(PEXCEPTION_POINTERS pep, const wstring& strFileName)
 {

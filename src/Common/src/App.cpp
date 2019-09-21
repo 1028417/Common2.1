@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include "App.h"
+#include "Common/App.h"
 
-#include "MainWnd.h"
+#include "Common/MainWnd.h"
 
 #pragma comment(lib, "gdiplus.lib")
 

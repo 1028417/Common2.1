@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include "Page.h"
+#include "Common/Page.h"
 
-#include "MainWnd.h"
+#include "Common/MainWnd.h"
 
 BEGIN_MESSAGE_MAP(CPage, CPropertyPage)
 	ON_WM_CTLCOLOR()

@@ -22,6 +22,6 @@
 #include <afxdisp.h>        // MFC 自动化类
 
 
-#include "Common.h"
+#include "Common/Common.h"
 
 #include "Resource.h"

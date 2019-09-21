@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include "ProgressDlg.h"
+#include "Common/ProgressDlg.h"
 
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {

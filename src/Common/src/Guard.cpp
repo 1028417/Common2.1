@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
-#include "Guard.h"
+#include "Common/Guard.h"
 
-#include "App.h"
+#include "Common/App.h"
 
 CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 	: m_wnd(wnd)

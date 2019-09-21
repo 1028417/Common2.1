@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 
-#include "ListCtrl.h"
+#include "Common/ListCtrl.h"
 
 BEGIN_MESSAGE_MAP(CListHeader, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)

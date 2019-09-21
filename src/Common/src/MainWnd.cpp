@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include "MainWnd.h"
+#include "Common/MainWnd.h"
 
-#include "app.h"
+#include "Common/app.h"
 
 BEGIN_MESSAGE_MAP(CMainWnd, CWnd)
 	ON_WM_SIZE()

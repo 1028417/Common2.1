@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 
-#include "PathCtrl.h"
+#include "Common/PathCtrl.h"
 
 //CPathList
 

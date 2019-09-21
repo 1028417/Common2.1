@@ -9,7 +9,6 @@ QT       -= core
 TARGET = xutil
 TEMPLATE = lib
 
-#CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++1y #gnu++1y
 
 SOURCES += \
@@ -58,9 +57,7 @@ HEADERS +=\
 
 DEFINES += __UtilPrj
 
-INCLUDEPATH += \
-    ../../inc \
-    ../../inc/util
+INCLUDEPATH += ../../inc/util
 
 android {
 DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
@@ -68,7 +65,11 @@ DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
     macx {
         DESTDIR = $$PWD/../../bin/macx
     } else {
-        DESTDIR = $$PWD/../../bin
+        ios {
+            DESTDIR = $$PWD/../../../build/ioslib
+        } else {
+            DESTDIR = $$PWD/../../bin
+        }
     }
 }
 
