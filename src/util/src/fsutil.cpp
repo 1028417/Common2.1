@@ -618,11 +618,17 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #else
     if (existFile(strDstFile))
     {
-        // TODO if (strSrcFile ==== strDstFile)
-        if (!removeFile(strDstFile))
-        {
-            return false;
-        }
+		wstring t_strSrcFile = strSrcFile;
+		wstring t_strDstFile = strDstFile;
+		transFSSlant(t_strSrcFile);
+		transFSSlant(t_strDstFile);
+		if (!wsutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
+		{
+			if (!removeFile(strDstFile))
+			{
+				return false;
+			}
+		}
     }
 
     if (!QFile::rename(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile)))
