@@ -60,20 +60,22 @@ DEFINES += __UtilPrj
 INCLUDEPATH += ../../inc/util
 
 android {
-DESTDIR = $$PWD/../../../XMusic/lib/armeabi-v7a
+    DESTDIR = ../../../XMusic/lib/armeabi-v7a
+} else: macx {
+    DESTDIR = ../../bin/macx
+
+    target.path = ../../../XMusic/bin/macx
+    INSTALLS += target
+} else: ios {
+    DESTDIR = ../../../build/ioslib
 } else {
-    macx {
-        DESTDIR = $$PWD/../../bin/macx
-    } else {
-        ios {
-            DESTDIR = $$PWD/../../../build/ioslib
-        } else {
-            DESTDIR = $$PWD/../../bin
-        }
-    }
+    DESTDIR = ../../bin
+
+    target.path = ../../../XMusic/bin
+    INSTALLS += target
 }
 
-MOC_DIR = $$PWD/../../../build/xutil
-RCC_DIR = $$PWD/../../../build/xutil
-UI_DIR = $$PWD/../../../build/xutil
-OBJECTS_DIR = $$PWD/../../../build/xutil
+MOC_DIR = ../../../build/xutil
+RCC_DIR = ../../../build/xutil
+UI_DIR = ../../../build/xutil
+OBJECTS_DIR = ../../../build/xutil
