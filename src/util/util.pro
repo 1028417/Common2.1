@@ -60,11 +60,11 @@ DEFINES += __UtilPrj
 INCLUDEPATH += ../../inc/util
 
 android {
-    DESTDIR = ../../../XMusic/lib/armeabi-v7a
+    DESTDIR = ../../../XMusic/libs/armeabi-v7a
 } else: macx {
-    DESTDIR = ../../bin/macx
+    DESTDIR = ../../bin/mac
 
-    target.path = ../../../XMusic/bin/macx
+    target.path = ../../../XMusic/bin/mac
     INSTALLS += target
 } else: ios {
     DESTDIR = ../../../build/ioslib
