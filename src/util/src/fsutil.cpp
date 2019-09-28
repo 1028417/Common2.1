@@ -498,7 +498,16 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 
 bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
-#if !__winvc
+#if __winvc
+    DWORD dwFileAttr = ::GetFileAttributesW(strPath.c_str());
+    if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
+    {
+        return false;
+    }
+
+    return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;
+
+#else
     QFileInfo fi(wsutil::toQStr(strPath));
     if (!fi.exists())
     {
@@ -506,15 +515,6 @@ bool fsutil::existPath(const wstring& strPath, bool bDir)
     }
 
     return fi.isDir() == bDir;
-
-#else
-	DWORD dwFileAttr = ::GetFileAttributesW(strPath.c_str());
-	if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
-	{
-		return false;
-	}
-
-	return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;	
 #endif
 }
 

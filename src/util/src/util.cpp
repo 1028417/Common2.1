@@ -1,6 +1,19 @@
 
 #include "util.h"
 
+E_Platform platform()
+{
+#if __windows
+    return E_Platform::PF_Windows;
+#elif __android
+    return E_Platform::PF_Android;
+#elif __ios
+    return E_Platform::PF_IOS;
+#else
+    return E_Platform::PF_Mac;
+#endif
+}
+
 #if __windows
 
 //#include <ShellScalingApi.h>
