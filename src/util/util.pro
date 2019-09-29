@@ -59,20 +59,26 @@ DEFINES += __UtilPrj
 
 INCLUDEPATH += ../../inc/util
 
-android {
-    DESTDIR = ../../../XMusic/libs/armeabi-v7a
-} else: macx {
-    DESTDIR = ../../bin/mac
+win32 {
+    LIBS += ../../bin/zlib1.dll
 
-    target.path = ../../../XMusic/bin/mac
-    INSTALLS += target
-} else: ios {
-    DESTDIR = ../../../build/ioslib
-} else {
     DESTDIR = ../../bin
 
     target.path = ../../../XMusic/bin
     INSTALLS += target
+} else {
+    LIBS    += -lz
+
+    android {
+        DESTDIR = ../../../XMusic/libs/armeabi-v7a
+    } else: macx {
+        DESTDIR = ../../bin/mac
+
+        target.path = ../../../XMusic/bin/mac
+        INSTALLS += target
+    } else: ios {
+        DESTDIR = ../../../build/ioslib
+    }
 }
 
 MOC_DIR = ../../../build/xutil

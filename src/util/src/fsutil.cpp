@@ -1,6 +1,30 @@
 ﻿
 #include "util.h"
 
+void fsutil::trimPathTail(wstring& strPath)
+{
+	if (!strPath.empty())
+	{
+		if (_checkPathTail(strPath.back()))
+		{
+			strPath.pop_back();
+		}
+	}
+}
+
+wstring fsutil::trimPathTail_r(const wstring& strPath)
+{
+	if (!strPath.empty())
+	{
+		if (_checkPathTail(strPath.back()))
+		{
+			return strPath.substr(0, strPath.size() - 1);
+		}
+	}
+
+	return strPath;
+}
+
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
 	ibstream fs(strFile);
@@ -12,11 +36,11 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 	if (0 != uReadSize)
 	{
 		vecData.resize(uReadSize);
-		fs.read(&vecData.front(), vecData.size());
-		size_t size = (size_t)fs.gcount();
-		if (size < uReadSize)
+        fs.read(&vecData.front(), uReadSize);
+        size_t uCount = (size_t)fs.gcount();
+        if (uCount < uReadSize)
 		{
-			vecData.resize(size);
+            vecData.resize(uCount);
 		}
 	}
 	else
@@ -24,14 +48,14 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 		while (!fs.eof())
 		{
 			char lpBuff[256] = { 0 };
-			fs.read(lpBuff, sizeof(lpBuff));
-			size_t size = (size_t)fs.gcount();
-			if (size > 0)
+            fs.read(lpBuff, sizeof(lpBuff));
+            size_t uCount = (size_t)fs.gcount();
+            if (uCount > 0)
 			{
 				size_t prevSize = vecData.size();
-				vecData.reserve(size);
+                vecData.resize(prevSize + uCount);
 
-				memcpy(&vecData[prevSize], lpBuff, size);
+                memcpy(&vecData[prevSize], lpBuff, uCount);
 			}
 		}
 	}
@@ -364,7 +388,7 @@ void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFi
 	int size = strPath.size();
 	for (int pos = size - 1; pos>=0; pos--)
 	{
-		if (_checkFSSlant(strPath[pos]))
+		if (_checkPathTail(strPath[pos]))
 		{
 			if (NULL != pstrDir)
 			{
@@ -391,7 +415,7 @@ wstring fsutil::GetRootDir(const wstring& strPath)
 	int size = strPath.size();
 	for (int pos = 1; pos < size; pos++)
 	{
-		if (_checkFSSlant(strPath[pos]))
+		if (_checkPathTail(strPath[pos]))
 		{
 			return strPath.substr(1, pos-1);
 		}
@@ -404,14 +428,8 @@ wstring fsutil::GetParentDir(const wstring& strPath)
 {
 	__EnsureReturn(!strPath.empty(), L"");
 
-	wstring t_strPath = strPath;
-	if (_checkFSSlant(t_strPath.back()))
-	{
-		t_strPath.pop_back();
-	}
-
 	wstring strParentDir;
-	SplitPath(t_strPath, &strParentDir, NULL);
+	SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
 
 	return strParentDir;
 }
@@ -471,7 +489,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	__EnsureReturn(size > 0, false);
 	__EnsureReturn(size < strSubPath.size(), false);
 
-	__EnsureReturn(_checkFSSlant(*strDir.rbegin()) || _checkFSSlant(strSubPath[size]), false);
+	__EnsureReturn(_checkPathTail(*strDir.rbegin()) || _checkPathTail(strSubPath[size]), false);
 
 #if __windows
     return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
@@ -534,6 +552,11 @@ bool fsutil::createDir(const wstring& strDir)
 	if (!::CreateDirectory(strDir.c_str(), NULL))
 	{
 		auto ret = ::GetLastError();
+		if (ERROR_ALREADY_EXISTS == ret)
+		{
+			return true;
+		}
+
 		if (ERROR_PATH_NOT_FOUND == ret)
 		{
 			if (!createDir(fsutil::GetParentDir(strDir)))
@@ -546,10 +569,8 @@ bool fsutil::createDir(const wstring& strDir)
 				return false;
 			}
 		}
-		else
-		{
-			return false;
-		}
+		
+		return false;
 	}
 
 #else
@@ -753,7 +774,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     }
 
     wstring strFind(strDir);
-    if (!_checkFSSlant(strDir.back()))
+    if (!_checkPathTail(strDir.back()))
     {
         strFind.append(1, __wcFSSlant);
     }
@@ -871,3 +892,110 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 
     return true;
 }
+
+static long _xcompressFile(const wstring& strSrcFile, const wstring& strDstFile
+                     , const function<unsigned long(const vector<char>&, vector<char>&)>& cb)
+{
+    vector<char> vecData;
+    if (!fsutil::loadBinary(strSrcFile, vecData))
+    {
+        return -1;
+    }
+    if (vecData.empty())
+    {
+        return 0;
+    }
+
+    vector<char> vecOutput;
+    unsigned long uRet = cb(vecData, vecOutput);
+    if (0 == uRet)
+    {
+        return 0;
+    }
+
+    obstream stream(strDstFile, true);
+    __EnsureReturn(stream, false);
+    stream.write(&vecOutput.front(), uRet);
+
+    return uRet;
+}
+
+#include "../../../zlib-1.2.3-lib/include/zlib.h"
+
+long fsutil::zcompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+{
+    return _xcompressFile(strSrcFile, strDstFile, [&](const vector<char>&vecData, vector<char>&vecOutput){
+        auto sourceLen = vecData.size();
+
+        uLongf destLen = sourceLen;
+        vecOutput.resize(destLen);
+
+        int nRet = compress2((Bytef*)&vecOutput.front(), &destLen, (const Bytef*)&vecData.front(), sourceLen, Z_BEST_COMPRESSION);
+        if (nRet != Z_OK)
+        {
+            return 0ul;
+        }
+
+        return destLen;
+    });
+}
+
+long fsutil::zuncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+{
+    return _xcompressFile(strSrcFile, strDstFile, [&](const vector<char>&vecData, vector<char>&vecOutput){
+        vecOutput.resize(vecData.size()*2);
+
+        uLongf destLen = 0;
+        int nRet = uncompress((Bytef*)&vecOutput.front(), &destLen, (const Bytef*)&vecData.front(), vecData.size());
+        if (nRet != 0)
+        {
+            return 0ul;
+        }
+
+        return destLen;
+    });
+}
+
+#if !__winvc
+long fsutil::qcompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
+{
+    vector<char> vecData;
+    if (!fsutil::loadBinary(strSrcFile, vecData))
+    {
+        return -1;
+    }
+    if (vecData.empty())
+    {
+        return 0;
+    }
+
+    cauto& baOutput = qCompress((const uchar*)&vecData.front(), vecData.size(), nCompressLecvel);
+
+    obstream stream(strDstFile, true);
+    __EnsureReturn(stream, false);
+    stream.write(baOutput.data(), baOutput.size());
+
+    return baOutput.size();
+}
+
+long fsutil::quncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+{
+    vector<char> vecData;
+    if (!fsutil::loadBinary(strSrcFile, vecData))
+    {
+        return -1;
+    }
+    if (vecData.empty())
+    {
+        return 0;
+    }
+
+    cauto& baOutput = qUncompress((const uchar*)&vecData.front(), vecData.size());
+
+    obstream stream(strDstFile, true);
+    __EnsureReturn(stream, false);
+    stream.write(baOutput.data(), baOutput.size());
+
+    return baOutput.size();
+}
+#endif
