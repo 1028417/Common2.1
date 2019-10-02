@@ -310,6 +310,7 @@ static bool _checkUTF8(const char *pStr)
     return true;
 }
 
+#if __windows
 static wstring _fromStr(const char *pStr, size_t len = 0)
 {
     if (0 == len)
@@ -324,17 +325,14 @@ static wstring _fromStr(const char *pStr, size_t len = 0)
     vector<wchar_t> vecBuff(len + 1);
     wchar_t *pBuff = &vecBuff.front();
 
-#if __windows
     if (mbstowcs_s(NULL, pBuff, len+1, pStr, len))
     {
         return L"";
     }
-#else
-    (void)mbstowcs(pBuff, pStr, len);
-#endif
 
     return pBuff;
 }
+#endif
 
 wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
 {
@@ -348,7 +346,11 @@ wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
         return _fromUTF8(str.c_str());
     }
 
+#if __windows
     return _fromStr(str.c_str());
+#else
+    return QString::fromStdString(str).toStdWString();
+#endif
 }
 
 wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
@@ -363,9 +365,14 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
         return _fromUTF8(pStr);
     }
 
+#if __windows
     return _fromStr(pStr);
+#else
+    return QString::fromStdString(pStr).toStdWString();
+#endif
 }
 
+#if __windows
 static string _toStr(const wchar_t *pStr, size_t len = 0)
 {
 	if (0 == len)
@@ -380,17 +387,14 @@ static string _toStr(const wchar_t *pStr, size_t len = 0)
     vector<char> vecBuff(len+1);
     char *pBuff = &vecBuff.front();
 
-#if __windows
     if (wcstombs_s(NULL, pBuff, len+1, pStr, len))
     {
         return "";
     }
-#else
-    (void)wcstombs(pBuff, pStr, len);
-#endif
 
     return pBuff;
 }
+#endif
 
 string wsutil::toStr(const wstring& str)
 {
@@ -399,7 +403,11 @@ string wsutil::toStr(const wstring& str)
         return "";
     }
 
+#if __windows
     return _toStr(str.c_str(), str.size());
+#else
+    return QString::fromStdWString(str).toStdString();
+#endif
 }
 
 string wsutil::toStr(const wchar_t *pStr)
@@ -409,5 +417,9 @@ string wsutil::toStr(const wchar_t *pStr)
         return "";
     }
 
+#if __windows
     return _toStr(pStr);
+#else
+    return QString::fromStdWString(pStr).toStdString();
+#endif
 }

@@ -745,11 +745,26 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 }
 #endif
 
+#if !__winvc
+#include <QCoreApplication>
+wstring fsutil::getAppDir()
+{
+    return QCoreApplication::applicationDirPath().toStdWString();
+}
+#endif
+
+#if __mac
+#include <QStandardPaths>
+wstring fsutil::getMacHomeDir()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::HomeLocation).toStdWString();
+}
+#endif
+
 static const wstring g_wsDot(1, __wcDot);
 static const wstring g_wsDotDot(2, __wcDot);
 
-/*
-    std::list<std::wstring> lstDrivers;
+/*  std::list<std::wstring> lstDrivers;
     winfsutil::getSysDrivers(lstDrivers);
     for (cauto& strDriver : lstDrivers)
     {

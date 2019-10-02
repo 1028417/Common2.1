@@ -152,7 +152,7 @@ BOOL CMainApp::InitInstance()
 	ULONG_PTR gdiplusToken = 0;
 	(void)GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-	_start();
+	_run();
 
 	AfxOleTerm();
 
@@ -161,7 +161,7 @@ BOOL CMainApp::InitInstance()
 	return FALSE;
 }
 
-void CMainApp::_start()
+void CMainApp::_run()
 {
 	__Assert(getController().init());
 

@@ -14,8 +14,20 @@ E_Platform platform()
 #endif
 }
 
-#if __windows
+#if !__winvc
+#include <QSysInfo>
+wstring platformType()
+{
+    return QSysInfo::productType().toStdWString();
+}
 
+wstring platformVersion()
+{
+    return QSysInfo::productVersion().toStdWString();
+}
+#endif
+
+#if __windows
 //#include <ShellScalingApi.h>
 #define MDT_EFFECTIVE_DPI 0
 
@@ -42,7 +54,7 @@ static HRESULT WINAPI GetDpiForMonitor(
 
 float getDPIRate()
 {
-	UINT uDPIX = 0;
+	UINT uDPIX = 0; // = QApplication::primaryScreen()->logicDotsPerInch();
 	HRESULT hr = GetDpiForMonitor(MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTONEAREST), MDT_EFFECTIVE_DPI, &uDPIX, NULL);
 	if (S_OK != hr)
 	{
@@ -52,4 +64,17 @@ float getDPIRate()
 
 	return __DPIDefault / uDPIX;
 }
+
+// XMusicHost目前做法是在清单工具设置“每个监视器高 DPI 识别”
+// 开启对话框Per-Monitor DPI Aware支持(至少Win10)
+//BOOL EnablePerMonitorDialogScaling()
+//{
+//	typedef BOOL(WINAPI *PFN_EnablePerMonitorDialogScaling)();
+//	PFN_EnablePerMonitorDialogScaling pEnablePerMonitorDialogScaling =
+//		(PFN_EnablePerMonitorDialogScaling)GetProcAddress(GetModuleHandleA("user32.dll"), (LPCSTR)2577);
+//
+//	if (pEnablePerMonitorDialogScaling) return pEnablePerMonitorDialogScaling();
+//
+//	return FALSE;
+//}
 #endif
