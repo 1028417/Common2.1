@@ -65,6 +65,7 @@ win32 {
     LIBS += -lcomdlg32
     LIBS += ../../bin/zlib1.dll
 
+    build_dir = ../../../build/xutil/win
     DESTDIR = ../../bin
 
     target.path = ../../../XMusic/bin
@@ -73,18 +74,21 @@ win32 {
     LIBS    += -lz
 
     android {
+        build_dir = ../../../build/xutil/android
         DESTDIR = ../../../XMusic/libs/armeabi-v7a
     } else: macx {
+        build_dir = ../../../build/xutil/mac
         DESTDIR = ../../bin/mac
 
         target.path = ../../../XMusic/bin/mac
         INSTALLS += target
     } else: ios {
+        build_dir = ../../../build/xutil/ios
         DESTDIR = ../../../build/ioslib
     }
 }
 
-MOC_DIR = ../../../build/xutil
-RCC_DIR = ../../../build/xutil
-UI_DIR = ../../../build/xutil
-OBJECTS_DIR = ../../../build/xutil
+MOC_DIR = $$build_dir
+RCC_DIR = $$build_dir
+UI_DIR = $$build_dir
+OBJECTS_DIR = $$build_dir
