@@ -26,7 +26,8 @@ SOURCES += \
     json/json_reader.cpp \
     json/json_value.cpp \
     json/json_writer.cpp \
-    src/util.cpp
+    src/util.cpp \
+    src/winfsdlg.cpp
 
 HEADERS +=\
     ../../inc/util/fsutil.h \
@@ -53,13 +54,15 @@ HEADERS +=\
     ../../inc/sstl/sstl.h \
     ../../inc/util/tmutil.h \
     ../../inc/util/wsutil.h \
-    ../../inc/util/mtlock.h
+    ../../inc/util/mtlock.h \
+    ../../inc/util/winfsdlg.h
 
 DEFINES += __UtilPrj
 
 INCLUDEPATH += ../../inc/util
 
 win32 {
+    LIBS += -lcomdlg32
     LIBS += ../../bin/zlib1.dll
 
     DESTDIR = ../../bin
