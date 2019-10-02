@@ -935,7 +935,7 @@ static long _xcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     return uRet;
 }
 
-#include "../../../zlib-1.2.3-lib/include/zlib.h"
+#include "../../../zlib1.2.3-win32lib/include/zlib.h"
 
 long fsutil::zcompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
