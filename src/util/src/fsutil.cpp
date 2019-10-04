@@ -28,7 +28,7 @@ wstring fsutil::trimPathTail_r(const wstring& strPath)
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
 	ibstream fs(strFile);
-	if (!fs || !fs.is_open())
+    if (!fs)
 	{
 		return false;
 	}
@@ -36,8 +36,7 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 	if (0 != uReadSize)
 	{
 		vecData.resize(uReadSize);
-        fs.read(&vecData.front(), uReadSize);
-        size_t uCount = (size_t)fs.gcount();
+        size_t uCount = fs.read(&vecData.front(), uReadSize);
         if (uCount < uReadSize)
 		{
             vecData.resize(uCount);
@@ -48,8 +47,7 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 		while (!fs.eof())
 		{
 			char lpBuff[256] = { 0 };
-            fs.read(lpBuff, sizeof(lpBuff));
-            size_t uCount = (size_t)fs.gcount();
+            size_t uCount = fs.read(lpBuff, sizeof(lpBuff));
             if (uCount > 0)
 			{
 				size_t prevSize = vecData.size();
@@ -177,17 +175,15 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 	char lpBuffer[1024]{ 0 };
 	while (!srcStream.eof())
 	{
-		srcStream.read(lpBuffer, sizeof lpBuffer);
-		auto size = srcStream.gcount();
-		if (size > 0)
+        size_t uCount = srcStream.read(lpBuffer, sizeof lpBuffer);
+        if (uCount > 0)
 		{
 			if (cb)
 			{
-				cb(lpBuffer, (size_t)size);
+                cb(lpBuffer, uCount);
 			}
 
-			dstStream.write(lpBuffer, size);
-			if (!dstStream.good())
+            if (!dstStream.write(lpBuffer, uCount))
 			{
 				return false;
 			}
@@ -566,8 +562,11 @@ bool fsutil::createDir(const wstring& strDir)
 
 			if (!::CreateDirectory(strDir.c_str(), NULL))
 			{
+				ret = ::GetLastError();
 				return false;
 			}
+
+			return true;
 		}
 		
 		return false;
@@ -930,7 +929,10 @@ static long _xcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
     obstream stream(strDstFile, true);
     __EnsureReturn(stream, false);
-    stream.write(&vecOutput.front(), uRet);
+    if (!stream.write(&vecOutput.front(), uRet))
+    {
+        return -1;
+    }
 
     return uRet;
 }
@@ -988,7 +990,10 @@ long fsutil::qcompressFile(const wstring& strSrcFile, const wstring& strDstFile,
 
     obstream stream(strDstFile, true);
     __EnsureReturn(stream, false);
-    stream.write(baOutput.data(), baOutput.size());
+    if (!stream.write(baOutput.data(), baOutput.size()))
+    {
+        return -1;
+    }
 
     return baOutput.size();
 }
@@ -1009,7 +1014,10 @@ long fsutil::quncompressFile(const wstring& strSrcFile, const wstring& strDstFil
 
     obstream stream(strDstFile, true);
     __EnsureReturn(stream, false);
-    stream.write(baOutput.data(), baOutput.size());
+    if (!stream.write(baOutput.data(), baOutput.size()))
+    {
+        return -1;
+    }
 
     return baOutput.size();
 }

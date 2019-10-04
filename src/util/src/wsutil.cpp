@@ -22,8 +22,8 @@ public:
     {
         setlocale(LC_COLLATE, "chs");
         setlocale(LC_CTYPE, "chs");
- /*
-#if !__windows
+
+ /*#if !__windows
         g_collate_CN.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive)
 #endif*/
     }
@@ -138,7 +138,8 @@ void wsutil::lowerCase(wstring& str)
 #if __windows
     (void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-    str = toQStr(str).toLower().toStdWString();
+    std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+    //str = toQStr(str).toLower().toStdWString();
 #endif
 }
 
@@ -154,7 +155,8 @@ void wsutil::upperCase(wstring& str)
 #if __windows
     (void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-    str = toQStr(str).toUpper().toStdWString();
+    std::transform(str.begin(), str.end(), str.begin(), std::toupper);
+    //str = toQStr(str).toUpper().toStdWString();
 #endif
 }
 
@@ -310,7 +312,7 @@ static bool _checkUTF8(const char *pStr)
     return true;
 }
 
-#if __windows
+#if __winvc
 static wstring _fromStr(const char *pStr, size_t len = 0)
 {
     if (0 == len)
@@ -346,7 +348,7 @@ wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
         return _fromUTF8(str.c_str());
     }
 
-#if __windows
+#if __winvc
     return _fromStr(str.c_str());
 #else
     return QString::fromStdString(str).toStdWString();
@@ -365,14 +367,14 @@ wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
         return _fromUTF8(pStr);
     }
 
-#if __windows
+#if __winvc
     return _fromStr(pStr);
 #else
     return QString::fromStdString(pStr).toStdWString();
 #endif
 }
 
-#if __windows
+#if __winvc
 static string _toStr(const wchar_t *pStr, size_t len = 0)
 {
 	if (0 == len)
@@ -403,7 +405,7 @@ string wsutil::toStr(const wstring& str)
         return "";
     }
 
-#if __windows
+#if __winvc
     return _toStr(str.c_str(), str.size());
 #else
     return QString::fromStdWString(str).toStdString();
@@ -417,7 +419,7 @@ string wsutil::toStr(const wchar_t *pStr)
         return "";
     }
 
-#if __windows
+#if __winvc
     return _toStr(pStr);
 #else
     return QString::fromStdWString(pStr).toStdString();
