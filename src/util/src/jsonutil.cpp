@@ -11,7 +11,7 @@ bool jsonutil::load(const wstring& strFile, JValue& jRoot, bool bStrictRoot)
 
     Json::Features features;
     features.strictRoot_ = bStrictRoot;
-    if (!Json::Reader(features).parse(strData, jRoot))
+    if (!JReader(features).parse(strData, jRoot))
     {
         return false;
     }
