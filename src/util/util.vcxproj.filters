@@ -30,6 +30,7 @@
     </ClCompile>
     <ClCompile Include="src\winfsdlg.cpp" />
     <ClCompile Include="src\util.cpp" />
+    <ClCompile Include="src\jsonutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -95,6 +96,7 @@
     <ClInclude Include="..\..\inc\util\TxtWriter.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
     <ClInclude Include="..\..\inc\util\winfsdlg.h" />
+    <ClInclude Include="..\..\inc\util\jsonutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">
