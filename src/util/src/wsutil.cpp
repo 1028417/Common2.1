@@ -138,7 +138,11 @@ void wsutil::lowerCase(wstring& str)
 #if __windows
     (void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-    std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+    for (auto& wch : str)
+    {
+        wch = std::tolower(wch);
+    }
+    //std::transform(str.begin(), str.end(), str.begin(), std::tolower);
     //str = toQStr(str).toLower().toStdWString();
 #endif
 }
@@ -155,7 +159,11 @@ void wsutil::upperCase(wstring& str)
 #if __windows
     (void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-    std::transform(str.begin(), str.end(), str.begin(), std::toupper);
+    for (auto& wch : str)
+    {
+        wch = std::toupper(wch);
+    }
+    //std::transform(str.begin(), str.end(), str.begin(), std::toupper);
     //str = toQStr(str).toUpper().toStdWString();
 #endif
 }
