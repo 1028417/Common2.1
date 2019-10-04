@@ -27,7 +27,8 @@ SOURCES += \
     json/json_value.cpp \
     json/json_writer.cpp \
     src/util.cpp \
-    src/winfsdlg.cpp
+    src/winfsdlg.cpp \
+    src/jsonutil.cpp
 
 HEADERS +=\
     ../../inc/util/fsutil.h \
@@ -55,7 +56,8 @@ HEADERS +=\
     ../../inc/util/tmutil.h \
     ../../inc/util/wsutil.h \
     ../../inc/util/mtlock.h \
-    ../../inc/util/winfsdlg.h
+    ../../inc/util/winfsdlg.h \
+    ../../inc/util/jsonutil.h
 
 DEFINES += __UtilPrj
 
