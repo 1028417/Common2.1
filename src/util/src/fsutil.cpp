@@ -64,7 +64,7 @@ bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uRea
 bool fsutil::loadTxt(const wstring& strFile, string& strText)
 {
 	ibstream fs(strFile);
-	if (!fs || !fs.is_open())
+    if (!fs)
 	{
 		return false;
 	}
