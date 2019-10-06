@@ -767,10 +767,10 @@ static const wstring g_wsDotDot(2, __wcDot);
     winfsutil::getSysDrivers(lstDrivers);
     for (cauto& strDriver : lstDrivers)
     {
-        tagFileInfo FileInfo;
-        FileInfo.bDir = true;
-        FileInfo.strName = strDriver;
-        cb(FileInfo);
+        tagFileInfo fileInfo;
+        fileInfo.bDir = true;
+        fileInfo.strName = strDriver;
+        cb(fileInfo);
     }
 */
 
@@ -830,14 +830,14 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
             continue;
         }
 
-        tagFileInfo FileInfo;
-        FileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-        FileInfo.strName = strFileName;
-        FileInfo.uFileSize = FindData.nFileSizeLow;
-        FileInfo.tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
-        FileInfo.tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
+        tagFileInfo fileInfo;
+        fileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        fileInfo.strName = strFileName;
+        fileInfo.uFileSize = FindData.nFileSizeLow;
+        fileInfo.tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
+        fileInfo.tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
 
-        cb(FileInfo);
+        cb(fileInfo);
     } while (::FindNextFileW(hFindFile, &FindData));
 
     (void)::FindClose(hFindFile);
@@ -888,19 +888,19 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 			}
         }
 
-        tagFileInfo FileInfo;
-        FileInfo.bDir = fi.isDir();
-        if (!FileInfo.bDir)
+        tagFileInfo fileInfo;
+        fileInfo.bDir = fi.isDir();
+        if (!fileInfo.bDir)
         {
-            FileInfo.uFileSize = fi.size();
+            fileInfo.uFileSize = fi.size();
         }
 
-        FileInfo.strName = strFileName;
+        fileInfo.strName = strFileName;
 
-        FileInfo.tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
-        FileInfo.tModifyTime = fi.lastModified().toTime_t();
+        fileInfo.tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+        fileInfo.tModifyTime = fi.lastModified().toTime_t();
 
-        cb(FileInfo);
+        cb(fileInfo);
     }
 #endif
 

@@ -3,52 +3,52 @@
 
 CPath::CPath(const wstring& strDir)
 {
-	m_fi.bDir = true;
+    m_fileInfo.bDir = true;
 
-	m_fi.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
+    m_fileInfo.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 }
 
 void CPath::SetDir(const wstring& strDir)
 {
 	Clear();
 
-    m_fi.bDir = true;
+    m_fileInfo.bDir = true;
 
-	m_fi.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
+    m_fileInfo.strName = wsutil::rtrim_r(strDir, __wcFSSlant);
 }
 
 wstring CPath::GetName() const
 {
-    if (m_fi.pParent)
+    if (m_fileInfo.pParent)
 	{
-        return m_fi.strName;
+        return m_fileInfo.strName;
 	}
 	else
 	{
-        return fsutil::GetFileName(m_fi.strName);
+        return fsutil::GetFileName(m_fileInfo.strName);
 	}
 }
 
 wstring CPath::absPath() const
 {
-    if (m_fi.pParent)
+    if (m_fileInfo.pParent)
 	{
-        return m_fi.pParent->absPath() + __wcFSSlant + m_fi.strName;
+        return m_fileInfo.pParent->absPath() + __wcFSSlant + m_fileInfo.strName;
 	}
 
-    return m_fi.strName;
+    return m_fileInfo.strName;
 }
 
 wstring CPath::oppPath() const
 {
-    if (m_fi.pParent)
+    if (NULL == m_fileInfo.pParent)
     {
-		WString strOppPath(m_fi.pParent->oppPath());
-		strOppPath << __wcFSSlant << m_fi.strName;
-		return strOppPath;
+        return L"";
     }
 
-    return L"";
+    WString strOppPath(m_fileInfo.pParent->oppPath());
+    strOppPath << __wcFSSlant << m_fileInfo.strName;
+    return strOppPath;
 }
 
 void CPath::_findFile()
@@ -61,15 +61,15 @@ void CPath::_findFile()
 
 void CPath::_onFindFile(TD_PathList& paSubDir, TD_PathList& paSubFile)
 {
-	bool bRet = fsutil::findFile(this->absPath(), [&](tagFileInfo& FileInfo) {
-		FileInfo.pParent = this;
-		CPath *pSubPath = _newSubPath(FileInfo);
+    bool bRet = fsutil::findFile(this->absPath(), [&](tagFileInfo& fileInfo) {
+        fileInfo.pParent = this;
+        CPath *pSubPath = _newSubPath(fileInfo);
 		if (NULL == pSubPath)
 		{
 			return;
 		}
 
-		if (FileInfo.bDir)
+        if (fileInfo.bDir)
 		{
 			paSubDir.add(pSubPath);
 		}
@@ -137,7 +137,7 @@ bool CPath::_scan(const CB_PathScan& cb)
 
 CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 {
-    __EnsureReturn(m_fi.bDir, NULL);
+    __EnsureReturn(m_fileInfo.bDir, NULL);
 
 	list<wstring> lstSubName;
 	while (!strSubPath.empty())
@@ -177,9 +177,9 @@ CPath *CPath::FindSubPath(wstring strSubPath, bool bDir)
 
 void CPath::RemoveSelf()
 {
-    if (NULL != m_fi.pParent)
+    if (NULL != m_fileInfo.pParent)
 	{
-        m_fi.pParent->Remove(this);
+        m_fileInfo.pParent->Remove(this);
 	}
 }
 
@@ -190,7 +190,7 @@ void CPath::Remove(CPath *pSubPath)
 		return;
 	}
 
-    if (pSubPath->m_FileInfo.bDir)
+    if (pSubPath->m_fileInfo.bDir)
 	{
 		if (0 != m_paSubDir.del(pSubPath))
 		{
