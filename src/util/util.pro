@@ -64,7 +64,7 @@ DEFINES += __UtilPrj
 INCLUDEPATH += ../../inc/util
 
 win32 {
-    LIBS += -lcomdlg32
+    LIBS += -lcomdlg32 -lgdi32
     LIBS += ../../bin/zlib1.dll
 
     platform = win

@@ -1,4 +1,4 @@
-
+ï»¿
 #include "util.h"
 
 E_Platform platform()
@@ -50,6 +50,7 @@ static HRESULT WINAPI GetDpiForMonitor(
 	return pGetDpiForMonitor(hmonitor, dpiType, dpiX, dpiY);
 }
 
+//#include <wingdi.h>
 #define __DPIDefault 96.0f
 
 float getDPIRate()
@@ -65,8 +66,8 @@ float getDPIRate()
 	return __DPIDefault / uDPIX;
 }
 
-// XMusicHostÄ¿Ç°×ö·¨ÊÇÔÚÇåµ¥¹¤¾ßÉèÖÃ¡°Ã¿¸ö¼àÊÓÆ÷¸ß DPI Ê¶±ğ¡±
-// ¿ªÆô¶Ô»°¿òPer-Monitor DPI AwareÖ§³Ö(ÖÁÉÙWin10)
+// XMusicHostç›®å‰åšæ³•æ˜¯åœ¨æ¸…å•å·¥å…·è®¾ç½®â€œæ¯ä¸ªç›‘è§†å™¨é«˜ DPI è¯†åˆ«â€
+// å¼€å¯å¯¹è¯æ¡†Per-Monitor DPI Awareæ”¯æŒ(è‡³å°‘Win10)
 //BOOL EnablePerMonitorDialogScaling()
 //{
 //	typedef BOOL(WINAPI *PFN_EnablePerMonitorDialogScaling)();

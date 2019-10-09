@@ -180,7 +180,12 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 		{
 			if (cb)
 			{
-                cb(lpBuffer, uCount);
+				if (!cb(lpBuffer, uCount))
+				{
+					dstStream.close();
+					(void)removeFile(strDstFile);
+                    return true;
+				}
 			}
 
             if (!dstStream.write(lpBuffer, uCount))
