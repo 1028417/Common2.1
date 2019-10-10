@@ -29,9 +29,9 @@ SOURCES += \
     src/util.cpp \
     src/winfsdlg.cpp \
     src/jsonutil.cpp \
-    zDecompress.cpp \
     ../../zlib-1.2.11/contrib/minizip/unzip.c \
-    ../../zlib-1.2.11/contrib/minizip/ioapi.c
+    ../../zlib-1.2.11/contrib/minizip/ioapi.c \
+    zipDecompress.cpp
 
 HEADERS +=\
     ../../inc/util/fsutil.h \
