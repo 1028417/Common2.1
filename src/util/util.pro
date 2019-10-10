@@ -62,7 +62,7 @@ HEADERS +=\
     ../../inc/util/winfsdlg.h \
     ../../inc/util/jsonutil.h
 
-DEFINES += __UtilPrj
+DEFINES += __UtilPrj IOAPI_NO_64
 
 INCLUDEPATH += ../../inc/util
 

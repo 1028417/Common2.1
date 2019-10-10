@@ -172,7 +172,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 	obstream dstStream(strDstFile, true);
 	__EnsureReturn(dstStream, false);
 
-	char lpBuffer[1024]{ 0 };
+    char lpBuffer[4096] {0};
 	while (!srcStream.eof())
 	{
         size_t uCount = srcStream.read(lpBuffer, sizeof lpBuffer);
