@@ -31,7 +31,7 @@ SOURCES += \
     src/jsonutil.cpp \
     ../../zlib-1.2.11/contrib/minizip/unzip.c \
     ../../zlib-1.2.11/contrib/minizip/ioapi.c \
-    zipDecompress.cpp
+    src/zipDecompress.cpp
 
 HEADERS +=\
     ../../inc/util/fsutil.h \
@@ -67,6 +67,8 @@ DEFINES += __UtilPrj IOAPI_NO_64
 INCLUDEPATH += ../../inc/util
 
 win32 {
+    INCLUDEPATH += ../../zlib-1.2.11
+
     LIBS += -lcomdlg32 -lgdi32
     LIBS += ../../bin/zlib1.dll
 

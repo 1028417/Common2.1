@@ -1,17 +1,13 @@
 
-#include <fstream>
-
-#include "../../zlib-1.2.11/zlib.h"
-#include "../../zlib-1.2.11/contrib/minizip/unzip.h"
-
 #include "util.h"
+
+#include "contrib/minizip/unzip.h"
 
 #if __windows
 #define __DirFlag FILE_ATTRIBUTE_DIRECTORY
-#define __mkdir(x) mkdir(x)
 #else
 #define __DirFlag S_IFDIR
-#define __mkdir(x) mkdir(x, 0777)
+#define _mkdir(x) mkdir(x, 0777)
 #endif
 
 static bool zipDecompress(unzFile zfile, const unz_file_info& zFileInfo, const string& strFilePath)
@@ -67,7 +63,7 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
 
         if (zFileInfo.external_fa & __DirFlag)
         {
-            if (__mkdir(strPath.c_str()))
+            if (_mkdir(strPath.c_str()))
             {
                 return false;
             }

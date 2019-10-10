@@ -1,13 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\fsutil.cpp" />
     <ClCompile Include="src\mtutil.cpp" />
-    <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\ProFile.cpp" />
     <ClCompile Include="src\tmutil.cpp" />
-    <ClCompile Include="src\TxtWriter.cpp" />
-    <ClCompile Include="src\winfsutil.cpp" />
     <ClCompile Include="src\wintimer.cpp" />
     <ClCompile Include="src\wsutil.cpp" />
     <ClCompile Include="sqlite\sqlite3.c">
@@ -28,9 +24,32 @@
     <ClCompile Include="json\json_writer.cpp">
       <Filter>json</Filter>
     </ClCompile>
-    <ClCompile Include="src\winfsdlg.cpp" />
     <ClCompile Include="src\util.cpp" />
     <ClCompile Include="src\jsonutil.cpp" />
+    <ClCompile Include="src\fsutil.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Path.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TxtWriter.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\winfsdlg.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\winfsutil.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\ioapi.c">
+      <Filter>fs\unz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\unzip.c">
+      <Filter>fs\unz</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zipDecompress.cpp">
+      <Filter>fs\unz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -41,11 +60,8 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
     <ClInclude Include="..\..\inc\util\wintimer.h" />
-    <ClInclude Include="..\..\inc\util\winfsutil.h" />
     <ClInclude Include="..\..\inc\util\util.h" />
     <ClInclude Include="..\..\inc\util\ProFile.h" />
-    <ClInclude Include="..\..\inc\util\Path.h" />
-    <ClInclude Include="..\..\inc\util\fsutil.h" />
     <ClInclude Include="..\..\inc\util\IDB.h">
       <Filter>db</Filter>
     </ClInclude>
@@ -93,10 +109,23 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\wsutil.h" />
-    <ClInclude Include="..\..\inc\util\TxtWriter.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
-    <ClInclude Include="..\..\inc\util\winfsdlg.h" />
     <ClInclude Include="..\..\inc\util\jsonutil.h" />
+    <ClInclude Include="..\..\inc\util\fsutil.h">
+      <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\Path.h">
+      <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\TxtWriter.h">
+      <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\winfsdlg.h">
+      <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\winfsutil.h">
+      <Filter>fs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">
@@ -110,6 +139,12 @@
     </Filter>
     <Filter Include="json">
       <UniqueIdentifier>{39119b3a-9925-414d-a880-282438b9cfc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs">
+      <UniqueIdentifier>{fef05657-c6b0-4579-a1ea-32c0ba50965e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\unz">
+      <UniqueIdentifier>{662cf539-5ebe-4837-ab1b-b6326ed58fe7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

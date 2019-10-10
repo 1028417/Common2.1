@@ -960,6 +960,7 @@ long fsutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFil
 
     return baOutput.size();
 }
+#endif
 
 static long _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
                      , const function<unsigned long(const vector<char>&, vector<char>&)>& cb)
@@ -991,7 +992,6 @@ static long _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     return len;
 }
 
-//#include "../../zlib-1.2.11/zlib.h"
 #include <zlib.h>
 
 long fsutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
@@ -1044,4 +1044,3 @@ bool fsutil::zUncompressZip(const string& strZipFile, const string& strDstDir)
 
     return zipDecompress(strZipFile, t_strDstDir);
 }
-#endif
