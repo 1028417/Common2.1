@@ -942,9 +942,10 @@ static long _xcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     return uRet;
 }
 
-#include "../../../zlib1.2.3-win32lib/include/zlib.h"
+#include <zlib.h>
+//#include "../../zlib-1.2.11/zlib.h"
 
-long fsutil::zcompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+long fsutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
     return _xcompressFile(strSrcFile, strDstFile, [&](const vector<char>&vecData, vector<char>&vecOutput){
         auto sourceLen = vecData.size();
@@ -952,7 +953,7 @@ long fsutil::zcompressFile(const wstring& strSrcFile, const wstring& strDstFile)
         uLongf destLen = sourceLen;
         vecOutput.resize(destLen);
 
-        int nRet = compress2((Bytef*)&vecOutput.front(), &destLen, (const Bytef*)&vecData.front(), sourceLen, Z_BEST_COMPRESSION);
+        int nRet = compress2((Bytef*)&vecOutput.front(), &destLen, (const Bytef*)&vecData.front(), sourceLen, level);
         if (nRet != Z_OK)
         {
             return 0ul;
@@ -962,7 +963,7 @@ long fsutil::zcompressFile(const wstring& strSrcFile, const wstring& strDstFile)
     });
 }
 
-long fsutil::zuncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+long fsutil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     return _xcompressFile(strSrcFile, strDstFile, [&](const vector<char>&vecData, vector<char>&vecOutput){
         vecOutput.resize(vecData.size()*2);
@@ -978,8 +979,21 @@ long fsutil::zuncompressFile(const wstring& strSrcFile, const wstring& strDstFil
     });
 }
 
+extern bool Decompress(const string& filepath, const string& decompress_to_path);
+bool fsutil::zUncompressZip(const string& strSrcFile, const string& strDstDir)
+{
+    if (strDstDir.empty() || !_checkPathTail(strDstDir.back()))
+    {
+        return Decompress(strSrcFile, strDstDir + "/");
+    }
+    else
+    {
+        return Decompress(strSrcFile, strDstDir);
+    }
+}
+
 #if !__winvc
-long fsutil::qcompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
+long fsutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
     vector<char> vecData;
     if (!fsutil::loadBinary(strSrcFile, vecData))
@@ -1003,7 +1017,7 @@ long fsutil::qcompressFile(const wstring& strSrcFile, const wstring& strDstFile,
     return baOutput.size();
 }
 
-long fsutil::quncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+long fsutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     vector<char> vecData;
     if (!fsutil::loadBinary(strSrcFile, vecData))

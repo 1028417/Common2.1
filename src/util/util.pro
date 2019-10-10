@@ -28,7 +28,10 @@ SOURCES += \
     json/json_writer.cpp \
     src/util.cpp \
     src/winfsdlg.cpp \
-    src/jsonutil.cpp
+    src/jsonutil.cpp \
+    zDecompress.cpp \
+    ../../zlib-1.2.11/contrib/minizip/unzip.c \
+    ../../zlib-1.2.11/contrib/minizip/ioapi.c
 
 HEADERS +=\
     ../../inc/util/fsutil.h \
