@@ -3,9 +3,11 @@
 
 #define MAX_PATH 260
 
-#if __winvc
+#if __windows
 #include <direct.h>
-#else
+#endif
+
+#if !__winvc
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
