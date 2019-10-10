@@ -64,11 +64,10 @@ HEADERS +=\
 
 DEFINES += __UtilPrj IOAPI_NO_64
 
-INCLUDEPATH += ../../inc/util
+INCLUDEPATH += ../../inc/util \
+    ../../zlib-1.2.11
 
 win32 {
-    INCLUDEPATH += ../../zlib-1.2.11
-
     LIBS += -lcomdlg32 -lgdi32
     LIBS += ../../bin/zlib1.dll
 
