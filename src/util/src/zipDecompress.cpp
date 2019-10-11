@@ -10,7 +10,14 @@
 #define _mkdir(x) mkdir(x, 0777)
 #endif
 
-static bool zipDecompress(unzFile zfile, const unz_file_info& zFileInfo, const string& strFilePath)
+struct tagUnzFileInfo : unz_file_info
+{
+    string strPath;
+
+    bool bDir = false;
+};
+
+static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
 {
     int nRet = unzOpenCurrentFile(zfile);
     if (nRet != UNZ_OK)
@@ -29,7 +36,7 @@ static bool zipDecompress(unzFile zfile, const unz_file_info& zFileInfo, const s
         return false;
     }
 
-    obstream dstStream(strFilePath, true);
+    obstream dstStream(zFileInfo.strPath, true);
     __EnsureReturn(dstStream, false);
     if (!dstStream.write(buf, len))
     {
@@ -48,28 +55,30 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
         return false;
     }
 
-    list<pair<unz_file_info, string>> lstZFileInfo;
+    list<tagUnzFileInfo> lstZFileInfo;
     for (uLong i = 0; i < zGlobalInfo.number_entry; i++)
-    {
+    {        
+        tagUnzFileInfo zFileInfo;
         vector<char> vecFileName(MAX_PATH + 1);
         char *szFileName = &vecFileName.front();
-        unz_file_info zFileInfo;
         int nRet = unzGetCurrentFileInfo(zfile, &zFileInfo, szFileName, MAX_PATH, NULL, 0, NULL, 0);
         if (nRet != UNZ_OK)
         {
             return false;
         }
-        cauto& strPath = strDstDir + szFileName;
 
-        if (zFileInfo.external_fa & __DirFlag)
+        zFileInfo.strPath = strDstDir + szFileName;
+        if ((char)__wcSlant == zFileInfo.strPath.back()) // if (zFileInfo.external_fa & __DirFlag)
         {
-            if (_mkdir(strPath.c_str()))
+            zFileInfo.bDir = true;
+
+            if (_mkdir(zFileInfo.strPath.c_str()))
             {
                 return false;
             }
         }
 
-        lstZFileInfo.push_back(std::make_pair(zFileInfo, strPath));
+        lstZFileInfo.push_back(zFileInfo);
 
         (void)unzGoToNextFile(zfile);
     }
@@ -79,9 +88,9 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
     bool bRet = false;
     for (cauto& zFileInfo : lstZFileInfo)
     {
-        if ((zFileInfo.first.external_fa & __DirFlag) == 0)
+        if (!zFileInfo.bDir)
         {
-            bRet = zipDecompress(zfile, zFileInfo.first, zFileInfo.second);
+            bRet = zipDecompress(zfile, zFileInfo);
             if (!bRet)
             {
                 return false;
