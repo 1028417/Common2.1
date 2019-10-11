@@ -42,8 +42,13 @@ void CMainWnd::fixWorkArea(bool bFullScreen)
 
 void CMainWnd::_fixWorkArea(CRect& rcWorkArea, bool bFullScreen)
 {
+	if (bFullScreen) // win7  ≈‰
+	{
+		::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOREDRAW);
+	}
+
 	::SetWindowPos(m_hWnd, HWND_NOTOPMOST, rcWorkArea.left, rcWorkArea.top
-		, rcWorkArea.Width(), rcWorkArea.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
+		, rcWorkArea.Width(), rcWorkArea.Height(),	SWP_NOACTIVATE);
 }
 
 void CMainWnd::OnMove(int x, int y)
