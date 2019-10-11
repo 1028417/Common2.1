@@ -184,7 +184,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 				{
 					dstStream.close();
 					(void)removeFile(strDstFile);
-                    return true;
+                    return false;
 				}
 			}
 
