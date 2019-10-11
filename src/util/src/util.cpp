@@ -78,4 +78,22 @@ float getDPIRate()
 //
 //	return FALSE;
 //}
+
+const RECT& getWorkArea(bool bFullScreen)
+{
+	static RECT rcWorkArea{ 0,0,0,0 };
+	if (bFullScreen)
+	{
+		rcWorkArea.left = 0;
+		rcWorkArea.top = 0;
+		rcWorkArea.left = GetSystemMetrics(SM_CXSCREEN);
+		rcWorkArea.bottom = GetSystemMetrics(SM_CYSCREEN);
+	}
+	else
+	{
+		(void)::SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWorkArea, 0);
+	}
+
+	return rcWorkArea;
+}
 #endif

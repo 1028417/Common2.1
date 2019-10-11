@@ -33,9 +33,17 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		m_strCancelButton = lpszCancelButton;
 	}
 	
+	if (0 == uWidth)
+	{
+		uWidth = getWorkArea(true).right * 38 / 100;
+	}
+	if (0 == uHeight)
+	{
+		uHeight = getWorkArea(true).bottom * 83 / 100;
+	}
 	m_nWidth = uWidth;
 	m_nHeight = uHeight;
-	
+
 	BROWSEINFO browseInfo;
 	::ZeroMemory(&browseInfo, sizeof browseInfo);
 	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_STATUSTEXT | BIF_BROWSEFORCOMPUTER;

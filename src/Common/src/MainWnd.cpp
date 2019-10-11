@@ -36,7 +36,7 @@ void CMainWnd::fixWorkArea(bool bFullScreen)
 {
 	m_bFullScreen = bFullScreen;
 
-	CRect rcWorkArea = CMainApp::getWorkArea(bFullScreen);
+	CRect rcWorkArea = getWorkArea(bFullScreen);
 	_fixWorkArea(rcWorkArea, bFullScreen);
 }
 

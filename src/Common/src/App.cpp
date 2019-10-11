@@ -556,18 +556,3 @@ bool CMainApp::showConfirmMsg(const wstring& strMsg, class CPage& wndPage)
 {
 	return showConfirmMsg(strMsg, (wstring)wndPage.GetTitle());
 }
-
-const CRect& CMainApp::getWorkArea(bool bFullScreen)
-{
-	static CRect rcWorkArea;
-	if (bFullScreen)
-	{
-		rcWorkArea.SetRect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-	}
-	else
-	{
-		(void)::SystemParametersInfo(SPI_GETWORKAREA, 0, rcWorkArea, 0);
-	}
-
-	return rcWorkArea;
-}
