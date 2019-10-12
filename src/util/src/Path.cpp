@@ -48,7 +48,7 @@ wstring CPath::oppPath() const
 
     WString strOppPath(m_fileInfo.pParent->oppPath());
     strOppPath << __wcFSSlant << m_fileInfo.strName;
-    return strOppPath;
+    return std::move(strOppPath);
 }
 
 void CPath::_findFile()
