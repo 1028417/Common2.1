@@ -839,8 +839,8 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         fileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
         fileInfo.strName = strFileName;
         fileInfo.uFileSize = FindData.nFileSizeLow;
-        fileInfo.tCreateTime = winfsutil::transFileTime(FindData.ftCreationTime);
-        fileInfo.tModifyTime = winfsutil::transFileTime(FindData.ftLastWriteTime);
+        fileInfo.tCreateTime = tmutil::transFileTime(FindData.ftCreationTime.dwLowDateTime, FindData.ftCreationTime.dwHighDateTime);
+        fileInfo.tModifyTime = tmutil::transFileTime(FindData.ftLastWriteTime.dwLowDateTime, FindData.ftLastWriteTime.dwHighDateTime);
 
         cb(fileInfo);
     } while (::FindNextFileW(hFindFile, &FindData));

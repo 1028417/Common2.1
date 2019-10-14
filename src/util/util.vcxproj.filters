@@ -4,7 +4,6 @@
     <ClCompile Include="src\mtutil.cpp" />
     <ClCompile Include="src\ProFile.cpp" />
     <ClCompile Include="src\tmutil.cpp" />
-    <ClCompile Include="src\wintimer.cpp" />
     <ClCompile Include="src\wsutil.cpp" />
     <ClCompile Include="sqlite\sqlite3.c">
       <Filter>db\sqlite</Filter>
@@ -50,6 +49,7 @@
     <ClCompile Include="src\zipDecompress.cpp">
       <Filter>fs\unz</Filter>
     </ClCompile>
+    <ClCompile Include="src\timerutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqlite\sqlite3.h">
@@ -59,7 +59,6 @@
       <Filter>db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
-    <ClInclude Include="..\..\inc\util\wintimer.h" />
     <ClInclude Include="..\..\inc\util\util.h" />
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\IDB.h">
@@ -126,6 +125,7 @@
     <ClInclude Include="..\..\inc\util\winfsutil.h">
       <Filter>fs</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\util\timerutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="db">

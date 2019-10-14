@@ -22,6 +22,7 @@ SOURCES += \
     src/tmutil.cpp \
     src/fsutil.cpp \
     src/Path.cpp \
+    src/timerutil.cpp \
     src/mtutil.cpp \
     src/TxtWriter.cpp \
     src/zipDecompress.cpp \
@@ -47,10 +48,11 @@ HEADERS +=\
     ../../inc/util/util.h \
     ../../inc/util/wsutil.h \
     ../../inc/util/tmutil.h \
-    ../../inc/util/mtlock.h \
-    ../../inc/util/mtutil.h \
     ../../inc/util/fsutil.h \
     ../../inc/util/Path.h \
+    ../../inc/util/timerutil.h \
+    ../../inc/util/mtlock.h \
+    ../../inc/util/mtutil.h \
     ../../inc/util/TxtWriter.h \
     ../../inc/util/IDB.h \
     ../../inc/util/SQLiteDB.h \
@@ -58,13 +60,11 @@ HEADERS +=\
 
 win32 {
 SOURCES += \
-    src/wintimer.cpp \
     src/winfsutil.cpp \
     src/winfsdlg.cpp
 
 HEADERS +=\
     ../../inc/util/winfsutil.h \
-    ../../inc/util/wintimer.h \
     ../../inc/util/winfsdlg.h
 }
 
@@ -74,7 +74,7 @@ INCLUDEPATH += ../../inc/util \
     ../../zlib-1.2.11
 
 win32 {
-    LIBS += -lcomdlg32 -lgdi32
+    LIBS +=  -lgdi32 -lcomdlg32 -lole32
     LIBS += ../../bin/zlib1.dll
 
     platform = win

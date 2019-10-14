@@ -1,39 +1,6 @@
 ﻿
 #include "util.h"
 
-time64_t winfsutil::transFileTime(const FILETIME& ft)
-{
-	ULARGE_INTEGER ui;
-	ui.LowPart = ft.dwLowDateTime;
-	ui.HighPart = ft.dwHighDateTime;
-
-	return (ui.QuadPart - 116444736000000000) / 10000000;
-}
-
-wstring winfsutil::formatFileTime(const FILETIME& fileTime, const wstring& strFormat)
-{
-	return tmutil::formatTime64(strFormat, transFileTime(fileTime));
-
-	/*SYSTEMTIME sysTime;
-	SYSTEMTIME localTime;
-	if (!FileTimeToSystemTime(&fileTime, &sysTime)
-	|| !SystemTimeToTzSpecificLocalTime(nullptr, &sysTime, &localTime))
-	{
-	return L"";
-	}
-
-	tm atm;
-	atm.tm_year = localTime.wYear - 1900;     // tm_year is 1900 based
-	atm.tm_mon = localTime.wMonth - 1;        // tm_mon is 0 based
-	atm.tm_mday = localTime.wDay;
-	atm.tm_hour = localTime.wHour;
-	atm.tm_min = localTime.wMinute;
-	atm.tm_sec = 0;
-	atm.tm_isdst = -1;
-
-	return _FormatTime(atm, strFormat);*/
-}
-
 void winfsutil::getSysDrivers(list<wstring>& lstDrivers)
 {
 	#define MAX_DRIVE (_MAX_DRIVE + 1)

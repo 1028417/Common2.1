@@ -3,6 +3,153 @@
 
 #include <ShlObj.h>
 
+int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+	CFolderDlg* pInstance = (CFolderDlg*)lpData;
+	pInstance->_handleCallBack(hWnd, uMsg, lParam);
+	return 0;
+}
+
+void CFolderDlg::_initDlg()
+{
+	if (!m_strInitialDir.empty())
+	{
+		(void)::SendMessage(m_hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM)m_strInitialDir.c_str());
+	}
+
+	if (!m_strTitle.empty())
+	{
+		SetWindowText(m_hWnd, m_strTitle.c_str());
+	}
+
+	(void)::SendMessage(m_hWnd, BFFM_SETSTATUSTEXTW, 1, (LPARAM)m_strTip.c_str());
+
+	if (!m_strOKButton.empty())
+	{
+		::SetWindowText(m_hWndOkButton, m_strOKButton.c_str());
+	}
+	if (!m_strCancelButton.empty())
+	{
+		::SetWindowText(m_hWndCancelButton, m_strCancelButton.c_str());
+	}
+
+
+	::GetClientRect(m_hWnd, &m_rcPreClient);
+
+	if (m_nWidth > 0 && m_nHeight > 0)
+	{
+		RECT rcWnd{ 0,0,0,0 };
+		GetWindowRect(m_hWnd, &rcWnd);
+		(void)::MoveWindow(m_hWnd, (rcWnd.left + rcWnd.right) / 2 - m_nWidth / 2
+			, (rcWnd.top + rcWnd.bottom) / 2 - m_nHeight / 2, m_nWidth, m_nHeight, FALSE);
+	}
+
+	_relayout();
+}
+
+void CFolderDlg::_relayout()
+{
+	RECT rcClient{ 0,0,0,0 };
+	::GetClientRect(m_hWnd, &rcClient);
+
+	int nWidthOff = rcClient.right - rcClient.left - (m_rcPreClient.right - m_rcPreClient.left);
+	int nHeightOff = rcClient.bottom - rcClient.top - (m_rcPreClient.bottom - m_rcPreClient.top);
+	
+	HWND hWndStatic = NULL;
+	RECT rcStatic{ 0,0,0,0 };
+	while (true)
+	{
+		hWndStatic = ::FindWindowExA(m_hWnd, hWndStatic, "Static", NULL);
+		if (!hWndStatic)
+		{
+			break;
+		}
+
+		(void)::GetWindowRect(hWndStatic, &rcStatic);
+		ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.left);
+		ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.right);
+		rcStatic.top = rcStatic.left;
+		rcStatic.bottom = rcStatic.top + 40;
+		(void)::MoveWindow(hWndStatic, rcStatic.left, rcStatic.left
+			, rcStatic.right - rcStatic.left + nWidthOff, rcStatic.bottom - rcStatic.left, FALSE);
+	}
+
+	RECT rcCancelButton{ 0,0,0,0 };
+	::GetWindowRect(m_hWndCancelButton, &rcCancelButton);
+	::ScreenToClient(m_hWnd, (LPPOINT)&rcCancelButton.left);
+	::ScreenToClient(m_hWnd, (LPPOINT)&rcCancelButton.right);
+	auto nBtnWidth = rcCancelButton.right - rcCancelButton.left;
+	::MoveWindow(m_hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
+		, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
+
+	::MoveWindow(m_hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 25, rcCancelButton.top + nHeightOff
+		, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
+
+	HWND hWndTreeCtrl = ::FindWindowExA(m_hWnd, NULL, "SysTreeView32", NULL);
+	RECT rcTreeCtrl{ 0,0,0,0 };
+	::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
+	ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.left);
+	ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.right);
+	if (!m_strTitle.empty())
+	{
+		rcTreeCtrl.top = rcStatic.bottom;
+	}
+	else
+	{
+		rcTreeCtrl.top = rcStatic.top;
+	}
+	rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
+
+	::SetWindowPos(hWndTreeCtrl, NULL, rcTreeCtrl.left, rcTreeCtrl.top
+		, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top
+		, SWP_HIDEWINDOW);
+	
+	timerutil::singleShot(10, [&, hWndTreeCtrl]() {
+		::ShowWindow(hWndTreeCtrl, SW_SHOW);
+		::SetFocus(hWndTreeCtrl);
+	});
+}
+
+void CFolderDlg::_handleCallBack(HWND hWnd, UINT uMsg, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case BFFM_INITIALIZED:
+		m_hWnd = hWnd;
+		m_hWndOkButton = GetDlgItem(hWnd, IDOK);
+		m_hWndCancelButton = GetDlgItem(hWnd, IDCANCEL);
+
+		_initDlg();
+
+		break;
+	case BFFM_SELCHANGED:
+	{
+		//wstring strTip = m_strTip;
+
+		auto pidl = (LPITEMIDLIST)lParam;
+		wchar_t pszPath[512]{ 0 };
+		if (SHGetPathFromIDList(pidl, pszPath))
+		{
+			if (!fsutil::existDir(pszPath))
+			{
+				::EnableWindow(m_hWndOkButton, FALSE);
+			}
+			else
+			{
+				::EnableWindow(m_hWndOkButton, TRUE);
+				//strTip.append(L" ").append(pszPath);
+			}
+		}
+
+		//(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXTW, 0, (LPARAM)strTip.c_str());
+	}
+	
+	break;
+	default:
+		break;
+	}
+}
+
 wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszTip
 	, LPCWSTR lpszOKButton, LPCWSTR lpszCancelButton, UINT uWidth, UINT uHeight)
 {
@@ -30,7 +177,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 	{
 		m_strCancelButton = lpszCancelButton;
 	}
-	
+
 	if (0 == uWidth)
 	{
 		uWidth = getWorkArea(true).right * 38 / 100;
@@ -44,159 +191,34 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 
 	BROWSEINFO browseInfo;
 	::ZeroMemory(&browseInfo, sizeof browseInfo);
-	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_STATUSTEXT | BIF_BROWSEFORCOMPUTER;
+	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_BROWSEFORCOMPUTER
+		| BIF_STATUSTEXT;// | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_UAHINT;
 
 	browseInfo.hwndOwner = hWndOwner;
 	browseInfo.lpfn = BrowseFolderCallBack;
 	browseInfo.lParam = (LPARAM)this;
 
 	LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
-	
-	if(lpItemIDList)
+
+	m_hWnd = NULL;
+	m_hWndOkButton = NULL;
+	m_hWndCancelButton = NULL;
+
+	if (NULL == lpItemIDList)
 	{
-		TCHAR pszPath[512];
-		if (SHGetPathFromIDList(lpItemIDList, pszPath))
-		{
-			m_strInitialDir = wsutil::rtrim_r(pszPath, __wcFSSlant);
-			return m_strInitialDir;
-		}
+		return L"";
 	}
 
-	return L"";
-}
-
-int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpParam)
-{
-	HWND hWndOkButton = GetDlgItem(hWnd, IDOK);
-	HWND hWndCancelButton = GetDlgItem(hWnd, IDCANCEL);
-
-	CFolderDlg* pInstance = (CFolderDlg*)lpParam;
-
-	switch (uMsg)
+	TCHAR pszPath[MAX_PATH]{ 0 };
+	if (!SHGetPathFromIDListW(lpItemIDList, pszPath))
 	{
-		case BFFM_INITIALIZED:
-			{
-				if (!pInstance->m_strInitialDir.empty())
-				{
-					(void)::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, (LPARAM)pInstance->m_strInitialDir.c_str());
-				}
-
-				if (!pInstance->m_strTitle.empty())
-				{
-					SetWindowText(hWnd, pInstance->m_strTitle.c_str());
-				}
-
-				cauto& strTip = pInstance->m_strTip + L"\n\n" + pInstance->m_strInitialDir;
-				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 1, (LPARAM)strTip.c_str());
-
-				if (!pInstance->m_strOKButton.empty())
-				{
-					::SetWindowText(hWndOkButton, pInstance->m_strOKButton.c_str());
-				}
-				if (!pInstance->m_strCancelButton.empty())
-				{
-					::SetWindowText(hWndCancelButton, pInstance->m_strCancelButton.c_str());
-				}
-
-
-				if (0 == pInstance->m_nWidth || 0 == pInstance->m_nHeight)
-				{
-					break;
-				}
-
-				RECT rcPreClient{ 0,0,0,0 };
-				::GetClientRect(hWnd, &rcPreClient);
-
-				RECT rcWnd{0,0,0,0};
-				GetWindowRect(hWnd, &rcWnd);
-				(void)::MoveWindow(hWnd, (rcWnd.left + rcWnd.right)/2 - pInstance->m_nWidth / 2
-					, (rcWnd.top+ rcWnd.bottom)/2 - pInstance->m_nHeight / 2
-					, pInstance->m_nWidth, pInstance->m_nHeight, TRUE);
-				
-				RECT rcClient{0,0,0,0};
-				::GetClientRect(hWnd, &rcClient);
-				
-				int nWidthOff = rcClient.right - rcClient.left - (rcPreClient.right - rcPreClient.left);
-				int nHeightOff = rcClient.bottom - rcClient.top - (rcPreClient.bottom - rcPreClient.top);
-
-
-				HWND hWndStatic = NULL;
-				RECT rcStatic{0,0,0,0};
-				while (true)
-				{
-					hWndStatic = ::FindWindowExA(hWnd, hWndStatic, "Static", NULL);
-					if (!hWndStatic)
-					{
-						break;
-					}
-
-					(void)::GetWindowRect(hWndStatic, &rcStatic);
-					ScreenToClient(hWnd, (LPPOINT)&rcStatic.left);
-					ScreenToClient(hWnd, (LPPOINT)&rcStatic.right);
-					rcStatic.top = rcStatic.left;
-					rcStatic.bottom = rcStatic.top + 50;
-					(void)::MoveWindow(hWndStatic, rcStatic.left, rcStatic.left
-						, rcStatic.right - rcStatic.left + nWidthOff, rcStatic.bottom - rcStatic.left, FALSE);
-				}
-
-
-				RECT rcCancelButton{ 0,0,0,0 };
-				::GetWindowRect(hWndCancelButton, &rcCancelButton);
-				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.left);
-				::ScreenToClient(hWnd, (LPPOINT)&rcCancelButton.right);
-				auto nBtnWidth = rcCancelButton.right - rcCancelButton.left;
-				::MoveWindow(hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
-					, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
-
-				::MoveWindow(hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 25, rcCancelButton.top + nHeightOff
-					, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
-
-				HWND hWndTreeCtrl = ::FindWindowExA(hWnd, NULL, "SysTreeView32", NULL);
-				
-				RECT rcTreeCtrl{0,0,0,0};
-				::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
-				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.left);
-				ScreenToClient(hWnd, (LPPOINT)&rcTreeCtrl.right);
-				if (!pInstance->m_strTitle.empty())
-				{
-					rcTreeCtrl.top = rcStatic.bottom;
-				}
-				else
-				{
-					rcTreeCtrl.top = rcStatic.top;
-				}
-				
-				rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
-				::MoveWindow(hWndTreeCtrl, rcTreeCtrl.left, rcTreeCtrl.top
-					, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom-rcTreeCtrl.top, FALSE);
-				
-				break;
-			}
-		case BFFM_SELCHANGED:
-			{
-                wstring strTip = pInstance->m_strTip;
-
-				wchar_t pszPath[512];
-				if (SHGetPathFromIDList((LPITEMIDLIST)lParam, pszPath))
-				{
-					if (!fsutil::existDir(pszPath))
-					{
-						::EnableWindow(hWndOkButton, FALSE);
-					}
-					else
-					{
-						::EnableWindow(hWndOkButton, TRUE);
-						strTip.append(L"\n\n").append(pszPath);
-					}
-				}
-
-				(void)::SendMessage(hWnd, BFFM_SETSTATUSTEXT, 0, (LPARAM)strTip.c_str());
-
-				break;
-			}
+		::CoTaskMemFree(lpItemIDList);
+		return L"";
 	}
+	::CoTaskMemFree(lpItemIDList);
 
-	return 0;
+	m_strInitialDir = wsutil::rtrim_r(pszPath, __wcFSSlant);
+	return m_strInitialDir;
 }
 
 void CFileDlg::_setOpt(const tagFileDlgOpt& opt)

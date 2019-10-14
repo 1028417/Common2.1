@@ -96,4 +96,13 @@ wstring tmutil::formatTime64(const wstring& strFormat, time64_t tTime)
 
 	return _formatTime(atm, strFormat);
 }
+
+time64_t tmutil::transFileTime(unsigned long dwLowDateTime, unsigned long dwHighDateTime)
+{
+	ULARGE_INTEGER ui;
+	ui.LowPart = dwLowDateTime;
+	ui.HighPart = dwHighDateTime;
+
+	return (ui.QuadPart - 116444736000000000) / 10000000;
+}
 #endif
