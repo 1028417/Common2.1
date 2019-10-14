@@ -1,7 +1,6 @@
 
 #include "util.h"
 
-#if __windows
 struct tagTimerInfo
 {
 	bool bPending = false;
@@ -118,5 +117,3 @@ void CWinTimer::kill()
 	}
 	m_uElapse = 0;
 }
-
-#endif

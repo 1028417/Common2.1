@@ -1,8 +1,6 @@
 ﻿
 #include "util.h"
 
-#if __windows
-
 time64_t winfsutil::transFileTime(const FILETIME& ft)
 {
 	ULARGE_INTEGER ui;
@@ -188,5 +186,3 @@ HICON winfsutil::getFileIcon(const wstring& extention)
 
 	return NULL;
 }
-
-#endif

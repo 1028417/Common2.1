@@ -14,35 +14,23 @@ QMAKE_CXXFLAGS += -std=c++1y #gnu++1y
 SOURCES += \
     sqlite/shell.c \
     sqlite/sqlite3.c \
-    src/wsutil.cpp \
-    src/tmutil.cpp \
-    src/fsutil.cpp \
-    src/Path.cpp \
-    src/SQLiteDB.cpp \
-    src/winfsutil.cpp \
-    src/wintimer.cpp \
-    src/mtutil.cpp \
-    src/TxtWriter.cpp \
     json/json_reader.cpp \
     json/json_value.cpp \
     json/json_writer.cpp \
     src/util.cpp \
-    src/winfsdlg.cpp \
+    src/wsutil.cpp \
+    src/tmutil.cpp \
+    src/fsutil.cpp \
+    src/Path.cpp \
+    src/mtutil.cpp \
+    src/TxtWriter.cpp \
+    src/zipDecompress.cpp \
+    src/SQLiteDB.cpp \
     src/jsonutil.cpp \
     ../../zlib-1.2.11/contrib/minizip/unzip.c \
     ../../zlib-1.2.11/contrib/minizip/ioapi.c \
-    src/zipDecompress.cpp
 
 HEADERS +=\
-    ../../inc/util/fsutil.h \
-    ../../inc/util/IDB.h \
-    ../../inc/util/mtutil.h \
-    ../../inc/util/Path.h \
-    ../../inc/util/SQLiteDB.h \
-    ../../inc/util/util.h \
-    ../../inc/util/winfsutil.h \
-    ../../inc/util/wintimer.h \
-    ../../inc/util/TxtWriter.h \
     ../../inc/sstl/_check.h \
     ../../inc/sstl/_define.h \
     ../../inc/sstl/_util.h \
@@ -56,11 +44,29 @@ HEADERS +=\
     ../../inc/sstl/SMap.h \
     ../../inc/sstl/SSet.h \
     ../../inc/sstl/sstl.h \
-    ../../inc/util/tmutil.h \
+    ../../inc/util/util.h \
     ../../inc/util/wsutil.h \
+    ../../inc/util/tmutil.h \
     ../../inc/util/mtlock.h \
-    ../../inc/util/winfsdlg.h \
+    ../../inc/util/mtutil.h \
+    ../../inc/util/fsutil.h \
+    ../../inc/util/Path.h \
+    ../../inc/util/TxtWriter.h \
+    ../../inc/util/IDB.h \
+    ../../inc/util/SQLiteDB.h \
     ../../inc/util/jsonutil.h
+
+win32 {
+SOURCES += \
+    src/wintimer.cpp \
+    src/winfsutil.cpp \
+    src/winfsdlg.cpp
+
+HEADERS +=\
+    ../../inc/util/winfsutil.h \
+    ../../inc/util/wintimer.h \
+    ../../inc/util/winfsdlg.h
+}
 
 DEFINES += __UtilPrj IOAPI_NO_64
 

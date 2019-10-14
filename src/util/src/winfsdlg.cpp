@@ -1,8 +1,6 @@
 
 #include "util.h"
 
-#if __windows
-
 #include <ShlObj.h>
 
 wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTitle, LPCWSTR lpszTip
@@ -343,5 +341,3 @@ UINT CFileDlg::GetSelFilterIndex() const
 {
 	return m_ofn.nFilterIndex;
 }
-
-#endif
