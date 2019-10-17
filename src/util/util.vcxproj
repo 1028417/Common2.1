@@ -15,27 +15,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\ioapi.c" />
-    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\unzip.c" />
-    <ClCompile Include="json\json_reader.cpp" />
-    <ClCompile Include="json\json_value.cpp" />
-    <ClCompile Include="json\json_writer.cpp" />
-    <ClCompile Include="src\jsonutil.cpp" />
-    <ClCompile Include="src\util.cpp" />
-    <ClCompile Include="src\winfsdlg.cpp" />
-    <ClCompile Include="src\mtutil.cpp" />
-    <ClCompile Include="src\Path.cpp" />
-    <ClCompile Include="src\ProFile.cpp" />
-    <ClCompile Include="src\fsutil.cpp" />
-    <ClCompile Include="src\SQLiteDB.cpp" />
-    <ClCompile Include="sqlite\shell.c" />
-    <ClCompile Include="sqlite\sqlite3.c" />
-    <ClCompile Include="src\tmutil.cpp" />
-    <ClCompile Include="src\TxtWriter.cpp" />
-    <ClCompile Include="src\timerutil.cpp" />
-    <ClCompile Include="src\winfsutil.cpp" />
-    <ClCompile Include="src\wsutil.cpp" />
-    <ClCompile Include="src\zipDecompress.cpp" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c" />
+    <ClCompile Include="..\..\3rd\json\json_reader.cpp" />
+    <ClCompile Include="..\..\3rd\json\json_value.cpp" />
+    <ClCompile Include="..\..\3rd\json\json_writer.cpp" />
+    <ClCompile Include="cpp\jsonutil.cpp" />
+    <ClCompile Include="cpp\util.cpp" />
+    <ClCompile Include="cpp\winfsdlg.cpp" />
+    <ClCompile Include="cpp\mtutil.cpp" />
+    <ClCompile Include="cpp\Path.cpp" />
+    <ClCompile Include="cpp\ProFile.cpp" />
+    <ClCompile Include="cpp\fsutil.cpp" />
+    <ClCompile Include="cpp\SQLiteDB.cpp" />
+    <ClCompile Include="..\..\3rd\sqlite\shell.c" />
+    <ClCompile Include="..\..\3rd\sqlite\sqlite3.c" />
+    <ClCompile Include="cpp\tmutil.cpp" />
+    <ClCompile Include="cpp\TxtWriter.cpp" />
+    <ClCompile Include="cpp\timerutil.cpp" />
+    <ClCompile Include="cpp\winfsutil.cpp" />
+    <ClCompile Include="cpp\wsutil.cpp" />
+    <ClCompile Include="cpp\xmlutil.cpp" />
+    <ClCompile Include="cpp\zipDecompress.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\sstl\ArrList.h" />
@@ -66,8 +71,7 @@
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\winfsutil.h" />
     <ClInclude Include="..\..\inc\util\wsutil.h" />
-    <ClInclude Include="sqlite\sqlite3.h" />
-    <ClInclude Include="sqlite\sqlite3ext.h" />
+    <ClInclude Include="..\..\inc\util\xmlutil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7D80C0B2-8C16-4B56-8C5D-D512FACEBF64}</ProjectGuid>
@@ -122,8 +126,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../inc/util;../../zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__UtilPrj;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -137,7 +141,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../../zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../../3rd/zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -158,8 +162,8 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>../../inc/util;../../zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__UtilPrj;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -171,7 +175,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../../zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../../3rd/zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>

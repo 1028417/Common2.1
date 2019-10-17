@@ -1,71 +1,82 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\mtutil.cpp" />
-    <ClCompile Include="src\ProFile.cpp" />
-    <ClCompile Include="src\tmutil.cpp" />
-    <ClCompile Include="src\wsutil.cpp" />
-    <ClCompile Include="sqlite\sqlite3.c">
-      <Filter>db\sqlite</Filter>
+    <ClCompile Include="..\..\3rd\sqlite\shell.c">
+      <Filter>fs\db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="sqlite\shell.c">
-      <Filter>db\sqlite</Filter>
+    <ClCompile Include="..\..\3rd\sqlite\sqlite3.c">
+      <Filter>fs\db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="src\SQLiteDB.cpp">
-      <Filter>db</Filter>
+    <ClCompile Include="..\..\3rd\json\json_reader.cpp">
+      <Filter>fs\json</Filter>
     </ClCompile>
-    <ClCompile Include="json\json_reader.cpp">
-      <Filter>json</Filter>
+    <ClCompile Include="..\..\3rd\json\json_value.cpp">
+      <Filter>fs\json</Filter>
     </ClCompile>
-    <ClCompile Include="json\json_value.cpp">
-      <Filter>json</Filter>
+    <ClCompile Include="..\..\3rd\json\json_writer.cpp">
+      <Filter>fs\json</Filter>
     </ClCompile>
-    <ClCompile Include="json\json_writer.cpp">
-      <Filter>json</Filter>
+    <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp">
+      <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="src\util.cpp" />
-    <ClCompile Include="src\jsonutil.cpp" />
-    <ClCompile Include="src\fsutil.cpp">
-      <Filter>fs</Filter>
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp">
+      <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="src\Path.cpp">
-      <Filter>fs</Filter>
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp">
+      <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="src\TxtWriter.cpp">
-      <Filter>fs</Filter>
+    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlparser.cpp">
+      <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="src\winfsdlg.cpp">
-      <Filter>fs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\winfsutil.cpp">
-      <Filter>fs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\ioapi.c">
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c">
       <Filter>fs\unz</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib-1.2.11\contrib\minizip\unzip.c">
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c">
       <Filter>fs\unz</Filter>
     </ClCompile>
-    <ClCompile Include="src\zipDecompress.cpp">
+    <ClCompile Include="cpp\SQLiteDB.cpp">
+      <Filter>fs\db</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\jsonutil.cpp">
+      <Filter>fs\json</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\zipDecompress.cpp">
       <Filter>fs\unz</Filter>
     </ClCompile>
-    <ClCompile Include="src\timerutil.cpp" />
+    <ClCompile Include="cpp\xmlutil.cpp">
+      <Filter>fs\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\fsutil.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\Path.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\TxtWriter.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\winfsdlg.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\winfsutil.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\mtutil.cpp" />
+    <ClCompile Include="cpp\ProFile.cpp" />
+    <ClCompile Include="cpp\timerutil.cpp" />
+    <ClCompile Include="cpp\tmutil.cpp" />
+    <ClCompile Include="cpp\util.cpp" />
+    <ClCompile Include="cpp\wsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sqlite\sqlite3.h">
-      <Filter>db\sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\sqlite3ext.h">
-      <Filter>db\sqlite</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
     <ClInclude Include="..\..\inc\util\util.h" />
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\IDB.h">
-      <Filter>db</Filter>
+      <Filter>fs\db</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\SQLiteDB.h">
-      <Filter>db</Filter>
+      <Filter>fs\db</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\sstl\_check.h">
       <Filter>sstl</Filter>
@@ -109,7 +120,6 @@
     <ClInclude Include="..\..\inc\util\tmutil.h" />
     <ClInclude Include="..\..\inc\util\wsutil.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
-    <ClInclude Include="..\..\inc\util\jsonutil.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h">
       <Filter>fs</Filter>
     </ClInclude>
@@ -126,25 +136,37 @@
       <Filter>fs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\timerutil.h" />
+    <ClInclude Include="..\..\inc\util\jsonutil.h">
+      <Filter>fs\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\xmlutil.h">
+      <Filter>fs\xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="db">
-      <UniqueIdentifier>{a2a1a09e-7b50-44c1-b95e-c06d1392c098}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="db\sqlite">
-      <UniqueIdentifier>{306da33b-f8ab-4908-8815-34bdc8709607}</UniqueIdentifier>
-    </Filter>
     <Filter Include="sstl">
       <UniqueIdentifier>{6aae0b5e-872e-4adb-8ed6-f60039352119}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="json">
-      <UniqueIdentifier>{39119b3a-9925-414d-a880-282438b9cfc7}</UniqueIdentifier>
     </Filter>
     <Filter Include="fs">
       <UniqueIdentifier>{fef05657-c6b0-4579-a1ea-32c0ba50965e}</UniqueIdentifier>
     </Filter>
     <Filter Include="fs\unz">
       <UniqueIdentifier>{662cf539-5ebe-4837-ab1b-b6326ed58fe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\db">
+      <UniqueIdentifier>{a2a1a09e-7b50-44c1-b95e-c06d1392c098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\db\sqlite">
+      <UniqueIdentifier>{306da33b-f8ab-4908-8815-34bdc8709607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\json">
+      <UniqueIdentifier>{39119b3a-9925-414d-a880-282438b9cfc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\xml">
+      <UniqueIdentifier>{638f4caf-6000-4c3c-a9a2-0264142a634a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\xml\tinyxml">
+      <UniqueIdentifier>{e1f76036-272e-49f7-90c3-78bd424e4efe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
