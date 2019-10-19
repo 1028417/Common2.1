@@ -40,10 +40,10 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 {
 #if __windows
     FILE *pf = NULL;
-    (void)_wfopen_s(&pf, strFile.c_str(), wsutil::fromStr(strMode).c_str());
+    (void)_wfopen_s(&pf, strFile.c_str(), strutil::strToWstr(strMode).c_str());
     return pf;
 #else
-    return ::fopen(wsutil::toStr(strFile).c_str(), strMode.c_str());
+    return ::fopen(strutil::wstrToStr(strFile).c_str(), strMode.c_str());
 #endif
 }
 
@@ -182,7 +182,7 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 #if __winvc
     return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-    return QFile::copy(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile));
+    return QFile::copy(strutil::wstrToQStr(strSrcFile), strutil::wstrToQStr(strDstFile));
 #endif
 }
 
@@ -234,7 +234,7 @@ bool fsutil::fileStat(const wstring& strFile, tagFileStat& stat)
 #if __windows
     return 0 == _wstat(strFile.c_str(), &stat);
 #else
-    return 0 == ::stat(wsutil::toStr(strFile).c_str(), &stat);
+    return 0 == ::stat(strutil::wstrToStr(strFile).c_str(), &stat);
 #endif
 }
 
@@ -517,8 +517,8 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 #if __windows
     return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
 #else
-	cauto& _strDir = wsutil::toStr(strDir);
-    return 0 == strncasecmp(_strDir.c_str(), wsutil::toStr(strSubPath).c_str(), _strDir.size());
+	cauto& _strDir = strutil::wstrToStr(strDir);
+    return 0 == strncasecmp(_strDir.c_str(), strutil::wstrToStr(strSubPath).c_str(), _strDir.size());
 #endif
 }
 
@@ -549,7 +549,7 @@ bool fsutil::existPath(const wstring& strPath, bool bDir)
     return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;
 
 #else
-    QFileInfo fi(wsutil::toQStr(strPath));
+    QFileInfo fi(strutil::wstrToQStr(strPath));
     if (!fi.exists())
     {
         return false;
@@ -600,7 +600,7 @@ bool fsutil::createDir(const wstring& strDir)
 	}
 
 #else
-    if (!QDir().mkpath(wsutil::toQStr(strDir)))
+    if (!QDir().mkpath(strutil::wstrToQStr(strDir)))
     {
         return false;
     }
@@ -622,7 +622,7 @@ bool fsutil::removeDir(const wstring& strDir)
     }
 
 #else
-    QDir dir(wsutil::toQStr(strDir));
+    QDir dir(strutil::wstrToQStr(strDir));
     if (!dir.rmpath(dir.absolutePath()))
     {
         return false;
@@ -644,7 +644,7 @@ bool fsutil::removeFile(const wstring& strFile)
     }
 
 #else
-    if (!QFile::remove(wsutil::toQStr(strFile)))
+    if (!QFile::remove(strutil::wstrToQStr(strFile)))
     {
         return false;
     }
@@ -669,7 +669,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 		wstring t_strDstFile = strDstFile;
 		transFSSlant(t_strSrcFile);
 		transFSSlant(t_strDstFile);
-		if (!wsutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
+		if (!strutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
 		{
 			if (!removeFile(strDstFile))
 			{
@@ -678,7 +678,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 		}
     }
 
-    if (!QFile::rename(wsutil::toQStr(strSrcFile), wsutil::toQStr(strDstFile)))
+    if (!QFile::rename(strutil::wstrToQStr(strSrcFile), strutil::wstrToQStr(strDstFile)))
     {
         return false;
     }
@@ -731,7 +731,7 @@ static wstring _getCwd()
     char *pCwd = getcwd(NULL, 0);
     if (NULL != pCwd)
     {
-        strCwd = wsutil::fromStr(pCwd);
+        strCwd = strutil::strToWstr(pCwd);
         free(pCwd);
     }
 
@@ -752,7 +752,7 @@ wstring fsutil::workDir()
 
 bool fsutil::setWorkDir(const wstring& strWorkDir)
 {
-    if (chdir(wsutil::toStr(strWorkDir).c_str()))
+    if (chdir(strutil::wstrToStr(strWorkDir).c_str()))
     {
         return false;
     }
@@ -870,7 +870,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     (void)::FindClose(hFindFile);
 
 #else
-    QDir dir(wsutil::toQStr(strDir));
+    QDir dir(strutil::wstrToQStr(strDir));
     if(!dir.exists())
     {
         return false;
@@ -897,7 +897,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 		{
 			if (E_FindFindFilter::FFP_ByPrefix == eFilter)
 			{
-				QString qsFilter = wsutil::toQStr(pstrFilter);
+				QString qsFilter = strutil::wstrToQStr(pstrFilter);
 				if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
 				{
 					continue;
@@ -907,7 +907,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 			{
 				if (E_FindFindFilter::FFP_ByExt == eFilter)
 				{
-					if (!wsutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
+					if (!strutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
 					{
 						continue;
 					}
@@ -1053,7 +1053,7 @@ long fsutil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFil
 extern bool zipDecompress(const string& strZipFile, const string& strDstDir);
 bool fsutil::zUncompressZip(const string& strZipFile, const string& strDstDir)
 {
-    if (!fsutil::createDir(wsutil::fromStr(strDstDir)))
+    if (!fsutil::createDir(strutil::strToWstr(strDstDir)))
     {
         return false;
     }

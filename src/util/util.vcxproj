@@ -34,7 +34,7 @@
     <ClCompile Include="cpp\TxtWriter.cpp" />
     <ClCompile Include="cpp\timerutil.cpp" />
     <ClCompile Include="cpp\winfsutil.cpp" />
-    <ClCompile Include="cpp\wsutil.cpp" />
+    <ClCompile Include="cpp\strutil.cpp" />
     <ClCompile Include="cpp\xmlutil.cpp" />
     <ClCompile Include="cpp\zipDecompress.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp" />
@@ -70,7 +70,7 @@
     <ClInclude Include="..\..\inc\util\util.h" />
     <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\winfsutil.h" />
-    <ClInclude Include="..\..\inc\util\wsutil.h" />
+    <ClInclude Include="..\..\inc\util\strutil.h" />
     <ClInclude Include="..\..\inc\util\xmlutil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

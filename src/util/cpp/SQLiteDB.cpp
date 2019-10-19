@@ -21,7 +21,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 	char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
 	if (NULL != lpData)
 	{
-		strData = wsutil::fromUTF8(lpData);
+		strData = strutil::utf8ToWstr(lpData);
 	}
 
 	return true;
@@ -91,7 +91,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<wstring>& arrData)
 		char *lpData = m_pData[(uRow + 1) * m_uColumnCount + uColumn];
 		if (NULL != lpData)
 		{
-			arrData.add(wsutil::fromUTF8(lpData));
+			arrData.add(strutil::utf8ToWstr(lpData));
 		}
 		else
 		{
@@ -173,7 +173,7 @@ bool CSQLiteDB::Connect(const wstring& strPara)
 #if __windows
     m_nRetCode = sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB);
 #else
-    string strFile = wsutil::toUTF8(strPara);
+    string strFile = strutil::wstrToUTF8(strPara);
     m_nRetCode = sqlite3_open(strFile.c_str(), (sqlite3**)&m_hDB);
 #endif
 
@@ -218,7 +218,7 @@ bool CSQLiteDB::Execute(const string& strSql)
 
 bool CSQLiteDB::Execute(const wstring& strSql)
 {
-	return Execute(wsutil::toUTF8(strSql));
+	return Execute(strutil::wstrToUTF8(strSql));
 }
 
 IDBResult* CSQLiteDB::Query(const string& strSql)
@@ -249,7 +249,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 
 IDBResult* CSQLiteDB::Query(const wstring& strSql)
 {
-	return Query(wsutil::toUTF8(strSql));
+	return Query(strutil::wstrToUTF8(strSql));
 }
 
 bool CSQLiteDB::BeginTrans()

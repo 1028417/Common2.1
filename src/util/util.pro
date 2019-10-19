@@ -26,12 +26,12 @@ HEADERS += \
     ../../inc/util/util.h \
     ../../inc/util/winfsdlg.h \
     ../../inc/util/winfsutil.h \
-    ../../inc/util/wsutil.h \
+    ../../inc/util/strutil.h \
     ../../inc/util/xmlutil.h
 
 SOURCES += \
     cpp/util.cpp \
-    cpp/wsutil.cpp \
+    cpp/strutil.cpp \
     cpp/tmutil.cpp \
     cpp/fsutil.cpp \
     cpp/Path.cpp \

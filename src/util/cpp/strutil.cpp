@@ -29,62 +29,68 @@ public:
     }
 } init;
 
-bool wsutil::checkWChar(const wstring& str)
+template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
+inline static void _trim(C& strText, T chr)
 {
-    for (auto& wchr : str)
-    {
-        if (wchr > 255)
-        {
-            return true;
-        }
-    }
-
-    return false;
+	strText.erase(0, strText.find_first_not_of(chr));
+	strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
-void wsutil::trim(wstring& strText, wchar_t chr)
+void strutil::trim(wstring& strText, wchar_t chr)
+{
+	_trim(strText, chr);
+}
+
+void strutil::trim(string& strText, char chr)
+{
+	_trim(strText, chr);
+}
+
+wstring strutil::trim_r(const wstring& strText, wchar_t chr)
+{
+	wstring strRet(strText);
+	_trim(strRet, chr);
+	return strRet;
+}
+
+string strutil::trim_r(const string& strText, char chr)
+{
+	string strRet(strText);
+	_trim(strRet, chr);
+	return strRet;
+}
+
+void strutil::ltrim(wstring& strText, wchar_t chr)
 {
     strText.erase(0, strText.find_first_not_of(chr));
-    strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
-wstring wsutil::trim_r(const wstring& strText, wchar_t chr)
-{
-    wstring strRet(strText);
-    trim(strRet, chr);
-    return strRet;
-}
-
-void wsutil::ltrim(wstring& strText, wchar_t chr)
-{
-    strText.erase(0, strText.find_first_not_of(chr));
-}
-
-wstring wsutil::ltrim_r(const wstring& strText, wchar_t chr)
+wstring strutil::ltrim_r(const wstring& strText, wchar_t chr)
 {
     wstring strRet(strText);
     ltrim(strRet, chr);
     return strRet;
 }
 
-void wsutil::rtrim(wstring& strText, wchar_t chr)
+void strutil::rtrim(wstring& strText, wchar_t chr)
 {
     strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
-wstring wsutil::rtrim_r(const wstring& strText, wchar_t chr)
+wstring strutil::rtrim_r(const wstring& strText, wchar_t chr)
 {
     wstring strRet(strText);
     rtrim(strRet, chr);
     return strRet;
 }
 
-void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
+template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
+static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
 {
-    auto fn = [&](const wstring& strSub) {
+    auto fn = [&](const C& strSub) {
         if (bTrim && wcSplitor != L' ')
         {
-            cauto& str = trim_r(strSub);
+            cauto& str = strutil::trim_r(strSub);
             if (!str.empty())
             {
                 vecRet.push_back(str);
@@ -97,10 +103,10 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
     };
 
     size_t pos = 0;
-    while ((pos = strText.find_first_not_of(wcSplitor, pos)) != wstring::npos)
+    while ((pos = strText.find_first_not_of(wcSplitor, pos)) != C::npos)
     {
         auto nextPos = strText.find(wcSplitor, pos);
-        if (wstring::npos == nextPos)
+        if (C::npos == nextPos)
         {
             fn(strText.substr(pos));
             break;
@@ -112,7 +118,17 @@ void wsutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& v
     }
 }
 
-int wsutil::collate(const wstring& lhs, const wstring& rhs)
+void strutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
+{
+	_split(strText, wcSplitor, vecRet, bTrim);
+}
+
+void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRet, bool bTrim)
+{
+	_split(strText, wcSplitor, vecRet, bTrim);
+}
+
+int strutil::collate(const wstring& lhs, const wstring& rhs)
 {
     return wcscoll(lhs.c_str(), rhs.c_str());
 
@@ -120,54 +136,84 @@ int wsutil::collate(const wstring& lhs, const wstring& rhs)
     //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
         //, rhs.c_str(), rhs.c_str() + rhs.size());
 #else
-    //return g_collate_CN.compare(toQStr(lhs), toQStr(rhs));
+    //return g_collate_CN.compare(wstrToQStr(lhs), wstrToQStr(rhs));
 #endif
 }
 
-bool wsutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
+bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 {
 #if __windows
     return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #else
-    return 0 == toQStr(str1).compare(toQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
+    return 0 == wstrToQStr(str1).compare(wstrToQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
 #endif
 }
 
-void wsutil::lowerCase(wstring& str)
+void strutil::lowerCase(wstring& str)
 {
 #if __windows
-    (void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
+	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
 #else
-    std::transform(str.begin(), str.end(), str.begin(), towlower);
-    //str = toQStr(str).toLower().toStdWString();
+    std::transform(str.begin(), str.end(), str.begin(), ::towlower);
 #endif
 }
 
-wstring wsutil::lowerCase_r(const wstring& str)
-{
-    wstring strRet = str;
-    lowerCase(strRet);
-    return strRet;
-}
-
-void wsutil::upperCase(wstring& str)
+void strutil::lowerCase(string& str)
 {
 #if __windows
-    (void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
+	(void)::_strlwr_s((char*)str.c_str(), str.size() + 1);
 #else
-    std::transform(str.begin(), str.end(), str.begin(), towupper);
-    //str = toQStr(str).toUpper().toStdWString();
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 #endif
 }
 
-wstring wsutil::upperCase_r(const wstring& str)
+wstring strutil::lowerCase_r(const wstring& str)
+{
+	wstring strRet = str;
+	lowerCase(strRet);
+	return strRet;
+}
+
+string strutil::lowerCase_r(const string& str)
+{
+	string strRet = str;
+	lowerCase(strRet);
+	return strRet;
+}
+
+void strutil::upperCase(wstring& str)
+{
+#if __windows
+	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
+#else
+	std::transform(str.begin(), str.end(), str.begin(), ::towupper);
+#endif
+}
+
+void strutil::upperCase(string& str)
+{
+#if __windows
+	(void)::_strupr_s((char*)str.c_str(), str.size() + 1);
+#else
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+#endif
+}
+
+wstring strutil::upperCase_r(const wstring& str)
 {
     wstring strRet = str;
     upperCase(strRet);
     return strRet;
 }
 
-void wsutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
+string strutil::upperCase_r(const string& str)
+{
+	string strRet = str;
+	upperCase(strRet);
+	return strRet;
+}
+
+void strutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
 {
     for (auto& chr : str)
     {
@@ -178,7 +224,7 @@ void wsutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
     }
 }
 
-void wsutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+void strutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t chrReplace)
 {
     for (auto& chr : str)
     {
@@ -189,14 +235,14 @@ void wsutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t chr
     }
 }
 
-wstring wsutil::replaceChar_r(const wstring& str, wchar_t chrFind, wchar_t chrReplace)
+wstring strutil::replaceChar_r(const wstring& str, wchar_t chrFind, wchar_t chrReplace)
 {
     wstring strRet(str);
     replaceChar(strRet, chrFind, chrReplace);
     return strRet;
 }
 
-wstring wsutil::replaceChars_r(const wstring& str, const wstring& strFindChars, wchar_t chrReplace)
+wstring strutil::replaceChars_r(const wstring& str, const wstring& strFindChars, wchar_t chrReplace)
 {
     wstring strRet(str);
     replaceChars(strRet, strFindChars, chrReplace);
@@ -218,7 +264,7 @@ inline static wstring _fromUTF8(const char *pStr)
 #endif
 }
 
-wstring wsutil::fromUTF8(const string& str)
+wstring strutil::utf8ToWstr(const string& str)
 {
     if (str.empty())
     {
@@ -233,11 +279,11 @@ inline static string _toUTF8(const wchar_t *pStr)
 #if __winvc
     return g_utf8Convert.to_bytes(pStr);
 #else
-    return wsutil::toQStr(pStr).toUtf8().constData();
+    return strutil::wstrToQStr(pStr).toUtf8().constData();
 #endif
 }
 
-string wsutil::toUTF8(const wstring& str)
+string strutil::wstrToUTF8(const wstring& str)
 {
     if (str.empty())
     {
@@ -247,7 +293,7 @@ string wsutil::toUTF8(const wstring& str)
     return _toUTF8(str.c_str());
 }
 
-string wsutil::toUTF8(const wchar_t *pStr)
+string strutil::wstrToUTF8(const wchar_t *pStr)
 {
     if (NULL == pStr)
     {
@@ -336,7 +382,7 @@ static wstring _fromStr(const char *pStr, size_t len = 0)
 }
 #endif
 
-wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
+wstring strutil::strToWstr(const string& str, bool bCheckUTF8)
 {
     if (str.empty())
     {
@@ -355,7 +401,7 @@ wstring wsutil::fromStr(const string& str, bool bCheckUTF8)
 #endif
 }
 
-wstring wsutil::fromStr(const char *pStr, bool bCheckUTF8)
+wstring strutil::strToWstr(const char *pStr, bool bCheckUTF8)
 {
     if (NULL == pStr)
     {
@@ -398,7 +444,7 @@ static string _toStr(const wchar_t *pStr, size_t len = 0)
 }
 #endif
 
-string wsutil::toStr(const wstring& str)
+string strutil::wstrToStr(const wstring& str)
 {
     if (str.empty())
     {
@@ -412,7 +458,7 @@ string wsutil::toStr(const wstring& str)
 #endif
 }
 
-string wsutil::toStr(const wchar_t *pStr)
+string strutil::wstrToStr(const wchar_t *pStr)
 {
     if (NULL == pStr)
     {

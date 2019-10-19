@@ -47,7 +47,7 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 
 bool CTxtWriter::open(const string& strFile, bool bTrunc)
 {
-	bool bExists = fsutil::existFile(wsutil::fromStr(strFile));
+	bool bExists = fsutil::existFile(strutil::strToWstr(strFile));
 
     __EnsureReturn(_open(strFile, bTrunc), false);
 
@@ -76,7 +76,7 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 	{
 		if (_isUnicode())
 		{
-			cauto& str = wsutil::fromStr(pStr);
+			cauto& str = strutil::strToWstr(pStr);
 			size = _fwrite(str.c_str(), str.size()*2);
 		}
 		else
@@ -109,12 +109,12 @@ size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 	{
 		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
 		{
-			cauto& str = wsutil::toStr(pStr);
+			cauto& str = strutil::wstrToStr(pStr);
 			size = _fwrite(str.c_str(), str.size());
 		}
 		else if (_isUtf8())
 		{
-			cauto& str = wsutil::toUTF8(pStr);
+			cauto& str = strutil::wstrToUTF8(pStr);
 			size = _fwrite(str.c_str(), str.size());
 		}
 		else

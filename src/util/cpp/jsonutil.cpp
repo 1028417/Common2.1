@@ -26,7 +26,7 @@ bool jsonutil::get(const JValue& jValue, wstring& strRet)
         return false;
     }
 
-    strRet = wsutil::fromStr(jValue.asString(), true);
+    strRet = strutil::strToWstr(jValue.asString(), true);
 
     return true;
 }

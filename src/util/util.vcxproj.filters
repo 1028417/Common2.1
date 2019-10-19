@@ -66,7 +66,7 @@
     <ClCompile Include="cpp\timerutil.cpp" />
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
-    <ClCompile Include="cpp\wsutil.cpp" />
+    <ClCompile Include="cpp\strutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
@@ -118,7 +118,6 @@
       <Filter>sstl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\tmutil.h" />
-    <ClInclude Include="..\..\inc\util\wsutil.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
     <ClInclude Include="..\..\inc\util\fsutil.h">
       <Filter>fs</Filter>
@@ -142,6 +141,7 @@
     <ClInclude Include="..\..\inc\util\xmlutil.h">
       <Filter>fs\xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\util\strutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sstl">

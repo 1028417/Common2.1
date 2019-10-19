@@ -88,10 +88,10 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 inline static int _sort(const wstring& lhs, const wstring& rhs)
 {
 #if __windows
-    return wsutil::collate(lhs, rhs);
+    return strutil::collate(lhs, rhs);
 #else
-    return wsutil::toQStr(lhs).compare(wsutil::toQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
-    //.localeAwareCompare(wsutil::toQStr(rhs.GetName()));
+    return strutil::wstrToQStr(lhs).compare(strutil::wstrToQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
+    //.localeAwareCompare(strutil::wstrToQStr(rhs.GetName()));
 #endif
 
 	return 1;
@@ -156,7 +156,7 @@ XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		{
 			XFile *pSubFile = NULL;
 			pSubDir->files()([&](XFile& file) {
-				if (wsutil::matchIgnoreCase(file.GetName(), strSubName))
+				if (strutil::matchIgnoreCase(file.GetName(), strSubName))
 				{
 					pSubFile = &file;
 					return false;
@@ -168,7 +168,7 @@ XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		}
 
 		if (!pSubDir->dirs().any([&](CPath& dir) {
-			if (wsutil::matchIgnoreCase(dir.GetName(), strSubName))
+			if (strutil::matchIgnoreCase(dir.GetName(), strSubName))
 			{
 				pSubDir = &dir;
 				return true;

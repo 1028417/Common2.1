@@ -217,7 +217,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		return L"";
     }
 
-	m_strInitialDir = wsutil::rtrim_r(pszPath, __wcFSSlant);
+	m_strInitialDir = strutil::rtrim_r(pszPath, __wcFSSlant);
 	return m_strInitialDir;
 }
 
