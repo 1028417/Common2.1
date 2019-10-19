@@ -43,6 +43,26 @@ void tagXmlElementInfo::getChild(const list<string>& lstChildName, CB_XmlGetChil
     (void)_findChild(*this, lstChildName, itrChildName, cb);
 }
 
+void tagXmlElementInfo::getChild(const list<string>& lstChildName, const string& strAttrName
+              , const string& strAttrValue, CB_XmlGetChild cb)
+{
+    getChild(lstChildName, [&](tagXmlElementInfo& elementInfo){
+        cauto& itr = elementInfo.mapAttr.find(strAttrName);
+        if (itr != elementInfo.mapAttr.end())
+        {
+            if (itr->second == strAttrValue)
+            {
+                if (!cb(elementInfo))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    });
+}
+
 void tagXmlElementInfo::getChildAttr(const list<string>& lstChildName, const string& strAttrName, CB_XmlGetChildAttr cb)
 {
     getChild(lstChildName, [&](tagXmlElementInfo& childInfo){
@@ -54,6 +74,15 @@ void tagXmlElementInfo::getChildAttr(const list<string>& lstChildName, const str
                 return false;
             }
         }
+
+        return true;
+    });
+}
+
+void tagXmlElementInfo::getChildAttr(const list<string>& lstChildName, const string& strAttrName, list<string>& lstAttrValue)
+{
+    getChildAttr(lstChildName, strAttrName, [&](tagXmlElementInfo&, const string& strAttrValue){
+        lstAttrValue.push_back(strAttrValue);
 
         return true;
     });
@@ -80,10 +109,16 @@ static void _loadElement(const TiXmlElement& element, tagXmlElementInfo& element
     }
 }
 
-static bool _loadXml(const string& strFile, bool bUtf8, bool bHtml, tagXmlElementInfo& rootElementInfo)
+static bool _loadXml(const wstring& strFile, bool bUtf8, bool bHtml, tagXmlElementInfo& rootElementInfo)
 {
+	FILE *pf = fsutil::fopen(strFile, "rb");
+	if (NULL == pf)
+	{
+		return false;
+	}
+
 	TiXmlDocument doc(bHtml);
-	if (!doc.LoadFile(strFile, bUtf8? TIXML_ENCODING_UTF8:TIXML_DEFAULT_ENCODING))
+	if (!doc.LoadFile(pf, bUtf8? TIXML_ENCODING_UTF8:TIXML_DEFAULT_ENCODING))
 	{
 		return false;
 	}
@@ -97,12 +132,12 @@ static bool _loadXml(const string& strFile, bool bUtf8, bool bHtml, tagXmlElemen
 	return true;
 }
 
-bool xmlutil::loadXml(const string& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
+bool xmlutil::loadXml(const wstring& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
 {
     return _loadXml(strFile, bUtf8, false, rootElementInfo);
 }
 
-bool xmlutil::loadHtml(const string& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
+bool xmlutil::loadHtml(const wstring& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
 {
     return _loadXml(strFile, bUtf8, true, rootElementInfo);
 }

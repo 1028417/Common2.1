@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-#if !__windows
+#if !__winvc
 #include <QTimer>
 
 #else
@@ -41,7 +41,7 @@ void CALLBACK TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
 __TimerID timerutil::_setTimer(UINT uElapse, const fn_bool& cb)
 {
-#if __windows
+#if __winvc
     UINT idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
 
     auto& TimerInfo = g_mapTimer[idEvent];
@@ -60,7 +60,7 @@ __TimerID timerutil::_setTimer(UINT uElapse, const fn_bool& cb)
 #endif
 }
 
-void timerutil::singleShot(UINT uElapse, const fn_void& cb)
+void timerutil::async(UINT uElapse, const fn_void& cb)
 {
     (void)_setTimer(uElapse, [cb]() {
         cb();
@@ -83,7 +83,7 @@ __TimerID timerutil::setTimerEx(UINT uElapse, const fn_bool& cb)
 	});
 }
 
-#if __windows
+#if __winvc
 void timerutil::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);

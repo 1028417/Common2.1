@@ -104,7 +104,7 @@ void CFolderDlg::_relayout()
 		, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top
 		, SWP_HIDEWINDOW);
 	
-	timerutil::singleShot(10, [&, hWndTreeCtrl]() {
+	timerutil::async(10, [&, hWndTreeCtrl]() {
 		::ShowWindow(hWndTreeCtrl, SW_SHOW);
 		::SetFocus(hWndTreeCtrl);
 	});
@@ -210,12 +210,12 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 	}
 
 	TCHAR pszPath[MAX_PATH]{ 0 };
-	if (!SHGetPathFromIDListW(lpItemIDList, pszPath))
-	{
-		::CoTaskMemFree(lpItemIDList);
+    BOOL bRet = SHGetPathFromIDListW(lpItemIDList, pszPath);
+    ::CoTaskMemFree(lpItemIDList);
+    if (!bRet)
+    {
 		return L"";
-	}
-	::CoTaskMemFree(lpItemIDList);
+    }
 
 	m_strInitialDir = wsutil::rtrim_r(pszPath, __wcFSSlant);
 	return m_strInitialDir;

@@ -36,8 +36,12 @@ static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
         return false;
     }
 
-    obstream dstStream(zFileInfo.strPath, true);
-    __EnsureReturn(dstStream, false);
+	FILE *pf = fsutil::fopen(zFileInfo.strPath, "wb");
+	if (NULL == pf)
+	{
+		return false;
+	}
+    obstream dstStream(pf);
     if (!dstStream.write(buf, len))
     {
         return false;

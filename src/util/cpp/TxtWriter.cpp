@@ -12,33 +12,6 @@ const string CTxtWriter::__UnicodeHead_BigEndian({ (char)0xfe, (char)0xff });
 
 const string CTxtWriter::__UTF8Bom({ (char)0xef, (char)0xbb, (char)0xbf });
 
-bool CTxtWriter::_open(const wstring& strFile, bool bTrunc)
-{
-#if __windows
-    wstring strMode(bTrunc ? L"wb" : L"ab");
-
-    (void)_wfopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
-
-    return NULL != m_lpFile;
-
-#else
-    return _open(wsutil::toStr(strFile), bTrunc);
-#endif
-}
-
-bool CTxtWriter::_open(const string& strFile, bool bTrunc)
-{
-	string strMode(bTrunc ? "wb" : "ab");
-
-#if __windows
-	(void)fopen_s(&m_lpFile, strFile.c_str(), strMode.c_str());
-#else
-    m_lpFile = fopen(strFile.c_str(), strMode.c_str());
-#endif
-
-	return NULL != m_lpFile;
-}
-
 void CTxtWriter::_writeHead()
 {
 	if (E_TxtEncodeType::TET_Unicode_LittleEndian == m_eEncodeType)
@@ -62,12 +35,12 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 {
 	bool bExists = fsutil::existFile(strFile);
 
-	__EnsureReturn(_open(strFile, bTrunc), false);
+    __EnsureReturn(_open(strFile, bTrunc), false);
 
-	if (!bExists || bTrunc)
-	{
-		_writeHead();
-	}
+    if (!bExists || bTrunc)
+    {
+        _writeHead();
+    }
 	
 	return true;
 }
@@ -76,12 +49,12 @@ bool CTxtWriter::open(const string& strFile, bool bTrunc)
 {
 	bool bExists = fsutil::existFile(wsutil::fromStr(strFile));
 
-	__EnsureReturn(_open(strFile, bTrunc), false);
+    __EnsureReturn(_open(strFile, bTrunc), false);
 
-	if (!bExists || bTrunc)
-	{
-		_writeHead();
-	}
+    if (!bExists || bTrunc)
+    {
+        _writeHead();
+    }
 
 	return true;
 }

@@ -11,6 +11,24 @@ TEMPLATE = lib
 
 #QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
+HEADERS += \
+    ../../inc/util/fsutil.h \
+    ../../inc/util/IDB.h \
+    ../../inc/util/jsonutil.h \
+    ../../inc/util/mtlock.h \
+    ../../inc/util/mtutil.h \
+    ../../inc/util/Path.h \
+    ../../inc/util/ProFile.h \
+    ../../inc/util/SQLiteDB.h \
+    ../../inc/util/timerutil.h \
+    ../../inc/util/tmutil.h \
+    ../../inc/util/TxtWriter.h \
+    ../../inc/util/util.h \
+    ../../inc/util/winfsdlg.h \
+    ../../inc/util/winfsutil.h \
+    ../../inc/util/wsutil.h \
+    ../../inc/util/xmlutil.h
+
 SOURCES += \
     cpp/util.cpp \
     cpp/wsutil.cpp \

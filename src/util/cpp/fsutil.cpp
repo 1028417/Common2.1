@@ -25,6 +25,28 @@ wstring fsutil::trimPathTail_r(const wstring& strPath)
 	return strPath;
 }
 
+FILE* fsutil::fopen(const string& strFile, const string& strMode)
+{
+#if __windows
+    FILE *pf = NULL;
+    (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
+    return pf;
+#else
+    return ::fopen(strFile.c_str(), strMode.c_str());
+#endif
+}
+
+FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
+{
+#if __windows
+    FILE *pf = NULL;
+    (void)_wfopen_s(&pf, strFile.c_str(), wsutil::fromStr(strMode).c_str());
+    return pf;
+#else
+    return ::fopen(wsutil::toStr(strFile).c_str(), strMode.c_str());
+#endif
+}
+
 bool fsutil::loadBinary(const wstring& strFile, vector<char>& vecData, UINT uReadSize)
 {
 	ibstream fs(strFile);
