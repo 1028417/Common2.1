@@ -17,7 +17,13 @@ wstring XFile::absPath() const
 {
     if (fileinfo.pParent)
 	{
-        return fileinfo.pParent->absPath() + __wcFSSlant + fileinfo.strName;
+        WString strAbsPath = fileinfo.pParent->absPath();
+        if (!strAbsPath.empty())
+        {
+            strAbsPath << __wcFSSlant;
+        }
+        strAbsPath << fileinfo.strName;
+        return std::move(strAbsPath);
 	}
 
     return fileinfo.strName;
