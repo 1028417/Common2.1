@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-wstring XFile::GetName() const
+wstring XFile::name() const
 {
     if (fileinfo.pParent)
 	{
@@ -41,7 +41,7 @@ wstring XFile::oppPath() const
     return std::move(strOppPath);
 }
 
-void XFile::Remove()
+void XFile::remove()
 {
 	if (NULL != fileinfo.pParent)
 	{
@@ -96,8 +96,8 @@ inline static int _sort(const wstring& lhs, const wstring& rhs)
 #if __windows
     return strutil::collate(lhs, rhs);
 #else
-    return strutil::wstrToQStr(lhs).compare(strutil::wstrToQStr(rhs), Qt::CaseSensitivity::CaseInsensitive);
-    //.localeAwareCompare(strutil::wstrToQStr(rhs.GetName()));
+    return strutil::toQstr(lhs).compare(strutil::toQstr(rhs), Qt::CaseSensitivity::CaseInsensitive);
+    //.localeAwareCompare(strutil::toQstr(rhs.GetName()));
 #endif
 
 	return 1;
@@ -105,7 +105,7 @@ inline static int _sort(const wstring& lhs, const wstring& rhs)
 
 int CPath::_sort(const XFile& lhs, const XFile& rhs) const
 {
-	return ::_sort(lhs.GetName(), rhs.GetName());
+    return ::_sort(lhs.name(), rhs.name());
 }
 
 void CPath::scan(const CB_PathScan& cb)
@@ -162,7 +162,7 @@ XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		{
 			XFile *pSubFile = NULL;
 			pSubDir->files()([&](XFile& file) {
-				if (strutil::matchIgnoreCase(file.GetName(), strSubName))
+                if (strutil::matchIgnoreCase(file.name(), strSubName))
 				{
 					pSubFile = &file;
 					return false;
@@ -174,7 +174,7 @@ XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
 		}
 
 		if (!pSubDir->dirs().any([&](CPath& dir) {
-			if (strutil::matchIgnoreCase(dir.GetName(), strSubName))
+            if (strutil::matchIgnoreCase(dir.name(), strSubName))
 			{
 				pSubDir = &dir;
 				return true;
@@ -211,8 +211,10 @@ void CPath::RemoveSubObject(XFile *pSubPath)
 	}
 }
 
-void CPath::Clear()
+void CPath::clear()
 {
+    _onClear();
+
 	for (auto p : m_paSubDir)
 	{
 		delete p;

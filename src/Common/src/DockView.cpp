@@ -6,9 +6,9 @@
 #define __Offset 8
 
 CViewTab::CViewTab()
-	: m_pen(Color(235, 235, 235), 1)
-	, m_brushSel(Color(255, 255, 255))
-	, m_brushUnsel(Color(245, 245, 245))
+	: m_pen(Gdiplus::Color(235, 235, 235), 1)
+	, m_brushSel(Gdiplus::Color(255, 255, 255))
+	, m_brushUnsel(Gdiplus::Color(245, 245, 245))
 {
 }
 
@@ -137,7 +137,7 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 		if (0 == m_nTrackMouseFlag)
 		{
 			TRACKMOUSEEVENT tme;
-			memset(&tme, 0, sizeof tme);
+			memzero(tme);
 			tme.cbSize = sizeof(tme);
 			tme.hwndTrack = m_hWnd;
 			tme.dwFlags = TME_LEAVE | TME_HOVER;
@@ -187,7 +187,7 @@ void CViewTab::OnPaint()
 	
 	MemDC.SetBkMode(TRANSPARENT);
 
-	Graphics graphics(MemDC.m_hDC);
+	Gdiplus::Graphics graphics(MemDC.m_hDC);
 
 	CRect rcItem;
 	auto nItemCount = GetItemCount();
@@ -227,11 +227,11 @@ void CViewTab::OnPaint()
 	dc.BitBlt(0, y, rcClient.right, nHeight, &MemDC, 0, y, SRCCOPY);
 }
 
-void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
+void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect& rcItem)
 {
 	int nSelItem = GetCurSel();
 
-	Point pt[]{ { rcItem.left, rcItem.bottom }
+	Gdiplus::Point pt[]{ { rcItem.left, rcItem.bottom }
 		, { rcItem.left, rcItem.top }
 		, { rcItem.right - __Offset, rcItem.top }
 		, { rcItem.right, rcItem.bottom }
@@ -265,7 +265,7 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 
 	graphics.FillPolygon(nItem == nSelItem ? &m_brushSel : &m_brushUnsel, pt, sizeof(pt) / sizeof(pt[0]));
 
-	graphics.SetSmoothingMode(SmoothingMode::SmoothingModeHighQuality);
+	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 	if (nItem != nSelItem)
 	{
 		if (nItem > 0)
@@ -279,7 +279,7 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 	}
 
 	TC_ITEMW tci;
-	memset(&tci, 0, sizeof tci);
+	memzero(tci);
 	tci.mask = TCIF_TEXT | TCIF_IMAGE;
 	wchar_t szTabText[256]{ 0 };
 	tci.pszText = szTabText;
@@ -292,7 +292,7 @@ void CViewTab::_drawItem(CDC& dc, Graphics& graphics, int nItem, CRect& rcItem)
 	if (NULL != pImgLst)
 	{
 		IMAGEINFO ImageInfo;
-		memset(&ImageInfo, 0, sizeof ImageInfo);
+		memzero(ImageInfo);
 		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
 		{
 			if (nItem>0)

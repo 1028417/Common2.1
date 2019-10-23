@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 
+#include <gdiplus.h>
+
 #include "Common/App.h"
 
 #include "Common/MainWnd.h"
@@ -147,7 +149,7 @@ BOOL CMainApp::InitInstance()
 	
 	(void)AfxOleInit(); //(void)::OleInitialize(NULL);
 	
-	GdiplusStartupInput gdiplusStartupInput;
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken = 0;
 	(void)GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -155,7 +157,7 @@ BOOL CMainApp::InitInstance()
 
 	_run();
 
-	(void)GdiplusShutdown(gdiplusToken);
+	(void)Gdiplus::GdiplusShutdown(gdiplusToken);
 
 	//AfxOleTerm(); // OleUninitialize();
 

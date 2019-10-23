@@ -47,7 +47,7 @@ void tagXmlElementInfo::getChild(const list<string>& lstChildName, const string&
               , const string& strAttrValue, CB_XmlGetChild cb)
 {
     getChild(lstChildName, [&](tagXmlElementInfo& elementInfo){
-        cauto& itr = elementInfo.mapAttr.find(strAttrName);
+        cauto itr = elementInfo.mapAttr.find(strAttrName);
         if (itr != elementInfo.mapAttr.end())
         {
             if (itr->second == strAttrValue)
@@ -66,7 +66,7 @@ void tagXmlElementInfo::getChild(const list<string>& lstChildName, const string&
 void tagXmlElementInfo::getChildAttr(const list<string>& lstChildName, const string& strAttrName, CB_XmlGetChildAttr cb)
 {
     getChild(lstChildName, [&](tagXmlElementInfo& childInfo){
-        cauto& itr = childInfo.mapAttr.find(strAttrName);
+        cauto itr = childInfo.mapAttr.find(strAttrName);
         if (itr != childInfo.mapAttr.end())
         {
             if (!cb(childInfo, itr->second))
@@ -91,7 +91,7 @@ void tagXmlElementInfo::getChildAttr(const list<string>& lstChildName, const str
 static void _loadElement(const TiXmlElement& element, tagXmlElementInfo& elementInfo)
 {
     elementInfo.strName = element.ValueStr();
-    cauto pText = element.GetText();
+    auto pText = element.GetText();
     if (pText)
     {
         elementInfo.strText = pText;
@@ -123,7 +123,7 @@ static bool _loadXml(const wstring& strFile, bool bUtf8, bool bHtml, tagXmlEleme
 		return false;
 	}
 
-    cauto pRoot = doc.RootElement();
+    auto pRoot = doc.RootElement();
     if (pRoot)
     {
         _loadElement(*pRoot, rootElementInfo);

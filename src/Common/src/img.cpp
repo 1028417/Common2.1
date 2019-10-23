@@ -3,7 +3,7 @@
 
 #include "Common/img.h"
 
-void CCompDC::getBitmap(const function<void(CBitmap&)>& cb)
+void CCompDC::getBitmap(cfn_void_t<CBitmap&> cb)
 {
 	if (m_CompBitmap.m_hObject)
 	{
@@ -385,11 +385,10 @@ void CImglst::SetToListCtrl(CListCtrl &wndListCtrl, E_ImglstType eImglstType)
 	}
 }
 
-HBITMAP CImglst::GetBitmap(UINT uPos, const function<void(CDC&)>& cb)
+HBITMAP CImglst::GetBitmap(UINT uPos, cfn_void_t<CDC&> cb)
 {
 	IMAGEINFO ImageInfo;
-	memset(&ImageInfo, 0, sizeof(ImageInfo));
-
+	memzero(ImageInfo);
 	if (!GetImageInfo(uPos, &ImageInfo))
 	{
 		return NULL;

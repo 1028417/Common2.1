@@ -27,7 +27,21 @@ HEADERS += \
     ../../inc/util/winfsdlg.h \
     ../../inc/util/winfsutil.h \
     ../../inc/util/strutil.h \
-    ../../inc/util/xmlutil.h
+    ../../inc/util/xmlutil.h \
+#
+    ../../inc/sstl/_check.h \
+    ../../inc/sstl/_define.h \
+    ../../inc/sstl/_util.h \
+    ../../inc/sstl/ArrList.h \
+    ../../inc/sstl/PairList.h \
+    ../../inc/sstl/PtrArray.h \
+    ../../inc/sstl/ptrcontainer.h \
+    ../../inc/sstl/SArray.h \
+    ../../inc/sstl/SContainer.h \
+    ../../inc/sstl/SList.h \
+    ../../inc/sstl/SMap.h \
+    ../../inc/sstl/SSet.h \
+    ../../inc/sstl/sstl.h
 
 SOURCES += \
     cpp/util.cpp \

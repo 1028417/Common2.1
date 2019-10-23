@@ -90,7 +90,7 @@ static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
     auto fn = [&](const C& strSub) {
         if (bTrim && wcSplitor != L' ')
         {
-            cauto& str = strutil::trim_r(strSub);
+            cauto str = strutil::trim_r(strSub);
             if (!str.empty())
             {
                 vecRet.push_back(str);
@@ -136,7 +136,7 @@ int strutil::collate(const wstring& lhs, const wstring& rhs)
     //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
         //, rhs.c_str(), rhs.c_str() + rhs.size());
 #else
-    //return g_collate_CN.compare(wstrToQStr(lhs), wstrToQStr(rhs));
+    //return g_collate_CN.compare(toQstr(lhs), toQstr(rhs));
 #endif
 }
 
@@ -145,26 +145,24 @@ bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
 #if __windows
     return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #else
-    return 0 == wstrToQStr(str1).compare(wstrToQStr(str2), Qt::CaseSensitivity::CaseInsensitive);
+    return 0 == toQstr(str1).compare(toQstr(str2), Qt::CaseSensitivity::CaseInsensitive);
 #endif
 }
 
 void strutil::lowerCase(wstring& str)
 {
-#if __windows
-	(void)::_wcslwr_s((wchar_t*)str.c_str(), str.size() + 1);
-#else
-    std::transform(str.begin(), str.end(), str.begin(), ::towlower);
-#endif
+    for (auto& chr : str)
+    {
+        chr = ::towlower(chr);
+    }
 }
 
 void strutil::lowerCase(string& str)
 {
-#if __windows
-	(void)::_strlwr_s((char*)str.c_str(), str.size() + 1);
-#else
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-#endif
+    for (auto& chr : str)
+    {
+        chr = ::tolower(chr);
+    }
 }
 
 wstring strutil::lowerCase_r(const wstring& str)
@@ -183,20 +181,18 @@ string strutil::lowerCase_r(const string& str)
 
 void strutil::upperCase(wstring& str)
 {
-#if __windows
-	(void)::_wcsupr_s((wchar_t*)str.c_str(), str.size() + 1);
-#else
-	std::transform(str.begin(), str.end(), str.begin(), ::towupper);
-#endif
+    for (auto& chr : str)
+    {
+        chr = ::towupper(chr);
+    }
 }
 
 void strutil::upperCase(string& str)
 {
-#if __windows
-	(void)::_strupr_s((char*)str.c_str(), str.size() + 1);
-#else
-    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-#endif
+    for (auto& chr : str)
+    {
+        chr = ::toupper(chr);
+    }
 }
 
 wstring strutil::upperCase_r(const wstring& str)
@@ -264,7 +260,7 @@ inline static wstring _fromUTF8(const char *pStr)
 #endif
 }
 
-wstring strutil::utf8ToWstr(const string& str)
+wstring strutil::fromUtf8(const string& str)
 {
     if (str.empty())
     {
@@ -274,33 +270,33 @@ wstring strutil::utf8ToWstr(const string& str)
     return _fromUTF8(str.c_str());
 }
 
-inline static string _toUTF8(const wchar_t *pStr)
+inline static string _toUtf8(const wchar_t *pStr)
 {
 #if __winvc
     return g_utf8Convert.to_bytes(pStr);
 #else
-    return strutil::wstrToQStr(pStr).toUtf8().constData();
+    return strutil::toQstr(pStr).toUtf8().constData();
 #endif
 }
 
-string strutil::wstrToUTF8(const wstring& str)
+string strutil::toUtf8(const wstring& str)
 {
     if (str.empty())
     {
         return "";
     }
 
-    return _toUTF8(str.c_str());
+    return _toUtf8(str.c_str());
 }
 
-string strutil::wstrToUTF8(const wchar_t *pStr)
+string strutil::toUtf8(const wchar_t *pStr)
 {
     if (NULL == pStr)
     {
         return "";
     }
 
-    return _toUTF8(pStr);
+    return _toUtf8(pStr);
 }
 
 static bool _checkUTF8(const char *pStr)
@@ -382,7 +378,7 @@ static wstring _fromStr(const char *pStr, size_t len = 0)
 }
 #endif
 
-wstring strutil::strToWstr(const string& str, bool bCheckUTF8)
+wstring strutil::toWstr(const string& str, bool bCheckUTF8)
 {
     if (str.empty())
     {
@@ -401,7 +397,7 @@ wstring strutil::strToWstr(const string& str, bool bCheckUTF8)
 #endif
 }
 
-wstring strutil::strToWstr(const char *pStr, bool bCheckUTF8)
+wstring strutil::toWstr(const char *pStr, bool bCheckUTF8)
 {
     if (NULL == pStr)
     {
@@ -432,19 +428,17 @@ static string _toStr(const wchar_t *pStr, size_t len = 0)
 		}
 	}
 
-    vector<char> vecBuff(len+1);
-    char *pBuff = &vecBuff.front();
-
-    if (wcstombs_s(NULL, pBuff, len+1, pStr, len))
+	TBuffer<char> buff(len+1);
+    if (wcstombs_s(NULL, buff, len+1, pStr, len))
     {
         return "";
     }
 
-    return pBuff;
+    return string(buff);
 }
 #endif
 
-string strutil::wstrToStr(const wstring& str)
+string strutil::toStr(const wstring& str)
 {
     if (str.empty())
     {
@@ -458,7 +452,7 @@ string strutil::wstrToStr(const wstring& str)
 #endif
 }
 
-string strutil::wstrToStr(const wchar_t *pStr)
+string strutil::toStr(const wchar_t *pStr)
 {
     if (NULL == pStr)
     {

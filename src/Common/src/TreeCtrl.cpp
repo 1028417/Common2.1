@@ -526,7 +526,7 @@ void CObjectTree::handleCustomDraw(NMTVCUSTOMDRAW& tvnmcd, LRESULT* pResult)
 			return;
 		}
 		
-		cauto& uTextAlpha = tvcd.uTextAlpha;
+		cauto uTextAlpha = tvcd.uTextAlpha;
 		if (0 != uTextAlpha && uTextAlpha <= 255)
 		{
 			auto pb = (BYTE*)&tvcd.crText;

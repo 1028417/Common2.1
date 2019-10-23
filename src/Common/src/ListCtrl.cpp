@@ -783,7 +783,7 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 				}
 			}
 
-			cauto& uTextAlpha = lvcd.uTextAlpha;
+			cauto uTextAlpha = lvcd.uTextAlpha;
 			if (0 != uTextAlpha && uTextAlpha <= 255)
 			{
 				auto pb = (BYTE*)&lvcd.crText;
@@ -959,7 +959,7 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 				if (!m_bTrackingMouse)
 				{
 					TRACKMOUSEEVENT tme;
-					memset(&tme, 0, sizeof tme);
+					memzero(tme);
 					tme.cbSize = sizeof(tme);
 					tme.hwndTrack = m_hWnd;
 					tme.dwFlags = TME_LEAVE | TME_HOVER;
@@ -1054,7 +1054,7 @@ UINT CObjectList::GetHeaderHeight()
 const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 {
 	static LVHITTESTINFO htinfo;
-	memset(&htinfo, 0, sizeof htinfo);
+	memzero(htinfo);
 
 	htinfo.pt = ptPos;
 	(void)__super::HitTest(&htinfo);

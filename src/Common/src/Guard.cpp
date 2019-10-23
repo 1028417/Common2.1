@@ -185,7 +185,7 @@ bool CMenuEx::Attach(HMENU hMenu)
 			auto itr = m_mapMenuItemInfos.find((UINT)nItemID);
 			if (itr != m_mapMenuItemInfos.end())
 			{
-				cauto& MenuItemInfo = itr->second;
+				cauto MenuItemInfo = itr->second;
 
 				if (MenuItemInfo.bDelete || MenuItemInfo.bDisable)
 				{

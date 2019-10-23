@@ -47,7 +47,7 @@ bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 
 bool CTxtWriter::open(const string& strFile, bool bTrunc)
 {
-	bool bExists = fsutil::existFile(strutil::strToWstr(strFile));
+	bool bExists = fsutil::existFile(strutil::toWstr(strFile));
 
     __EnsureReturn(_open(strFile, bTrunc), false);
 
@@ -61,12 +61,12 @@ bool CTxtWriter::open(const string& strFile, bool bTrunc)
 
 size_t CTxtWriter::_fwrite(const void *pData, size_t size) const
 {
-	return fwrite(pData, size, 1, m_lpFile);
+    return fwrite(pData, size, 1, m_pf);
 }
 
 size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 {
-	if (NULL == m_lpFile)
+    if (NULL == m_pf)
 	{
 		return 0;
 	}
@@ -76,7 +76,7 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 	{
 		if (_isUnicode())
 		{
-			cauto& str = strutil::strToWstr(pStr);
+			cauto str = strutil::toWstr(pStr);
 			size = _fwrite(str.c_str(), str.size()*2);
 		}
 		else
@@ -91,7 +91,7 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 	}
 
 #if __isdebug
-	(void)fflush(m_lpFile);
+    (void)fflush(m_pf);
 #endif
 
 	return size;
@@ -99,7 +99,7 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 
 size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 {
-	if (NULL == m_lpFile)
+    if (NULL == m_pf)
 	{
 		return 0;
 	}
@@ -109,12 +109,12 @@ size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 	{
 		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
 		{
-			cauto& str = strutil::wstrToStr(pStr);
+			cauto str = strutil::toStr(pStr);
 			size = _fwrite(str.c_str(), str.size());
 		}
 		else if (_isUtf8())
 		{
-			cauto& str = strutil::wstrToUTF8(pStr);
+			cauto str = strutil::toUtf8(pStr);
 			size = _fwrite(str.c_str(), str.size());
 		}
 		else
@@ -129,7 +129,7 @@ size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 	}
 
 #if __isdebug
-	(void)fflush(m_lpFile);
+    (void)fflush(m_pf);
 #endif
 
 	return size;
@@ -161,17 +161,11 @@ size_t CTxtWriter::_writeEndLine() const
 	}
 }
 
-bool CTxtWriter::close()
+void CTxtWriter::close()
 {
-	if (NULL != m_lpFile)
-	{
-		if (-1 == fclose(m_lpFile))
-		{
-			return false;
-		}
-
-		m_lpFile = NULL;
-	}
-
-	return true;
+    if (m_pf)
+    {
+        (void)fclose(m_pf);
+        m_pf = NULL;
+    }
 }

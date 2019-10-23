@@ -26,10 +26,8 @@ static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
     }
 
     uLong len = zFileInfo.uncompressed_size;
-    vector<char> vecData(len);
-    const char *buf = &vecData.front();
-    nRet = unzReadCurrentFile(zfile, (voidp)buf, len);
-
+	CByteVector vecData(len);
+    nRet = unzReadCurrentFile(zfile, vecData, len);
     (void)unzCloseCurrentFile(zfile);
     if (nRet != (int)len)
     {
@@ -42,7 +40,7 @@ static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
 		return false;
 	}
     obstream dstStream(pf);
-    if (!dstStream.write(buf, len))
+    if (!dstStream.write(vecData, len))
     {
         return false;
     }
@@ -63,8 +61,8 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
     for (uLong i = 0; i < zGlobalInfo.number_entry; i++)
     {        
         tagUnzFileInfo zFileInfo;
-        vector<char> vecFileName(MAX_PATH + 1);
-        char *szFileName = &vecFileName.front();
+		CByteVector vecFileName(MAX_PATH + 1);
+		char *szFileName = vecFileName;
         int nRet = unzGetCurrentFileInfo(zfile, &zFileInfo, szFileName, MAX_PATH, NULL, 0, NULL, 0);
         if (nRet != UNZ_OK)
         {
@@ -90,7 +88,7 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
     (void)unzGoToFirstFile(zfile);
 
     bool bRet = false;
-    for (cauto& zFileInfo : lstZFileInfo)
+    for (cauto zFileInfo : lstZFileInfo)
     {
         if (!zFileInfo.bDir)
         {
