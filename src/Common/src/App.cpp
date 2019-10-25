@@ -79,7 +79,7 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 	}
 }
 
-void CMainApp::thread(const fn_void& cb)
+void CMainApp::thread(cfn_void cb)
 {
 	bool bExit = false;
 	std::thread thr([&]() {

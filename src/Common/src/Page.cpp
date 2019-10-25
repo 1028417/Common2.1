@@ -59,15 +59,15 @@ BOOL CPage::Active(bool bForceFocus)
 	return TRUE;
 }
 
-BOOL CPage::SetTitle(const CString& cstrTitle, int iImage)
+void CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
-	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
-	if (NULL == pDockView)
-	{
-		return FALSE;
-	}
+	m_cstrTitle = cstrTitle; // 可能是不附在DockView上的独立view
 
-	return pDockView->SetPageTitle(*this, cstrTitle, iImage);
+	CDockView *pDockView = dynamic_cast<CDockView*>(GetParentSheet());
+	if (pDockView)
+	{
+		(void)pDockView->SetPageTitle(*this, cstrTitle, iImage);
+	}
 }
 
 void CPage::RegMenuHotkey(CWnd& wndCtrl, UINT uVkKeyCode, UINT uCmd)

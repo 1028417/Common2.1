@@ -9,7 +9,7 @@ QT       += core
 TARGET = xutil
 TEMPLATE = lib
 
-#QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
+QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
 HEADERS += \
     ../../inc/util/fsutil.h \
@@ -57,7 +57,7 @@ SOURCES += \
     ../../3rd/json/json_reader.cpp \
     ../../3rd/json/json_value.cpp \
     ../../3rd/json/json_writer.cpp \
- #\
+ #
     cpp/xmlutil.cpp \
     ../../3rd/tinyxml/tinyxml.cpp \
     ../../3rd/tinyxml/tinyxmlerror.cpp \

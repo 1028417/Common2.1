@@ -822,21 +822,16 @@ static const wstring g_wsDotDot(2, __wcDot);
 
 bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
-	if (strDir.empty())
+    /*if (strDir.empty())
 	{
 		return false;
-	}
+    }*/
 
-#if __windows
-    if (strDir.empty())
-    {
-        return false;
-    }
-
+#if __winvc
     wstring strFind(strDir);
     if (!checkPathTail(strDir.back()))
     {
-        strFind.append(1, __wcFSSlant);
+        strFind.append(1, __wcDirSeparator);
     }
 
     if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
@@ -864,8 +859,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     do
     {
         if ((FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
-        //	|| (FindData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
-        )
+                || (FindData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
         {
             continue;
         }
@@ -894,35 +888,52 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     {
         return false;
     }
-    dir.setFilter(QDir::Dirs | QDir::Files);
-    dir.setSorting(QDir::DirsFirst);
 
-    QFileInfoList list = dir.entryInfoList();
+    //cauto filter = QDir::Filter::NoFilter;
+    cauto filter = QDir::Filter::Dirs | QDir::Filter::Files
+            | QDir::Filter::NoSymLinks
+            | QDir::Filter::Readable //| QDir::Filter::Hidden
+            | QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot;
+
+    cauto sortFlag = QDir::SortFlag::NoSort;
+    /*cauto sortFlag = QDir::SortFlag::DirsFirst | QDir::SortFlag::IgnoreCase
+                   | QDir::SortFlag::LocaleAware;*/
+
+    QFileInfoList list = dir.entryInfoList(filter, sortFlag);
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
     {
         const QFileInfo& fi = list.at(nIdx);
-        if (!fi.isReadable() || fi.isHidden() || fi.isSymLink())
+        /*if (fi.isSymLink())
         {
             continue;
         }
-
-		cauto strFileName = fi.fileName().toStdWString();
-		if (g_wsDot == strFileName || g_wsDotDot == strFileName)
+        if (!fi.isReadable())
+        {
+            continue;
+        }
+        if(fi.isHidden())
+        {
+            continue;
+        }*/
+        cauto strFileName = fi.fileName().toStdWString();
+        /*if (g_wsDot == strFileName || g_wsDotDot == strFileName)
 		{
 			continue;
-		}
+        }*/
+
+        bool bDir = fi.isDir();
 
 		if (pstrFilter)
 		{
 			if (E_FindFindFilter::FFP_ByPrefix == eFilter)
 			{
-				QString qsFilter = strutil::toQstr(pstrFilter);
-				if (0 != fi.fileName().left(qsFilter.size()).compare(qsFilter, Qt::CaseSensitivity::CaseInsensitive))
+                wstring strFilter = pstrFilter;
+                if (!strutil::matchIgnoreCase(strFileName.substr(0, strFilter.size()), strFilter))
 				{
 					continue;
 				}
 			}
-			else if (!fi.isDir())
+            else if (!bDir)
 			{
 				if (E_FindFindFilter::FFP_ByExt == eFilter)
 				{
@@ -935,14 +946,13 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         }
 
         tagFileInfo fileInfo;
-        fileInfo.bDir = fi.isDir();
-        if (!fileInfo.bDir)
+        fileInfo.bDir = bDir;
+        if (!bDir)
         {
-            fileInfo.uFileSize = fi.size();
+            fileInfo.uFileSize = (UINT)fi.size();
         }
 
         fileInfo.strName = strFileName;
-
         fileInfo.tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
         fileInfo.tModifyTime = fi.lastModified().toTime_t();
 
@@ -1003,8 +1013,8 @@ long fsutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFil
 }
 #endif
 
-static long _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
-                     , const function<unsigned long(const CByteVector&, CByteVector&)>& cb)
+static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
+                     , const function<UINT(const CByteVector&, CByteVector&)>& cb)
 {
 	CByteVector vecData;
     if (!fsutil::loadBinary(strSrcFile, vecData))
@@ -1017,7 +1027,7 @@ static long _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     }
 
 	CByteVector vecOutput;
-    unsigned long len = cb(vecData, vecOutput);
+    UINT len = cb(vecData, vecOutput);
     if (0 == len)
     {
         return 0;
@@ -1080,7 +1090,7 @@ bool fsutil::zUncompressZip(const string& strZipFile, const string& strDstDir)
     string t_strDstDir(strDstDir);
     if (strDstDir.empty() || !checkPathTail(strDstDir.back()))
     {
-        t_strDstDir.append(1, (char)__wcFSSlant);
+        t_strDstDir.append(1, (char)__wcDirSeparator);
     }
 
     return zipDecompress(strZipFile, t_strDstDir);

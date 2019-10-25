@@ -3,61 +3,92 @@
 
 #include <locale>
 
-/*#if __windows
-    static const char *CN_LOCALE_STRING = "Chinese_china";
-    static const locale g_locale_CN(CN_LOCALE_STRING);
-    //static const locale g_locale_CN("");
-    static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t> >(g_locale_CN);
+static struct __localeInit {
+    __localeInit() {
+        setlocale(LC_COLLATE, ""); // "chs");
+        setlocale(LC_CTYPE, ""); // "chs");
+
+        //std::locale::global(std::locale(""));
+    }
+} localeInit;
+
+#if __winvc
+    static const locale g_locale_CN("Chinese_china");
+    static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
+
 #else
-    #include <QLocale>
-    #include <QCollator>
+#include <QLocale>
+#include <QCollator>
     static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
     static const QCollator& g_collate_CN = QCollator(g_locale_CN);
-#endif*/
+#endif
 
-static class __init
+int strutil::collate(const wstring& lhs, const wstring& rhs)
 {
-public:
-    __init()
-    {
-        setlocale(LC_COLLATE, "chs");
-        setlocale(LC_CTYPE, "chs");
+	return wcscoll(lhs.c_str(), rhs.c_str());
 
- /*#if !__windows
-        g_collate_CN.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive)
-#endif*/
+    //return toQstr(lhs).localeAwareCompare(toQstr(rhs));
+}
+
+int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
+{
+#if __winvc
+    return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
+        , rhs.c_str(), rhs.c_str() + rhs.size());
+#else
+    return g_collate_CN.compare(toQstr(lhs), toQstr(rhs));
+#endif
+}
+
+string strutil::substr(const string& str, size_t pos, size_t len)
+{
+    if (str.length() < pos)
+    {
+        return "";
     }
-} init;
+
+    return str.substr(pos, len);
+}
+
+wstring strutil::substr(const wstring& str, size_t pos, size_t len)
+{
+    if (str.length() < pos)
+    {
+        return L"";
+    }
+
+    return str.substr(pos, len);
+}
 
 template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
 inline static void _trim(C& strText, T chr)
 {
-	strText.erase(0, strText.find_first_not_of(chr));
-	strText.erase(strText.find_last_not_of(chr) + 1);
+    strText.erase(0, strText.find_first_not_of(chr));
+    strText.erase(strText.find_last_not_of(chr) + 1);
 }
 
 void strutil::trim(wstring& strText, wchar_t chr)
 {
-	_trim(strText, chr);
+    _trim(strText, chr);
 }
 
 void strutil::trim(string& strText, char chr)
 {
-	_trim(strText, chr);
+    _trim(strText, chr);
 }
 
 wstring strutil::trim_r(const wstring& strText, wchar_t chr)
 {
-	wstring strRet(strText);
-	_trim(strRet, chr);
-	return strRet;
+    wstring strRet(strText);
+    _trim(strRet, chr);
+    return strRet;
 }
 
 string strutil::trim_r(const string& strText, char chr)
 {
-	string strRet(strText);
-	_trim(strRet, chr);
-	return strRet;
+    string strRet(strText);
+    _trim(strRet, chr);
+    return strRet;
 }
 
 void strutil::ltrim(wstring& strText, wchar_t chr)
@@ -120,24 +151,12 @@ static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
 
 void strutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
 {
-	_split(strText, wcSplitor, vecRet, bTrim);
+    _split(strText, wcSplitor, vecRet, bTrim);
 }
 
 void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRet, bool bTrim)
 {
-	_split(strText, wcSplitor, vecRet, bTrim);
-}
-
-int strutil::collate(const wstring& lhs, const wstring& rhs)
-{
-    return wcscoll(lhs.c_str(), rhs.c_str());
-
-#if __windows
-    //return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
-        //, rhs.c_str(), rhs.c_str() + rhs.size());
-#else
-    //return g_collate_CN.compare(toQstr(lhs), toQstr(rhs));
-#endif
+    _split(strText, wcSplitor, vecRet, bTrim);
 }
 
 bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
@@ -167,16 +186,16 @@ void strutil::lowerCase(string& str)
 
 wstring strutil::lowerCase_r(const wstring& str)
 {
-	wstring strRet = str;
-	lowerCase(strRet);
-	return strRet;
+    wstring strRet = str;
+    lowerCase(strRet);
+    return strRet;
 }
 
 string strutil::lowerCase_r(const string& str)
 {
-	string strRet = str;
-	lowerCase(strRet);
-	return strRet;
+    string strRet = str;
+    lowerCase(strRet);
+    return strRet;
 }
 
 void strutil::upperCase(wstring& str)
@@ -204,9 +223,39 @@ wstring strutil::upperCase_r(const wstring& str)
 
 string strutil::upperCase_r(const string& str)
 {
-	string strRet = str;
-	upperCase(strRet);
-	return strRet;
+    string strRet = str;
+    upperCase(strRet);
+    return strRet;
+}
+
+void strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
+{
+    auto findLen = strFind.length();
+    if (0 == findLen)
+    {
+        return;
+    }
+
+    auto replaceLen = strReplace.length();
+
+    for (size_t pos = 0; pos+findLen <= str.length(); )
+    {
+        pos = str.find(strFind.c_str(), pos, findLen);
+        if (wstring::npos == pos)
+        {
+            break;
+        }
+
+        if (0 == replaceLen)
+        {
+            str.erase(pos, findLen);
+        }
+        else
+        {
+            str.replace(pos, findLen, strReplace);
+            pos += replaceLen;
+        }
+    }
 }
 
 void strutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
@@ -419,16 +468,16 @@ wstring strutil::toWstr(const char *pStr, bool bCheckUTF8)
 #if __winvc
 static string _toStr(const wchar_t *pStr, size_t len = 0)
 {
-	if (0 == len)
-	{
-		len = wcslen(pStr);
-		if (0 == len)
-		{
-			return "";
-		}
-	}
+    if (0 == len)
+    {
+        len = wcslen(pStr);
+        if (0 == len)
+        {
+            return "";
+        }
+    }
 
-	TBuffer<char> buff(len+1);
+    TBuffer<char> buff(len+1);
     if (wcstombs_s(NULL, buff, len+1, pStr, len))
     {
         return "";

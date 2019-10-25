@@ -20,7 +20,7 @@ wstring XFile::absPath() const
         WString strAbsPath = fileinfo.pParent->absPath();
         if (!strAbsPath.empty())
         {
-            strAbsPath << __wcFSSlant;
+            strAbsPath << __wcDirSeparator;
         }
         strAbsPath << fileinfo.strName;
         return std::move(strAbsPath);
@@ -37,15 +37,25 @@ wstring XFile::oppPath() const
     }
 
     WString strOppPath(fileinfo.pParent->oppPath());
-    strOppPath << __wcFSSlant << fileinfo.strName;
+    strOppPath << __wcDirSeparator << fileinfo.strName;
     return std::move(strOppPath);
+}
+
+const CPath* XFile::rootDir() const
+{
+	if (NULL == fileinfo.pParent)
+	{
+		return (const CPath*)this;
+	}
+
+	return fileinfo.pParent->rootDir();
 }
 
 void XFile::remove()
 {
 	if (NULL != fileinfo.pParent)
 	{
-		fileinfo.pParent->RemoveSubObject(this);
+        fileinfo.pParent->remove(this);
 	}
 }
 
@@ -80,13 +90,20 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 		}
 	});
 
-	m_eFindFileStatus = bRet ? E_FindFileStatus::FFS_Exists : E_FindFileStatus::FFS_NotExists;
+    if (bRet)
+    {
+        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
+    }
+    else
+    {
+        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
+    }
 
 	paSubDir.qsort([&](const CPath& lhs, const CPath& rhs) {
 		return _sort(lhs, rhs) < 0;
 	});
 
-	paSubDir.qsort([&](const XFile& lhs, const XFile& rhs) {
+    paSubFile.qsort([&](const XFile& lhs, const XFile& rhs) {
 		return _sort(lhs, rhs) < 0;
 	});
 }
@@ -134,7 +151,7 @@ bool CPath::_scan(const CB_PathScan& cb)
 	return true;
 }
 
-XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
+XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 {
     __EnsureReturn(fileinfo.bDir, NULL);
 
@@ -190,7 +207,7 @@ XFile *CPath::FindSubPath(wstring strSubPath, bool bDir)
 	return pSubDir;
 }
 
-void CPath::RemoveSubObject(XFile *pSubPath)
+void CPath::remove(XFile *pSubPath)
 {
 	if (pSubPath)
 	{

@@ -39,7 +39,7 @@ void CALLBACK TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 }
 #endif
 
-__TimerID timerutil::_setTimer(UINT uElapse, const fn_bool& cb)
+__TimerID timerutil::_setTimer(UINT uElapse, cfn_bool cb)
 {
 #if __winvc
     UINT idEvent = ::SetTimer(NULL, 0, uElapse, TimerProc);
@@ -60,7 +60,7 @@ __TimerID timerutil::_setTimer(UINT uElapse, const fn_bool& cb)
 #endif
 }
 
-void timerutil::async(UINT uElapse, const fn_void& cb)
+void timerutil::async(UINT uElapse, cfn_void cb)
 {
     (void)_setTimer(uElapse, [cb]() {
         cb();
@@ -68,7 +68,7 @@ void timerutil::async(UINT uElapse, const fn_void& cb)
     });
 }
 
-__TimerID timerutil::setTimer(UINT uElapse, const fn_void& cb)
+__TimerID timerutil::setTimer(UINT uElapse, cfn_void cb)
 {
 	return _setTimer(uElapse, [cb]() {
 		cb();
@@ -76,7 +76,7 @@ __TimerID timerutil::setTimer(UINT uElapse, const fn_void& cb)
 	});
 }
 
-__TimerID timerutil::setTimerEx(UINT uElapse, const fn_bool& cb)
+__TimerID timerutil::setTimerEx(UINT uElapse, cfn_bool cb)
 {
 	return _setTimer(uElapse, [cb]() {
 		return cb();
@@ -103,7 +103,7 @@ bool CWinTimer::_onTimer()
 	return true;
 }
 
-void CWinTimer::_set(const fn_bool& cb, UINT uElapse)
+void CWinTimer::_set(cfn_bool cb, UINT uElapse)
 {
 	m_cb = cb;
 
@@ -120,12 +120,12 @@ void CWinTimer::_set(const fn_bool& cb, UINT uElapse)
 	m_uElapse = uElapse;
 }
 
-void CWinTimer::set(UINT uElapse, const fn_bool& cb)
+void CWinTimer::set(UINT uElapse, cfn_bool cb)
 {
 	_set(cb, uElapse);
 }
 
-void CWinTimer::set(const fn_bool& cb)
+void CWinTimer::set(cfn_bool cb)
 {
 	_set(cb);
 }
