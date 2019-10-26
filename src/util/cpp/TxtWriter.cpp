@@ -12,23 +12,25 @@ const string CTxtWriter::__UnicodeHead_BigEndian({ (char)0xfe, (char)0xff });
 
 const string CTxtWriter::__UTF8Bom({ (char)0xef, (char)0xbb, (char)0xbf });
 
-void CTxtWriter::_writeHead()
+bool CTxtWriter::_writeHead()
 {
 	if (E_TxtEncodeType::TET_Unicode_LittleEndian == m_eEncodeType)
 	{
-		string strHead = __UnicodeHead_LittleEndian;
-		(void)_fwrite(strHead.c_str(), strHead.size());
+        string strHead = __UnicodeHead_LittleEndian;
+        return obstream::write(strHead.c_str(), strHead.size());
 	}
 	else if (E_TxtEncodeType::TET_Unicode_BigEndian == m_eEncodeType)
 	{
 		string strHead = __UnicodeHead_BigEndian;
-		(void)_fwrite(strHead.c_str(), strHead.size());
+        return obstream::write(strHead.c_str(), strHead.size());
 	}
 	else if (E_TxtEncodeType::TET_Utf8_WithBom == m_eEncodeType)
 	{
 		string strBom = __UTF8Bom;
-		(void)_fwrite(strBom.c_str(), strBom.size());
+        return obstream::write(strBom.c_str(), strBom.size());
 	}
+
+    return true;
 }
 
 bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
@@ -59,29 +61,19 @@ bool CTxtWriter::open(const string& strFile, bool bTrunc)
 	return true;
 }
 
-size_t CTxtWriter::_fwrite(const void *pData, size_t size) const
+bool CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 {
-    return fwrite(pData, size, 1, m_pf);
-}
-
-size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
-{
-    if (NULL == m_pf)
-	{
-		return 0;
-	}
-
 	size_t size = 0;
 	if (len != 0)
 	{
 		if (_isUnicode())
 		{
 			cauto str = strutil::toWstr(pStr);
-			size = _fwrite(str.c_str(), str.size()*2);
+            size = obstream::write(str.c_str(), str.size()*2);
 		}
 		else
 		{
-			size = _fwrite(pStr, len);
+            size = obstream::write(pStr, len);
 		}
 	}
 
@@ -91,35 +83,30 @@ size_t CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine) const
 	}
 
 #if __isdebug
-    (void)fflush(m_pf);
+   obstream::flush();
 #endif
 
 	return size;
 }
 
-size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
+bool CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 {
-    if (NULL == m_pf)
-	{
-		return 0;
-	}
-
 	size_t size = 0;
 	if (len != 0)
 	{
 		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
 		{
 			cauto str = strutil::toStr(pStr);
-			size = _fwrite(str.c_str(), str.size());
+            size = obstream::write(str.c_str(), str.size());
 		}
 		else if (_isUtf8())
 		{
 			cauto str = strutil::toUtf8(pStr);
-			size = _fwrite(str.c_str(), str.size());
+            size = obstream::write(str.c_str(), str.size());
 		}
 		else
 		{
-			size = _fwrite(pStr, len * 2);
+            size = obstream::write(pStr, len * 2);
 		}
 	}
 
@@ -129,43 +116,34 @@ size_t CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine) const
 	}
 
 #if __isdebug
-    (void)fflush(m_pf);
+    obstream::flush();
 #endif
 
 	return size;
 }
 
-size_t CTxtWriter::_writeEndLine() const
+bool CTxtWriter::_writeEndLine() const
 {
 	if (_isUnicode())
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-			return _fwrite(g_pwcEolN, sizeof g_pwcEolN);
+            return obstream::write(g_pwcEolN, sizeof g_pwcEolN);
 		}
 		else
 		{
-			return _fwrite(g_pwcEolRN, sizeof g_pwcEolRN);
+            return obstream::write(g_pwcEolRN, sizeof g_pwcEolRN);
 		}
 	}
 	else
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-			return _fwrite(g_pchEolN, sizeof g_pchEolN);
+            return obstream::write(g_pchEolN, sizeof g_pchEolN);
 		}
 		else
 		{
-			return _fwrite(g_pchEolRN, sizeof g_pchEolRN);
+            return obstream::write(g_pchEolRN, sizeof g_pchEolRN);
 		}
 	}
-}
-
-void CTxtWriter::close()
-{
-    if (m_pf)
-    {
-        (void)fclose(m_pf);
-        m_pf = NULL;
-    }
 }

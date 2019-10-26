@@ -41,7 +41,8 @@ HEADERS += \
     ../../inc/sstl/SList.h \
     ../../inc/sstl/SMap.h \
     ../../inc/sstl/SSet.h \
-    ../../inc/sstl/sstl.h
+    ../../inc/sstl/sstl.h \
+    ../../inc/util/bstream.h
 
 SOURCES += \
     cpp/util.cpp \

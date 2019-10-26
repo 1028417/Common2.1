@@ -17,7 +17,7 @@ struct tagUnzFileInfo : unz_file_info
     bool bDir = false;
 };
 
-static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
+static bool _zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
 {
     int nRet = unzOpenCurrentFile(zfile);
     if (nRet != UNZ_OK)
@@ -34,12 +34,11 @@ static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
         return false;
     }
 
-	FILE *pf = fsutil::fopen(zFileInfo.strPath, "wb");
-	if (NULL == pf)
-	{
-		return false;
-	}
-    obstream dstStream(pf);
+    obstream dstStream(zFileInfo.strPath, true);
+    if (!dstStream)
+    {
+        return false;
+    }
     if (!dstStream.write(vecData, len))
     {
         return false;
@@ -48,7 +47,7 @@ static bool zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
     return true;
 }
 
-static bool zipDecompress(unzFile zfile, const string& strDstDir)
+static bool _zipDecompress(unzFile zfile, const string& strDstDir)
 {
     unz_global_info zGlobalInfo;
     int nRet = unzGetGlobalInfo(zfile, &zGlobalInfo);
@@ -92,7 +91,7 @@ static bool zipDecompress(unzFile zfile, const string& strDstDir)
     {
         if (!zFileInfo.bDir)
         {
-            bRet = zipDecompress(zfile, zFileInfo);
+            bRet = _zipDecompress(zfile, zFileInfo);
             if (!bRet)
             {
                 return false;
@@ -113,7 +112,7 @@ bool zipDecompress(const string& strZipFile, const string& strDstDir)
         return false;
     }
 
-    bool bRet = zipDecompress(zfile, strDstDir);
+    bool bRet = _zipDecompress(zfile, strDstDir);
 
     unzClose(zfile);
 

@@ -56,6 +56,7 @@
     <ClInclude Include="..\..\inc\sstl\_check.h" />
     <ClInclude Include="..\..\inc\sstl\_define.h" />
     <ClInclude Include="..\..\inc\sstl\_util.h" />
+    <ClInclude Include="..\..\inc\util\bstream.h" />
     <ClInclude Include="..\..\inc\util\jsonutil.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
     <ClInclude Include="..\..\inc\util\tmutil.h" />

@@ -142,6 +142,9 @@
       <Filter>fs\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\strutil.h" />
+    <ClInclude Include="..\..\inc\util\bstream.h">
+      <Filter>fs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sstl">
