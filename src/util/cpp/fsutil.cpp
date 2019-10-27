@@ -47,7 +47,7 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 #endif
 }
 
-bool fsutil::loadBinary(const wstring& strFile, TD_ByteVector& vecBuff, UINT uReadSize)
+bool fsutil::loadBinary(const wstring& strFile, CByteBuff& vecBuff, UINT uReadSize)
 {
 	ibstream fs(strFile);
 	__EnsureReturn(fs, false);
@@ -57,9 +57,8 @@ bool fsutil::loadBinary(const wstring& strFile, TD_ByteVector& vecBuff, UINT uRe
 		size_t buffSize = MIN(fs.size(), uReadSize);
 		if (buffSize > 0)
 		{
-			size_t pos = vecBuff.size();
-			vecBuff.resize(pos + buffSize);
-			if (fs.read(&vecBuff[pos], buffSize) != buffSize)
+            auto ptr = vecBuff.resizeMore(buffSize);
+            if (fs.read(ptr, buffSize) != buffSize)
 			{
 				return false;
 			}
@@ -69,19 +68,18 @@ bool fsutil::loadBinary(const wstring& strFile, TD_ByteVector& vecBuff, UINT uRe
 	{
 		size_t buffSize = fs.size();
 		if (buffSize > 0)
-		{
-			size_t pos = vecBuff.size();
-			vecBuff.resize(pos + buffSize);
+        {
+            auto ptr = vecBuff.resizeMore(buffSize);
 
 			do
 			{
 				size_t uCount = MIN(buffSize, 1024);
-				if (fs.read(&vecBuff[pos], uCount) != uCount)
+                if (fs.read(ptr, uCount) != uCount)
 				{
 					return false;
 				}
 
-				pos += uCount;
+                ptr += uCount;
 				buffSize -= uCount;
 			} while (buffSize > 0);
 		}
@@ -966,7 +964,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 #if !__winvc
 long fsutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
-	CByteVector vecData;
+    CByteBuff vecData;
     if (!loadBinary(strSrcFile, vecData))
     {
         return -1;
@@ -990,7 +988,7 @@ long fsutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile,
 
 long fsutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-	CByteVector vecData;
+    CByteBuff vecData;
     if (!loadBinary(strSrcFile, vecData))
     {
         return -1;
@@ -1014,9 +1012,9 @@ long fsutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFil
 #endif
 
 static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
-                     , const function<UINT(const CByteVector&, CByteVector&)>& cb)
+                     , const function<UINT(const CByteBuff&, CByteBuff&)>& cb)
 {
-	CByteVector vecData;
+    CByteBuff vecData;
     if (!fsutil::loadBinary(strSrcFile, vecData))
     {
         return -1;
@@ -1026,7 +1024,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
         return 0;
     }
 
-	CByteVector vecOutput;
+    CByteBuff vecOutput;
     UINT len = cb(vecData, vecOutput);
     if (0 == len)
     {
@@ -1047,7 +1045,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 long fsutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteVector& vecData, CByteVector& vecOutput){
+    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& vecData, CByteBuff& vecOutput){
         auto sourceLen = vecData.size();
 
         uLongf destLen = sourceLen;
@@ -1065,7 +1063,7 @@ long fsutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile,
 
 long fsutil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteVector& vecData, CByteVector& vecOutput){
+    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& vecData, CByteBuff& vecOutput){
         vecOutput.resize(vecData.size()*2);
 
         uLongf destLen = 0;
