@@ -26,8 +26,8 @@ static bool _zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
     }
 
     uLong len = zFileInfo.uncompressed_size;
-	CByteBuff vecData(len);
-    nRet = unzReadCurrentFile(zfile, vecData, len);
+	CByteBuff btbData(len);
+    nRet = unzReadCurrentFile(zfile, btbData, len);
     (void)unzCloseCurrentFile(zfile);
     if (nRet != (int)len)
     {
@@ -39,7 +39,7 @@ static bool _zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
     {
         return false;
     }
-    if (!dstStream.write(vecData, len))
+    if (!dstStream.write(btbData, len))
     {
         return false;
     }
@@ -121,17 +121,17 @@ bool zipDecompress(const string& strZipFile, const string& strDstDir)
 #if !__winvc
 long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
-    CByteBuff vecData;
-    if (!fsutil::loadBinary(strSrcFile, vecData))
+    CByteBuff btbData;
+    if (!fsutil::loadBinary(strSrcFile, btbData))
     {
         return -1;
     }
-    if (vecData->empty())
+    if (!btbData)
     {
         return 0;
     }
 
-    cauto baOutput = qCompress(vecData, vecData->size(), nCompressLecvel);
+    cauto baOutput = qCompress(btbData, btbData->size(), nCompressLecvel);
 
     obstream dstStream(strDstFile, true);
     __EnsureReturn(dstStream, false);
@@ -145,17 +145,17 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-    CByteBuff vecData;
-    if (!fsutil::loadBinary(strSrcFile, vecData))
+    CByteBuff btbData;
+    if (!fsutil::loadBinary(strSrcFile, btbData))
     {
         return -1;
     }
-    if (vecData->empty())
+    if (!btbData)
     {
         return 0;
     }
 
-    cauto baOutput = qUncompress(vecData, vecData->size());
+    cauto baOutput = qUncompress(btbData, btbData->size());
 
     obstream dstStream(strDstFile, true);
     __EnsureReturn(dstStream, false);
@@ -171,18 +171,18 @@ long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
 static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
                      , const function<UINT(const CByteBuff&, CByteBuff&)>& cb)
 {
-    CByteBuff vecData;
-    if (!fsutil::loadBinary(strSrcFile, vecData))
+    CByteBuff btbData;
+    if (!fsutil::loadBinary(strSrcFile, btbData))
     {
         return -1;
     }
-    if (vecData->empty())
+    if (!btbData)
     {
         return 0;
     }
 
-    CByteBuff vecOutput;
-    UINT len = cb(vecData, vecOutput);
+    CByteBuff btbOutput;
+    UINT len = cb(btbData, btbOutput);
     if (0 == len)
     {
         return 0;
@@ -190,7 +190,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
     obstream dstStream(strDstFile, true);
     __EnsureReturn(dstStream, false);
-    if (!dstStream.write(vecOutput, len))
+    if (!dstStream.write(btbOutput, len))
     {
         return -1;
     }
@@ -202,13 +202,13 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 long ziputil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& vecData, CByteBuff& vecOutput){
-        auto srcLen = vecData->size();
+    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
+        auto srcLen = btbData->size();
 
         uLongf destLen = srcLen;
-        vecOutput->resize(destLen);
+		btbOutput->resize(destLen);
 
-        int nRet = compress2(vecOutput, &destLen, vecData, srcLen, level);
+        int nRet = compress2(btbOutput, &destLen, btbData, srcLen, level);
         if (nRet != Z_OK)
         {
             return 0ul;
@@ -220,12 +220,12 @@ long ziputil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& vecData, CByteBuff& vecOutput){
-		size_t srcLen = vecData->size();
-		vecOutput->resize(srcLen*2);
+    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
+		size_t srcLen = btbData->size();
+		btbOutput->resize(srcLen*2);
 
         uLongf destLen = 0;
-        int nRet = uncompress(vecOutput, &destLen, vecData, srcLen);
+        int nRet = uncompress(btbOutput, &destLen, btbData, srcLen);
         if (nRet != 0)
         {
             return 0ul;

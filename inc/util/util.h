@@ -214,6 +214,15 @@ public:
         }
     }
 
+	operator bool() const
+	{
+		return !m_vecBuff.empty();
+	}
+	bool operator !() const
+	{
+		return m_vecBuff.empty();
+	}
+
     inline const byte_t* ptr() const
 	{
         if (m_vecBuff.empty())
@@ -231,11 +240,20 @@ public:
 		return &m_vecBuff.front();
 	}
 
-    operator const byte_t*() const
+	operator const byte_t*() const
 	{
 		return ptr();
-    }
+	}
 	operator byte_t*()
+	{
+		return ptr();
+	}
+
+	operator const void*() const
+	{
+		return ptr();
+	}
+	operator void*()
 	{
 		return ptr();
 	}
@@ -317,6 +335,15 @@ public:
         }
     }
 
+	operator bool() const
+	{
+		return !m_strBuff.empty();
+	}
+	bool operator !() const
+	{
+		return m_strBuff.empty();
+	}
+
 	inline const char* ptr() const
 	{
 		if (m_strBuff.empty())
@@ -347,10 +374,19 @@ public:
 	{
 		return (const byte_t*)ptr();
 	}
-    operator byte_t*()
-    {
-        return (byte_t*)ptr();
-    }
+	operator byte_t*()
+	{
+		return (byte_t*)ptr();
+	}
+
+	operator const void*() const
+	{
+		return (const byte_t*)ptr();
+	}
+	operator void*()
+	{
+		return (byte_t*)ptr();
+	}
 
 	const string* operator->() const
 	{
