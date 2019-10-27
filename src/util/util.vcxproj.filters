@@ -40,9 +40,6 @@
     <ClCompile Include="cpp\jsonutil.cpp">
       <Filter>fs\json</Filter>
     </ClCompile>
-    <ClCompile Include="cpp\zipDecompress.cpp">
-      <Filter>fs\unz</Filter>
-    </ClCompile>
     <ClCompile Include="cpp\xmlutil.cpp">
       <Filter>fs\xml</Filter>
     </ClCompile>
@@ -67,6 +64,9 @@
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
+    <ClCompile Include="cpp\ziputil.cpp">
+      <Filter>fs\unz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
@@ -144,6 +144,9 @@
     <ClInclude Include="..\..\inc\util\strutil.h" />
     <ClInclude Include="..\..\inc\util\bstream.h">
       <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\ziputil.h">
+      <Filter>fs\unz</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

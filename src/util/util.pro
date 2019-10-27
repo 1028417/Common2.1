@@ -28,6 +28,7 @@ HEADERS += \
     ../../inc/util/winfsutil.h \
     ../../inc/util/strutil.h \
     ../../inc/util/xmlutil.h \
+    ../../inc/util/ziputil.h \
 #
     ../../inc/sstl/_check.h \
     ../../inc/sstl/_define.h \
@@ -69,7 +70,7 @@ SOURCES += \
     ../../3rd/sqlite/shell.c \
     ../../3rd/sqlite/sqlite3.c \
 #
-    cpp/zipDecompress.cpp \
+    cpp/ziputil.cpp \
     ../../3rd/zlib-1.2.11/contrib/minizip/unzip.c \
     ../../3rd/zlib-1.2.11/contrib/minizip/ioapi.c \
 
