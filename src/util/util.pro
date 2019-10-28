@@ -29,7 +29,6 @@ HEADERS += \
     ../../inc/util/SQLiteDB.h \
     ../../inc/util/jsonutil.h \
     ../../inc/util/xmlutil.h \
-    ../../inc/util/ziputil.h \
 #
     ../../inc/sstl/_check.h \
     ../../inc/sstl/_define.h \
@@ -43,7 +42,8 @@ HEADERS += \
     ../../inc/sstl/SList.h \
     ../../inc/sstl/SMap.h \
     ../../inc/sstl/SSet.h \
-    ../../inc/sstl/sstl.h
+    ../../inc/sstl/sstl.h \
+    ../../inc/util/zutil.h
 
 SOURCES += \
     cpp/util.cpp \
@@ -70,9 +70,9 @@ SOURCES += \
     ../../3rd/sqlite/shell.c \
     ../../3rd/sqlite/sqlite3.c \
 #
-    cpp/ziputil.cpp \
     ../../3rd/zlib-1.2.11/contrib/minizip/unzip.c \
     ../../3rd/zlib-1.2.11/contrib/minizip/ioapi.c \
+    cpp/zutil.cpp
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 

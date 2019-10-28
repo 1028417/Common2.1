@@ -119,7 +119,7 @@ bool _zipDecompress(const string& strZipFile, const string& strDstDir)
 }
 
 #if !__winvc
-long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
+long zutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
     CByteBuff btbData;
     if (!fsutil::loadFile(strSrcFile, btbData))
@@ -143,7 +143,7 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
     return baOutput.size();
 }
 
-long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+long zutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     CByteBuff btbData;
     if (!fsutil::loadFile(strSrcFile, btbData))
@@ -204,7 +204,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 #include <zlib.h>
 
-int ziputil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int level)
+int zutil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int level)
 {
 	uLongf destLen = len;
 	btbBuff.resizeMore(destLen);
@@ -217,14 +217,14 @@ int ziputil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int le
 	return destLen;
 }
 
-long ziputil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
+long zutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
     return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
         return zCompress(btbData, btbData->size(), btbOutput, level);
     });
 }
 
-long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
+long zutil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
 		size_t srcLen = btbData->size();
@@ -241,7 +241,7 @@ long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
     });
 }
 
-bool ziputil::zipUncompress(const string& strZipFile, const string& strDstDir)
+bool zutil::zipUncompress(const string& strZipFile, const string& strDstDir)
 {
     if (!fsutil::createDir(strutil::toWstr(strDstDir)))
     {
