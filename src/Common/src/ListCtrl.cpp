@@ -859,7 +859,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
 
-		/*CMainApp::async([=]() {
+		/*__async([=]() {
 			CEdit *pwndEdit = GetEditControl();
 			if (NULL != pwndEdit)
 			{
@@ -1135,7 +1135,7 @@ void CObjectList::AsyncLButtondown(cfn_void cb)
 {
 	m_cbLButtondown = cb;
 
-	CMainApp::async(300, [&]() {
+	__async(300, [&]() {
 		if (m_cbLButtondown)
 		{
 			m_cbLButtondown();

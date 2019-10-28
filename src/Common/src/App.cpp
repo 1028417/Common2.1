@@ -16,7 +16,7 @@ static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 static CB_Sync g_cbAsync;
 static CCSLock g_lckAsync;
 
-static void _async(const CB_Sync& cb)
+void CMainApp::_sync(const CB_Sync& cb)
 {
 	g_lckAsync.lock();
 
@@ -41,21 +41,7 @@ static void _async(const CB_Sync& cb)
 	}
 }
 
-void CMainApp::async(const CB_Sync& cb, UINT uDelayTime)
-{
-	_async([=]() {
-		if (0 == uDelayTime)
-		{
-			cb();
-		}
-		else
-		{
-			(void)timerutil::async(uDelayTime, cb);
-		}
-	});
-}
-
-void CMainApp::sync(const CB_Sync& cb, bool bBlock)
+void CMainApp::sync(const CB_Sync& cb)
 {
 	DWORD dwThreadID = ::GetCurrentThreadId();
 	if (dwThreadID == GetMainApp()->m_nThreadID)
@@ -63,19 +49,27 @@ void CMainApp::sync(const CB_Sync& cb, bool bBlock)
 		cb();
 		return;
 	}
-
-	async([=]() {
+	
+	_sync([=]() {
 		cb();
-
-		if (bBlock)
-		{
-			mtutil::apcWakeup(dwThreadID);
-		}
+		
+		mtutil::apcWakeup(dwThreadID);
 	});
+	
+	::SleepEx(-1, TRUE);
+}
 
-	if (bBlock)
+void CMainApp::sync(UINT uDelayTime, const CB_Sync& cb)
+{
+	if (0 == uDelayTime)
 	{
-		::SleepEx(-1, TRUE);
+		_sync(cb);
+	}
+	else
+	{
+		_sync([=]() {
+			__async(uDelayTime, cb);
+		});
 	}
 }
 

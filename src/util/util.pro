@@ -12,21 +12,22 @@ TEMPLATE = lib
 QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
 HEADERS += \
-    ../../inc/util/fsutil.h \
-    ../../inc/util/IDB.h \
-    ../../inc/util/jsonutil.h \
+    ../../inc/util/util.h \
+    ../../inc/util/tmutil.h \
+    ../../inc/util/buffer.h \
+    ../../inc/util/strutil.h \
+    ../../inc/util/timerutil.h \
     ../../inc/util/mtlock.h \
     ../../inc/util/mtutil.h \
-    ../../inc/util/Path.h \
-    ../../inc/util/ProFile.h \
-    ../../inc/util/SQLiteDB.h \
-    ../../inc/util/timerutil.h \
-    ../../inc/util/tmutil.h \
+    ../../inc/util/fsutil.h \
+    ../../inc/util/bstream.h \
     ../../inc/util/TxtWriter.h \
-    ../../inc/util/util.h \
+    ../../inc/util/Path.h \
     ../../inc/util/winfsdlg.h \
     ../../inc/util/winfsutil.h \
-    ../../inc/util/strutil.h \
+    ../../inc/util/IDB.h \
+    ../../inc/util/SQLiteDB.h \
+    ../../inc/util/jsonutil.h \
     ../../inc/util/xmlutil.h \
     ../../inc/util/ziputil.h \
 #
@@ -42,24 +43,23 @@ HEADERS += \
     ../../inc/sstl/SList.h \
     ../../inc/sstl/SMap.h \
     ../../inc/sstl/SSet.h \
-    ../../inc/sstl/sstl.h \
-    ../../inc/util/bstream.h
+    ../../inc/sstl/sstl.h
 
 SOURCES += \
     cpp/util.cpp \
-    cpp/strutil.cpp \
     cpp/tmutil.cpp \
-    cpp/fsutil.cpp \
-    cpp/Path.cpp \
+    cpp/strutil.cpp \
     cpp/timerutil.cpp \
     cpp/mtutil.cpp \
+    cpp/fsutil.cpp \
+    cpp/Path.cpp \
     cpp/TxtWriter.cpp \
 #
     cpp/jsonutil.cpp \
     ../../3rd/json/json_reader.cpp \
     ../../3rd/json/json_value.cpp \
     ../../3rd/json/json_writer.cpp \
- #
+#
     cpp/xmlutil.cpp \
     ../../3rd/tinyxml/tinyxml.cpp \
     ../../3rd/tinyxml/tinyxmlerror.cpp \

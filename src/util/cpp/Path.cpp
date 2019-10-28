@@ -18,12 +18,12 @@ wstring XFile::absPath() const
     if (fileinfo.pParent)
 	{
         WString strAbsPath = fileinfo.pParent->absPath();
-        if (!strAbsPath.empty())
+        if (!strAbsPath->empty())
         {
             strAbsPath << __wcDirSeparator;
         }
         strAbsPath << fileinfo.strName;
-        return std::move(strAbsPath);
+        return strAbsPath;
 	}
 
     return fileinfo.strName;
@@ -38,7 +38,7 @@ wstring XFile::oppPath() const
 
     WString strOppPath(fileinfo.pParent->oppPath());
     strOppPath << __wcDirSeparator << fileinfo.strName;
-    return std::move(strOppPath);
+    return strOppPath;
 }
 
 const CPath* XFile::rootDir() const

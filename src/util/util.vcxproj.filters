@@ -29,10 +29,10 @@
       <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c">
-      <Filter>fs\unz</Filter>
+      <Filter>fs\zip</Filter>
     </ClCompile>
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c">
-      <Filter>fs\unz</Filter>
+      <Filter>fs\zip</Filter>
     </ClCompile>
     <ClCompile Include="cpp\SQLiteDB.cpp">
       <Filter>fs\db</Filter>
@@ -59,19 +59,17 @@
       <Filter>fs</Filter>
     </ClCompile>
     <ClCompile Include="cpp\mtutil.cpp" />
-    <ClCompile Include="cpp\ProFile.cpp" />
     <ClCompile Include="cpp\timerutil.cpp" />
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
     <ClCompile Include="cpp\ziputil.cpp">
-      <Filter>fs\unz</Filter>
+      <Filter>fs\zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
     <ClInclude Include="..\..\inc\util\util.h" />
-    <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\IDB.h">
       <Filter>fs\db</Filter>
     </ClInclude>
@@ -146,8 +144,10 @@
       <Filter>fs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\ziputil.h">
-      <Filter>fs\unz</Filter>
+      <Filter>fs\zip</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\util\buffer.h" />
+    <ClInclude Include="..\..\inc\util\WString.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sstl">
@@ -155,9 +155,6 @@
     </Filter>
     <Filter Include="fs">
       <UniqueIdentifier>{fef05657-c6b0-4579-a1ea-32c0ba50965e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="fs\unz">
-      <UniqueIdentifier>{662cf539-5ebe-4837-ab1b-b6326ed58fe7}</UniqueIdentifier>
     </Filter>
     <Filter Include="fs\db">
       <UniqueIdentifier>{a2a1a09e-7b50-44c1-b95e-c06d1392c098}</UniqueIdentifier>
@@ -173,6 +170,9 @@
     </Filter>
     <Filter Include="fs\xml\tinyxml">
       <UniqueIdentifier>{e1f76036-272e-49f7-90c3-78bd424e4efe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\zip">
+      <UniqueIdentifier>{662cf539-5ebe-4837-ab1b-b6326ed58fe7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

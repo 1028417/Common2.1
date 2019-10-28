@@ -104,7 +104,7 @@ void CFolderDlg::_relayout()
 		, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top
 		, SWP_HIDEWINDOW);
 	
-	timerutil::async(10, [&, hWndTreeCtrl]() {
+	__async(10, [&, hWndTreeCtrl]() {
 		::ShowWindow(hWndTreeCtrl, SW_SHOW);
 		::SetFocus(hWndTreeCtrl);
 	});

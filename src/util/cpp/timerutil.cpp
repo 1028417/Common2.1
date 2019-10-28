@@ -60,12 +60,12 @@ __TimerID timerutil::_setTimer(UINT uElapse, cfn_bool cb)
 #endif
 }
 
-void timerutil::async(UINT uElapse, cfn_void cb)
+void timerutil::async(UINT uDelayTime, cfn_void cb)
 {
-    (void)_setTimer(uElapse, [cb]() {
-        cb();
-        return false;
-    });
+	(void)_setTimer(uDelayTime, [cb]() {
+		cb();
+		return false;
+	});
 }
 
 __TimerID timerutil::setTimer(UINT uElapse, cfn_void cb)

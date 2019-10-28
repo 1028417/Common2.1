@@ -34,12 +34,12 @@ static bool _zipDecompress(unzFile zfile, const tagUnzFileInfo& zFileInfo)
         return false;
     }
 
-    obstream dstStream(zFileInfo.strPath, true);
-    if (!dstStream)
+    obstream obs(zFileInfo.strPath, true);
+    if (!obs)
     {
         return false;
     }
-    if (!dstStream.write(btbData, len))
+    if (!obs.write(btbData, len))
     {
         return false;
     }
@@ -103,7 +103,7 @@ static bool _zipDecompress(unzFile zfile, const string& strDstDir)
     return true;
 }
 
-bool zipDecompress(const string& strZipFile, const string& strDstDir)
+bool _zipDecompress(const string& strZipFile, const string& strDstDir)
 {
     unzFile zfile = unzOpen(strZipFile.c_str());
     if (NULL == zfile)
@@ -122,7 +122,7 @@ bool zipDecompress(const string& strZipFile, const string& strDstDir)
 long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
     CByteBuff btbData;
-    if (!fsutil::loadBinary(strSrcFile, btbData))
+    if (!fsutil::loadFile(strSrcFile, btbData))
     {
         return -1;
     }
@@ -133,9 +133,9 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
     cauto baOutput = qCompress(btbData, btbData->size(), nCompressLecvel);
 
-    obstream dstStream(strDstFile, true);
-    __EnsureReturn(dstStream, false);
-    if (!dstStream.write(baOutput.data(), baOutput.size()))
+    obstream obs(strDstFile, true);
+    __EnsureReturn(obs, false);
+    if (!obs.write(baOutput.data(), baOutput.size()))
     {
         return -1;
     }
@@ -146,7 +146,7 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     CByteBuff btbData;
-    if (!fsutil::loadBinary(strSrcFile, btbData))
+    if (!fsutil::loadFile(strSrcFile, btbData))
     {
         return -1;
     }
@@ -157,9 +157,9 @@ long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
 
     cauto baOutput = qUncompress(btbData, btbData->size());
 
-    obstream dstStream(strDstFile, true);
-    __EnsureReturn(dstStream, false);
-    if (!dstStream.write(baOutput.data(), baOutput.size()))
+    obstream obs(strDstFile, true);
+    __EnsureReturn(obs, false);
+    if (!obs.write(baOutput.data(), baOutput.size()))
     {
         return -1;
     }
@@ -169,10 +169,10 @@ long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
 #endif
 
 static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
-                     , const function<UINT(const CByteBuff&, CByteBuff&)>& cb)
+                     , const function<int(const CByteBuff&, CByteBuff&)>& cb)
 {
     CByteBuff btbData;
-    if (!fsutil::loadBinary(strSrcFile, btbData))
+    if (!fsutil::loadFile(strSrcFile, btbData))
     {
         return -1;
     }
@@ -182,15 +182,19 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     }
 
     CByteBuff btbOutput;
-    UINT len = cb(btbData, btbOutput);
+    int len = cb(btbData, btbOutput);
+    if (len < 0)
+    {
+        return -1;
+    }
     if (0 == len)
     {
         return 0;
     }
 
-    obstream dstStream(strDstFile, true);
-    __EnsureReturn(dstStream, false);
-    if (!dstStream.write(btbOutput, len))
+    obstream obs(strDstFile, true);
+    __EnsureReturn(obs, false);
+    if (!obs.write(btbOutput, len))
     {
         return -1;
     }
@@ -200,21 +204,23 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 #include <zlib.h>
 
+int ziputil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int level)
+{
+	uLongf destLen = len;
+	btbBuff.resizeMore(destLen);
+	int nRet = compress2(btbBuff, &destLen, (const Bytef*)pData, len, level);
+	if (nRet != Z_OK)
+	{
+		return -1;
+	}
+
+	return destLen;
+}
+
 long ziputil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
     return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
-        auto srcLen = btbData->size();
-
-        uLongf destLen = srcLen;
-		btbOutput->resize(destLen);
-
-        int nRet = compress2(btbOutput, &destLen, btbData, srcLen, level);
-        if (nRet != Z_OK)
-        {
-            return 0ul;
-        }
-
-        return destLen;
+        return zCompress(btbData, btbData->size(), btbOutput, level);
     });
 }
 
@@ -235,7 +241,7 @@ long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
     });
 }
 
-bool ziputil::zUncompressZip(const string& strZipFile, const string& strDstDir)
+bool ziputil::zipUncompress(const string& strZipFile, const string& strDstDir)
 {
     if (!fsutil::createDir(strutil::toWstr(strDstDir)))
     {
@@ -248,5 +254,5 @@ bool ziputil::zUncompressZip(const string& strZipFile, const string& strDstDir)
         t_strDstDir.append(1, (char)__wcDirSeparator);
     }
 
-    return zipDecompress(strZipFile, t_strDstDir);
+    return _zipDecompress(strZipFile, t_strDstDir);
 }

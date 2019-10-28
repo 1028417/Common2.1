@@ -25,7 +25,6 @@
     <ClCompile Include="cpp\winfsdlg.cpp" />
     <ClCompile Include="cpp\mtutil.cpp" />
     <ClCompile Include="cpp\Path.cpp" />
-    <ClCompile Include="cpp\ProFile.cpp" />
     <ClCompile Include="cpp\fsutil.cpp" />
     <ClCompile Include="cpp\SQLiteDB.cpp" />
     <ClCompile Include="..\..\3rd\sqlite\shell.c" />
@@ -57,6 +56,7 @@
     <ClInclude Include="..\..\inc\sstl\_define.h" />
     <ClInclude Include="..\..\inc\sstl\_util.h" />
     <ClInclude Include="..\..\inc\util\bstream.h" />
+    <ClInclude Include="..\..\inc\util\buffer.h" />
     <ClInclude Include="..\..\inc\util\jsonutil.h" />
     <ClInclude Include="..\..\inc\util\mtlock.h" />
     <ClInclude Include="..\..\inc\util\tmutil.h" />
@@ -69,9 +69,9 @@
     <ClInclude Include="..\..\inc\util\Path.h" />
     <ClInclude Include="..\..\inc\util\SQLiteDB.h" />
     <ClInclude Include="..\..\inc\util\util.h" />
-    <ClInclude Include="..\..\inc\util\ProFile.h" />
     <ClInclude Include="..\..\inc\util\winfsutil.h" />
     <ClInclude Include="..\..\inc\util\strutil.h" />
+    <ClInclude Include="..\..\inc\util\WString.h" />
     <ClInclude Include="..\..\inc\util\xmlutil.h" />
     <ClInclude Include="..\..\inc\util\ziputil.h" />
   </ItemGroup>

@@ -47,69 +47,48 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 #endif
 }
 
-bool fsutil::loadBinary(const wstring& strFile, CByteBuff& vecBuff, UINT uReadSize)
+template <class T>
+static int _loadFile(const wstring& strFile, T& buff, UINT uReadSize=0)
 {
-	ibstream fs(strFile);
-	__EnsureReturn(fs, false);
+	ibstream ibs(strFile);
+	__EnsureReturn(ibs, -1);
 
-	if (0 != uReadSize)
+	if (0 == uReadSize)
 	{
-		size_t buffSize = MIN(fs.size(), uReadSize);
-		if (buffSize > 0)
-		{
-            auto ptr = vecBuff.resizeMore(buffSize);
-            if (fs.read(ptr, buffSize) != buffSize)
-			{
-				return false;
-			}
-		}
+		uReadSize = ibs.size();
 	}
 	else
 	{
-		size_t buffSize = fs.size();
-		if (buffSize > 0)
-        {
-            auto ptr = vecBuff.resizeMore(buffSize);
-
-			do
-			{
-				size_t uCount = MIN(buffSize, 1024);
-                if (fs.read(ptr, uCount) != uCount)
-				{
-					return false;
-				}
-
-                ptr += uCount;
-				buffSize -= uCount;
-			} while (buffSize > 0);
-		}
+		uReadSize = MIN(uReadSize, ibs.size());
+	}
+	if (0 == uReadSize)
+	{
+		return 0;
 	}
 
-	return true;
+	auto ptr = buff.resizeMore(uReadSize);
+	if (ibs.read(ptr, uReadSize) != uReadSize)
+	{
+		return -1;
+	}
+
+	return uReadSize;
+}
+
+bool fsutil::loadFile(const wstring& strFile, CByteBuff& btbBuff, UINT uReadSize)
+{
+	return _loadFile(strFile, btbBuff, uReadSize) >= 0;
 }
 
 bool fsutil::loadTxt(const wstring& strFile, string& strText)
 {
-	ibstream fs(strFile);
-	__EnsureReturn(fs, false);
-
-	char lpBuff[512];
-	while (true)
+	CCharBuff chbBuff;
+	if (_loadFile(strFile, chbBuff) < 0)
 	{
-		size_t uCount = fs.read(lpBuff, sizeof(lpBuff) - 1);
-		if (0 == uCount)
-		{
-			break;
-		}
-		if (uCount >= sizeof(lpBuff))
-		{
-			return false;
-		}
-
-		lpBuff[uCount] = '\0';
-		strText.append(lpBuff);
+		return false;
 	}
 
+	strText.swap(chbBuff.str());
     cauto strHead = CTxtWriter::__UTF8Bom;
     if (strText.substr(0, strHead.size()) == strHead)
     {
@@ -131,8 +110,6 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
             }
         }
     }
-
-	fs.close();
 
 	return true;
 }
@@ -199,16 +176,16 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
 {
-	ibstream srcStream(strSrcFile);
-	__EnsureReturn(srcStream, false);
+	ibstream ibs(strSrcFile);
+	__EnsureReturn(ibs, false);
 
-	obstream dstStream(strDstFile, true);
-	__EnsureReturn(dstStream, false);
+	obstream obs(strDstFile, true);
+	__EnsureReturn(obs, false);
 
     char lpBuff[4096] {0};
 	while (true)
 	{
-        size_t uCount = srcStream.read(lpBuff, sizeof(lpBuff));
+        size_t uCount = ibs.read(lpBuff, sizeof(lpBuff));
 		if (0 == uCount)
 		{
 			break;
@@ -222,13 +199,13 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 		{
 			if (!cb(lpBuff, uCount))
 			{
-				dstStream.close();
+				obs.close();
 				(void)removeFile(strDstFile);
                 return false;
 			}
 		}
 
-        if (!dstStream.write(lpBuff, uCount))
+        if (!obs.write(lpBuff, uCount))
 		{
 			return false;
 		}
@@ -820,10 +797,10 @@ static const wstring g_wsDotDot(2, __wcDot);
 
 bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
-    /*if (strDir.empty())
+    if (strDir.empty())
 	{
 		return false;
-    }*/
+    }
 
 #if __winvc
     wstring strFind(strDir);
