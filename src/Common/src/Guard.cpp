@@ -92,7 +92,7 @@ static int cloneMenu(HMENU hDst, HMENU hSrc)
 	{
 		CString strMenuStr(L'\0', 256);
 		MENUITEMINFO mii;
-		memset(&mii, 0, sizeof mii);
+		memzero(mii);
 		mii.cbSize = sizeof(mii);
 		mii.fMask = 0
 			| MIIM_CHECKMARKS //Retrieves or sets the hbmpChecked and hbmpUnchecked members. 

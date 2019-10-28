@@ -63,7 +63,7 @@
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
-    <ClCompile Include="cpp\ziputil.cpp">
+    <ClCompile Include="cpp\zutil.cpp">
       <Filter>fs\zip</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,11 +143,11 @@
     <ClInclude Include="..\..\inc\util\bstream.h">
       <Filter>fs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\util\ziputil.h">
-      <Filter>fs\zip</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\util\buffer.h" />
     <ClInclude Include="..\..\inc\util\WString.h" />
+    <ClInclude Include="..\..\inc\util\zutil.h">
+      <Filter>fs\zip</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sstl">

@@ -35,7 +35,7 @@
     <ClCompile Include="cpp\winfsutil.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
     <ClCompile Include="cpp\xmlutil.cpp" />
-    <ClCompile Include="cpp\ziputil.cpp" />
+    <ClCompile Include="cpp\zutil.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp" />
@@ -73,7 +73,7 @@
     <ClInclude Include="..\..\inc\util\strutil.h" />
     <ClInclude Include="..\..\inc\util\WString.h" />
     <ClInclude Include="..\..\inc\util\xmlutil.h" />
-    <ClInclude Include="..\..\inc\util\ziputil.h" />
+    <ClInclude Include="..\..\inc\util\zutil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7D80C0B2-8C16-4B56-8C5D-D512FACEBF64}</ProjectGuid>

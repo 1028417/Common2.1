@@ -50,7 +50,7 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 template <class T>
 static int _loadFile(const wstring& strFile, T& buff, UINT uReadSize=0)
 {
-	ibstream ibs(strFile);
+	IBStream ibs(strFile);
 	__EnsureReturn(ibs, -1);
 
 	if (0 == uReadSize)
@@ -67,8 +67,9 @@ static int _loadFile(const wstring& strFile, T& buff, UINT uReadSize=0)
 	}
 
 	auto ptr = buff.resizeMore(uReadSize);
-	if (ibs.read(ptr, uReadSize) != uReadSize)
+	if (!ibs.readex(ptr, uReadSize))
 	{
+		buff.resizeLess(uReadSize);
 		return -1;
 	}
 
@@ -176,23 +177,19 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
 {
-	ibstream ibs(strSrcFile);
+	IBStream ibs(strSrcFile);
 	__EnsureReturn(ibs, false);
 
-	obstream obs(strDstFile, true);
+	OBStream obs(strDstFile, true);
 	__EnsureReturn(obs, false);
 
     char lpBuff[4096] {0};
 	while (true)
 	{
-        size_t uCount = ibs.read(lpBuff, sizeof(lpBuff));
+        size_t uCount = ibs.read(lpBuff, 1, sizeof(lpBuff));
 		if (0 == uCount)
 		{
 			break;
-		}
-		if (uCount > sizeof(lpBuff))
-		{
-			return false;
 		}
 
 		if (cb)
@@ -205,7 +202,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 			}
 		}
 
-        if (!obs.write(lpBuff, uCount))
+        if (!obs.writeex(lpBuff, uCount))
 		{
 			return false;
 		}
@@ -304,19 +301,7 @@ bool fsutil::fileStat64_32(const wstring& strFile, tagFileStat64_32& stat)
 #endif
 }
 
-int fsutil::GetFileSize(FILE *pf)
-{
-	tagFileStat32 stat;
-	memzero(stat);
-    if (!fileStat32(pf, stat))
-	{
-		return -1;
-	}
-
-	return stat.st_size;
-}
-
-int fsutil::GetFileSize(const wstring& strFile)
+long fsutil::GetFileSize(const wstring& strFile)
 {
 	tagFileStat32 stat;
 	memzero(stat);
@@ -328,19 +313,7 @@ int fsutil::GetFileSize(const wstring& strFile)
 	return stat.st_size;
 }
 
-int64_t fsutil::GetFileSize64(FILE *pf)
-{
-	tagFileStat32_64 stat;
-	memzero(stat);
-    if (!fileStat32_64(pf, stat))
-	{
-		return -1;
-	}
-
-	return stat.st_size;
-}
-
-int64_t fsutil::GetFileSize64(const wstring& strFile)
+long long fsutil::GetFileSize64(const wstring& strFile)
 {
 	tagFileStat32_64 stat;
 	memzero(stat);
@@ -681,34 +654,72 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
     return true;
 }
 
-int64_t fsutil::seekFile(FILE *pf, int64_t offset, E_SeekFileFlag eFlag)
+long fsutil::lSeek(FILE *pf, long offset, int origin)
 {
-#if __windows
-    (void)_fseeki64(pf, offset, (int)eFlag);
-    return _ftelli64(pf);
+#if __ios || __mac
+    return (long)lseek(pf, offset, origin);
 
-#elif __android
-    if (feof(pf))
+#elif __winvc
+    if (fseek(pf, offset, origin))
+    {
+        return -1;
+    }
+    return ftell(pf);
+
+#else
+    /*if (feof(pf))
     {
        rewind(pf);
     }
     else
     {
         setbuf(pf, NULL);
-    }
+    }*/
 
-    auto fno = _fileno(pf);
-    auto nRet = lseek64(fno, offset, (int)eFlag);
-    if (nRet >= 0)
+    return lseek(_fileno(pf), offset, origin);
+#endif
+}
+
+long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
+{
+#if __ios || __mac
+    return lseek(pf, offset, origin);
+
+#elif __winvc
+    if (_fseeki64(pf, offset, origin))
     {
-        return nRet;
+        return -1;
     }
-    return lseek64(fno, 0, SEEK_CUR);
+    return _ftelli64(pf);
 
 #else
-    (void)fseek(pf, (long)offset, (int)eFlag);
-    return ftell(pf);
+    /*if (feof(pf))
+    {
+       rewind(pf);
+    }
+    else
+    {
+        setbuf(pf, NULL);
+    }*/
+
+    return lseek64(_fileno(pf), offset, origin);
 #endif
+}
+
+long fsutil::GetFileSize(FILE *pf)
+{
+	long pos = ftell(pf);
+	long len = lSeek(pf, 0, SEEK_END);
+	(void)seek(pf, pos);
+	return len;
+}
+
+long long fsutil::GetFileSize64(FILE *pf)
+{
+	long long pos = ftell64(pf);
+	long long len = lSeek64(pf, 0, SEEK_END);
+	(void)seek64(pf, pos);
+	return len;
 }
 
 #if __winvc
