@@ -170,7 +170,7 @@ static voidpf ZCALLBACK zopen_file(voidpf opaque, const char* filename, int mode
 {
 	(void)filename;
 	(void)mode;
-	return &((ZInopaque*)opaque)->stream();
+    return opaque;
 }
 
 static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -215,7 +215,7 @@ static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
 	return 0;
 }
 
-bool ZInopaque::unzip(const wstring& strDstDir)
+bool zutil::unzipFile(Instream& ins, const wstring& strDstDir)
 {
 	zlib_filefunc_def zfunc;
 	memzero(zfunc);
@@ -227,7 +227,7 @@ bool ZInopaque::unzip(const wstring& strDstDir)
 	zfunc.zclose_file = zclose_file;
 	zfunc.zerror_file = ztesterror_file;
 
-	zfunc.opaque = this;
+    zfunc.opaque = &ins;
 
 	return _unzipFile(strDstDir, NULL, &zfunc);
 }
