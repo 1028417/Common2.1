@@ -168,7 +168,7 @@ bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-#if __winvc
+#if __windows
     return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
     return QFile::copy(strutil::toQstr(strSrcFile), strutil::toQstr(strDstFile));
@@ -506,7 +506,7 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 
 bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
-#if __winvc
+#if __windows
     DWORD dwFileAttr = ::GetFileAttributesW(strPath.c_str());
     if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
     {
@@ -659,7 +659,7 @@ long fsutil::lSeek(FILE *pf, long offset, int origin)
 #if __ios || __mac
     return (long)lseek(pf, offset, origin);
 
-#elif __winvc
+#elif __windows
     if (fseek(pf, offset, origin))
     {
         return -1;
@@ -667,14 +667,14 @@ long fsutil::lSeek(FILE *pf, long offset, int origin)
     return ftell(pf);
 
 #else
-    /*if (feof(pf))
+    if (feof(pf))
     {
-       rewind(pf);
+        rewind(pf);
     }
     else
     {
         setbuf(pf, NULL);
-    }*/
+    }
 
     return lseek(_fileno(pf), offset, origin);
 #endif
@@ -685,7 +685,7 @@ long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
 #if __ios || __mac
     return lseek(pf, offset, origin);
 
-#elif __winvc
+#elif __windows
     if (_fseeki64(pf, offset, origin))
     {
         return -1;
@@ -693,33 +693,17 @@ long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
     return _ftelli64(pf);
 
 #else
-    /*if (feof(pf))
+    if (feof(pf))
     {
        rewind(pf);
     }
     else
     {
         setbuf(pf, NULL);
-    }*/
+    }
 
     return lseek64(_fileno(pf), offset, origin);
 #endif
-}
-
-long fsutil::GetFileSize(FILE *pf)
-{
-	long pos = ftell(pf);
-	long len = lSeek(pf, 0, SEEK_END);
-	(void)seek(pf, pos);
-	return len;
-}
-
-long long fsutil::GetFileSize64(FILE *pf)
-{
-	long long pos = ftell64(pf);
-	long long len = lSeek64(pf, 0, SEEK_END);
-	(void)seek64(pf, pos);
-	return len;
 }
 
 #if __winvc

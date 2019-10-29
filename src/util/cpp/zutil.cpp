@@ -184,7 +184,10 @@ static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong
 	return size;
 }
 
-//static uLong ZCALLBACK write_file_func(voidpf opaque, voidpf stream, const void* buf, uLong size);
+/*static uLong ZCALLBACK zwrite_file(voidpf opaque, voidpf stream, const void* buf, uLong size)
+{
+    return 0;
+}*/
 
 static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
 {
@@ -220,8 +223,9 @@ bool zutil::unzipFile(Instream& ins, const wstring& strDstDir)
 	zlib_filefunc_def zfunc;
 	memzero(zfunc);
 
-	zfunc.zopen_file = zopen_file;
-	zfunc.zread_file = zread_file;
+    zfunc.zopen_file = zopen_file;
+    zfunc.zread_file = zread_file;
+    //zfunc.zwrite_file = zwrite_file;
 	zfunc.ztell_file = ztell_file;
 	zfunc.zseek_file = zseek_file;
 	zfunc.zclose_file = zclose_file;
