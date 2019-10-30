@@ -3,26 +3,13 @@
 
 void fsutil::trimPathTail(wstring& strPath)
 {
-	if (!strPath.empty())
-	{
+    if (!strPath.empty())
+    {
         if (checkPathTail(strPath.back()))
-		{
-			strPath.pop_back();
-		}
-	}
-}
-
-wstring fsutil::trimPathTail_r(const wstring& strPath)
-{
-	if (!strPath.empty())
-	{
-        if (checkPathTail(strPath.back()))
-		{
-			return strPath.substr(0, strPath.size() - 1);
-		}
-	}
-
-	return strPath;
+        {
+            strPath.pop_back();
+        }
+    }
 }
 
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
@@ -50,46 +37,46 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 template <class T>
 static int _loadFile(const wstring& strFile, T& buff, UINT uReadSize=0)
 {
-	IBStream ibs(strFile);
-	__EnsureReturn(ibs, -1);
+    IBStream ibs(strFile);
+    __EnsureReturn(ibs, -1);
 
-	if (0 == uReadSize)
-	{
-		uReadSize = ibs.size();
-	}
-	else
-	{
-		uReadSize = MIN(uReadSize, ibs.size());
-	}
-	if (0 == uReadSize)
-	{
-		return 0;
-	}
+    if (0 == uReadSize)
+    {
+        uReadSize = ibs.size();
+    }
+    else
+    {
+        uReadSize = MIN(uReadSize, ibs.size());
+    }
+    if (0 == uReadSize)
+    {
+        return 0;
+    }
 
-	auto ptr = buff.resizeMore(uReadSize);
-	if (!ibs.readex(ptr, uReadSize))
-	{
-		buff.resizeLess(uReadSize);
-		return -1;
-	}
+    auto ptr = buff.resizeMore(uReadSize);
+    if (!ibs.readex(ptr, uReadSize))
+    {
+        buff.resizeLess(uReadSize);
+        return -1;
+    }
 
-	return uReadSize;
+    return uReadSize;
 }
 
 bool fsutil::loadFile(const wstring& strFile, CByteBuff& btbBuff, UINT uReadSize)
 {
-	return _loadFile(strFile, btbBuff, uReadSize) >= 0;
+    return _loadFile(strFile, btbBuff, uReadSize) >= 0;
 }
 
 bool fsutil::loadTxt(const wstring& strFile, string& strText)
 {
-	CCharBuff chbBuff;
-	if (_loadFile(strFile, chbBuff) < 0)
-	{
-		return false;
-	}
+    CCharBuff chbBuff;
+    if (_loadFile(strFile, chbBuff) < 0)
+    {
+        return false;
+    }
 
-	strText.swap(chbBuff.str());
+    strText.append(chbBuff.str());
     cauto strHead = CTxtWriter::__UTF8Bom;
     if (strText.substr(0, strHead.size()) == strHead)
     {
@@ -112,58 +99,58 @@ bool fsutil::loadTxt(const wstring& strFile, string& strText)
         }
     }
 
-	return true;
+    return true;
 }
 
 bool fsutil::loadTxt(const wstring& strFile, cfn_bool_t<const string&> cb)
 {
-	string strText;
-	if (!loadTxt(strFile, strText))
-	{
-		return false;
-	}
+    string strText;
+    if (!loadTxt(strFile, strText))
+    {
+        return false;
+    }
 
-	size_t prePos = 0;
-	size_t pos = 0;
-	while (true)
-	{
-		pos = strText.find('\n', prePos);
-		if (string::npos == pos)
-		{
-			break;
-		}
+    size_t prePos = 0;
+    size_t pos = 0;
+    while (true)
+    {
+        pos = strText.find('\n', prePos);
+        if (string::npos == pos)
+        {
+            break;
+        }
 
-		string strSub = strText.substr(prePos, pos - prePos);
-		if (!strSub.empty())
-		{
-			if ('\r' == *strText.rbegin())
-			{
-				strSub.pop_back();
-			}
-		}
+        string strSub = strText.substr(prePos, pos - prePos);
+        if (!strSub.empty())
+        {
+            if ('\r' == *strText.rbegin())
+            {
+                strSub.pop_back();
+            }
+        }
 
-		if (!cb(strSub))
-		{
-			return true;
-		}
-		
-		prePos = pos + 1;
-	}
+        if (!cb(strSub))
+        {
+            return true;
+        }
 
-	if (prePos < strText.size())
-	{
-		cb(strText.substr(prePos));
-	}
+        prePos = pos + 1;
+    }
 
-	return true;
+    if (prePos < strText.size())
+    {
+        cb(strText.substr(prePos));
+    }
+
+    return true;
 }
 
 bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
 {
-	return loadTxt(strFile, [&](const string& strText) {
-		vecLineText.add(strText);
-		return true;
-	});
+    return loadTxt(strFile, [&](const string& strText) {
+        vecLineText.add(strText);
+        return true;
+    });
 }
 
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
@@ -177,38 +164,38 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
 {
-	IBStream ibs(strSrcFile);
-	__EnsureReturn(ibs, false);
+    IBStream ibs(strSrcFile);
+    __EnsureReturn(ibs, false);
 
-	OBStream obs(strDstFile, true);
-	__EnsureReturn(obs, false);
+    OBStream obs(strDstFile, true);
+    __EnsureReturn(obs, false);
 
     char lpBuff[4096] {0};
-	while (true)
-	{
+    while (true)
+    {
         size_t uCount = ibs.read(lpBuff, 1, sizeof(lpBuff));
-		if (0 == uCount)
-		{
-			break;
-		}
+        if (0 == uCount)
+        {
+            break;
+        }
 
-		if (cb)
-		{
-			if (!cb(lpBuff, uCount))
-			{
-				obs.close();
-				(void)removeFile(strDstFile);
+        if (cb)
+        {
+            if (!cb(lpBuff, uCount))
+            {
+                obs.close();
+                (void)removeFile(strDstFile);
                 return false;
-			}
-		}
+            }
+        }
 
         if (!obs.writeex(lpBuff, uCount))
-		{
-			return false;
-		}
-	}
+        {
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 bool fsutil::fileStat(FILE *pf, tagFileStat& stat)
@@ -303,205 +290,205 @@ bool fsutil::fileStat64_32(const wstring& strFile, tagFileStat64_32& stat)
 
 long fsutil::GetFileSize(const wstring& strFile)
 {
-	tagFileStat32 stat;
-	memzero(stat);
-	if (!fileStat32(strFile, stat))
-	{
-		return -1;
-	}
+    tagFileStat32 stat;
+    memzero(stat);
+    if (!fileStat32(strFile, stat))
+    {
+        return -1;
+    }
 
-	return stat.st_size;
+    return stat.st_size;
 }
 
 long long fsutil::GetFileSize64(const wstring& strFile)
 {
-	tagFileStat32_64 stat;
-	memzero(stat);
-	if (!fileStat32_64(strFile, stat))
-	{
-		return -1;
-	}
+    tagFileStat32_64 stat;
+    memzero(stat);
+    if (!fileStat32_64(strFile, stat))
+    {
+        return -1;
+    }
 
-	return stat.st_size;
+    return stat.st_size;
 }
 
 time32_t fsutil::GetFileModifyTime(FILE *pf)
 {
-	tagFileStat32 stat;
-	memzero(stat);
+    tagFileStat32 stat;
+    memzero(stat);
     if (!fileStat32(pf, stat))
-	{
-		return -1;
-	}
+    {
+        return -1;
+    }
 
-	return stat.st_mtime;
+    return stat.st_mtime;
 }
 
 time32_t fsutil::GetFileModifyTime(const wstring& strFile)
 {
-	tagFileStat32 stat;
-	memzero(stat);
-	if (!fileStat32(strFile, stat))
-	{
-		return -1;
-	}
+    tagFileStat32 stat;
+    memzero(stat);
+    if (!fileStat32(strFile, stat))
+    {
+        return -1;
+    }
 
-	return stat.st_mtime;
+    return stat.st_mtime;
 }
 
 time64_t fsutil::GetFileModifyTime64(FILE *pf)
 {
-	tagFileStat64_32 stat;
-	memzero(stat);
+    tagFileStat64_32 stat;
+    memzero(stat);
     if (!fileStat64_32(pf, stat))
-	{
-		return -1;
-	}
+    {
+        return -1;
+    }
 
-	return stat.st_mtime;
+    return stat.st_mtime;
 }
 
 time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
 {
-	tagFileStat64_32 stat;
-	memzero(stat);
-	if (!fileStat64_32(strFile, stat))
-	{
-		return -1;
-	}
+    tagFileStat64_32 stat;
+    memzero(stat);
+    if (!fileStat64_32(strFile, stat))
+    {
+        return -1;
+    }
 
-	return stat.st_mtime;
+    return stat.st_mtime;
 }
 
 void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
 {
-	int size = strPath.size();
-	for (int pos = size - 1; pos>=0; pos--)
-	{
+    int size = strPath.size();
+    for (int pos = size - 1; pos>=0; pos--)
+    {
         if (checkPathTail(strPath[pos]))
-		{
-			if (NULL != pstrDir)
-			{
-				*pstrDir = strPath.substr(0, pos);
-			}
+        {
+            if (NULL != pstrDir)
+            {
+                *pstrDir = strPath.substr(0, pos);
+            }
 
-			if (NULL != pstrFile)
-			{
-				*pstrFile = strPath.substr(pos + 1);
-			}
+            if (NULL != pstrFile)
+            {
+                *pstrFile = strPath.substr(pos + 1);
+            }
 
-			return;
-		}
-	}
+            return;
+        }
+    }
 
-	if (NULL != pstrFile)
-	{
-		*pstrFile = strPath;
-	}
+    if (NULL != pstrFile)
+    {
+        *pstrFile = strPath;
+    }
 }
 
 wstring fsutil::GetRootDir(const wstring& strPath)
 {
-	int size = strPath.size();
-	for (int pos = 1; pos < size; pos++)
-	{
+    int size = strPath.size();
+    for (int pos = 1; pos < size; pos++)
+    {
         if (checkPathTail(strPath[pos]))
-		{
-			return strPath.substr(1, pos-1);
-		}
-	}
+        {
+            return strPath.substr(1, pos-1);
+        }
+    }
 
-	return L"";
+    return L"";
 }
 
 wstring fsutil::GetParentDir(const wstring& strPath)
 {
-	__EnsureReturn(!strPath.empty(), L"");
+    __EnsureReturn(!strPath.empty(), L"");
 
-	wstring strParentDir;
-	SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
+    wstring strParentDir;
+    SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
 
-	return strParentDir;
+    return strParentDir;
 }
 
 wstring fsutil::GetFileName(const wstring& strPath)
 {
-	wstring strFileName;
-	SplitPath(strPath, NULL, &strFileName);
+    wstring strFileName;
+    SplitPath(strPath, NULL, &strFileName);
 
-	return strFileName;
+    return strFileName;
 }
 
 static void _GetFileName(const wstring& strPath, wstring *pstrTitle, wstring *pstrExtName)
 {
-	wstring strFileName;
-	fsutil::SplitPath(strPath, NULL, &strFileName);
+    wstring strFileName;
+    fsutil::SplitPath(strPath, NULL, &strFileName);
 
-	auto pos = strFileName.find_last_of(__wcDot);
-	if (wstring::npos != pos)
-	{
-		if (NULL != pstrExtName)
-		{
-			*pstrExtName = strFileName.substr(pos+1);
-		}
+    auto pos = strFileName.find_last_of(__wcDot);
+    if (wstring::npos != pos)
+    {
+        if (NULL != pstrExtName)
+        {
+            *pstrExtName = strFileName.substr(pos+1);
+        }
 
-		if (NULL != pstrTitle)
-		{
-			*pstrTitle = strFileName.substr(0, pos);
-		}
-	}
-	else
-	{
-		if (NULL != pstrTitle)
-		{
-			*pstrTitle = strFileName;
-		}
-	}
+        if (NULL != pstrTitle)
+        {
+            *pstrTitle = strFileName.substr(0, pos);
+        }
+    }
+    else
+    {
+        if (NULL != pstrTitle)
+        {
+            *pstrTitle = strFileName;
+        }
+    }
 }
 
 wstring fsutil::getFileTitle(const wstring& strPath)
 {
-	wstring strTitle;
-	_GetFileName(strPath, &strTitle, NULL);
-	return strTitle;
+    wstring strTitle;
+    _GetFileName(strPath, &strTitle, NULL);
+    return strTitle;
 }
 
 wstring fsutil::GetFileExtName(const wstring& strPath)
 {
-	wstring strExtName;
-	_GetFileName(strPath, NULL, &strExtName);
-	return strExtName;
+    wstring strExtName;
+    _GetFileName(strPath, NULL, &strExtName);
+    return strExtName;
 }
 
 bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
-	auto size = strDir.size();
-	__EnsureReturn(size > 0, false);
-	__EnsureReturn(size < strSubPath.size(), false);
+    auto size = strDir.size();
+    __EnsureReturn(size > 0, false);
+    __EnsureReturn(size < strSubPath.size(), false);
 
     __EnsureReturn(checkPathTail(*strDir.rbegin()) || checkPathTail(strSubPath[size]), false);
 
 #if __windows
     return 0 == _wcsnicmp(strDir.c_str(), strSubPath.c_str(), size);
 #else
-	cauto _strDir = strutil::toStr(strDir);
+    cauto _strDir = strutil::toStr(strDir);
     return 0 == strncasecmp(_strDir.c_str(), strutil::toStr(strSubPath).c_str(), _strDir.size());
 #endif
 }
 
 wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
 {
-	if (strBaseDir.empty())
-	{
-		return strPath;
-	}
-	
-	if (!CheckSubPath(strBaseDir, strPath))
-	{
-		return L"";
-	}
+    if (strBaseDir.empty())
+    {
+        return strPath;
+    }
 
-	return strPath.substr(strBaseDir.size());
+    if (!CheckSubPath(strBaseDir, strPath))
+    {
+        return L"";
+    }
+
+    return strPath.substr(strBaseDir.size());
 }
 
 bool fsutil::existPath(const wstring& strPath, bool bDir)
@@ -528,43 +515,43 @@ bool fsutil::existPath(const wstring& strPath, bool bDir)
 
 bool fsutil::existDir(const wstring& strDir)
 {
-	return existPath(strDir, true);
+    return existPath(strDir, true);
 }
 
 bool fsutil::existFile(const wstring& strFile)
 {
-	return existPath(strFile, false);
+    return existPath(strFile, false);
 }
 
 bool fsutil::createDir(const wstring& strDir)
 {
 #if __windows
-	if (!::CreateDirectory(strDir.c_str(), NULL))
-	{
-		auto ret = ::GetLastError();
-		if (ERROR_ALREADY_EXISTS == ret)
-		{
-			return true;
-		}
+    if (!::CreateDirectory(strDir.c_str(), NULL))
+    {
+        auto ret = ::GetLastError();
+        if (ERROR_ALREADY_EXISTS == ret)
+        {
+            return true;
+        }
 
-		if (ERROR_PATH_NOT_FOUND == ret)
-		{
-			if (!createDir(fsutil::GetParentDir(strDir)))
-			{
-				return false;
-			}
+        if (ERROR_PATH_NOT_FOUND == ret)
+        {
+            if (!createDir(fsutil::GetParentDir(strDir)))
+            {
+                return false;
+            }
 
-			if (!::CreateDirectory(strDir.c_str(), NULL))
-			{
-				ret = ::GetLastError();
-				return false;
-			}
+            if (!::CreateDirectory(strDir.c_str(), NULL))
+            {
+                ret = ::GetLastError();
+                return false;
+            }
 
-			return true;
-		}
-		
-		return false;
-	}
+            return true;
+        }
+
+        return false;
+    }
 
 #else
     if (!QDir().mkpath(strutil::toQstr(strDir)))
@@ -632,17 +619,17 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #else
     if (existFile(strDstFile))
     {
-		wstring t_strSrcFile = strSrcFile;
-		wstring t_strDstFile = strDstFile;
-		transFSSlant(t_strSrcFile);
-		transFSSlant(t_strDstFile);
-		if (!strutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
-		{
-			if (!removeFile(strDstFile))
-			{
-				return false;
-			}
-		}
+        wstring t_strSrcFile = strSrcFile;
+        wstring t_strDstFile = strDstFile;
+        transFSSlant(t_strSrcFile);
+        transFSSlant(t_strDstFile);
+        if (!strutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
+        {
+            if (!removeFile(strDstFile))
+            {
+                return false;
+            }
+        }
     }
 
     if (!QFile::rename(strutil::toQstr(strSrcFile), strutil::toQstr(strDstFile)))
@@ -657,7 +644,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 long fsutil::lSeek(FILE *pf, long offset, int origin)
 {
 #if __ios || __mac
-    return (long)lseek(pf, offset, origin);
+    return (long)lseek(_fileno(pf), offset, origin);
 
 #elif __windows
     if (fseek(pf, offset, origin))
@@ -683,7 +670,7 @@ long fsutil::lSeek(FILE *pf, long offset, int origin)
 long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
 {
 #if __ios || __mac
-    return lseek(pf, offset, origin);
+    return lseek(_fileno(pf), offset, origin);
 
 #elif __windows
     if (_fseeki64(pf, offset, origin))
@@ -753,10 +740,10 @@ bool fsutil::setWorkDir(const wstring& strWorkDir)
 #if __windows
 wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 {
-	wchar_t pszPath[MAX_PATH];
-	memzero(pszPath);
-	::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
-	return GetParentDir(pszPath);
+    wchar_t pszPath[MAX_PATH];
+    memzero(pszPath);
+    ::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+    return GetParentDir(pszPath);
 }
 #endif
 
@@ -793,15 +780,15 @@ static const wstring g_wsDotDot(2, __wcDot);
 bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
     if (strDir.empty())
-	{
-		return false;
+    {
+        return false;
     }
 
 #if __winvc
     wstring strFind(strDir);
     if (!checkPathTail(strDir.back()))
     {
-        strFind.append(1, __wcDirSeparator);
+        strFind.push_back(__wcDirSeparator);
     }
 
     if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
@@ -818,7 +805,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     }
 
     WIN32_FIND_DATAW FindData;
-	memzero(FindData);
+    memzero(FindData);
     auto hFindFile = ::FindFirstFileW(strFind.c_str(), &FindData);
     if (INVALID_HANDLE_VALUE == hFindFile)
     {
@@ -887,32 +874,32 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         }*/
         cauto strFileName = fi.fileName().toStdWString();
         /*if (g_wsDot == strFileName || g_wsDotDot == strFileName)
-		{
-			continue;
+        {
+            continue;
         }*/
 
         bool bDir = fi.isDir();
 
-		if (pstrFilter)
-		{
-			if (E_FindFindFilter::FFP_ByPrefix == eFilter)
-			{
+        if (pstrFilter)
+        {
+            if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+            {
                 wstring strFilter = pstrFilter;
                 if (!strutil::matchIgnoreCase(strFileName.substr(0, strFilter.size()), strFilter))
-				{
-					continue;
-				}
-			}
+                {
+                    continue;
+                }
+            }
             else if (!bDir)
-			{
-				if (E_FindFindFilter::FFP_ByExt == eFilter)
-				{
-					if (!strutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
-					{
-						continue;
-					}
-				}
-			}
+            {
+                if (E_FindFindFilter::FFP_ByExt == eFilter)
+                {
+                    if (!strutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
+                    {
+                        continue;
+                    }
+                }
+            }
         }
 
         tagFileInfo fileInfo;
@@ -923,7 +910,13 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         }
 
         fileInfo.strName = strFileName;
-        fileInfo.tCreateTime = fi.created().toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,13,0))
+        cauto createTime = fi.birthTime();
+#else
+        cauto createTime = fi.created();
+#endif
+        fileInfo.tCreateTime = createTime.toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
         fileInfo.tModifyTime = fi.lastModified().toTime_t();
 
         cb(fileInfo);

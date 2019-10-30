@@ -9,6 +9,12 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
+#pragma data_seg("Shared")
+static bool volatile g_bRuning = false;
+static HWND volatile g_hMainWnd = NULL;
+#pragma data_seg()
+#pragma comment(linker,"/section:Shared,RWS")
+
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
@@ -160,18 +166,38 @@ BOOL CMainApp::InitInstance()
 
 void CMainApp::_run()
 {
+	if (g_bRuning)
+	{
+		if (NULL != g_hMainWnd)
+		{
+			if (IsIconic(g_hMainWnd))
+			{
+				(void)ShowWindow(g_hMainWnd, SW_RESTORE);
+			}
+			else
+			{
+				//::SetWindowPos(g_hMainWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+				::SetForegroundWindow(g_hMainWnd);
+			}
+		}
+
+		return;
+	}
+	g_bRuning = true;
+
+
 	__Assert(getController().init());
 
 	CMainWnd *pMainWnd = getView().show();
-	HWND hwndMain = pMainWnd->GetSafeHwnd();
-	__Ensure(hwndMain);
+	g_hMainWnd = pMainWnd->GetSafeHwnd();
+	__Ensure(g_hMainWnd);
 	m_pMainWnd = pMainWnd;
 
 	for (auto& HotkeyInfo : g_vctHotkeyInfos)
 	{
 		if (HotkeyInfo.bGlobal)
 		{
-			(void)_RegGlobalHotkey(hwndMain, HotkeyInfo);
+			(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
 		}
 	}
 
@@ -187,7 +213,7 @@ void CMainApp::_run()
 	//{
 	//	if (itrHotkeyInfo->bGlobal)
 	//	{
-	//		(void)::UnregisterHotKey(AfxGetMainWnd()->GetSafeHwnd(), itrHotkeyInfo->lParam);
+	//		(void)::UnregisterHotKey(g_hMainWnd, itrHotkeyInfo->lParam);
 	//	}
 	//}
 
@@ -238,7 +264,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 	switch (pMsg->message)
 	{
 	case WM_COMMAND:
-		if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
+		if (pMsg->hwnd == g_hMainWnd)
 		{
 			UINT uCode = HIWORD(pMsg->wParam);
 			UINT uID = LOWORD(pMsg->wParam);
@@ -256,7 +282,7 @@ BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 
 		break;
 	case WM_HOTKEY:
-		if (pMsg->hwnd == AfxGetMainWnd()->GetSafeHwnd())
+		if (pMsg->hwnd == g_hMainWnd)
 		{
 			(void)_HandleHotkey(pMsg->lParam);
 
@@ -507,10 +533,9 @@ BOOL CMainApp::RegHotkey(const tagHotkeyInfo &HotkeyInfo)
 
 	if (HotkeyInfo.bGlobal)
 	{
-		auto hwndMain = AfxGetMainWnd()->GetSafeHwnd();
-		if (NULL != hwndMain)
+		if (NULL != g_hMainWnd)
 		{
-			if (!_RegGlobalHotkey(hwndMain, HotkeyInfo))
+			if (!_RegGlobalHotkey(g_hMainWnd, HotkeyInfo))
 			{
 				return FALSE;
 			}

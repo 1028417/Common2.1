@@ -10,160 +10,93 @@
 #define _mkdir(x) mkdir(x, 0777)
 #endif
 
-struct tagUnzFileInfo : unz_file_info
+int CZipFile::_readCurrent(void *buf, UINT len)
 {
-    string strPath;
-
-    bool bDir = false;
-};
-
-static bool _unzipSubFile(unzFile zfile, const tagUnzFileInfo& zFileInfo)
-{
-    int nRet = unzOpenCurrentFile(zfile);
-    if (nRet != UNZ_OK)
-    {
-        return false;
-    }
-
-    uLong len = zFileInfo.uncompressed_size;
-	CByteBuff btbData(len);
-    nRet = unzReadCurrentFile(zfile, btbData, len);
-    (void)unzCloseCurrentFile(zfile);
-    if (nRet != (int)len)
-    {
-        return false;
-    }
-
-    OBStream obs(zFileInfo.strPath, true);
-	__EnsureReturn(obs, false);
-    if (!obs.writeex(btbData, len))
-    {
-        return false;
-    }
-
-    return true;
-}
-
-static bool _unzipSubFile(unzFile zfile, const string& strDstDir)
-{
-    unz_global_info zGlobalInfo;
-    int nRet = unzGetGlobalInfo(zfile, &zGlobalInfo);
-    if (nRet != UNZ_OK)
-    {
-        return false;
-    }
-
-    list<tagUnzFileInfo> lstZFileInfo;
-    for (uLong i = 0; i < zGlobalInfo.number_entry; i++)
-    {        
-        tagUnzFileInfo zFileInfo;
-        CCharBuff chbFileName(MAX_PATH + 1);
-        int nRet = unzGetCurrentFileInfo(zfile, &zFileInfo, chbFileName, MAX_PATH, NULL, 0, NULL, 0);
-        if (nRet != UNZ_OK)
-        {
-            return false;
-        }
-
-        zFileInfo.strPath = strDstDir + chbFileName.str();
-        if ((char)__wcSlant == zFileInfo.strPath.back()) // if (zFileInfo.external_fa & __DirFlag)
-        {
-            zFileInfo.bDir = true;
-
-            if (_mkdir(zFileInfo.strPath.c_str()))
-            {
-                return false;
-            }
-        }
-
-        lstZFileInfo.push_back(zFileInfo);
-
-        (void)unzGoToNextFile(zfile);
-    }
-
-    (void)unzGoToFirstFile(zfile);
-
-    bool bRet = false;
-    for (cauto zFileInfo : lstZFileInfo)
-    {
-        if (!zFileInfo.bDir)
-        {
-            bRet = _unzipSubFile(zfile, zFileInfo);
-            if (!bRet)
-            {
-                return false;
-            }
-        }
-
-        (void)unzGoToNextFile(zfile);
-    }
-
-    return true;
-}
-
-static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
-                     , const function<int(const CByteBuff&, CByteBuff&)>& cb)
-{
-    CByteBuff btbData;
-	__EnsureReturn(fsutil::loadFile(strSrcFile, btbData), -1);
-	__EnsureReturn(btbData, 0);
-    
-    CByteBuff btbOutput;
-    int len = cb(btbData, btbOutput);
-    if (len < 0)
-    {
-        return -1;
-    }
-    if (0 == len)
-    {
-        return 0;
-    }
-
-    OBStream obs(strDstFile, true);
-    __EnsureReturn(obs, -1);
-    if (!obs.writeex(btbOutput, (size_t)len))
-    {
-        return -1;
-    }
-
-    return len;
-}
-
-static bool _unzipFile(const wstring& strDstDir, const char *szFile, zlib_filefunc_def* pzlib_filefunc_def)
-{
-	if (!fsutil::createDir(strDstDir))
+	int nRet = unzOpenCurrentFile(m_unzfile);
+	if (nRet != UNZ_OK)
 	{
-		return false;
+		return -1;
 	}
 
-	string t_strDstDir(strutil::toStr(strDstDir));
-	if (strDstDir.empty() || !fsutil::checkPathTail(strDstDir.back()))
+	int nCount = unzReadCurrentFile(m_unzfile, buf, len);
+	(void)unzCloseCurrentFile(m_unzfile);
+	
+	return nCount;
+}
+
+int CZipFile::read(const tagUnzFileInfo& unzFileInfo, void *buf, UINT len)
+{
+	unz_file_pos file_pos{ unzFileInfo.pos_in_zip_directory, unzFileInfo.num_of_file };
+	int nRet = unzGoToFilePos(m_unzfile, &file_pos);
+	if (nRet != UNZ_OK)
 	{
-		t_strDstDir.append(1, (char)__wcDirSeparator);
+		return -1;
 	}
 
-	unzFile zfile = NULL;
+	return _readCurrent(buf, len);
+}
+
+static unzFile _unzOpen(list<tagUnzFileInfo>& lstUnzFileInfo, const char *szFile, zlib_filefunc_def* pzlib_filefunc_def=NULL)
+{
+	unzFile t_unzfile = NULL;
 	if (pzlib_filefunc_def)
 	{
-		zfile = unzOpen2(szFile, pzlib_filefunc_def);
+		t_unzfile = unzOpen2(szFile, pzlib_filefunc_def);
 	}
 	else
 	{
-		zfile = unzOpen(szFile);
+		t_unzfile = unzOpen(szFile);
 	}
-
-    bool bRet = false;
-	if (zfile)
+	if (NULL == t_unzfile)
 	{
-		bRet = _unzipSubFile(zfile, t_strDstDir);
-		unzClose(zfile);
+		return NULL;
 	}
+	
+	/*unz_global_info zGlobalInfo;
+	int nRet = unzGetGlobalInfo(t_unzfile, &zGlobalInfo);
+	if (nRet != UNZ_OK)
+	{
+		(void)unzClose(t_unzfile);
+		return NULL;
+	}*/
 
-    return bRet;
-}
+	unz_file_info file_info;
+	memzero(file_info);
 
-bool zutil::unzipFile(const string& strZipFile, const wstring& strDstDir)
-{
-	return _unzipFile(strDstDir, strZipFile.c_str(), NULL);
+	TBuffer<char> lpFileName(MAX_PATH + 1);
+
+	unz_file_pos file_pos{ 0,0 };
+
+	do {
+		int nRet = unzGetCurrentFileInfo(t_unzfile, &file_info, lpFileName, MAX_PATH, NULL, 0, NULL, 0);
+		if (nRet != UNZ_OK)
+		{
+			(void)unzClose(t_unzfile);
+			return NULL;
+		}
+
+		tagUnzFileInfo unzFileInfo;
+		unzFileInfo.strPath = lpFileName;
+		unzFileInfo.bDir = ((char)__wcSlant == unzFileInfo.strPath.back());  // (unzFileInfo.external_fa & __DirFlag);
+
+		unzFileInfo.uFileSize = file_info.uncompressed_size;
+
+		nRet = unzGetFilePos(t_unzfile, &file_pos);
+		if (nRet != UNZ_OK)
+		{
+			(void)unzClose(t_unzfile);
+			return NULL;
+		}
+		unzFileInfo.pos_in_zip_directory = file_pos.pos_in_zip_directory;
+		unzFileInfo.num_of_file = file_pos.num_of_file;
+
+		lstUnzFileInfo.push_back(unzFileInfo);
+
+	} while (unzGoToNextFile(t_unzfile) == UNZ_OK);
+
+	(void)unzGoToFirstFile(t_unzfile);
+
+	return t_unzfile;
 }
 
 static voidpf ZCALLBACK zopen_file(voidpf opaque, const char* filename, int mode)
@@ -183,11 +116,6 @@ static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong
 
 	return size;
 }
-
-/*static uLong ZCALLBACK zwrite_file(voidpf opaque, voidpf stream, const void* buf, uLong size)
-{
-    return 0;
-}*/
 
 static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
 {
@@ -213,30 +141,122 @@ static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
 	return 0;
 }
 
-static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
+/*static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
 {
 	return 0;
+}*/
+
+bool CZipFile::open(const string& strFile)
+{
+	m_unzfile = _unzOpen(m_lstUnzFileInfo, strFile.c_str());
+	return m_unzfile != NULL;
 }
 
-bool zutil::unzipFile(Instream& ins, const wstring& strDstDir)
+bool CZipFile::open(Instream& ins)
 {
 	zlib_filefunc_def zfunc;
 	memzero(zfunc);
 
-    zfunc.zopen_file = zopen_file;
-    zfunc.zread_file = zread_file;
-    //zfunc.zwrite_file = zwrite_file;
+	zfunc.zopen_file = zopen_file;
+	zfunc.zread_file = zread_file;
 	zfunc.ztell_file = ztell_file;
 	zfunc.zseek_file = zseek_file;
 	zfunc.zclose_file = zclose_file;
-	zfunc.zerror_file = ztesterror_file;
+	//zfunc.zerror_file = ztesterror_file;
 
-    zfunc.opaque = &ins;
+	zfunc.opaque = &ins;
 
-	return _unzipFile(strDstDir, NULL, &zfunc);
+	m_unzfile = _unzOpen(m_lstUnzFileInfo, "", &zfunc);
+	return m_unzfile != NULL;
 }
 
-#include <zlib.h>
+bool CZipFile::unzip(const wstring& strDstDir)
+{
+	if (NULL == m_unzfile)
+	{
+		return false;
+	}
+
+	if (!fsutil::createDir(strDstDir))
+	{
+		return false;
+	}
+
+	string t_strDstDir(strutil::toStr(strDstDir));
+	if (strDstDir.empty() || !fsutil::checkPathTail(strDstDir.back()))
+	{
+		t_strDstDir.push_back((char)__wcDirSeparator);
+	}
+
+	(void)unzGoToFirstFile(m_unzfile);
+
+	for (cauto unzFileInfo : m_lstUnzFileInfo)
+	{
+		if (unzFileInfo.bDir)
+		{
+			if (_mkdir((t_strDstDir + unzFileInfo.strPath).c_str()))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			UINT len = unzFileInfo.uFileSize;
+			TBuffer<byte_t> buff(len);
+            if (_readCurrent(buff, len) != (int)len)
+			{
+				return false;
+			}
+            OBStream obs(t_strDstDir + unzFileInfo.strPath, true);
+			__EnsureReturn(obs, false);
+			if (!obs.writeex(buff, len))
+			{
+				return false;
+			}
+		}
+
+		(void)unzGoToNextFile(m_unzfile);
+	}
+
+	return true;
+}
+
+void CZipFile::close()
+{
+	if (m_unzfile)
+	{
+		(void)unzClose(m_unzfile);
+		m_unzfile = NULL;
+	}
+}
+
+static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
+	, const function<int(const CByteBuff&, CByteBuff&)>& cb)
+{
+	CByteBuff btbData;
+	__EnsureReturn(fsutil::loadFile(strSrcFile, btbData), -1);
+	__EnsureReturn(btbData, 0);
+
+	CByteBuff btbOutput;
+	int len = cb(btbData, btbOutput);
+	if (len < 0)
+	{
+		return -1;
+	}
+	if (0 == len)
+	{
+		return 0;
+	}
+
+	OBStream obs(strDstFile, true);
+	__EnsureReturn(obs, -1);
+	if (!obs.writeex(btbOutput, (size_t)len))
+	{
+		return -1;
+	}
+
+	return len;
+}
 
 int zutil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int level)
 {
@@ -253,26 +273,26 @@ int zutil::zCompress(const void* pData, size_t len, CByteBuff& btbBuff, int leve
 
 long zutil::zCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int level) // Z_BEST_COMPRESSION
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
-        return zCompress(btbData, btbData->size(), btbOutput, level);
-    });
+	return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput) {
+		return zCompress(btbData, btbData->size(), btbOutput, level);
+	});
 }
 
 long zutil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-    return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput){
+	return _zcompressFile(strSrcFile, strDstFile, [&](const CByteBuff& btbData, CByteBuff& btbOutput) {
 		size_t srcLen = btbData->size();
-		btbOutput->resize(srcLen*2);
+		btbOutput->resize(srcLen * 2);
 
-        uLongf destLen = 0;
-        int nRet = uncompress(btbOutput, &destLen, btbData, srcLen);
-        if (nRet != 0)
-        {
-            return 0ul;
-        }
+		uLongf destLen = 0;
+		int nRet = uncompress(btbOutput, &destLen, btbData, srcLen);
+		if (nRet != 0)
+		{
+			return 0ul;
+		}
 
-        return destLen;
-    });
+		return destLen;
+	});
 }
 
 #if !__winvc
