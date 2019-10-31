@@ -1,24 +1,6 @@
 
 #include "util.h"
 
-bool jsonutil::load(const wstring& strFile, JValue& jRoot, bool bStrictRoot)
-{
-    string strData;
-    if (!fsutil::loadTxt(strFile, strData))
-    {
-        return false;
-    }
-
-    Json::Features features;
-    features.strictRoot_ = bStrictRoot;
-    if (!JReader(features).parse(strData, jRoot, false))
-    {
-        return false;
-    }
-
-    return true;
-}
-
 bool jsonutil::get(const JValue& jValue, wstring& strRet)
 {
     if (jValue.isNull())
@@ -26,7 +8,15 @@ bool jsonutil::get(const JValue& jValue, wstring& strRet)
         return false;
     }
 
-    strRet = strutil::toWstr(jValue.asString(), true);
+	cauto str = jValue.asString();
+	if (strutil::checkUtf8(str))
+	{
+		strRet = strutil::fromUtf8(str);
+	}
+	else
+	{
+		strRet = strutil::toWstr(str);
+	}
 
     return true;
 }

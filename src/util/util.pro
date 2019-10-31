@@ -20,7 +20,7 @@ HEADERS += \
     ../../inc/util/mtlock.h \
     ../../inc/util/mtutil.h \
     ../../inc/util/fsutil.h \
-    ../../inc/util/bstream.h \
+    ../../inc/util/fstream.h \
     ../../inc/util/TxtWriter.h \
     ../../inc/util/Path.h \
     ../../inc/util/winfsdlg.h \

@@ -300,217 +300,145 @@ using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
 #endif
 
-inline static wstring _fromUTF8(const char *pStr)
+bool strutil::checkUtf8(const char *pStr, size_t len)
+{
+	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
+	unsigned char chr = *pStr;
+	bool bAllAscii = true;
+	for (size_t uIndex = 0; uIndex < len; ++uIndex)
+	{
+		chr = *(pStr + uIndex);
+		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
+		if (nBytes == 0 && (chr & 0x80) != 0) {
+			bAllAscii = false;
+		}
+		if (nBytes == 0) {
+			//如果不是ASCII码,应该是多字节符,计算字节数
+			if (chr >= 0x80) {
+				if (chr >= 0xFC && chr <= 0xFD) {
+					nBytes = 6;
+				}
+				else if (chr >= 0xF8) {
+					nBytes = 5;
+				}
+				else if (chr >= 0xF0) {
+					nBytes = 4;
+				}
+				else if (chr >= 0xE0) {
+					nBytes = 3;
+				}
+				else if (chr >= 0xC0) {
+					nBytes = 2;
+				}
+				else {
+					return false;
+				}
+				nBytes--;
+			}
+		}
+		else {
+			//多字节符的非首字节,应为 10xxxxxx
+			if ((chr & 0xC0) != 0x80) {
+				return false;
+			}
+			//减到为零为止
+			nBytes--;
+		}
+	}
+	//违返UTF8编码规则
+	if (nBytes != 0) {
+		return false;
+	}
+	if (bAllAscii) { //如果全部都是ASCII, 也是UTF8
+		return false;
+	}
+
+	return true;
+}
+
+wstring strutil::fromUtf8(const char *pStr, size_t len)
 {
 #if __winvc
-    return g_utf8Convert.from_bytes(pStr);
+	return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
-    return QString::fromUtf8(pStr).toStdWString();
+    return QString::fromUtf8(pStr, len).toStdWString();
 #endif
 }
 
-wstring strutil::fromUtf8(const string& str)
-{
-    if (str.empty())
-    {
-        return L"";
-    }
-
-    return _fromUTF8(str.c_str());
-}
-
-inline static string _toUtf8(const wchar_t *pStr)
+string strutil::toUtf8(const wchar_t *pStr, size_t len)
 {
 #if __winvc
-    return g_utf8Convert.to_bytes(pStr);
+    return g_utf8Convert.to_bytes(pStr, pStr+len);
 #else
-    return strutil::toQstr(pStr).toUtf8().constData();
+    return strutil::toQstr(wstring(pStr, len)).toUtf8().constData();
 #endif
 }
 
 string strutil::toUtf8(const wstring& str)
 {
-    if (str.empty())
-    {
-        return "";
-    }
-
-    return _toUtf8(str.c_str());
-}
-
-string strutil::toUtf8(const wchar_t *pStr)
-{
-    if (NULL == pStr)
-    {
-        return "";
-    }
-
-    return _toUtf8(pStr);
-}
-
-static bool _checkUTF8(const char *pStr)
-{
-    UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
-    unsigned char chr = *pStr;
-    bool bAllAscii = true;
-    for (UINT uIndex = 0; pStr[uIndex] != '\0'; ++uIndex) {
-        chr = *(pStr + uIndex);
-        //判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
-        if (nBytes == 0 && (chr & 0x80) != 0) {
-            bAllAscii = false;
-        }
-        if (nBytes == 0) {
-            //如果不是ASCII码,应该是多字节符,计算字节数
-            if (chr >= 0x80) {
-                if (chr >= 0xFC && chr <= 0xFD) {
-                    nBytes = 6;
-                }
-                else if (chr >= 0xF8) {
-                    nBytes = 5;
-                }
-                else if (chr >= 0xF0) {
-                    nBytes = 4;
-                }
-                else if (chr >= 0xE0) {
-                    nBytes = 3;
-                }
-                else if (chr >= 0xC0) {
-                    nBytes = 2;
-                }
-                else {
-                    return false;
-                }
-                nBytes--;
-            }
-        }
-        else {
-            //多字节符的非首字节,应为 10xxxxxx
-            if ((chr & 0xC0) != 0x80) {
-                return false;
-            }
-            //减到为零为止
-            nBytes--;
-        }
-    }
-    //违返UTF8编码规则
-    if (nBytes != 0) {
-        return false;
-    }
-    if (bAllAscii) { //如果全部都是ASCII, 也是UTF8
-        return false;
-    }
-
-    return true;
-}
-
 #if __winvc
-static wstring _fromStr(const char *pStr, size_t len = 0)
-{
-    if (0 == len)
-    {
-        len = strlen(pStr);
-        if (0 == len)
-        {
-            return L"";
-        }
-    }
-
-    vector<wchar_t> vecBuff(len + 1);
-    wchar_t *pBuff = &vecBuff.front();
-
-    if (mbstowcs_s(NULL, pBuff, len+1, pStr, len))
-    {
-        return L"";
-    }
-
-    return pBuff;
-}
+    return toUtf8(str.c_str(), str.size());
+#else
+    return strutil::toQstr(str).toUtf8().constData();
 #endif
+}
 
-wstring strutil::toWstr(const string& str, bool bCheckUTF8)
+wstring strutil::toWstr(const char *pStr, size_t len)
 {
-    if (str.empty())
-    {
-        return L"";
-    }
-
-    if (bCheckUTF8 && _checkUTF8(str.c_str()))
-    {
-        return _fromUTF8(str.c_str());
-    }
-
 #if __winvc
-    return _fromStr(str.c_str());
+	if (0 == len)
+	{
+		return L"";
+	}
+
+	TBuffer<wchar_t> buff(len+1);
+	if (mbstowcs_s(NULL, buff, len+1, pStr, len))
+	{
+		return L"";
+	}
+
+	return buff.ptr();
+
+#else
+    return QString::fromStdString(string(pStr, len)).toStdWString();
+#endif
+}
+
+wstring strutil::toWstr(const string& str)
+{
+#if __winvc
+    return toWstr(str.c_str(), str.size());
 #else
     return QString::fromStdString(str).toStdWString();
 #endif
 }
 
-wstring strutil::toWstr(const char *pStr, bool bCheckUTF8)
+string strutil::toStr(const wchar_t *pStr, size_t len)
 {
-    if (NULL == pStr)
-    {
-        return L"";
-    }
-
-    if (bCheckUTF8 && _checkUTF8(pStr))
-    {
-        return _fromUTF8(pStr);
-    }
-
 #if __winvc
-    return _fromStr(pStr);
-#else
-    return QString::fromStdString(pStr).toStdWString();
-#endif
-}
+	if (0 == len)
+	{
+		return "";
+	}
 
-#if __winvc
-static string _toStr(const wchar_t *pStr, size_t len = 0)
-{
-    if (0 == len)
-    {
-        len = wcslen(pStr);
-        if (0 == len)
-        {
-            return "";
-        }
-    }
-
-    TBuffer<char> buff(len+1);
+	TD_CharBuffer buff(len+1);
     if (wcstombs_s(NULL, buff, len+1, pStr, len))
     {
         return "";
     }
 
-    return string(buff);
-}
+    return buff.ptr();
+
+#else
+    return QString::fromStdWString(wstring(pStr, len)).toStdString();
 #endif
+}
 
 string strutil::toStr(const wstring& str)
 {
-    if (str.empty())
-    {
-        return "";
-    }
-
 #if __winvc
-    return _toStr(str.c_str(), str.size());
+    return toStr(str.c_str(), str.size());
 #else
     return QString::fromStdWString(str).toStdString();
-#endif
-}
-
-string strutil::toStr(const wchar_t *pStr)
-{
-    if (NULL == pStr)
-    {
-        return "";
-    }
-
-#if __winvc
-    return _toStr(pStr);
-#else
-    return QString::fromStdWString(pStr).toStdString();
 #endif
 }

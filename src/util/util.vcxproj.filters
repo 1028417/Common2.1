@@ -140,13 +140,13 @@
       <Filter>fs\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\util\strutil.h" />
-    <ClInclude Include="..\..\inc\util\bstream.h">
-      <Filter>fs</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\util\buffer.h" />
     <ClInclude Include="..\..\inc\util\WString.h" />
     <ClInclude Include="..\..\inc\util\zutil.h">
       <Filter>fs\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\fstream.h">
+      <Filter>fs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -57,13 +57,19 @@ float getDPIRate()
 {
 	UINT uDPIX = 0; // = QApplication::primaryScreen()->logicDotsPerInch();
 	HRESULT hr = GetDpiForMonitor(MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTONEAREST), MDT_EFFECTIVE_DPI, &uDPIX, NULL);
-	if (S_OK != hr)
+	if (S_OK == hr && uDPIX > 0)
 	{
-		HDC hDCDesk = GetDC(NULL);
-		uDPIX = GetDeviceCaps(hDCDesk, LOGPIXELSX);
+		return __DPIDefault / uDPIX;
 	}
 
-	return __DPIDefault / uDPIX;
+	HDC hDCDesk = GetDC(NULL);
+	int nDPIX = GetDeviceCaps(hDCDesk, LOGPIXELSX);
+	if (nDPIX > 0)
+	{
+		return __DPIDefault / nDPIX;
+	}
+
+	return 1;
 }
 
 // XMusicHost目前做法是在清单工具设置“每个监视器高 DPI 识别”

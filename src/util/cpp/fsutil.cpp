@@ -27,130 +27,12 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 {
 #if __windows
     FILE *pf = NULL;
-    (void)_wfopen_s(&pf, strFile.c_str(), strutil::toWstr(strMode).c_str());
+	wstring t_strMode(strMode.begin(), strMode.end());
+    (void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
     return pf;
 #else
     return ::fopen(strutil::toStr(strFile).c_str(), strMode.c_str());
 #endif
-}
-
-template <class T>
-static int _loadFile(const wstring& strFile, T& buff, UINT uReadSize=0)
-{
-    IBStream ibs(strFile);
-    __EnsureReturn(ibs, -1);
-
-    if (0 == uReadSize)
-    {
-        uReadSize = ibs.size();
-    }
-    else
-    {
-        uReadSize = MIN(uReadSize, ibs.size());
-    }
-    if (0 == uReadSize)
-    {
-        return 0;
-    }
-
-    auto ptr = buff.resizeMore(uReadSize);
-    if (!ibs.readex(ptr, uReadSize))
-    {
-        buff.resizeLess(uReadSize);
-        return -1;
-    }
-
-    return uReadSize;
-}
-
-bool fsutil::loadFile(const wstring& strFile, CByteBuff& btbBuff, UINT uReadSize)
-{
-    return _loadFile(strFile, btbBuff, uReadSize) >= 0;
-}
-
-bool fsutil::loadTxt(const wstring& strFile, string& strText)
-{
-    CCharBuff chbBuff;
-    if (_loadFile(strFile, chbBuff) < 0)
-    {
-        return false;
-    }
-
-    strText.append(chbBuff.str());
-    cauto strHead = CTxtWriter::__UTF8Bom;
-    if (strText.substr(0, strHead.size()) == strHead)
-    {
-        strText.erase(0, strHead.size());
-    }
-    else
-    {
-        cauto strHead = CTxtWriter::__UnicodeHead_LittleEndian;
-        if (strText.substr(0, strHead.size()) == strHead)
-        {
-            strText.erase(0, strHead.size());
-        }
-        else
-        {
-            cauto strHead = CTxtWriter::__UnicodeHead_BigEndian;
-            if (strText.substr(0, strHead.size()) == strHead)
-            {
-                strText.erase(0, strHead.size());
-            }
-        }
-    }
-
-    return true;
-}
-
-bool fsutil::loadTxt(const wstring& strFile, cfn_bool_t<const string&> cb)
-{
-    string strText;
-    if (!loadTxt(strFile, strText))
-    {
-        return false;
-    }
-
-    size_t prePos = 0;
-    size_t pos = 0;
-    while (true)
-    {
-        pos = strText.find('\n', prePos);
-        if (string::npos == pos)
-        {
-            break;
-        }
-
-        string strSub = strText.substr(prePos, pos - prePos);
-        if (!strSub.empty())
-        {
-            if ('\r' == *strText.rbegin())
-            {
-                strSub.pop_back();
-            }
-        }
-
-        if (!cb(strSub))
-        {
-            return true;
-        }
-
-        prePos = pos + 1;
-    }
-
-    if (prePos < strText.size())
-    {
-        cb(strText.substr(prePos));
-    }
-
-    return true;
-}
-
-bool fsutil::loadTxt(const wstring& strFile, SVector<string>& vecLineText)
-{
-    return loadTxt(strFile, [&](const string& strText) {
-        vecLineText.add(strText);
-        return true;
-    });
 }
 
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
@@ -164,32 +46,32 @@ bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
 {
-    IBStream ibs(strSrcFile);
-    __EnsureReturn(ibs, false);
+    IFStream ifs(strSrcFile);
+    __EnsureReturn(ifs, false);
 
-    OBStream obs(strDstFile, true);
-    __EnsureReturn(obs, false);
+    OFStream ofs(strDstFile, true);
+    __EnsureReturn(ofs, false);
 
     char lpBuff[4096] {0};
     while (true)
     {
-        size_t uCount = ibs.read(lpBuff, 1, sizeof(lpBuff));
-        if (0 == uCount)
+        size_t size = ifs.read(lpBuff, 1, sizeof(lpBuff));
+        if (0 == size)
         {
             break;
         }
 
         if (cb)
         {
-            if (!cb(lpBuff, uCount))
+            if (!cb(lpBuff, size))
             {
-                obs.close();
+				ofs.close();
                 (void)removeFile(strDstFile);
                 return false;
             }
         }
 
-        if (!obs.writeex(lpBuff, uCount))
+        if (!ofs.writeex(lpBuff, size))
         {
             return false;
         }
@@ -906,7 +788,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         fileInfo.bDir = bDir;
         if (!bDir)
         {
-            fileInfo.uFileSize = (UINT)fi.size();
+            fileInfo.uFileSize = (size_t)fi.size();
         }
 
         fileInfo.strName = strFileName;

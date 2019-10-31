@@ -109,33 +109,7 @@ static void _loadElement(const TiXmlElement& element, tagXmlElementInfo& element
     }
 }
 
-static bool _loadXml(const wstring& strFile, bool bUtf8, bool bHtml, tagXmlElementInfo& rootElementInfo)
-{
-	FILE *pf = fsutil::fopen(strFile, "rb");
-	if (NULL == pf)
-	{
-		return false;
-	}
-
-	TiXmlDocument doc(bHtml);
-	if (!doc.LoadFile(pf, bUtf8? TIXML_ENCODING_UTF8:TIXML_DEFAULT_ENCODING))
-	{
-        fclose(pf);
-		return false;
-	}
-
-    auto pRoot = doc.RootElement();
-    if (pRoot)
-    {
-        _loadElement(*pRoot, rootElementInfo);
-    }
-
-    fclose(pf);
-
-	return true;
-}
-
-static bool _loadXml(char* buf, UINT length, bool bUtf8, bool bHtml, tagXmlElementInfo& rootElementInfo)
+bool xmlutil::loadXml(char* buf, size_t length, bool bUtf8, bool bHtml, tagXmlElementInfo& rootElementInfo)
 {
 	TiXmlDocument doc(bHtml);
 	if (!doc.Load(buf, length, bUtf8 ? TIXML_ENCODING_UTF8 : TIXML_DEFAULT_ENCODING))
@@ -152,20 +126,15 @@ static bool _loadXml(char* buf, UINT length, bool bUtf8, bool bHtml, tagXmlEleme
 	return true;
 }
 
-bool xmlutil::loadXml(const wstring& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
+bool xmlutil::loadXml(Instream& ins, bool bHtml, tagXmlElementInfo& rootElementInfo)
 {
-    return _loadXml(strFile, bUtf8, false, rootElementInfo);
-}
-bool xmlutil::loadXml(char* buf, UINT length, tagXmlElementInfo& rootElementInfo, bool bUtf8)
-{
-	return _loadXml(buf, length, bUtf8, false, rootElementInfo);
-}
+	string strText;
+	CTxtReader TxtReader;
+	if (!TxtReader.read(ins, strText))
+	{
+		return false;
+	}
 
-bool xmlutil::loadHtml(const wstring& strFile, tagXmlElementInfo& rootElementInfo, bool bUtf8)
-{
-    return _loadXml(strFile, bUtf8, true, rootElementInfo);
-}
-bool xmlutil::loadHtml(char* buf, UINT length, tagXmlElementInfo& rootElementInfo, bool bUtf8)
-{
-	return _loadXml(buf, length, bUtf8, true, rootElementInfo);
+	bool bUtf8 = TxtReader.hasUTF8Bom() || strutil::checkUtf8(strText);
+	return loadXml((char *)strText.c_str(), strText.size(), bUtf8, bHtml, rootElementInfo);
 }
