@@ -635,11 +635,9 @@ wstring fsutil::getAppDir()
 {
     return QCoreApplication::applicationDirPath().toStdWString();
 }
-#endif
 
-#if __mac
 #include <QStandardPaths>
-wstring fsutil::getMacHomeDir()
+wstring fsutil::getHomeDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::HomeLocation).toStdWString();
 }
