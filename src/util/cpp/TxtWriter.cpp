@@ -16,15 +16,15 @@ bool CTxtWriter::_writeHead()
 {
 	if (E_TxtEncodeType::TET_UCS2_LittleEndian == m_eEncodeType)
     {
-        return m_ofs.writeex(__UCS2Head_LittleEndian, sizeof __UCS2Head_LittleEndian);
+        return m_ofs.writex(__UCS2Head_LittleEndian, sizeof __UCS2Head_LittleEndian);
 	}
 	else if (E_TxtEncodeType::TET_UCS2_BigEndian == m_eEncodeType)
     {
-        return m_ofs.writeex(__UCS2Head_BigEndian, sizeof __UCS2Head_BigEndian);
+        return m_ofs.writex(__UCS2Head_BigEndian, sizeof __UCS2Head_BigEndian);
 	}
 	else if (E_TxtEncodeType::TET_UTF8_WithBom == m_eEncodeType)
     {
-        return m_ofs.writeex(__UTF8Bom, sizeof __UTF8Bom);
+        return m_ofs.writex(__UTF8Bom, sizeof __UTF8Bom);
 	}
 
     return true;
@@ -65,14 +65,14 @@ bool CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
 		if (_isUnicode())
 		{
 			cauto str = strutil::toWstr(pStr);
-			if (!m_ofs.writeex(str.c_str(), str.size() * 2))
+            if (!m_ofs.writex(str.c_str(), str.size() * 2))
 			{
 				return false;
 			}
 		}
 		else
 		{
-            if (!m_ofs.writeex(pStr, len))
+            if (!m_ofs.writex(pStr, len))
 			{
 				return false;
 			}
@@ -102,16 +102,16 @@ bool CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
 		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
 		{
 			cauto str = strutil::toStr(pStr);
-            size = m_ofs.writeex(str.c_str(), str.size());
+            size = m_ofs.writex(str.c_str(), str.size());
 		}
 		else if (_isUtf8())
 		{
 			cauto str = strutil::toUtf8(pStr);
-            size = m_ofs.writeex(str.c_str(), str.size());
+            size = m_ofs.writex(str.c_str(), str.size());
 		}
 		else
 		{
-            size = m_ofs.writeex(pStr, len * 2);
+            size = m_ofs.writex(pStr, len * 2);
 		}
 	}
 
@@ -133,22 +133,22 @@ bool CTxtWriter::_writeEndLine()
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-            return m_ofs.writeex(g_pwcEolN, sizeof g_pwcEolN);
+            return m_ofs.writex(g_pwcEolN, sizeof g_pwcEolN);
 		}
 		else
 		{
-            return m_ofs.writeex(g_pwcEolRN, sizeof g_pwcEolRN);
+            return m_ofs.writex(g_pwcEolRN, sizeof g_pwcEolRN);
 		}
 	}
 	else
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
-            return m_ofs.writeex(g_pchEolN, sizeof g_pchEolN);
+            return m_ofs.writex(g_pchEolN, sizeof g_pchEolN);
 		}
 		else
 		{
-            return m_ofs.writeex(g_pchEolRN, sizeof g_pchEolRN);
+            return m_ofs.writex(g_pchEolRN, sizeof g_pchEolRN);
 		}
 	}
 }

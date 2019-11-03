@@ -71,7 +71,7 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
             }
         }
 
-        if (!ofs.writeex(lpBuff, size))
+        if (!ofs.writex(lpBuff, size))
         {
             return false;
         }

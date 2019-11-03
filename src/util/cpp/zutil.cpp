@@ -212,7 +212,7 @@ bool CZipFile::unzip(const wstring& strDstDir)
 			}
             OFStream ofs(t_strDstDir + pInfo->strPath, true);
 			__EnsureReturn(ofs, false);
-			if (!ofs.writeex(buff, pInfo->uFileSize))
+            if (!ofs.writex(buff, pInfo->uFileSize))
 			{
 				return false;
 			}
@@ -254,7 +254,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 	OFStream ofs(strDstFile, true);
 	__EnsureReturn(ofs, -1);
-	if (!ofs.writeex(bbfOutput, (size_t)len))
+    if (!ofs.writex(bbfOutput, (size_t)len))
 	{
 		return -1;
 	}
@@ -317,7 +317,7 @@ long zutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, 
 
     OFStream ofs(strDstFile, true);
     __EnsureReturn(ofs, -1);
-    if (!ofs.writeex(baOutput.data(), (size_t)baOutput.size()))
+    if (!ofs.writex(baOutput.data(), (size_t)baOutput.size()))
 	{
 		return -1;
 	}
@@ -337,7 +337,7 @@ long zutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
     OFStream ofs(strDstFile, true);
     __EnsureReturn(ofs, -1);
-    if (!ofs.writeex(baOutput.data(), (size_t)baOutput.size()))
+    if (!ofs.writex(baOutput.data(), (size_t)baOutput.size()))
 	{
 		return -1;
 	}
