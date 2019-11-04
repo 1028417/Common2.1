@@ -239,7 +239,8 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-	__EnsureReturn(ifs.readex(bbfData) > 0, 0);
+    (void)ifs.readex(bbfData);
+    __EnsureReturn(bbfData, 0);
 
 	CByteBuffer bbfOutput;
 	int len = cb(bbfData, bbfOutput);
@@ -310,7 +311,7 @@ long zutil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, 
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    __EnsureReturn(ifs.readex(bbfData), -1);
+    (void)ifs.readex(bbfData);
     __EnsureReturn(bbfData, 0);
 
     cauto baOutput = qCompress(bbfData, bbfData->size(), nCompressLecvel);
@@ -330,7 +331,7 @@ long zutil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    __EnsureReturn(ifs.readex(bbfData), -1);
+    (void)ifs.readex(bbfData);
     __EnsureReturn(bbfData, 0);
 
     cauto baOutput = qUncompress(bbfData, bbfData->size());

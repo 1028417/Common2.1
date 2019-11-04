@@ -130,10 +130,7 @@ bool xmlutil::loadXml(Instream& ins, bool bHtml, tagXmlElementInfo& rootElementI
 {
 	string strText;
 	CTxtReader TxtReader;
-	if (!TxtReader.read(ins, strText))
-	{
-		return false;
-	}
+    TxtReader.read(ins, strText);
 
 	bool bUtf8 = TxtReader.hasUTF8Bom() || strutil::checkUtf8(strText);
 	return loadXml((char *)strText.c_str(), strText.size(), bUtf8, bHtml, rootElementInfo);
