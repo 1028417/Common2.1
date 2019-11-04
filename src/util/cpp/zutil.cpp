@@ -10,7 +10,7 @@
 #define _mkdir(x) mkdir(x, 0777)
 #endif
 
-long CZipFile::_readCurrent(void *buf, size_t len)
+long CZipFile::_readCurrent(void *buf, size_t len) const
 {
 	int nRet = unzOpenCurrentFile(m_unzfile);
 	if (nRet != UNZ_OK)
@@ -24,7 +24,7 @@ long CZipFile::_readCurrent(void *buf, size_t len)
 	return nCount;
 }
 
-long CZipFile::read(const tagUnzFileInfo& unzFileInfo, void *buf, size_t len)
+long CZipFile::read(const tagUnzFileInfo& unzFileInfo, void *buf, size_t len) const
 {
 	unz_file_pos file_pos{ unzFileInfo.pos_in_zip_directory, unzFileInfo.num_of_file };
 	int nRet = unzGoToFilePos(m_unzfile, &file_pos);
@@ -97,10 +97,9 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 			unzFileInfo.pos_in_zip_directory = file_pos.pos_in_zip_directory;
 			unzFileInfo.num_of_file = file_pos.num_of_file;
 
-			m_lstSubFileInfo.push_back(unzFileInfo);
-			m_lstSubInfo.push_back(&m_lstSubFileInfo.back());
+            auto pFileInfo = &(m_mapSubFileInfo[unzFileInfo.strPath] = unzFileInfo);
+            m_lstSubInfo.push_back(pFileInfo);
 		}
-
 	} while (unzGoToNextFile(unzfile) == UNZ_OK);
 
 	(void)unzGoToFirstFile(unzfile);
@@ -174,7 +173,7 @@ bool CZipFile::open(Instream& ins)
 	return _open("", &zfunc);
 }
 
-bool CZipFile::unzip(const wstring& strDstDir)
+bool CZipFile::unzip(const wstring& strDstDir) const
 {
 	if (NULL == m_unzfile)
 	{
