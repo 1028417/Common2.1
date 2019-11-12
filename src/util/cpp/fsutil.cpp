@@ -650,10 +650,7 @@ static const wstring g_wsDotDot(2, __wcDot);
     winfsutil::getSysDrivers(lstDrivers);
     for (cauto strDriver : lstDrivers)
     {
-        tagFileInfo fileInfo;
-        fileInfo.bDir = true;
-        fileInfo.strName = strDriver;
-        cb(fileInfo);
+        cb(tagFileInfo(true, strDriver));
     }
 */
 
@@ -707,9 +704,8 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
             continue;
         }
 
-        tagFileInfo fileInfo;
-        fileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-        fileInfo.strName = strFileName;
+		bool bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		tagFileInfo fileInfo(bDir, strFileName);
         fileInfo.uFileSize = FindData.nFileSizeLow;
         fileInfo.tCreateTime = tmutil::transFileTime(FindData.ftCreationTime.dwLowDateTime, FindData.ftCreationTime.dwHighDateTime);
         fileInfo.tModifyTime = tmutil::transFileTime(FindData.ftLastWriteTime.dwLowDateTime, FindData.ftLastWriteTime.dwHighDateTime);
@@ -782,15 +778,12 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
             }
         }
 
-        tagFileInfo fileInfo;
-        fileInfo.bDir = bDir;
+        tagFileInfo fileInfo(bDir, strFileName);
         if (!bDir)
         {
             fileInfo.uFileSize = (size_t)fi.size();
         }
-
-        fileInfo.strName = strFileName;
-
+		
 #if (QT_VERSION >= QT_VERSION_CHECK(5,13,0))
         cauto createTime = fi.birthTime();
 #else
