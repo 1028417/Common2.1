@@ -12,10 +12,21 @@
 
 long CZipFile::_readCurrent(void *buf, size_t len) const
 {
-	int nRet = unzOpenCurrentFile(m_unzfile);
-	if (nRet != UNZ_OK)
+	if (m_strPwd.empty())
 	{
-		return -1;
+		int nRet = unzOpenCurrentFile(m_unzfile);
+		if (nRet != UNZ_OK)
+		{
+			return -1;
+		}
+	}
+	else
+	{
+		int nRet = unzOpenCurrentFilePassword(m_unzfile, m_strPwd.c_str());
+		if (nRet != UNZ_OK)
+		{
+			return -1;
+		}
 	}
 
 	long nCount = (long)unzReadCurrentFile(m_unzfile, buf, len);
@@ -156,8 +167,10 @@ static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
 	return 0;
 }*/
 
-bool CZipFile::open(Instream& ins)
+bool CZipFile::open(Instream& ins, const string& strPwd)
 {
+	m_strPwd = strPwd;
+
 	zlib_filefunc_def zfunc;
 	memzero(zfunc);
 
