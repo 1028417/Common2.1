@@ -49,7 +49,6 @@
     <ClCompile Include="src\DragDrop.cpp">
       <Filter>src\ctrl</Filter>
     </ClCompile>
-    <ClCompile Include="Dump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

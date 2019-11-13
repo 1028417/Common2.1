@@ -138,9 +138,6 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dump.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\Guard.cpp" />
     <ClCompile Include="src\img.cpp" />
     <ClCompile Include="src\ResModule.cpp" />
