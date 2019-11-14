@@ -329,30 +329,30 @@ BOOL CImglst::Init(CBitmap& bitmap)
 	return TRUE;
 }
 
-BOOL CImglst::SetFile(const wstring& strFile, bool bHalfToneMode, LPCRECT prcMargin, int iPosReplace)
+BOOL CImglst::SetFile(const wstring& strFile, bool bHalfToneMode, LPCRECT prcMargin, int nPosReplace)
 {
 	CImg img;
 	__EnsureReturn(img.Load(strFile.c_str()), FALSE);
 
-	SetImg(img, bHalfToneMode, prcMargin, iPosReplace);
+	SetImg(img, bHalfToneMode, prcMargin, nPosReplace);
 	
 	return TRUE;
 }
 
-void CImglst::SetImg(CImg& img, bool bHalfToneMode, LPCRECT prcMargin, int iPosReplace)
+void CImglst::SetImg(CImg& img, bool bHalfToneMode, LPCRECT prcMargin, int nPosReplace)
 {
 	img.StretchBltFix(E_ImgFixMode::IFM_Inner, m_CompDC.getDC(), CRect(0, 0, m_cx, m_cy), bHalfToneMode, prcMargin);
 
 	m_CompDC.getBitmap([&](CBitmap& bitmap) {
-		SetBitmap(bitmap, iPosReplace);
+		SetBitmap(bitmap, nPosReplace);
 	});
 }
 
-void CImglst::SetBitmap(CBitmap& bitmap, int iPosReplace)
+void CImglst::SetBitmap(CBitmap& bitmap, int nPosReplace)
 {
-	if (iPosReplace >= 0)
+	if (nPosReplace >= 0)
 	{
-		(void)__super::Replace(iPosReplace, &bitmap, NULL);
+		(void)__super::Replace(nPosReplace, &bitmap, NULL);
 	}
 	else
 	{
@@ -360,11 +360,11 @@ void CImglst::SetBitmap(CBitmap& bitmap, int iPosReplace)
 	}
 }
 
-void CImglst::SetIcon(HICON hIcon, int iPosReplace)
+void CImglst::SetIcon(HICON hIcon, int nPosReplace)
 {
-	if (iPosReplace >= 0)
+	if (nPosReplace >= 0)
 	{
-		(void)Replace(iPosReplace, hIcon);
+		(void)Replace(nPosReplace, hIcon);
 	}
 	else
 	{
