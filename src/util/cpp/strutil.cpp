@@ -40,16 +40,6 @@ int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
 #endif
 }
 
-string strutil::substr(const string& str, size_t pos, size_t len)
-{
-    if (str.length() < pos)
-    {
-        return "";
-    }
-
-    return str.substr(pos, len);
-}
-
 wstring strutil::substr(const wstring& str, size_t pos, size_t len)
 {
     if (str.length() < pos)
@@ -58,6 +48,38 @@ wstring strutil::substr(const wstring& str, size_t pos, size_t len)
     }
 
     return str.substr(pos, len);
+}
+
+string strutil::substr(const string& str, size_t pos, size_t len)
+{
+	if (str.length() < pos)
+	{
+		return "";
+	}
+
+	return str.substr(pos, len);
+}
+
+bool strutil::endWith(const wstring& str, const wstring& strEnd)
+{
+	int pos = (int)str.length() - strEnd.length();
+	if (pos < 0)
+	{
+		return false;
+	}
+
+	return substr(str, pos) == strEnd;
+}
+
+bool strutil::endWith(const string& str, const string& strEnd)
+{
+	int pos = (int)str.length() - strEnd.length();
+	if (pos < 0)
+	{
+		return false;
+	}
+
+	return substr(str, pos) == strEnd;
 }
 
 template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
