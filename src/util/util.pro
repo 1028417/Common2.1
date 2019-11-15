@@ -46,6 +46,7 @@ HEADERS += \
     ../../inc/util/ziputil.h
 
 SOURCES += \
+    ../../3rd/bzip2-1.0.6/bzcompress.c \
     cpp/util.cpp \
     cpp/tmutil.cpp \
     cpp/strutil.cpp \
@@ -87,12 +88,20 @@ SOURCES += \
     ../../3rd/zlib-1.2.11/trees.c \
     ../../3rd/zlib-1.2.11/uncompr.c \
     ../../3rd/zlib-1.2.11/zutil.c \
-    cpp/ziputil.cpp
+    cpp/ziputil.cpp \
+#
+    ../../3rd/bzip2-1.0.6/blocksort.c \
+    ../../3rd/bzip2-1.0.6/bzlib.c \
+    ../../3rd/bzip2-1.0.6/bzip2.c \
+    ../../3rd/bzip2-1.0.6/crctable.c \
+    ../../3rd/bzip2-1.0.6/decompress.c \
+    ../../3rd/bzip2-1.0.6/randtable.c \
+    ../../3rd/bzip2-1.0.6/huffman.c
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
 INCLUDEPATH += ../../inc/util \
-    ../../3rd/zlib-1.2.11
+    ../../3rd/zlib-1.2.11 ../../3rd/bzip2-1.0.6
 
 DEFINES += __UtilPrj  IOAPI_NO_64  TIXML_USE_STL
 
