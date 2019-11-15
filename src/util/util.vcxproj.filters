@@ -63,8 +63,53 @@
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
-    <ClCompile Include="cpp\zutil.cpp">
+    <ClCompile Include="cpp\ziputil.cpp">
       <Filter>fs\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\adler32.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\compress.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\crc32.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\deflate.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzclose.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzlib.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzread.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzwrite.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\infback.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inffast.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inflate.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inftrees.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\trees.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\uncompr.c">
+      <Filter>fs\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\zutil.c">
+      <Filter>fs\zip\zlib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,11 +187,11 @@
     <ClInclude Include="..\..\inc\util\strutil.h" />
     <ClInclude Include="..\..\inc\util\buffer.h" />
     <ClInclude Include="..\..\inc\util\WString.h" />
-    <ClInclude Include="..\..\inc\util\zutil.h">
-      <Filter>fs\zip</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\util\fstream.h">
       <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\util\ziputil.h">
+      <Filter>fs\zip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +218,9 @@
     </Filter>
     <Filter Include="fs\zip">
       <UniqueIdentifier>{662cf539-5ebe-4837-ab1b-b6326ed58fe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\zip\zlib">
+      <UniqueIdentifier>{540a628d-71d6-457f-a2e6-5d91b9e6409c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

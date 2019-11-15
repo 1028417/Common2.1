@@ -43,7 +43,7 @@ HEADERS += \
     ../../inc/sstl/SMap.h \
     ../../inc/sstl/SSet.h \
     ../../inc/sstl/sstl.h \
-    ../../inc/util/zutil.h
+    ../../inc/util/ziputil.h
 
 SOURCES += \
     cpp/util.cpp \
@@ -72,7 +72,22 @@ SOURCES += \
 #
     ../../3rd/zlib-1.2.11/contrib/minizip/unzip.c \
     ../../3rd/zlib-1.2.11/contrib/minizip/ioapi.c \
-    cpp/zutil.cpp
+    ../../3rd/zlib-1.2.11/adler32.c \
+    ../../3rd/zlib-1.2.11/compress.c \
+    ../../3rd/zlib-1.2.11/crc32.c \
+    ../../3rd/zlib-1.2.11/deflate.c \
+    ../../3rd/zlib-1.2.11/gzclose.c \
+    ../../3rd/zlib-1.2.11/gzlib.c \
+    ../../3rd/zlib-1.2.11/gzread.c \
+    ../../3rd/zlib-1.2.11/gzwrite.c \
+    ../../3rd/zlib-1.2.11/infback.c \
+    ../../3rd/zlib-1.2.11/inffast.c \
+    ../../3rd/zlib-1.2.11/inflate.c \
+    ../../3rd/zlib-1.2.11/inftrees.c \
+    ../../3rd/zlib-1.2.11/trees.c \
+    ../../3rd/zlib-1.2.11/uncompr.c \
+    ../../3rd/zlib-1.2.11/zutil.c \
+    cpp/ziputil.cpp
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
@@ -82,30 +97,25 @@ INCLUDEPATH += ../../inc/util \
 DEFINES += __UtilPrj  IOAPI_NO_64  TIXML_USE_STL
 
 win32 {
-    LIBS += -lgdi32  -lcomdlg32  -lole32 \
-        ../../bin/zlib1.dll
+    LIBS += -lgdi32  -lcomdlg32  -lole32
 
     platform = win
     DESTDIR = ../../bin
 
     target.path = ../../../XMusic/bin
     INSTALLS += target
-} else {
-    LIBS += -lz
+} else: android {
+    platform = android
+    DESTDIR = ../../../XMusic/libs/armeabi-v7a
+} else: macx {
+    platform = mac
+    DESTDIR = ../../bin/mac
 
-    android {
-        platform = android
-        DESTDIR = ../../../XMusic/libs/armeabi-v7a
-    } else: macx {
-        platform = mac
-        DESTDIR = ../../bin/mac
-
-        target.path = ../../../XMusic/bin/mac
-        INSTALLS += target
-    } else: ios {
-        platform = ios
-        DESTDIR = ../../../build/ioslib
-    }
+    target.path = ../../../XMusic/bin/mac
+    INSTALLS += target
+} else: ios {
+    platform = ios
+    DESTDIR = ../../../build/ioslib
 }
 
 build_dir = ../../../build/xutil/$$platform

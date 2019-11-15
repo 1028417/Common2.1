@@ -15,11 +15,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\adler32.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\compress.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c" />
     <ClCompile Include="..\..\3rd\json\json_reader.cpp" />
     <ClCompile Include="..\..\3rd\json\json_value.cpp" />
     <ClCompile Include="..\..\3rd\json\json_writer.cpp" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\crc32.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\deflate.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzclose.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzlib.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzread.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\gzwrite.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\infback.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inffast.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inflate.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\inftrees.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\trees.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\uncompr.c" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\zutil.c" />
     <ClCompile Include="cpp\jsonutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\winfsdlg.cpp" />
@@ -35,7 +50,7 @@
     <ClCompile Include="cpp\winfsutil.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
     <ClCompile Include="cpp\xmlutil.cpp" />
-    <ClCompile Include="cpp\zutil.cpp" />
+    <ClCompile Include="cpp\ziputil.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp" />
     <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp" />
@@ -73,7 +88,7 @@
     <ClInclude Include="..\..\inc\util\strutil.h" />
     <ClInclude Include="..\..\inc\util\WString.h" />
     <ClInclude Include="..\..\inc\util\xmlutil.h" />
-    <ClInclude Include="..\..\inc\util\zutil.h" />
+    <ClInclude Include="..\..\inc\util\ziputil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7D80C0B2-8C16-4B56-8C5D-D512FACEBF64}</ProjectGuid>
@@ -143,7 +158,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../../3rd/zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -177,7 +192,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../../3rd/zlib-1.2.11/libz.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
