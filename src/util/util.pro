@@ -46,7 +46,6 @@ HEADERS += \
     ../../inc/util/ziputil.h
 
 SOURCES += \
-    ../../3rd/bzip2-1.0.6/bzcompress.c \
     cpp/util.cpp \
     cpp/tmutil.cpp \
     cpp/strutil.cpp \
@@ -91,12 +90,13 @@ SOURCES += \
     cpp/ziputil.cpp \
 #
     ../../3rd/bzip2-1.0.6/blocksort.c \
-    ../../3rd/bzip2-1.0.6/bzlib.c \
+    ../../3rd/bzip2-1.0.6/bzcompress.c \
     ../../3rd/bzip2-1.0.6/bzip2.c \
+    ../../3rd/bzip2-1.0.6/bzlib.c \
     ../../3rd/bzip2-1.0.6/crctable.c \
     ../../3rd/bzip2-1.0.6/decompress.c \
-    ../../3rd/bzip2-1.0.6/randtable.c \
     ../../3rd/bzip2-1.0.6/huffman.c
+    ../../3rd/bzip2-1.0.6/randtable.c \
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 

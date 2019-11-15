@@ -111,6 +111,30 @@
     <ClCompile Include="..\..\3rd\zlib-1.2.11\zutil.c">
       <Filter>fs\zip\zlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\randtable.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\huffman.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\decompress.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\crctable.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzlib.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzip2.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzcompress.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\blocksort.c">
+      <Filter>fs\zip\bzip2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />
@@ -221,6 +245,9 @@
     </Filter>
     <Filter Include="fs\zip\zlib">
       <UniqueIdentifier>{540a628d-71d6-457f-a2e6-5d91b9e6409c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fs\zip\bzip2">
+      <UniqueIdentifier>{b4a66285-634a-4087-b168-f05a7b05895d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

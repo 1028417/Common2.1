@@ -15,6 +15,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\blocksort.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzcompress.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzip2.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\bzlib.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\crctable.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\decompress.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\huffman.c" />
+    <ClCompile Include="..\..\3rd\bzip2-1.0.6\randtable.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\adler32.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\compress.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c" />
@@ -143,7 +151,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -179,7 +187,7 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
