@@ -12,9 +12,9 @@ void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock
 		list<thread> lstThread;
 		for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
 		{
-			lstThread.push_back(thread([&, uIndex]() {
+			lstThread.emplace_back([&, uIndex]() {
 				cb(uIndex);
-			}));
+			});
 		}
 
 		for (auto& thread : lstThread)

@@ -42,7 +42,7 @@ BOOL CDragDropMgr::RegDropTarget(IDropTargetEx& DropTarget, CWnd& Wnd)
 		return TRUE;
 	}
 
-	g_lstDragDropMgr.push_back(CDragDropMgr());
+	g_lstDragDropMgr.emplace_back();
 	__AssertReturn(g_lstDragDropMgr.back().Register(&Wnd), FALSE);
 
 	m_mapDropTargets[&Wnd] = &DropTarget;

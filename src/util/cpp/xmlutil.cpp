@@ -104,7 +104,7 @@ static void _loadElement(const TiXmlElement& element, tagXmlElementInfo& element
 
     for (auto pChild = element.FirstChildElement(); pChild; pChild = pChild->NextSiblingElement())
     {
-        elementInfo.vecChildInfo.push_back(tagXmlElementInfo());
+        elementInfo.vecChildInfo.emplace_back();
         _loadElement(*pChild, elementInfo.vecChildInfo.back());
     }
 }

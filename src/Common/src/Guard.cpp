@@ -158,7 +158,7 @@ bool CMenuEx::Attach(HMENU hMenu)
 		{
 			HMENU hSubMenu = this->GetSubMenu(nItem)->m_hMenu;
 
-			m_lstSubMenu.push_back(CMenuEx(*this, true));
+			m_lstSubMenu.emplace_back(*this, true);
 			auto& SubMenu = m_lstSubMenu.back();
 			if (!SubMenu.Attach(hSubMenu))
 			{
