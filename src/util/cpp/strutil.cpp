@@ -250,7 +250,8 @@ string strutil::upperCase_r(const string& str)
     return strRet;
 }
 
-void strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
+template <class T>
+static void _replace(T& str, const T& strFind, const T& strReplace)
 {
     auto findLen = strFind.length();
     if (0 == findLen)
@@ -263,7 +264,7 @@ void strutil::replace(wstring& str, const wstring& strFind, const wstring& strRe
     for (size_t pos = 0; pos+findLen <= str.length(); )
     {
         pos = str.find(strFind.c_str(), pos, findLen);
-        if (wstring::npos == pos)
+        if (T::npos == pos)
         {
             break;
         }
@@ -278,6 +279,16 @@ void strutil::replace(wstring& str, const wstring& strFind, const wstring& strRe
             pos += replaceLen;
         }
     }
+}
+
+void strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
+{
+    _replace(str, strFind, strReplace);
+}
+
+void strutil::replace(string& str, const string& strFind, const string& strReplace)
+{
+    _replace(str, strFind, strReplace);
 }
 
 void strutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
