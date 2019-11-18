@@ -645,12 +645,6 @@ wstring fsutil::getModuleDir(wchar_t *pszModuleName)
 #endif
 
 #if !__winvc
-#include <QCoreApplication>
-wstring fsutil::getAppDir()
-{
-    return QCoreApplication::applicationDirPath().toStdWString();
-}
-
 #include <QStandardPaths>
 wstring fsutil::getHomeDir()
 {

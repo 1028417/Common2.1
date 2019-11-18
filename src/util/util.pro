@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
+QT       -= gui
 
 TARGET = xutil
 TEMPLATE = lib
