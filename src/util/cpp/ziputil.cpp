@@ -141,7 +141,7 @@ static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong
 static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
 {
     (void)opaque;
-    return ((Instream*)stream)->pos();
+    return (long)((Instream*)stream)->pos();
 }
 
 static long ZCALLBACK zseek_file(voidpf opaque, voidpf stream, uLong offset, int origin)
@@ -251,7 +251,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData);
+    (void)ifs.readex(bbfData, (size_t)ifs);
     __EnsureReturn(bbfData, 0);
 
 	CByteBuffer bbfOutput;
@@ -323,7 +323,7 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData);
+    (void)ifs.readex(bbfData, (size_t)ifs.size());
     __EnsureReturn(bbfData, 0);
 
     cauto baOutput = qCompress(bbfData, bbfData->size(), nCompressLecvel);
@@ -343,7 +343,7 @@ long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData);
+    (void)ifs.readex(bbfData, (size_t)ifs);
     __EnsureReturn(bbfData, 0);
 
     cauto baOutput = qUncompress(bbfData, bbfData->size());

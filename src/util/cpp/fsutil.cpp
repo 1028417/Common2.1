@@ -80,113 +80,33 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
     return true;
 }
 
-bool fsutil::fileStat(FILE *pf, tagFileStat& stat)
-{
-#if __windows
-    return 0 == _fstat(_fileno(pf), &stat);
-#else
-    return 0 == ::fstat(_fileno(pf), &stat);
-#endif
-}
-
-bool fsutil::fileStat(const wstring& strFile, tagFileStat& stat)
-{
-#if __windows
-    return 0 == _wstat(strFile.c_str(), &stat);
-#else
-    return 0 == ::stat(strutil::toStr(strFile).c_str(), &stat);
-#endif
-}
-
-bool fsutil::fileStat32(FILE *pf, tagFileStat32& stat)
-{
-#if __windows
-    return 0 == _fstat32(_fileno(pf), &stat);
-#else
-    return fileStat(pf, stat);
-#endif
-}
-
-bool fsutil::fileStat32(const wstring& strFile, tagFileStat32& stat)
-{
-#if __windows
-    return 0 == _wstat32(strFile.c_str(), &stat);
-#else
-    return fileStat(strFile, stat);
-#endif
-}
-
-bool fsutil::fileStat32_64(FILE *pf, tagFileStat32_64& stat)
-{
-#if __windows
-    return 0 == _fstat32i64(_fileno(pf), &stat);
-#else
-    return fileStat(pf, stat);
-#endif
-}
-
-bool fsutil::fileStat32_64(const wstring& strFile, tagFileStat32_64& stat)
-{
-#if __windows
-    return 0 == _wstat32i64(strFile.c_str(), &stat);
-#else
-    return fileStat(strFile, stat);
-#endif
-}
-
-bool fsutil::fileStat64(FILE *pf, tagFileStat64& stat)
+bool fsutil::fStat64(FILE *pf, tagFileStat64& stat)
 {
 #if __windows
     return 0 == _fstat64(_fileno(pf), &stat);
+#elif __android
+    return 0 == fstat64(_fileno(pf), &stat);
 #else
-    return fileStat(pf, stat);
+    return 0 == fstat(_fileno(pf), &stat);
 #endif
 }
 
-bool fsutil::fileStat64(const wstring& strFile, tagFileStat64& stat)
+bool fsutil::lStat64(const wstring& strFile, tagFileStat64& stat)
 {
 #if __windows
     return 0 == _wstat64(strFile.c_str(), &stat);
+#elif __android
+    return 0 == lstat64(strutil::toStr(strFile).c_str(), &stat);
 #else
-    return fileStat(strFile, stat);
+    return 0 == lstat(strutil::toStr(strFile).c_str(), &stat);
 #endif
-}
-
-bool fsutil::fileStat64_32(FILE *pf, tagFileStat64_32& stat)
-{
-#if __windows
-    return 0 == _fstat64i32(_fileno(pf), &stat);
-#else
-    return fileStat(pf, stat);
-#endif
-}
-
-bool fsutil::fileStat64_32(const wstring& strFile, tagFileStat64_32& stat)
-{
-#if __windows
-    return 0 == _wstat64i32(strFile.c_str(), &stat);
-#else
-    return fileStat(strFile, stat);
-#endif
-}
-
-long fsutil::GetFileSize(const wstring& strFile)
-{
-    tagFileStat32 stat;
-    memzero(stat);
-    if (!fileStat32(strFile, stat))
-    {
-        return -1;
-    }
-
-    return stat.st_size;
 }
 
 long long fsutil::GetFileSize64(const wstring& strFile)
 {
-    tagFileStat32_64 stat;
+    tagFileStat64 stat;
     memzero(stat);
-    if (!fileStat32_64(strFile, stat))
+    if (!lStat64(strFile, stat))
     {
         return -1;
     }
@@ -194,35 +114,11 @@ long long fsutil::GetFileSize64(const wstring& strFile)
     return stat.st_size;
 }
 
-time32_t fsutil::GetFileModifyTime(FILE *pf)
-{
-    tagFileStat32 stat;
-    memzero(stat);
-    if (!fileStat32(pf, stat))
-    {
-        return -1;
-    }
-
-    return stat.st_mtime;
-}
-
-time32_t fsutil::GetFileModifyTime(const wstring& strFile)
-{
-    tagFileStat32 stat;
-    memzero(stat);
-    if (!fileStat32(strFile, stat))
-    {
-        return -1;
-    }
-
-    return stat.st_mtime;
-}
-
 time64_t fsutil::GetFileModifyTime64(FILE *pf)
 {
-    tagFileStat64_32 stat;
+    tagFileStat64 stat;
     memzero(stat);
-    if (!fileStat64_32(pf, stat))
+    if (!fStat64(pf, stat))
     {
         return -1;
     }
@@ -232,9 +128,9 @@ time64_t fsutil::GetFileModifyTime64(FILE *pf)
 
 time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
 {
-    tagFileStat64_32 stat;
+    tagFileStat64 stat;
     memzero(stat);
-    if (!fileStat64_32(strFile, stat))
+    if (!lStat64(strFile, stat))
     {
         return -1;
     }
@@ -544,13 +440,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 long fsutil::lSeek(FILE *pf, long offset, int origin)
 {
-#if __ios || __mac
-    return (long)lseek(_fileno(pf), offset, origin);
-
-#elif __windows
-    return (long)lSeek64(pf, offset, origin);
-
-#else
+#if __android
     if (feof(pf))
     {
         rewind(pf);
@@ -561,6 +451,9 @@ long fsutil::lSeek(FILE *pf, long offset, int origin)
     }
 
     return lseek(_fileno(pf), offset, origin);
+
+#else
+	return (long)lSeek64(pf, offset, origin);
 #endif
 }
 
@@ -715,7 +608,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
 
 		bool bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 		tagFileInfo fileInfo(bDir, strFileName);
-        fileInfo.uFileSize = FindData.nFileSizeLow;
+        fileInfo.uFileSize = FindData.nFileSizeLow; // TODO
         fileInfo.tCreateTime = tmutil::transFileTime(FindData.ftCreationTime.dwLowDateTime, FindData.ftCreationTime.dwHighDateTime);
         fileInfo.tModifyTime = tmutil::transFileTime(FindData.ftLastWriteTime.dwLowDateTime, FindData.ftLastWriteTime.dwHighDateTime);
 
@@ -790,7 +683,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         tagFileInfo fileInfo(bDir, strFileName);
         if (!bDir)
         {
-            fileInfo.uFileSize = (size_t)fi.size();
+            fileInfo.uFileSize = (uint64_t)fi.size();
         }
 		
 #if (QT_VERSION >= QT_VERSION_CHECK(5,13,0))
