@@ -23,74 +23,68 @@ bool jsonutil::get(const JValue& jValue, wstring& strRet)
 
 bool jsonutil::get(const JValue& jValue, string& strRet)
 {
-    if (jValue.isNull())
+    if (!jValue.isNull())
     {
-        return false;
+        strRet = jValue.asString();
+        return true;
     }
 
-    strRet = jValue.asString();
-
-    return true;
+    return false;
 }
 
 bool jsonutil::get(const JValue& jValue, bool& bRet)
 {
-    if (jValue.isNull())
+    if (!jValue.isNull())
     {
-        return false;
+        bRet = jValue.asBool();
+        return true;
     }
 
-    bRet = jValue.asBool();
-
-    return true;
+    return false;
 }
 
 bool jsonutil::get(const JValue& jValue, int& nRet)
 {
-    if (jValue.isNull())
+    if (!jValue.isNull())
     {
-        return false;
+        nRet = jValue.asInt();
+        return true;
     }
 
-    nRet = jValue.asInt();
-
-    return true;
+    return false;
 }
 
 bool jsonutil::get(const JValue& jValue, unsigned int& uRet)
 {
-    if (jValue.isNull())
+    if (jValue.isUInt())
     {
-        return false;
+        uRet = jValue.asUInt();
+        return true;
     }
 
-    uRet = jValue.asUInt();
-
-    return true;
+    return false;
 }
 
 #ifdef JSON_HAS_INT64
 bool jsonutil::get(const JValue& jValue, Json::Value::Int64& nRet)
 {
-    if (jValue.isNull())
+    if (!jValue.isNull())
     {
-        return false;
+        nRet = jValue.asInt64();
+        return true;
     }
 
-    nRet = jValue.asInt64();
-
-    return true;
+    return false;
 }
 
 bool jsonutil::get(const JValue& jValue, Json::Value::UInt64& uRet)
 {
-    if (jValue.isNull())
+    if (jValue.isUInt() || jValue.isUInt64())
     {
-        return false;
+        uRet = jValue.asUInt64();
+        return true;
     }
 
-    uRet = jValue.asUInt64();
-
-    return true;
+    return false;
 }
 #endif
