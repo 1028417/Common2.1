@@ -94,8 +94,8 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 
 		if (unzFileInfo.bDir)
 		{
-			m_lstSubDirInfo.push_back(unzFileInfo);
-			m_lstSubInfo.push_back(&m_lstSubDirInfo.back());
+            m_lstUnzDirInfo.push_back(unzFileInfo);
+            m_lstUnzFileInfo.push_back(&m_lstUnzDirInfo.back());
 		}
 		else
 		{
@@ -108,8 +108,8 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 			unzFileInfo.pos_in_zip_directory = file_pos.pos_in_zip_directory;
 			unzFileInfo.num_of_file = file_pos.num_of_file;
 
-            auto pFileInfo = &(m_mapSubFileInfo[unzFileInfo.strPath] = unzFileInfo);
-            m_lstSubInfo.push_back(pFileInfo);
+            auto pFileInfo = &(m_mapUnzFileInfo[unzFileInfo.strPath] = unzFileInfo);
+            m_lstUnzFileInfo.push_back(pFileInfo);
 		}
 	} while (unzGoToNextFile(unzfile) == UNZ_OK);
 
@@ -206,7 +206,7 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 
 	(void)unzGoToFirstFile(m_unzfile);
 
-	for (cauto pInfo : m_lstSubInfo)
+    for (cauto pInfo : m_lstUnzFileInfo)
 	{
 		if (pInfo->bDir)
 		{
