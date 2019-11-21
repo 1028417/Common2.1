@@ -111,8 +111,9 @@ win32 {
     platform = win
     DESTDIR = ../../bin
 
-    target.path = ../../../XMusic/bin
-    INSTALLS += target
+    QMAKE_POST_LINK += copy /Y ..\..\bin\xutil.dll ..\..\..\XMusic\bin
+    #target.path = ../../../XMusic/bin
+    #INSTALLS += target
 } else: android {
     platform = android
     DESTDIR = ../../../XMusic/libs/armeabi-v7a
@@ -120,8 +121,9 @@ win32 {
     platform = mac
     DESTDIR = ../../bin/mac
 
-    target.path = ../../../XMusic/bin/mac
-    INSTALLS += target
+    QMAKE_POST_LINK += cp -f ../../bin/libxutil*.dylib ../../../XMusic/bin/mac
+    #target.path = ../../../XMusic/bin/mac
+    #INSTALLS += target
 } else: ios {
     platform = ios
     DESTDIR = ../../../build/ioslib
