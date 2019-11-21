@@ -165,7 +165,7 @@ void CMainApp::_run()
 {
 	if (g_bRuning)
 	{
-		if (NULL != g_hMainWnd)
+		if (g_hMainWnd)
 		{
 			if (IsIconic(g_hMainWnd))
 			{
