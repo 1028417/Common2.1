@@ -119,7 +119,7 @@ win32 {
     platform = mac
     DESTDIR = ../../bin/mac
 
-    QMAKE_POST_LINK += cp -f ../../bin/mac/libxutil.dylib ../../../XMusic/bin/mac
+    QMAKE_POST_LINK += cp -f ../../bin/mac/libxutil*.dylib ../../../XMusic/bin/mac/
 } else: ios {
     platform = ios
     DESTDIR = ../../../build/ioslib
