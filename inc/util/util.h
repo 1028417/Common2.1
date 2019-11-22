@@ -161,6 +161,10 @@ __UtilExt const RECT& getWorkArea(bool bFullScreen);
 
 #include "mtutil.h"
 
+#include "mtutil.h"
+
+#include "curlutil.h"
+
 enum class E_Platform
 {
     PF_Windows,

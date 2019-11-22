@@ -12,6 +12,7 @@ TEMPLATE = lib
 QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
 HEADERS += \
+    ../../inc/util/curlutil.h \
     ../../inc/util/util.h \
     ../../inc/util/tmutil.h \
     ../../inc/util/buffer.h \
@@ -96,26 +97,82 @@ SOURCES += \
     ../../3rd/bzip2-1.0.6/crctable.c \
     ../../3rd/bzip2-1.0.6/decompress.c \
     ../../3rd/bzip2-1.0.6/huffman.c \
-    ../../3rd/bzip2-1.0.6/randtable.c
+    ../../3rd/bzip2-1.0.6/randtable.c \
+#
+    cpp/curlutil.cpp \
+    ../../3rd/curl/lib/curl_ctype.c \
+    ../../3rd/curl/lib/nonblock.c \
+    ../../3rd/curl/lib/strtoofft.c \
+    ../../3rd/curl/lib/warnless.c \
+    ../../3rd/curl/src/slist_wc.c \
+    ../../3rd/curl/src/tool_binmode.c \
+    ../../3rd/curl/src/tool_bname.c \
+    ../../3rd/curl/src/tool_cb_dbg.c \
+    ../../3rd/curl/src/tool_cb_hdr.c \
+    ../../3rd/curl/src/tool_cb_prg.c \
+    ../../3rd/curl/src/tool_cb_rea.c \
+    ../../3rd/curl/src/tool_cb_see.c \
+    ../../3rd/curl/src/tool_cb_wrt.c \
+    ../../3rd/curl/src/tool_cfgable.c \
+    ../../3rd/curl/src/tool_convert.c \
+    ../../3rd/curl/src/tool_dirhie.c \
+    ../../3rd/curl/src/tool_doswin.c \
+    ../../3rd/curl/src/tool_easysrc.c \
+    ../../3rd/curl/src/tool_filetime.c \
+    ../../3rd/curl/src/tool_formparse.c \
+    ../../3rd/curl/src/tool_getparam.c \
+    ../../3rd/curl/src/tool_getpass.c \
+    ../../3rd/curl/src/tool_help.c \
+    ../../3rd/curl/src/tool_helpers.c \
+    ../../3rd/curl/src/tool_homedir.c \
+    ../../3rd/curl/src/tool_hugehelp.c \
+    ../../3rd/curl/src/tool_libinfo.c \
+    ../../3rd/curl/src/tool_main.c \
+    ../../3rd/curl/src/tool_metalink.c \
+    ../../3rd/curl/src/tool_msgs.c \
+    ../../3rd/curl/src/tool_operate.c \
+    ../../3rd/curl/src/tool_operhlp.c \
+    ../../3rd/curl/src/tool_panykey.c \
+    ../../3rd/curl/src/tool_paramhlp.c \
+    ../../3rd/curl/src/tool_parsecfg.c \
+    ../../3rd/curl/src/tool_progress.c \
+    ../../3rd/curl/src/tool_setopt.c \
+    ../../3rd/curl/src/tool_sleep.c \
+    ../../3rd/curl/src/tool_strdup.c \
+    ../../3rd/curl/src/tool_urlglob.c \
+    ../../3rd/curl/src/tool_util.c \
+    ../../3rd/curl/src/tool_vms.c \
+    ../../3rd/curl/src/tool_writeout.c \
+    ../../3rd/curl/src/tool_xattr.c
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
 INCLUDEPATH += ../../inc/util \
-    ../../3rd/zlib-1.2.11 ../../3rd/bzip2-1.0.6
+    ../../3rd/zlib-1.2.11 \
+    ../../3rd/bzip2-1.0.6 \
+    ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src
 
 DEFINES += __UtilPrj  IOAPI_NO_64  TIXML_USE_STL
 
 win32 {
     LIBS += -lgdi32  -lcomdlg32  -lole32
+    LIBS += $$PWD/../../bin/libcurl.dll  -lws2_32
 
     platform = win
     DESTDIR = ../../bin
 
     QMAKE_POST_LINK += copy /Y ..\..\bin\xutil.dll ..\..\..\XMusic\bin
-} else: android {
+} else {
+    DEFINES += HAVE_CONFIG_H
+
+android {
+    LIBS += -L$$PWD/../../libs/armeabi-v7a  -lcurl
+
     platform = android
     DESTDIR = ../../../XMusic/libs/armeabi-v7a
 } else: macx {
+    LIBS += -L$$PWD/../../libs/ios/simulator  -lcurl  -lssl  -lcrypto  -lnghttp2  -lz
+
     platform = mac
     DESTDIR = ../../bin/mac
 
@@ -123,6 +180,7 @@ win32 {
 } else: ios {
     platform = ios
     DESTDIR = ../../../build/ioslib
+}
 }
 
 build_dir = ../../../build/xutil/$$platform
