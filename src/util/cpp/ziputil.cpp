@@ -64,7 +64,8 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 	}
 	
 	/*unz_global_info zGlobalInfo;
-	int nRet = unzGetGlobalInfo(unzfile, &zGlobalInfo);
+    memzero(zGlobalInfo);
+    int nRet = unzGetGlobalInfo(unzfile, &zGlobalInfo);
 	if (nRet != UNZ_OK)
 	{
 		(void)unzClose(t_unzfile);
@@ -162,10 +163,12 @@ static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
 	return 0;
 }
 
-/*static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
+static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
 {
+    (void)opaque;
+    (void)stream;
 	return 0;
-}*/
+}
 
 bool CZipFile::open(Instream& ins, const string& strPwd)
 {
@@ -179,7 +182,7 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
 	zfunc.ztell_file = ztell_file;
 	zfunc.zseek_file = zseek_file;
 	zfunc.zclose_file = zclose_file;
-	//zfunc.zerror_file = ztesterror_file;
+    zfunc.zerror_file = ztesterror_file;
 
 	zfunc.opaque = &ins;
 
