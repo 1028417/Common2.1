@@ -104,7 +104,7 @@ static void _initCurl(CURL* curl)
 #endif*/
 }
 
-int curlutil::curlPerform(const string& strUrl, const CB_CURLDownload& cb, int& nRepCode, string& strErrMsg)
+int curlutil::curlPerform(const string& strUrl, const CB_CURLDownload& cb, string& strErrMsg)
 {
     CURL* curl = curl_easy_init();
     _initCurl(curl);
@@ -118,10 +118,11 @@ int curlutil::curlPerform(const string& strUrl, const CB_CURLDownload& cb, int& 
     int res = curl_easy_perform(curl);
     if (0 == res)
     {
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &nRepCode);
+        long nRepCode = 0; // mac64位用int会崩溃
+        (void)curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &nRepCode);
         if (nRepCode != 200)
         {
-            res = 0-nRepCode;
+            res = 0-(int)nRepCode;
         }
     }
     else
@@ -143,9 +144,9 @@ int curlutil::curlPerform(const string& strUrl, const CB_CURLDownload& cb, int& 
 
 int curlutil::curlPerform(const string& strURL, const CB_CURLDownload& cb)
 {
-    int nRepCode = 0;
     string strErrMsg;
-    return curlPerform(strURL, cb, nRepCode, strErrMsg);
+    return curlPerform(strURL, cb, strErrMsg);
+    (void)strErrMsg;
 }
 
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV);
