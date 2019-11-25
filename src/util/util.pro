@@ -18,10 +18,14 @@ INCLUDEPATH += ../../inc/util \
     ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src \
     ../../3rd/openssl/include ../../3rd/c-ares
 
-DEFINES += __UtilPrj  IOAPI_NO_64  TIXML_USE_STL
+DEFINES += __UtilPrj
 
-DEFINES += BUILDING_LIBCURL \
-    USE_OPENSSL  HAVE_OPENSSL  #USE_ARES  #USE_IPV6
+DEFINES += TIXML_USE_STL
+
+!win32: DEFINES += IOAPI_NO_64  # for zlib-miniZip
+
+DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL  #USE_IPV6
+            #USE_ARES  #CARES_BUILDING_LIBRARY
 
 win32 {
     LIBS += -lgdi32  -lcomdlg32  -lole32
@@ -43,7 +47,7 @@ android {
     platform = android
     DESTDIR = ../../../XMusic/libs/armeabi-v7a
 } else: macx {
-    LIBS += -L$$PWD/../../libs/ios/simulator  -lssl  -lcrypto  -lnghttp2  -lz
+    LIBS += -L$$PWD/../../libs/ios/simulator  -lcurl  -lssl  -lcrypto  -lnghttp2  -lz
 
     platform = mac
     DESTDIR = ../../bin/mac
@@ -247,6 +251,8 @@ HEADERS += \
     ../../3rd/curl/lib/wildcard.h \
     ../../3rd/curl/lib/x509asn1.h
 
+win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
+
 SOURCES += \
     cpp/util.cpp \
     cpp/tmutil.cpp \
@@ -301,6 +307,7 @@ SOURCES += \
     ../../3rd/bzip2-1.0.6/randtable.c \
 #
     cpp/curlutil.cpp \
+#
     ../../3rd/curl/src/slist_wc.c \
     ../../3rd/curl/src/tool_binmode.c \
     ../../3rd/curl/src/tool_bname.c \
@@ -340,8 +347,10 @@ SOURCES += \
     ../../3rd/curl/src/tool_util.c \
     ../../3rd/curl/src/tool_vms.c \
     ../../3rd/curl/src/tool_writeout.c \
-    ../../3rd/curl/src/tool_xattr.c \
-#
+    ../../3rd/curl/src/tool_xattr.c
+
+macx {} else: ios {} else {
+SOURCES += \
     ../../3rd/curl/lib/altsvc.c \
     ../../3rd/curl/lib/amigaos.c \
     ../../3rd/curl/lib/asyn-ares.c \
@@ -479,5 +488,4 @@ SOURCES += \
     ../../3rd/curl/lib/warnless.c \
     ../../3rd/curl/lib/wildcard.c \
     ../../3rd/curl/lib/x509asn1.c
-
-win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
+}
