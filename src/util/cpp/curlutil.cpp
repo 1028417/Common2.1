@@ -363,7 +363,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     return nCurlCode;
 }
 
-int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, CByteBuffer& bbfData)
+int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime)
 {
     int nRet = syncDownload(strUrl, uRetryTime);
     if (0 == nRet)
@@ -373,7 +373,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, CByteBuffer
     return nRet;
 }
 
-int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, CCharBuffer& cbfRet)
+int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime)
 {
     int nRet = syncDownload(strUrl, uRetryTime);
     if (0 == nRet)
