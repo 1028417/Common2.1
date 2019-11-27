@@ -75,6 +75,7 @@ OBJECTS_DIR = $$build_dir
 
 
 HEADERS += \
+    ../../3rd/curl/lib/socketpair.h \
     ../../inc/util/curlutil.h \
     ../../inc/util/util.h \
     ../../inc/util/tmutil.h \
@@ -261,6 +262,7 @@ HEADERS += \
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
 SOURCES += \
+    ../../3rd/curl/lib/socketpair.c \
     cpp/util.cpp \
     cpp/tmutil.cpp \
     cpp/strutil.cpp \
