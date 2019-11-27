@@ -6,14 +6,13 @@
 extern "C" int curlInit();
 extern "C" int curltool_main(int argc, char *argv[], void *lpWriteCB, void *lpWriteData);
 
-CURLSH *g_curlShare = NULL;
+static CURLSH *g_curlShare = NULL;
 
 int curlutil::initCurl(string& strVerInfo)
 {
     curl_version_info_data *p = curl_version_info(CURLVERSION_NOW);
 
     stringstream ss;
-
     ss << "age: " << p->age;
 
     if (p->version) ss << "\nversion: " << p->version;
@@ -212,7 +211,7 @@ static int progress_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow
     return cb(dltotal, dlnow);
 }
 
-int curlutil::curlPerform(const string& strUrl, string& strErrMsg, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+int curlutil::curlDownload(const string& strUrl, string& strErrMsg, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
 {
     CURL* curl = curl_easy_init();
 
@@ -221,8 +220,8 @@ int curlutil::curlPerform(const string& strUrl, string& strErrMsg, CB_CURLWrite&
 
     curlOpt.connectTimeout = 3;
 
-    curlOpt.lowSpeedLimit = 1024;
-    curlOpt.lowSpeedLimitTime = 5;
+    curlOpt.lowSpeedLimit = 1; // 单位字节
+    curlOpt.lowSpeedLimitTime = 6;
 
     _initCurl(curl, curlOpt);
 
@@ -237,7 +236,7 @@ int curlutil::curlPerform(const string& strUrl, string& strErrMsg, CB_CURLWrite&
     {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, (void*)progress_callback);
-        curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void*)&cbProgress);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, (void*)&cbProgress);
     }
 
     int res = curl_easy_perform(curl);
@@ -268,17 +267,10 @@ int curlutil::curlPerform(const string& strUrl, string& strErrMsg, CB_CURLWrite&
     return res;
 }
 
-int curlutil::curlPerform(const string& strURL, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
-{
-    string strErrMsg;
-    return curlPerform(strURL, strErrMsg, cbWrite, cbProgress);
-    (void)strErrMsg;
-}
-
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV);
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV_CONT);
 
-int _callCURLTool(const list<string>& lstParams
+static int _callCURLTool(const list<string>& lstParams
                          , void *lpWriteCB = NULL, void *lpWriteData = NULL)
 {
     vector<char *> argv{(char*)"curl", (char*)"-k"};
@@ -299,7 +291,7 @@ int curlutil::curlToolPerform(const list<string>& lstParams)
     return _callCURLTool(lstParams);
 }
 
-int curlutil::curlToolPerform(const string& strURL, CB_CURLWrite& cb)
+int curlutil::curlToolDownload(const string& strURL, CB_CURLWrite& cb)
 {
     list<string> lstParams(1, strURL);
     return _callCURLTool(lstParams, (void*)write_callback, (void*)&cb);
@@ -309,23 +301,30 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
 {
     _clear();
 
-    auto fnProgress = [&](int64_t dltotal, int64_t dlnow) {
-        (void)dltotal;
-        (void)dlnow;
+    //auto beginTime = time(NULL);
 
+    auto fnProgress = [=](int64_t dltotal, int64_t dlnow){
         if (!m_bStatus)
         {
             return -1;
         }
 
+        (void)dltotal;
+        (void)dlnow;
+
+        /*if (0 == dlnow)
+        {
+            // beginTime
+        }*/
+
         return 0;
     };
 
     auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
-        if (!m_bStatus)
+        /*if (!m_bStatus)
         {
             return 0;
-        }
+        }*/
 
         size *= nmemb;
         byte_t *pData = new byte_t[size];
@@ -355,7 +354,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
-        nCurlCode = curlutil::curlPerform(strUrl, fnWrite, fnProgress);
+        nCurlCode = curlutil::curlDownload(strUrl, fnWrite, fnProgress);
         if (0 == nCurlCode)
         {
             break;
@@ -376,7 +375,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     {
         if (m_bStatus)
         {
-            g_logger << "curlToolPerform fail: " >> nCurlCode;
+            g_logger << "curlDownload fail: " >> nCurlCode;
         }
     }*/
 

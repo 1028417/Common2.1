@@ -11,28 +11,35 @@ TEMPLATE = lib
 
 QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
-INCLUDEPATH += ../../inc/util \
-    ../../3rd/zlib-1.2.11 \
-    ../../3rd/bzip2-1.0.6 \
-#
-    ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src \
-    ../../3rd/openssl/include ../../3rd/c-ares
-
 DEFINES += __UtilPrj
 
 DEFINES += TIXML_USE_STL
 
 !win32: DEFINES += IOAPI_NO_64  # for zlib-miniZip
 
-DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL  #USE_IPV6
-            #USE_ARES  #CARES_BUILDING_LIBRARY
+DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
+            CARES_BUILDING_LIBRARY  #USE_ARES #安卓有问题
+            #USE_IPV6
+
+INCLUDEPATH += ../../inc/util \
+    ../../3rd/zlib-1.2.11 \
+    ../../3rd/bzip2-1.0.6 \
+#
+    ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src \
+    ../../3rd/c-ares
+
+win32 {
+INCLUDEPATH += ../../3rd/openssl-1.1.0h/include
+} else: android {
+INCLUDEPATH += ../../3rd/openssl-1.1.0f/include
+}
 
 win32 {
     LIBS += -lgdi32  -lcomdlg32  -lole32
 
     LIBS += -lws2_32 -lwldap32 \
-            $$PWD/../../3rd/openssl/lib/libcrypto.lib \
-            $$PWD/../../3rd/openssl/lib/libssl.lib
+            $$PWD/../../3rd/openssl-1.1.0h/lib/libcrypto.lib \
+            $$PWD/../../3rd/openssl-1.1.0h/lib/libssl.lib
 
     platform = win
     DESTDIR = ../../bin
@@ -487,5 +494,58 @@ SOURCES += \
     ../../3rd/curl/lib/vtls/wolfssl.c \
     ../../3rd/curl/lib/warnless.c \
     ../../3rd/curl/lib/wildcard.c \
-    ../../3rd/curl/lib/x509asn1.c
+    ../../3rd/curl/lib/x509asn1.c \
+#
+    ../../3rd/c-ares/ares__close_sockets.c \
+    ../../3rd/c-ares/ares__get_hostent.c \
+    ../../3rd/c-ares/ares__read_line.c \
+    ../../3rd/c-ares/ares__timeval.c \
+    ../../3rd/c-ares/ares_cancel.c \
+    ../../3rd/c-ares/ares_create_query.c \
+    ../../3rd/c-ares/ares_data.c \
+    ../../3rd/c-ares/ares_destroy.c \
+    ../../3rd/c-ares/ares_expand_name.c \
+    ../../3rd/c-ares/ares_free_hostent.c \
+    ../../3rd/c-ares/ares_free_string.c \
+    ../../3rd/c-ares/ares_gethostbyname.c \
+    ../../3rd/c-ares/ares_getsock.c \
+    ../../3rd/c-ares/ares_init.c \
+    ../../3rd/c-ares/ares_library_init.c\
+    ../../3rd/c-ares/ares_llist.c \
+    ../../3rd/c-ares/ares_nowarn.c \
+    ../../3rd/c-ares/ares_options.c \
+    ../../3rd/c-ares/ares_parse_a_reply.c \
+    ../../3rd/c-ares/ares_parse_aaaa_reply.c \
+    ../../3rd/c-ares/ares_process.c \
+    ../../3rd/c-ares/ares_query.c \
+    ../../3rd/c-ares/ares_search.c \
+    ../../3rd/c-ares/ares_send.c \
+    ../../3rd/c-ares/ares_strerror.c \
+    ../../3rd/c-ares/ares_timeout.c \
+    ../../3rd/c-ares/ares_version.c \
+    ../../3rd/c-ares/bitncmp.c \
+    ../../3rd/c-ares/inet_net_pton.c \
+    ../../3rd/c-ares/ares_strdup.c \
+    ../../3rd/c-ares/ares_getnameinfo.c \
+    ../../3rd/c-ares/ares_gethostbyaddr.c \
+    ../../3rd/c-ares/_inet_ntop.c \
+    ../../3rd/c-ares/ares_parse_ptr_reply.c \
+    ../../3rd/c-ares/ares_android.c \
+    ../../3rd/c-ares/ares_strsplit.c \
+# for win32
+    ../../3rd/c-ares/ares_expand_string.c \
+    ../../3rd/c-ares/ares_fds.c \
+    ../../3rd/c-ares/ares_getenv.c \
+    ../../3rd/c-ares/ares_getopt.c \
+    ../../3rd/c-ares/ares_mkquery.c \
+    ../../3rd/c-ares/ares_parse_mx_reply.c \
+    ../../3rd/c-ares/ares_parse_naptr_reply.c \
+    ../../3rd/c-ares/ares_parse_ns_reply.c \
+    ../../3rd/c-ares/ares_parse_soa_reply.c \
+    ../../3rd/c-ares/ares_parse_srv_reply.c \
+    ../../3rd/c-ares/ares_parse_txt_reply.c \
+    ../../3rd/c-ares/ares_platform.c \
+    ../../3rd/c-ares/ares_strcasecmp.c \
+    ../../3rd/c-ares/ares_writev.c \
+    ../../3rd/c-ares/windows_port.c
 }
