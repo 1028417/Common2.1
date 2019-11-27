@@ -1,18 +1,19 @@
 
 #pragma once
 
-using CB_CURLDownload = function<size_t(char *ptr, size_t size, size_t nmemb)>;
+using CB_CURLWrite = const function<size_t(char *ptr, size_t size, size_t nmemb)>;
+using CB_CURLProgress = const function<int(int64_t dltotal, int64_t dlnow)>;
 
 class __UtilExt curlutil
 {
 public:
     static int initCurl(string& strVerInfo);
 
-    static int curlPerform(const string& strURL, const CB_CURLDownload& cb, string& strErrMsg);
-    static int curlPerform(const string& strURL, const CB_CURLDownload& cb);
+    static int curlPerform(const string& strURL, string& strErrMsg, CB_CURLWrite& cbDownload, CB_CURLProgress& cbProgress = NULL);
+    static int curlPerform(const string& strURL, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress = NULL);
 
     static int curlToolPerform(const list<string>& lstParams);
-    static int curlToolPerform(const string& strURL, const CB_CURLDownload& cb);
+    static int curlToolPerform(const string& strURL, CB_CURLWrite& cbWrite);
 };
 
 class __UtilExt CDownloader
