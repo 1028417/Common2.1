@@ -251,7 +251,7 @@ int curlutil::curlDownload(const string& strUrl, string& strErrMsg, CB_CURLWrite
     }
     else
     {
-         if (res != CURLcode::CURLE_WRITE_ERROR && res != CURLcode::CURLE_ABORTED_BY_CALLBACK)
+         if (res != CURLcode::CURLE_ABORTED_BY_CALLBACK)// && res != CURLcode::CURLE_WRITE_ERROR)
          {
              auto pErrMsg = curl_easy_strerror((CURLcode)res);
              if (pErrMsg)
@@ -301,26 +301,19 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
 {
     _clear();
 
-    //auto beginTime = time(NULL);
+    auto fnProgress = [&](int64_t dltotal, int64_t dlnow){
+        (void)dltotal;
+        (void)dlnow;
 
-    auto fnProgress = [=](int64_t dltotal, int64_t dlnow){
         if (!m_bStatus)
         {
             return -1;
         }
 
-        (void)dltotal;
-        (void)dlnow;
-
-        /*if (0 == dlnow)
-        {
-            // beginTime
-        }*/
-
         return 0;
     };
 
-    auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
+    auto fnWrite = [&, cb](char *ptr, size_t size, size_t nmemb) {
         /*if (!m_bStatus)
         {
             return 0;
@@ -370,14 +363,6 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
             break;
         }
     }
-
-    /*if (nCurlCode != 0)
-    {
-        if (m_bStatus)
-        {
-            g_logger << "curlDownload fail: " >> nCurlCode;
-        }
-    }*/
 
     m_bStatus = false;
 
