@@ -242,7 +242,7 @@ int curlutil::curlPerform(const string& strUrl, const CB_CURLDownload& cb, strin
     }
     else
     {
-         if (CURLE_ABORTED_BY_CALLBACK != res)
+         if (res != CURLcode::CURLE_WRITE_ERROR && res != CURLcode::CURLE_ABORTED_BY_CALLBACK)
          {
              auto pErrMsg = curl_easy_strerror((CURLcode)res);
              if (pErrMsg)
