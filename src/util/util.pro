@@ -54,7 +54,7 @@ android {
     platform = android
     DESTDIR = ../../../XMusic/libs/armeabi-v7a
 } else: macx {
-    LIBS += -L$$PWD/../../libs/ios/simulator  -lcurl  -lssl  -lcrypto  -lnghttp2  -lz
+    LIBS += -L$$PWD/../../libs/mac  -lcurl  -lssl  -lcrypto  -lnghttp2  -lz
 
     platform = mac
     DESTDIR = ../../bin/mac
