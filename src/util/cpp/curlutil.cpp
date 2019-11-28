@@ -218,9 +218,9 @@ int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_C
     return res;
 }
 
-string curlutil::getCurlErrMsg(UINT uErrCode)
+string curlutil::getCurlErrMsg(UINT uCurlCode)
 {
-    auto pErrMsg = curl_easy_strerror((CURLcode)uErrCode);
+    auto pErrMsg = curl_easy_strerror((CURLcode)uCurlCode);
     if (pErrMsg)
     {
         return pErrMsg;
@@ -311,18 +311,20 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
+        m_beginTime = time(NULL);
+
         nCurlCode = curlutil::curlDownload(m_curlOpt, strUrl, fnWrite, fnProgress);
         if (0 == nCurlCode)
         {
             break;
         }
 
-        if (m_uSumSize > 0)
+        if (!m_bStatus)
         {
             break;
         }
 
-        if (!m_bStatus)
+        if (m_uSumSize > 0)
         {
             break;
         }
