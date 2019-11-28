@@ -77,43 +77,13 @@ int curlutil::initCurl(string& strVerInfo)
     return true;
 }
 
-void freeCurl()
+void curlutil::freeCurl()
 {
     curl_share_cleanup(g_curlShare);
     g_curlShare = NULL;
 
     curl_global_cleanup();
 }
-
-struct tagCurlOpt
-{
-    tagCurlOpt(bool t_bShare, long t_dnsCacheTimeout)
-        : bShare(t_bShare)
-        , dnsCacheTimeout(t_dnsCacheTimeout)
-    {
-    }
-
-    bool bShare;
-
-    long dnsCacheTimeout;
-
-    string strUserAgent;
-
-    unsigned long maxRedirect = 0;
-
-    unsigned long timeout = 0;
-    unsigned long connectTimeout = 0;
-
-    unsigned long lowSpeedLimit = 0;
-    unsigned long lowSpeedLimitTime = 0;
-
-    unsigned long maxSpeedLimit = 0;
-
-    unsigned long keepAliveInterval = 0;
-    unsigned long keepAliveIdl = 0;
-};
-
-//curl_easy_setopt(curlhandle, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
 
 static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
 {
@@ -122,15 +92,13 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
         curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
     }
 
-    curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, curlOpt.dnsCacheTimeout);
+    //curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, curlOpt.dnsCacheTimeout);
 
-    //curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
-
-    //curl_easy_setopt(curl, CURLOPT_NETRC, (long)CURL_NETRC_IGNORED);
-
-    if (!curlOpt.strUserAgent.empty())
+    if (curlOpt.maxRedirect > 0)
     {
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, curlOpt.strUserAgent.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, curlOpt.maxRedirect);
     }
 
 /*#if !__winvc
@@ -139,13 +107,6 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 #endif
 #endif*/
-
-    if (curlOpt.maxRedirect > 0)
-    {
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, curlOpt.maxRedirect);
-    }
 
     if (curlOpt.timeout > 0)
     {
@@ -168,14 +129,15 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
         curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, curlOpt.maxSpeedLimit);
     }
 
-    if (curlOpt.keepAliveInterval > 0)
+    /*if (curlOpt.keepAliveIdl > 0)
     {
         curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-        curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, curlOpt.keepAliveInterval);
-
-        auto keepAliveIdl = 0 == curlOpt.keepAliveIdl ? curlOpt.keepAliveInterval : curlOpt.keepAliveIdl;
-        curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, keepAliveIdl);
-    }
+        curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, curlOpt.keepAliveIdl);
+        if (curlOpt.keepAliveInterval > 0)
+        {
+            curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, curlOpt.keepAliveInterval);
+        }
+    }*/
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // 当前必須
     //curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -193,6 +155,15 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
 
     //curl_easy_setopt(curl, CURLOPT_SSLVERSION, 3L);
     //curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+
+    //curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+
+    //curl_easy_setopt(curl, CURLOPT_NETRC, (long)CURL_NETRC_IGNORED);
+
+    if (!curlOpt.strUserAgent.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, curlOpt.strUserAgent.c_str());
+    }
 }
 
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
@@ -211,21 +182,12 @@ static int progress_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow
     return cb(dltotal, dlnow);
 }
 
-int curlutil::curlDownload(const string& strUrl, string& strErrMsg, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
 {
     CURL* curl = curl_easy_init();
-
-    tagCurlOpt curlOpt(false, 0);
-    curlOpt.strUserAgent = "curl/7.66.0";
-
-    curlOpt.connectTimeout = 3;
-
-    curlOpt.lowSpeedLimit = 1; // 单位字节
-    curlOpt.lowSpeedLimitTime = 6;
-
     _initCurl(curl, curlOpt);
 
-    //CURLOPT_RESUME_FROM_LARGE
+    //curl_easy_setopt(curlhandle, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
 
     curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
 
@@ -249,22 +211,22 @@ int curlutil::curlDownload(const string& strUrl, string& strErrMsg, CB_CURLWrite
             res = 0-(int)nRepCode;
         }
     }
-    else
-    {
-         if (res != CURLcode::CURLE_ABORTED_BY_CALLBACK)// && res != CURLcode::CURLE_WRITE_ERROR)
-         {
-             auto pErrMsg = curl_easy_strerror((CURLcode)res);
-             if (pErrMsg)
-             {
-                 strErrMsg = pErrMsg;
-             }
-         }
-    }
 
     //curl_easy_reset(curl)
     curl_easy_cleanup(curl);
 
     return res;
+}
+
+string curlutil::getCurlErrMsg(UINT uErrCode)
+{
+    auto pErrMsg = curl_easy_strerror((CURLcode)uErrCode);
+    if (pErrMsg)
+    {
+        return pErrMsg;
+    }
+
+    return "";
 }
 
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV);
@@ -302,10 +264,12 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     _clear();
 
     auto fnProgress = [&](int64_t dltotal, int64_t dlnow){
-        (void)dltotal;
-        (void)dlnow;
-
         if (!m_bStatus)
+        {
+            return -1;
+        }
+
+        if (!_onProgress(dltotal, dlnow))
         {
             return -1;
         }
@@ -347,7 +311,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
-        nCurlCode = curlutil::curlDownload(strUrl, fnWrite, fnProgress);
+        nCurlCode = curlutil::curlDownload(m_curlOpt, strUrl, fnWrite, fnProgress);
         if (0 == nCurlCode)
         {
             break;
@@ -363,6 +327,14 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
             break;
         }
     }
+
+    /*if (m_bStatus)
+    {
+        if (nCurlCode > 0)
+        {
+            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
+        }
+    }*/
 
     m_bStatus = false;
 
