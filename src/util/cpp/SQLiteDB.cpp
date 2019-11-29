@@ -27,7 +27,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, wstring& strData)
 	return true;
 }
 
-bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
+inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
 {
 	__EnsureReturn(uRow < m_uRowCount && uColumn < m_uColumnCount, false);
 	__EnsureReturn(m_pData, false);
@@ -41,7 +41,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, string& strData)
 	return true;
 }
 
-bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
+inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
 {
 	string strData;
 	__EnsureReturn(GetData(uRow, uColumn, strData), false);
@@ -53,10 +53,60 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int& nValue)
 
 bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, UINT& uValue)
 {
+	int nValue = 0;
+	__EnsureReturn(GetData(uRow, uColumn, nValue), false);
+
+	uValue = (UINT)nValue;
+
+	return true;
+}
+
+inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, long& nValue)
+{
 	string strData;
 	__EnsureReturn(GetData(uRow, uColumn, strData), false);
 
-	uValue = (UINT)atoi(strData.c_str());
+	nValue = atol(strData.c_str());
+
+	return true;
+}
+
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, unsigned long& nValue)
+{
+	long long t_nValue = 0;
+	__EnsureReturn(GetData(uRow, uColumn, t_nValue), false);
+
+	nValue = (unsigned long)t_nValue;
+
+	return true;
+}
+
+inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, long long& nValue)
+{
+	string strData;
+	__EnsureReturn(GetData(uRow, uColumn, strData), false);
+
+	nValue = atoll(strData.c_str());
+
+	return true;
+}
+
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, unsigned long long& nValue)
+{
+	long long t_nValue = 0;
+	__EnsureReturn(GetData(uRow, uColumn, t_nValue), false);
+
+	nValue = (unsigned long long)t_nValue;
+
+	return true;
+}
+
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
+{
+	string strData;
+	__EnsureReturn(GetData(uRow, uColumn, strData), false);
+
+	dbValue = atof(strData.c_str());
 
 	return true;
 }
@@ -66,17 +116,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, bool& bValue)
 	string strData;
 	__EnsureReturn(GetData(uRow, uColumn, strData), false);
 
-    bValue = "1" == strData;
-
-    return true;
-}
-
-bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, double& dbValue)
-{
-	string strData;
-	__EnsureReturn(GetData(uRow, uColumn, strData), false);
-
-	dbValue = atof(strData.c_str());
+	bValue = "1" == strData;
 
 	return true;
 }
