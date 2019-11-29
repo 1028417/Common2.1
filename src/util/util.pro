@@ -28,10 +28,10 @@ INCLUDEPATH += ../../inc/util \
     ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src \
     ../../3rd/c-ares
 
-win32 {
-INCLUDEPATH += ../../3rd/openssl-1.1.0h/include
-} else: android {
+android {
 INCLUDEPATH += ../../3rd/openssl-1.1.0f/include
+} else {
+INCLUDEPATH += ../../3rd/openssl-1.1.0h/include
 }
 
 win32 {
@@ -48,19 +48,27 @@ win32 {
 } else {
     DEFINES += HAVE_CONFIG_H
 
+    LIBS += -lcrypto -lssl
+
 android {
-    LIBS += -L$$PWD/../../libs/armeabi-v7a  -lcrypto  -lssl
+    LIBS += -L$$PWD/../../libs/armeabi-v7a
+
+    INCLUDEPATH += ../../3rd/curl/lib/curl_config_android
 
     platform = android
     DESTDIR = ../../../XMusic/libs/armeabi-v7a
 } else: macx {
-    LIBS += -L$$PWD/../../libs/mac  -lcurl  -lssl  -lcrypto  -lnghttp2  -lz
+    LIBS += -L$$PWD/../../libs/mac  #-lnghttp2  -lz
+
+    INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
 
     platform = mac
     DESTDIR = ../../bin/mac
 
     QMAKE_POST_LINK += cp -f ../../bin/mac/libxutil*.dylib ../../../XMusic/bin/mac/
 } else: ios {
+    INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
+
     platform = ios
     DESTDIR = ../../../build/ioslib
 }
@@ -358,7 +366,6 @@ SOURCES += \
     ../../3rd/curl/src/tool_writeout.c \
     ../../3rd/curl/src/tool_xattr.c
 
-macx {} else: ios {} else {
 SOURCES += \
     ../../3rd/curl/lib/altsvc.c \
     ../../3rd/curl/lib/amigaos.c \
@@ -496,8 +503,10 @@ SOURCES += \
     ../../3rd/curl/lib/vtls/wolfssl.c \
     ../../3rd/curl/lib/warnless.c \
     ../../3rd/curl/lib/wildcard.c \
-    ../../3rd/curl/lib/x509asn1.c \
-#
+    ../../3rd/curl/lib/x509asn1.c
+
+macx {} else: ios {} else {
+SOURCES += \
     ../../3rd/c-ares/ares__close_sockets.c \
     ../../3rd/c-ares/ares__get_hostent.c \
     ../../3rd/c-ares/ares__read_line.c \
@@ -534,7 +543,7 @@ SOURCES += \
     ../../3rd/c-ares/ares_parse_ptr_reply.c \
     ../../3rd/c-ares/ares_android.c \
     ../../3rd/c-ares/ares_strsplit.c \
-# for win32
+# just for win32???
     ../../3rd/c-ares/ares_expand_string.c \
     ../../3rd/c-ares/ares_fds.c \
     ../../3rd/c-ares/ares_getenv.c \
