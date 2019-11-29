@@ -203,7 +203,7 @@ bool CSQLiteDB::Execute(const string& strSql)
 
 	char *pszError = NULL;
     m_nRetCode = sqlite3_exec((sqlite3*)m_hDB, strSql.c_str(), 0, 0, &pszError);
-	if (NULL != pszError)
+	if (pszError)
 	{
 		m_strError = pszError;
 	}
