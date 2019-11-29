@@ -149,7 +149,6 @@ HEADERS += \
     ../../3rd/curl/lib/cookie.h \
     ../../3rd/curl/lib/curl_addrinfo.h \
     ../../3rd/curl/lib/curl_base64.h \
-    ../../3rd/curl/lib/curl_config.h \
     ../../3rd/curl/lib/curl_ctype.h \
     ../../3rd/curl/lib/curl_des.h \
     ../../3rd/curl/lib/curl_endian.h \
