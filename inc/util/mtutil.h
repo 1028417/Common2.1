@@ -96,6 +96,37 @@ public:
         std::this_thread::yield();
     }
 
+
+    class __UtilExt CThreadGroup
+    {
+    public:
+        CThreadGroup()
+            //: m_CancelEvent(TRUE)
+        {
+        }
+
+    private:
+        vector<BOOL> m_vecThreadStatus;
+
+        volatile bool m_bPause = false;
+
+        bool m_bCancelEvent = false;
+
+    public:
+        using CB_WorkThread = function<void(UINT uThreadIndex)>;
+        void start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock);
+
+        bool checkCancel();
+
+    protected:
+        void pause(bool bPause = true);
+
+        void cancel();
+
+        UINT getActiveCount();
+    };
+
+
 	template <class T, class R>
 	using CB_SubTask = const function<bool(UINT uTaskIdx, T&, R&)>&;
 	
@@ -151,35 +182,6 @@ public:
 			return m_vecResult;
 		}
 	};
-};
-
-class __UtilExt CThreadGroup
-{
-public:
-	CThreadGroup()
-		//: m_CancelEvent(TRUE)
-	{
-	}
-
-private:
-	vector<BOOL> m_vecThreadStatus;
-
-	volatile bool m_bPause = false;
-
-	bool m_bCancelEvent = false;
-
-public:
-	using CB_WorkThread = function<void(UINT uThreadIndex)>;
-	void start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock);
-
-	bool checkCancel();
-
-protected:
-	void pause(bool bPause = true);
-
-	void cancel();
-
-	UINT getActiveCount();
 };
 
 #include "mtlock.h"
