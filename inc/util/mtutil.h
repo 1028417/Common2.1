@@ -95,6 +95,62 @@ public:
     {
         std::this_thread::yield();
     }
+
+	template <class T, class R>
+	using CB_SubTask = const function<bool(UINT uTaskIdx, T&, R&)>&;
+	
+	template <typename T, typename R>
+	static void startMultiTask(ArrList<T>& alTask, vector<R>& vecResult, UINT uThreadCount, CB_SubTask<T, R> cb)
+	{
+		uThreadCount = MAX(1, uThreadCount);
+		vecResult.resize(uThreadCount);
+
+		CThreadGroup ThreadGroup;
+		ThreadGroup.start(uThreadCount, [&](UINT uThreadIndex) {
+			bool bCancelFlag = false;
+			for (UINT uTaskIdx = uThreadIndex; uTaskIdx < alTask.size(); uTaskIdx += uThreadCount)
+			{
+				alTask.get(uTaskIdx, [&](T& task) {
+					if (!cb(uTaskIdx, task, vecResult[uThreadIndex]))
+					{
+						bCancelFlag = true;
+					}
+				});
+				if (bCancelFlag)
+				{
+					break;
+				}
+			}
+		}, true);
+	}
+
+	template <typename T>
+	static void startMultiTask(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
+	{
+		vector<BOOL> vecResult;
+		start(alTask, vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, BOOL&) {
+			return cb(uTaskIdx, task);
+		});
+	}
+
+	template <typename T, typename R=BOOL>
+	class CMultiTask
+	{
+	public:
+		CMultiTask() {}
+
+	private:
+		vector<R> m_vecResult;
+
+	public:
+		using CB_SubTask = mtutil::CB_SubTask<T,R>;
+
+		vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, CB_SubTask cb)
+		{
+			mtutil::startMultiTask(alTask, m_vecResult, uThreadCount, cb);
+			return m_vecResult;
+		}
+	};
 };
 
 class __UtilExt CThreadGroup
@@ -124,62 +180,6 @@ protected:
 	void cancel();
 
 	UINT getActiveCount();
-};
-
-template <typename T, typename R>
-class CMultiTask
-{
-public:
-	CMultiTask()
-	{
-	}
-
-private:
-	vector<R> m_vecResult;
-
-public:
-	using CB_SubTask = const function<bool(UINT uTaskIdx, T&, R&)>&;
-
-	static void start(ArrList<T>& alTask, vector<R>& vecResult, UINT uThreadCount, CB_SubTask cb)
-	{
-		uThreadCount = MAX(1, uThreadCount);
-		vecResult.resize(uThreadCount);
-
-		CThreadGroup ThreadGroup;
-		ThreadGroup.start(uThreadCount, [&](UINT uThreadIndex) {
-			bool bCancelFlag = false;
-			for (UINT uTaskIdx = uThreadIndex; uTaskIdx < alTask.size(); uTaskIdx += uThreadCount)
-			{
-				alTask.get(uTaskIdx, [&](T& task) {
-					if (!cb(uTaskIdx, task, vecResult[uThreadIndex]))
-					{
-						bCancelFlag = true;
-					}
-				});
-				if (bCancelFlag)
-				{
-					break;
-				}
-			}
-		}, true);
-	}
-
-	static void start(ArrList<T>& alTask, UINT uThreadCount, const function<bool(UINT uTaskIdx, T&)>& cb)
-	{
-		vector<R> vecResult;
-		start(alTask, vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, R&) {
-			return cb(uTaskIdx, task);
-		});
-	}
-
-	vector<R>& start(ArrList<T>& alTask, UINT uThreadCount, CB_SubTask cb)
-	{
-		start(alTask, m_vecResult, uThreadCount, [&](UINT uTaskIdx, T& task, R& result) {
-			return cb(uTaskIdx, task, result);
-		});
-
-		return m_vecResult;
-	}
 };
 
 #include "mtlock.h"

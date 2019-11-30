@@ -489,7 +489,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 BOOL CObjectList::DeleteObject(const CListObject *pObject)
 {
 	int nItem = GetObjectItem(pObject);
-	__EnsureReturn(0 <= nItem, FALSE);
+	__EnsureReturn(nItem >= 0, FALSE);
 
 	return DeleteItem(nItem);
 }
@@ -586,7 +586,7 @@ int CObjectList::GetSelItem()
 CListObject *CObjectList::GetSelObject()
 {
 	int nItem = GetSelItem();
-	__EnsureReturn(0 <= nItem, NULL);
+	__EnsureReturn(nItem >= 0, NULL);
 
 	return GetItemObject(nItem);
 }
@@ -632,7 +632,7 @@ void CObjectList::GetSelObjects(TD_ListObjectList& lstObjects)
 
 BOOL CObjectList::SelectFirstItem()
 {
-	__EnsureReturn(0 < GetItemCount(), FALSE);
+	__EnsureReturn(GetItemCount() > 0, FALSE);
 	
 	SelectItem(0);
 
@@ -657,7 +657,7 @@ void CObjectList::SelectItem(UINT uItem, BOOL bSetFocus)
 void CObjectList::SelectObject(const CListObject *pObject, BOOL bSetFocus)
 {
 	int nItem =	GetObjectItem(pObject);
-	if (0 <= nItem)
+	if (nItem >= 0)
 	{
 		SelectItem(nItem, bSetFocus);
 	}
@@ -1062,7 +1062,7 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 	return htinfo;
 }
 
-void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
+void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
 	int nItemCount = GetItemCount();
 	if (0 == nItemCount)
@@ -1094,15 +1094,8 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (cb)
-			{
-				cb(uItem);
-			}
-			else
-			{
-				onAsyncTask(uItem);
-			}
-			
+			cb(uItem);
+						
 			return true;
 		}
 
@@ -1115,19 +1108,26 @@ void CObjectList::AsyncTask(UINT uElapse, const CB_AsyncTask& cb)
 			}
 			bAsyncTaskFlag = TRUE;
 
-			if (cb)
-			{
-				cb(uItem);
-			}
-			else
-			{
-				onAsyncTask(uItem);
-			}
-
+			cb(uItem);
+			
 			return true;
 		}
 
 		return false;
+	});
+}
+
+void CObjectList::AsyncTask(UINT uElapse, const function<bool(CListObject& object)> cb)
+{
+	AsyncTask(uElapse, [&](UINT uItem) {
+		auto pObject = GetItemObject(uItem);
+		if (pObject)
+		{
+			if (cb(*pObject))
+			{
+				UpdateItem(uItem, pObject);
+			}
+		}
 	});
 }
 

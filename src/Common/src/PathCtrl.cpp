@@ -42,7 +42,7 @@ void CPathList::SetPath(CPathObject& dir)
 
 BOOL CPathList::IsFileItem(int nItem)
 {
-	__EnsureReturn(0 <= nItem, FALSE);
+	__EnsureReturn(nItem >= 0, FALSE);
 
 	CPathObject *pPath = (CPathObject*)GetItemObject(nItem);
 	__EnsureReturn(pPath, FALSE);
