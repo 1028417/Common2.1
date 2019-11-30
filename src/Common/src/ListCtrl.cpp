@@ -1117,9 +1117,9 @@ void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 	});
 }
 
-void CObjectList::AsyncTask(UINT uElapse, const function<bool(CListObject& object)> cb)
+void CObjectList::AsyncTask(UINT uElapse, const function<bool(CListObject& object)>& cb)
 {
-	AsyncTask(uElapse, [&](UINT uItem) {
+	AsyncTask(uElapse, [&, cb](UINT uItem) {
 		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
