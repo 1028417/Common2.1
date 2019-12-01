@@ -65,6 +65,21 @@ bool jsonutil::get(const JValue& jValue, unsigned int& uRet)
     return false;
 }
 
+#if !__winvc
+#define sscanf_s sscanf
+#endif
+
+bool jsonutil::getHex(const JValue& jValue, unsigned int& uRet)
+{
+    string strValue;
+    if (!get(jValue, strValue))
+    {
+        return false;
+    }
+
+    return 1 == sscanf_s(strValue.c_str(), "%X", &uRet);
+}
+
 #ifdef JSON_HAS_INT64
 bool jsonutil::get(const JValue& jValue, Json::Value::Int64& nRet)
 {
