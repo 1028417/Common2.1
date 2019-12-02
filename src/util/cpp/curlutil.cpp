@@ -277,11 +277,11 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
         return 0;
     };
 
-    auto fnWrite = [&, cb](char *ptr, size_t size, size_t nmemb) {
-        /*if (!m_bStatus)
+    auto fnWrite = [&, cb](char *ptr, size_t size, size_t nmemb)->size_t {
+        if (!m_bStatus)
         {
             return 0;
-        }*/
+        }
 
         size *= nmemb;
         byte_t *pData = new byte_t[size];
@@ -289,7 +289,10 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
 
         if (cb)
         {
-            cb(pData, size);
+            if (!cb(pData, size))
+            {
+                return 0;
+            }
         }
 
         m_mtxDataLock.lock();
@@ -298,9 +301,13 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
         m_uSumSize += size;
         m_mtxDataLock.unlock();
 
-        if (m_uDataSize > 4e7)
+        while (m_uDataSize > 4e7)
         {
             mtutil::usleep(50);
+            if (!m_bStatus)
+            {
+                return 0;
+            }
         }
 
         return size;
