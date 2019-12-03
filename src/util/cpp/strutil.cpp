@@ -5,8 +5,11 @@
 
 static struct __localeInit {
     __localeInit() {
-        setlocale(LC_COLLATE, ""); // "chs");
-        setlocale(LC_CTYPE, ""); // "chs");
+		setlocale(LC_COLLATE, "");
+		setlocale(LC_CTYPE, "");
+
+		//_wsetlocale(LC_COLLATE, L"chs");
+		//_wsetlocale(LC_CTYPE, L"chs");
 
         //std::locale::global(std::locale(""));
     }
@@ -454,8 +457,9 @@ string strutil::toStr(const wchar_t *pStr, size_t len)
 		return "";
 	}
 
+	len *= 2;
 	TD_CharBuffer buff(len+1);
-    if (wcstombs_s(NULL, buff, len+1, pStr, len))
+    if (wcstombs_s(NULL, buff, len, pStr, len))
     {
         return "";
     }
@@ -477,61 +481,63 @@ string strutil::toStr(const wstring& str)
 }
 
 static const std::string base64_chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789+/";
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-.";
+static const char base64_tail = '_';
 
-static inline bool is_base64(const char c)
+template <typename T, typename RET = basic_string<T, char_traits<T>, allocator<T>>>
+RET _base64_encode(const char *bytes_to_encode, unsigned int in_len)
 {
-    return (isalnum(c) || (c == '+') || (c == '/'));
+	RET strRet;
+	int i = 0;
+	int j = 0;
+	unsigned char char_array_3[3];
+	unsigned char char_array_4[4];
+
+	while (in_len--)
+	{
+		char_array_3[i++] = *(bytes_to_encode++);
+		if (i == 3)
+		{
+			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+			char_array_4[3] = char_array_3[2] & 0x3f;
+			for (i = 0; (i <4); i++)
+			{
+				strRet.append(1, base64_chars[char_array_4[i]]);
+			}
+			i = 0;
+		}
+	}
+	if (i)
+	{
+		for (j = i; j < 3; j++)
+		{
+			char_array_3[j] = '\0';
+		}
+
+		char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+		char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+		char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+		char_array_4[3] = char_array_3[2] & 0x3f;
+
+		for (j = 0; (j < i + 1); j++)
+		{
+			strRet.append(1, base64_chars[char_array_4[j]]);
+		}
+
+		while ((i++ < 3))
+		{
+			strRet.append(1, base64_tail);
+		}
+	}
+
+	return strRet;
 }
 
 string strutil::base64_encode(const char *bytes_to_encode, unsigned int in_len)
 {
-    std::string ret;
-    int i = 0;
-    int j = 0;
-    unsigned char char_array_3[3];
-    unsigned char char_array_4[4];
-
-    while (in_len--)
-    {
-        char_array_3[i++] = *(bytes_to_encode++);
-        if(i == 3)
-        {
-            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-            char_array_4[3] = char_array_3[2] & 0x3f;
-            for(i = 0; (i <4) ; i++)
-            {
-                ret += base64_chars[char_array_4[i]];
-            }
-            i = 0;
-        }
-    }
-    if(i)
-    {
-        for(j = i; j < 3; j++)
-        {
-            char_array_3[j] = '\0';
-        }
-
-        char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-        char_array_4[3] = char_array_3[2] & 0x3f;
-
-        for(j = 0; (j < i + 1); j++)
-        {
-            ret += base64_chars[char_array_4[j]];
-        }
-
-        while((i++ < 3))
-        {
-            ret += '=';
-        }
-
-    }
-    return ret;
+	return _base64_encode<char>(bytes_to_encode, in_len);
 }
 
 string strutil::base64_decode(const string& encoded_string)
@@ -543,7 +549,7 @@ string strutil::base64_decode(const string& encoded_string)
     unsigned char char_array_4[4], char_array_3[3];
     std::string ret;
 
-    while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+    while (in_len-- && (encoded_string[in_] != base64_tail) && base64_chars.find(encoded_string[in_]) != string::npos) {
         char_array_4[i++] = encoded_string[in_]; in_++;
         if (i ==4) {
             for (i = 0; i <4; i++)

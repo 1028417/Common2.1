@@ -136,10 +136,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../bin/</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../build\$(ProjectName)d/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../bin/</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../build\$(ProjectName)/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)</TargetName>
@@ -180,6 +180,12 @@
     <BuildLog>
       <Path />
     </BuildLog>
+    <PostBuildEvent>
+      <Command>Copy /Y "$(ProjectDir)$(OutDir)$(TargetName).dll" "$(ProjectDir)$(OutDir)..\..\XMusic\bin\"
+
+Copy /Y "$(ProjectDir)$(OutDir)..\libs\$(TargetName).lib" "$(ProjectDir)$(OutDir)..\..\XMusic\libs\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -215,6 +221,12 @@
     <BuildLog>
       <Path />
     </BuildLog>
+    <PostBuildEvent>
+      <Command>Copy /Y "$(ProjectDir)$(OutDir)$(TargetName).dll" "$(ProjectDir)$(OutDir)..\..\XMusic\bin\"
+
+Copy /Y "$(ProjectDir)$(OutDir)..\libs\$(TargetName).lib" "$(ProjectDir)$(OutDir)..\..\XMusic\libs\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

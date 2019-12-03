@@ -12,6 +12,18 @@ void fsutil::trimPathTail(wstring& strPath)
     }
 }
 
+FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
+{
+#if __windows
+	FILE *pf = NULL;
+	wstring t_strMode(strMode.begin(), strMode.end());
+	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
+	return pf;
+#else
+	return ::fopen(strutil::toStr(strFile).c_str(), strMode.c_str());
+#endif
+}
+
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
 {
 #if __windows
@@ -23,24 +35,21 @@ FILE* fsutil::fopen(const string& strFile, const string& strMode)
 #endif
 }
 
-FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
-{
-#if __windows
-    FILE *pf = NULL;
-	wstring t_strMode(strMode.begin(), strMode.end());
-    (void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
-    return pf;
-#else
-    return ::fopen(strutil::toStr(strFile).c_str(), strMode.c_str());
-#endif
-}
-
 bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
 #if __windows
-    return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+	return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-    return QFile::copy(strutil::toQstr(strSrcFile), strutil::toQstr(strDstFile));
+	return QFile::copy(strutil::toQstr(strSrcFile), strutil::toQstr(strDstFile));
+#endif
+}
+
+bool fsutil::copyFile(const string& strSrcFile, const string& strDstFile)
+{
+#if __windows
+	return TRUE == ::CopyFileA(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
+#else
+	return QFile::copy(strSrcFile, strDstFile);
 #endif
 }
 
