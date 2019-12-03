@@ -49,7 +49,7 @@ bool fsutil::copyFile(const string& strSrcFile, const string& strDstFile)
 #if __windows
 	return TRUE == ::CopyFileA(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
 #else
-	return QFile::copy(strSrcFile, strDstFile);
+    return QFile::copy(QString::fromStdString(strSrcFile), QString::fromStdString(strDstFile));
 #endif
 }
 
