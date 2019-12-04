@@ -431,6 +431,20 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     return uRet;
 }
 
+void CDownloader::cutData(uint64_t uPos)
+{
+    mutex_lock lock(m_mtxDataLock);
+    uint64_t uReadPos = m_uSumSize - m_uDataSize;
+    if (uPos <= uReadPos)
+    {
+        return;
+    }
+
+    uint64_t uCutSize = uPos - uReadPos;
+    TD_ByteBuffer buff(uCutSize);
+    (void)getData(buff);
+}
+
 void CDownloader::cancel()
 {
     m_bStatus = false;
