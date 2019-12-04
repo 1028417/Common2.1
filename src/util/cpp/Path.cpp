@@ -132,8 +132,6 @@ void CPath::scan(const CB_PathScan& cb)
 
 bool CPath::_scan(const CB_PathScan& cb)
 {
-    mtutil::usleep(1);
-
 	_findFile();
 	if (!cb(*this, m_paSubFile))
 	{
@@ -142,6 +140,8 @@ bool CPath::_scan(const CB_PathScan& cb)
 
 	for (auto pSubDir : m_paSubDir)
 	{
+        mtutil::usleep(1);
+
 		if (!pSubDir->_scan(cb))
 		{
 			return false;

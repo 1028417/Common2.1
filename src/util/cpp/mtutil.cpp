@@ -51,7 +51,7 @@ bool CThreadGroup::checkCancel()
 {
 	while (m_bPause)
 	{
-		mtutil::usleep(10);
+        mtutil::usleep(50);
 	}
 
 	return m_bCancelEvent; // m_CancelEvent.wait(0);
