@@ -453,4 +453,3 @@ void CDownloader::_clear()
     m_uDataSize = 0;
     m_uSumSize = 0;
 }
-
