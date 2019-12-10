@@ -140,12 +140,12 @@ bool CPath::_scan(const CB_PathScan& cb)
 
 	for (auto pSubDir : m_paSubDir)
 	{
-        mtutil::usleep(1);
-
 		if (!pSubDir->_scan(cb))
 		{
 			return false;
 		}
+
+        mtutil::usleep(1);
 	}
 
 	return true;
