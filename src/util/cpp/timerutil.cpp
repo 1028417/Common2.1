@@ -96,7 +96,6 @@ bool CWinTimer::_onTimer()
 	if (!m_cb())
 	{
 		m_idTimer = 0;
-		m_uElapse = 0;
 		return false;
 	}
 
@@ -107,17 +106,20 @@ void CWinTimer::_set(cfn_bool cb, UINT uElapse)
 {
 	m_cb = cb;
 
-	if (0 == uElapse || uElapse == m_uElapse)
+	if (uElapse == m_uElapse)
 	{
-		return;
+		if (m_idTimer != 0)
+		{
+			return;
+		}
 	}
+	m_uElapse = uElapse;
 
 	kill();
 
-	m_idTimer = timerutil::setTimerEx(uElapse, [=]() {
+	m_idTimer = timerutil::setTimerEx(m_uElapse, [=]() {
 		return _onTimer();
 	});
-	m_uElapse = uElapse;
 }
 
 void CWinTimer::set(UINT uElapse, cfn_bool cb)
@@ -127,16 +129,15 @@ void CWinTimer::set(UINT uElapse, cfn_bool cb)
 
 void CWinTimer::set(cfn_bool cb)
 {
-	_set(cb);
+	set(m_uElapse, cb);
 }
 
 void CWinTimer::kill()
 {
-	if (0 != m_idTimer)
+	if (m_idTimer != 0)
 	{
 		timerutil::killTimer(m_idTimer);
 		m_idTimer = 0;
 	}
-	m_uElapse = 0;
 }
 #endif

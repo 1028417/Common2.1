@@ -11,7 +11,7 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 {
 	LRESULT lResult = CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
 
-	if (0 != m_uHeight)
+	if (m_uHeight != 0)
 	{
 		HD_LAYOUT& hdl = *(HD_LAYOUT*)lParam;
 		hdl.prc->top = hdl.pwpos->cy = m_uHeight;
@@ -22,7 +22,7 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 
 BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 {
-	if (0 != fFontSizeOffset)
+	if (fFontSizeOffset != 0)
 	{
 		__EnsureReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
 	}
@@ -59,9 +59,13 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 		InitColumn(m_para.lstColumns);
 	}
 
-	if (0 != m_para.uHeaderHeight || 0 != m_para.fHeaderFontSize)
+	if (0 == m_para.nHeaderHeight)
 	{
-		__EnsureReturn(InitHeader(m_para.uHeaderHeight, m_para.fHeaderFontSize), FALSE);
+		(void)ModifyStyle(0, LVS_NOCOLUMNHEADER);
+	}
+	else if (m_para.nHeaderHeight > 0 || m_para.fHeaderFontSize != 0)
+	{
+		__EnsureReturn(InitHeader((UINT)m_para.nHeaderHeight, m_para.fHeaderFontSize), FALSE);
 	}
 
 	auto pFont = CListCtrl::GetHeaderCtrl()->GetFont();
