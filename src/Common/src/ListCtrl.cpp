@@ -3,6 +3,8 @@
 
 #include "Common/ListCtrl.h"
 
+CCompatableFont g_fontCustom;
+
 BEGIN_MESSAGE_MAP(CListHeader, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 END_MESSAGE_MAP()
@@ -732,6 +734,15 @@ bool CObjectList::GetRenameText(UINT uItem, wstring& strRenameText)
 	return true;
 }
 
+void CObjectList::SetCustomFont(CDC& dc, float fFontSizeOffset, bool bUnderline)
+{
+	(void)g_fontCustom.DeleteObject();
+	if (g_fontCustom.create(m_font, fFontSizeOffset, 0, false, bUnderline))
+	{
+		(void)dc.SelectObject(g_fontCustom);
+	}
+}
+
 void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 {
 	auto& nmcd = lvnmcd.nmcd;
@@ -808,12 +819,8 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 
 			if (0 != lvcd.fFontSizeOffset)
 			{
-				(void)m_fontCustom.DeleteObject();
-				if (m_fontCustom.create(m_font, lvcd.fFontSizeOffset, 0, false, lvcd.bSetUnderline))
-				{
-					(void)lvcd.dc.SelectObject(m_fontCustom);
-					*pResult = CDRF_NEWFONT;
-				}
+				SetCustomFont(lvcd.dc, lvcd.fFontSizeOffset, lvcd.bSetUnderline);
+				*pResult = CDRF_NEWFONT;
 			}
 			else if (lvcd.bSetUnderline)
 			{
