@@ -741,12 +741,6 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 	}
 	else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 	{
-		bool bReportView = isReportView();
-		if (bReportView)
-		{
-			*pResult = CDRF_NOTIFYSUBITEMDRAW;
-		}
-
 		if (GetItemState(nmcd.dwItemSpec, LVIS_SELECTED))
 		{
 			lvnmcd.clrTextBk = BkgColor_Select;
@@ -758,21 +752,46 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 
 		nmcd.uItemState &= ~CDIS_SELECTED;
 		nmcd.uItemState &= ~CDIS_FOCUS;
+
+		bool bReportView = isReportView();
+		if (bReportView)
+		{
+			if (m_cbDrawSubItem)
+			{
+				*pResult = CDRF_NOTIFYSUBITEMDRAW;
+			}
+			
+			if (m_cbPostDraw)
+			{
+				*pResult |= CDRF_NOTIFYPOSTPAINT;
+			}
+		}		
 	}
 	else
 	{
-		if (!m_cbCustomDraw)
+		if (CDDS_ITEMPOSTPAINT == nmcd.dwDrawStage)
 		{
-			return;
-		}
+			if (!m_cbPostDraw)
+			{
+				return;
+			}
 
-		if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
+			tagLVDrawSubItem lvcd(lvnmcd);
+			lvcd.crText = m_para.crText;
+			m_cbPostDraw(lvcd);
+		}
+		else if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 		{
-			tagLVCustomDraw lvcd(lvnmcd);
+			if (!m_cbDrawSubItem)
+			{
+				return;
+			}
+
+			tagLVDrawSubItem lvcd(lvnmcd);
 			lvcd.crText = m_para.crText;
 			auto crBkg = lvcd.crBkg;
 
-			m_cbCustomDraw(lvcd);
+			m_cbDrawSubItem(lvcd);
 			if (lvcd.bSkipDefault)
 			{
 				*pResult = CDRF_SKIPDEFAULT;
@@ -785,22 +804,6 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 				{
 					lvcd.crBkg = crBkg;
 				}
-			}
-
-			cauto uTextAlpha = lvcd.uTextAlpha;
-			if (0 != uTextAlpha && uTextAlpha <= 255)
-			{
-				auto pb = (BYTE*)&lvcd.crText;
-				int r = *pb;
-				int g = pb[1];
-				int b = pb[2];
-
-				pb = (BYTE*)&lvcd.crBkg;
-				r += (-r + pb[0])*uTextAlpha / 255;
-				g += (-g + pb[1])*uTextAlpha / 255;
-				b += (-b + pb[2])*uTextAlpha / 255;
-
-				lvcd.crText = RGB(r, g, b);
 			}
 
 			if (0 != lvcd.fFontSizeOffset)

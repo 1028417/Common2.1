@@ -513,33 +513,17 @@ void CObjectTree::handleCustomDraw(NMTVCUSTOMDRAW& tvnmcd, LRESULT* pResult)
 		}
 		nmcd.uItemState &= ~CDIS_FOCUS;
 		
-		if (!m_cbCustomDraw)
+		if (!m_cbDrawItem)
 		{
 			return;
 		}
 
-		tagTVCustomDraw tvcd(tvnmcd);
-		m_cbCustomDraw(tvcd);
+		tagTVDrawItem tvcd(tvnmcd);
+		m_cbDrawItem(tvcd);
 		if (tvcd.bSkipDefault)
 		{
 			*pResult = CDRF_SKIPDEFAULT;
 			return;
-		}
-		
-		cauto uTextAlpha = tvcd.uTextAlpha;
-		if (0 != uTextAlpha && uTextAlpha <= 255)
-		{
-			auto pb = (BYTE*)&tvcd.crText;
-			int r = *pb;
-			int g = pb[1];
-			int b = pb[2];
-
-			pb = (BYTE*)&tvcd.crBkg;
-			r += (-r + pb[0])*uTextAlpha / 255;
-			g += (-g + pb[1])*uTextAlpha / 255;
-			b += (-b + pb[2])*uTextAlpha / 255;
-
-			tvcd.crText = RGB(r, g, b);
 		}
 	}
 }
