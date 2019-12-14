@@ -370,7 +370,7 @@ bool CMainApp::_HandleHotkey(LPARAM lParam)
 {
 	static DWORD s_dwPrevTickCount = 0;
 	auto dwTickCount = ::GetTickCount();
-	if (dwTickCount - s_dwPrevTickCount < 300)
+	if (dwTickCount - s_dwPrevTickCount < 1000)
 	{
 		return false;	
 	}
