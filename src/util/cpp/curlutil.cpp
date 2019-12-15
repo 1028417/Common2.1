@@ -285,16 +285,18 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
 
         size *= nmemb;
 
+        string strData(ptr, size);
         if (cb)
         {
-            if (!cb((byte_t*)ptr, size))
+            if (!cb(strData))
             {
                 return 0;
             }
         }
 
-        byte_t *pData = new byte_t[size];
-        memcpy(pData, ptr, size);
+        size = strData.length();
+        auto pData = new byte_t[size];
+        memcpy(pData, strData.c_str(), size);
 
         m_mtxDataLock.lock();
         m_lstData.emplace_back(pData, size);
@@ -386,7 +388,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     while (true)
     {
         auto& prData = m_lstData.front();
-        byte_t *pData = prData.first;
+        auto pData = prData.first;
         size_t& size = prData.second;
         if (size <= buffSize)
         {
