@@ -484,7 +484,7 @@ static const std::string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
 
 template <typename T, typename RET = basic_string<T, char_traits<T>, allocator<T>>>
-RET _base64_encode(const char *bytes_to_encode, unsigned int in_len, char chrTail)
+RET _base64_encode(const char *pStr, size_t len, char chrTail)
 {
 	RET strRet;
 	int i = 0;
@@ -492,9 +492,9 @@ RET _base64_encode(const char *bytes_to_encode, unsigned int in_len, char chrTai
 	unsigned char char_array_3[3];
 	unsigned char char_array_4[4];
 
-	while (in_len--)
+    while (len--)
 	{
-		char_array_3[i++] = *(bytes_to_encode++);
+        char_array_3[i++] = *(pStr++);
 		if (i == 3)
 		{
 			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
@@ -537,22 +537,21 @@ RET _base64_encode(const char *bytes_to_encode, unsigned int in_len, char chrTai
 	return strRet;
 }
 
-string strutil::base64_encode(const char *bytes_to_encode, unsigned int in_len, char chrTail)
+string strutil::base64_encode(const char *pStr, size_t len, char chrTail)
 {
-	return _base64_encode<char>(bytes_to_encode, in_len, chrTail);
+    return _base64_encode<char>(pStr, len, chrTail);
 }
 
-string strutil::base64_decode(const string& encoded_string, char chrTail)
+string strutil::base64_decode(const char *pStr, size_t len, char chrTail)
 {
-    int in_len = (int) encoded_string.size();
     int i = 0;
     int j = 0;
     int in_ = 0;
     unsigned char char_array_4[4], char_array_3[3];
     std::string ret;
 
-    while (in_len-- && (encoded_string[in_] != chrTail) && base64_chars.find(encoded_string[in_]) != string::npos) {
-        char_array_4[i++] = encoded_string[in_]; in_++;
+    while (len-- && (pStr[in_] != chrTail) && base64_chars.find(pStr[in_]) != string::npos) {
+        char_array_4[i++] = pStr[in_]; in_++;
         if (i ==4) {
             for (i = 0; i <4; i++)
                 char_array_4[i] = (unsigned char)base64_chars.find(char_array_4[i]);
