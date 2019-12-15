@@ -294,15 +294,18 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
             }
         }
 
-        size = strData.length();
-        auto pData = new byte_t[size];
-        memcpy(pData, strData.c_str(), size);
+        auto newSize = strData.length();
+        if (newSize > 0)
+        {
+            auto pData = new byte_t[newSize];
+            memcpy(pData, strData.c_str(), newSize);
 
-        m_mtxDataLock.lock();
-        m_lstData.emplace_back(pData, size);
-        m_uDataSize += size;
-        m_uSumSize += size;
-        m_mtxDataLock.unlock();
+            m_mtxDataLock.lock();
+            m_lstData.emplace_back(pData, newSize);
+            m_uDataSize += newSize;
+            m_uSumSize += newSize;
+            m_mtxDataLock.unlock();
+        }
 
         return size;
     };
