@@ -53,13 +53,18 @@ bool fsutil::copyFile(const string& strSrcFile, const string& strDstFile)
 #endif
 }
 
-bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb)
+bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb, const string& strHead)
 {
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, false);
 
     OFStream ofs(strDstFile, true);
     __EnsureReturn(ofs, false);
+
+	if (!strHead.empty())
+	{
+		__EnsureReturn(ofs.writex(strHead.c_str(), strHead.length()), false);
+	}
 
     char lpBuff[4096] {0};
     while (true)
