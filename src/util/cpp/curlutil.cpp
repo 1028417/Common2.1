@@ -288,10 +288,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
         string strData(ptr, size);
         if (cb)
         {
-            if (!cb(strData))
-            {
-                return 0;
-            }
+            cb(strData);
         }
 
         auto newSize = strData.length();
