@@ -11,7 +11,7 @@ TEMPLATE = lib
 
 QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
 
-DEFINES += __UtilPrj
+DEFINES += QT_DEPRECATED_WARNINGS __UtilPrj
 
 DEFINES += TIXML_USE_STL
 
