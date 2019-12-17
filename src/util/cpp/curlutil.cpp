@@ -259,25 +259,29 @@ int curlutil::curlToolDownload(const string& strURL, CB_CURLWrite& cb)
     return _callCURLTool(lstParams, (void*)write_callback, (void*)&cb);
 }
 
-int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Downloader& cb)
+int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
+                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
 {
     _clear();
 
-    auto fnProgress = [&](int64_t dltotal, int64_t dlnow){
+    auto fnProgress = [&, cbProgress](int64_t dltotal, int64_t dlnow){
         if (!m_bStatus)
         {
             return -1;
         }
 
-        if (!_onProgress(dltotal, dlnow))
+        if (cbProgress)
         {
-            return -1;
+            if (!cbProgress(dltotal, dlnow))
+            {
+                return -1;
+            }
         }
 
         return 0;
     };
 
-    auto fnWrite = [&, cb](char *ptr, size_t size, size_t nmemb)->size_t {
+    auto fnWrite = [&, cbRecv](char *ptr, size_t size, size_t nmemb)->size_t {
         if (!m_bStatus)
         {
             return 0;
@@ -286,9 +290,9 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
         size *= nmemb;
 
         string strData(ptr, size);
-        if (cb)
+        if (cbRecv)
         {
-            cb(strData);
+            cbRecv(strData);
         }
 
         auto newSize = strData.length();
@@ -344,9 +348,10 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime, const CB_Do
     return nCurlCode;
 }
 
-int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime)
+int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime
+                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
 {
-    int nRet = syncDownload(strUrl, uRetryTime);
+    int nRet = syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
     if (0 == nRet)
     {
         (void)_getAllData(bbfData);
@@ -354,9 +359,10 @@ int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT u
     return nRet;
 }
 
-int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime)
+int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime
+                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
 {
-    int nRet = syncDownload(strUrl, uRetryTime);
+    int nRet = syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
     if (0 == nRet)
     {
         (void)_getAllData(cbfRet);
@@ -364,10 +370,11 @@ int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uR
     return nRet;
 }
 
-void CDownloader::asyncDownload(const string& strUrl, UINT uRetryTime, const CB_Downloader& cb)
+void CDownloader::asyncDownload(const string& strUrl, UINT uRetryTime
+                                , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
 {
-    m_thread.start([=](){
-        (void)syncDownload(strUrl, uRetryTime, cb);
+    m_thread.start([=]() {
+        (void)syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
     });
 }
 
