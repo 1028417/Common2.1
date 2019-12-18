@@ -259,11 +259,8 @@ int curlutil::curlToolDownload(const string& strURL, CB_CURLWrite& cb)
     return _callCURLTool(lstParams, (void*)write_callback, (void*)&cb);
 }
 
-int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
-                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
+int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress& cbProgress)
 {
-    _clear();
-
     auto fnProgress = [&, cbProgress](int64_t dltotal, int64_t dlnow){
         if (!m_bStatus)
         {
@@ -281,7 +278,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
         return 0;
     };
 
-    auto fnWrite = [&, cbRecv](char *ptr, size_t size, size_t nmemb)->size_t {
+    auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
         if (!m_bStatus)
         {
             return 0;
@@ -290,20 +287,7 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
         size *= nmemb;
 
         string strData(ptr, size);
-        if (cbRecv)
-        {
-            cbRecv(strData);
-        }
-
-        auto newSize = strData.length();
-        if (newSize > 0)
-        {
-            m_mtxDataLock.lock();
-            m_lstData.push_back(strData);
-            m_uDataSize += newSize;
-            m_uSumSize += newSize;
-            m_mtxDataLock.unlock();
-        }
+        _onRecv(strData);
 
         return size;
     };
@@ -313,6 +297,8 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
+        _clear();
+
         m_beginTime = time(NULL);
 
         nCurlCode = curlutil::curlDownload(m_curlOpt, strUrl, fnWrite, fnProgress);
@@ -323,13 +309,14 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
 
         if (!m_bStatus)
         {
+            _clear();
             break;
         }
 
-        if (m_uSumSize > 0)
+        /*if (m_uSumSize > 0)
         {
             break;
-        }
+        }*/
     }
 
     /*if (m_bStatus)
@@ -345,10 +332,16 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
     return nCurlCode;
 }
 
-int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime
-                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
+void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress& cbProgress)
 {
-    int nRet = syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
+    m_thread.start([=]() {
+        (void)syncDownload(strUrl, uRetryTime, cbProgress);
+    });
+}
+
+int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime, CB_DownloadProgress& cbProgress)
+{
+    int nRet = CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
     if (0 == nRet)
     {
         (void)_getAllData(bbfData);
@@ -356,10 +349,9 @@ int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT u
     return nRet;
 }
 
-int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime
-                              , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
+int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime, CB_DownloadProgress& cbProgress)
 {
-    int nRet = syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
+    int nRet = CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
     if (0 == nRet)
     {
         (void)_getAllData(cbfRet);
@@ -367,12 +359,24 @@ int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uR
     return nRet;
 }
 
-void CDownloader::asyncDownload(const string& strUrl, UINT uRetryTime
-                                , CB_DownloadRecv cbRecv, CB_DownloadProgress& cbProgress)
+void CDownloader::_onRecv(string& strData)
 {
-    m_thread.start([=]() {
-        (void)syncDownload(strUrl, uRetryTime, cbRecv, cbProgress);
-    });
+    auto newSize = strData.length();
+    if (newSize > 0)
+    {
+        m_mtxDataLock.lock();
+        m_lstData.push_back(strData);
+        m_uDataSize += newSize;
+        m_uSumSize += newSize;
+        m_mtxDataLock.unlock();
+    }
+}
+
+void CCurlDownload::cancel()
+{
+    m_bStatus = false;
+
+    m_thread.cancel();
 }
 
 int CDownloader::getData(byte_t *pBuff, size_t buffSize)
@@ -380,7 +384,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     mutex_lock lock(m_mtxDataLock);
     if (m_lstData.empty())
     {
-        if (!m_bStatus)
+        if (!status())
         {
             return -1;
         }
@@ -440,15 +444,6 @@ void CDownloader::cutData(uint64_t uPos)
 
     m_mtxDataLock.unlock();
     (void)getData(buff);
-}
-
-void CDownloader::cancel()
-{
-    m_bStatus = false;
-
-    _clear();
-
-    m_thread.cancel();
 }
 
 void CDownloader::_clear()
