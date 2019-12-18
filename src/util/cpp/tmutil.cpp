@@ -35,7 +35,7 @@ static wstring _formatTime(const tm& atm, const wstring& strFormat)
 {
 	wchar_t lpBuff[64];
 	memzero(lpBuff);
-	if (!wcsftime(lpBuff, sizeof lpBuff, strFormat.c_str(), &atm))
+    if (!wcsftime(lpBuff, sizeof(lpBuff), strFormat.c_str(), &atm))
 	{
 		return L"";
 	}

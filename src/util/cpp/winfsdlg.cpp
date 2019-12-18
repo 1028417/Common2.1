@@ -190,7 +190,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 	m_nHeight = uHeight;
 
 	BROWSEINFO browseInfo;
-	::ZeroMemory(&browseInfo, sizeof browseInfo);
+    ::ZeroMemory(&browseInfo, sizeof(browseInfo));
 	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_BROWSEFORCOMPUTER
 		| BIF_STATUSTEXT;// | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_UAHINT;
 
@@ -240,7 +240,7 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 	m_ofn.lpstrFile = m_lpstrFileName;
 	m_ofn.nMaxFile = sizeof(m_lpstrFileName) / sizeof(m_lpstrFileName[0]);
 
-	::ZeroMemory(m_lpstrFilter, sizeof m_lpstrFilter);
+    ::ZeroMemory(m_lpstrFilter, sizeof(m_lpstrFilter));
 	m_ofn.lpstrFilter = m_lpstrFilter;
 	if (!opt.strFilter.empty())
 	{
