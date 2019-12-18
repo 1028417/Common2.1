@@ -298,11 +298,8 @@ int CDownloader::syncDownload(const string& strUrl, UINT uRetryTime
         auto newSize = strData.length();
         if (newSize > 0)
         {
-            auto pData = new byte_t[newSize];
-            memcpy(pData, strData.c_str(), newSize);
-
             m_mtxDataLock.lock();
-            m_lstData.emplace_back(pData, newSize);
+            m_lstData.push_back(strData);
             m_uDataSize += newSize;
             m_uSumSize += newSize;
             m_mtxDataLock.unlock();
@@ -394,12 +391,11 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     size_t uRet = 0;
     while (true)
     {
-        auto& prData = m_lstData.front();
-        auto pData = prData.first;
-        size_t& size = prData.second;
+        auto& strData = m_lstData.front();
+        size_t size = strData.length();
         if (size <= buffSize)
         {
-            memcpy(pBuff, pData, size);
+            memcpy(pBuff, strData.c_str(), size);
             pBuff += size;
             buffSize -= size;
 
@@ -407,7 +403,6 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
 
             m_uDataSize -= size;
 
-            delete pData;
             m_lstData.pop_front();
 
             if (0 == buffSize || m_lstData.empty())
@@ -417,13 +412,11 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
         }
         else
         {
-            memcpy(pBuff, pData, buffSize);
+            memcpy(pBuff, strData.c_str(), buffSize);
             uRet += buffSize;
 
-            size -= buffSize;
-            memcpy(pData, pData+buffSize, size);
-
             m_uDataSize -= buffSize;
+            strData.erase(0, buffSize);
 
             break;
         }
@@ -462,10 +455,6 @@ void CDownloader::_clear()
 {
     mutex_lock lock(m_mtxDataLock);
 
-    for (auto& prData : m_lstData)
-    {
-        delete prData.first;
-    }
     m_lstData.clear();
 
     m_uDataSize = 0;
