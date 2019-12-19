@@ -278,7 +278,10 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
         return 0;
     };
 
+    bool bFlag = false;
     auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
+        bFlag = true;
+
         if (!m_bStatus)
         {
             return 0;
@@ -299,6 +302,8 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
     {
         _clear();
 
+        //m_strErrMsg.clear();
+
         m_beginTime = time(NULL);
 
         nCurlCode = curlutil::curlDownload(m_curlOpt, strUrl, fnWrite, fnProgress);
@@ -313,19 +318,16 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
             break;
         }
 
-        /*if (m_uSumSize > 0)
+//        if (nCurlCode > 0)
+//        {
+//            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
+//        }
+
+        if (bFlag)
         {
             break;
-        }*/
-    }
-
-    /*if (m_bStatus)
-    {
-        if (nCurlCode > 0)
-        {
-            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
         }
-    }*/
+    }
 
     m_bStatus = false;
 
@@ -362,14 +364,11 @@ int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uR
 void CDownloader::_onRecv(string& strData)
 {
     auto newSize = strData.length();
-    if (newSize > 0)
-    {
-        m_mtxDataLock.lock();
-        m_lstData.push_back(strData);
-        m_uDataSize += newSize;
-        m_uSumSize += newSize;
-        m_mtxDataLock.unlock();
-    }
+    m_mtxDataLock.lock();
+    m_lstData.push_back(strData);
+    m_uDataSize += newSize;
+    m_uSumSize += newSize;
+    m_mtxDataLock.unlock();
 }
 
 void CCurlDownload::cancel()
@@ -429,7 +428,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     return uRet;
 }
 
-void CDownloader::cutData(uint64_t uPos)
+/*void CDownloader::cutData(uint64_t uPos)
 {
     m_mtxDataLock.lock();
     uint64_t uReadPos = m_uSumSize - m_uDataSize;
@@ -444,7 +443,7 @@ void CDownloader::cutData(uint64_t uPos)
 
     m_mtxDataLock.unlock();
     (void)getData(buff);
-}
+}*/
 
 void CDownloader::_clear()
 {
