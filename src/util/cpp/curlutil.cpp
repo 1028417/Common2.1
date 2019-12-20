@@ -456,9 +456,11 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
 
 void CDownloader::_clear()
 {
-    mutex_lock lock(m_mtxDataLock);
+    m_mtxDataLock.lock();
 
     m_lstData.clear();
 
     m_uDataSize = 0;
+
+    m_mtxDataLock.unlock();
 }
