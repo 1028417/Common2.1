@@ -278,16 +278,15 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
         return 0;
     };
 
-    bool bFlag = false;
     auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
-        bFlag = true;
-
         if (!m_bStatus)
         {
             return 0;
         }
 
         size *= nmemb;
+        m_uSumSize += size;
+
         if (!_onRecv(ptr, size))
         {
             return 0;
@@ -301,6 +300,8 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
+        m_uSumSize = 0;
+
         _clear();
 
         //m_strErrMsg.clear();
@@ -324,7 +325,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 //            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
 //        }
 
-        if (bFlag)
+        if (m_uSumSize > 0)
         {
             break;
         }
@@ -340,12 +341,6 @@ void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_Down
     m_thread.start([=]() {
         (void)syncDownload(strUrl, uRetryTime, cbProgress);
     });
-}
-
-bool CDownloader::_onRecv(char *ptr, size_t size)
-{
-    string strData(ptr, size);
-    return _onRecv(strData);
 }
 
 int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime, CB_DownloadProgress cbProgress)
@@ -368,13 +363,18 @@ int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uR
     return nRet;
 }
 
+bool CDownloader::_onRecv(char *ptr, size_t size)
+{
+    string strData(ptr, size);
+    return _onRecv(strData);
+}
+
 bool CDownloader::_onRecv(string& strData)
 {
     auto newSize = strData.length();
     m_mtxDataLock.lock();
     m_lstData.push_back(strData);
     m_uDataSize += newSize;
-    m_uSumSize += newSize;
     m_mtxDataLock.unlock();
 
     return true;
@@ -461,5 +461,4 @@ void CDownloader::_clear()
     m_lstData.clear();
 
     m_uDataSize = 0;
-    m_uSumSize = 0;
 }
