@@ -365,16 +365,9 @@ int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uR
 
 bool CDownloader::_onRecv(char *ptr, size_t size)
 {
-    string strData(ptr, size);
-    return _onRecv(strData);
-}
-
-bool CDownloader::_onRecv(string& strData)
-{
-    auto newSize = strData.length();
     m_mtxDataLock.lock();
-    m_lstData.push_back(strData);
-    m_uDataSize += newSize;
+    m_lstData.emplace_back(ptr, size);
+    m_uDataSize += size;
     m_mtxDataLock.unlock();
 
     return true;
