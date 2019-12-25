@@ -480,11 +480,11 @@ string strutil::toStr(const wstring& str)
 #endif
 }
 
-static const std::string base64_chars =
+static const std::string g_strBase64Chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
 
 template <typename T, typename RET = basic_string<T, char_traits<T>, allocator<T>>>
-RET _base64_encode(const char *pStr, size_t len, char chrTail)
+RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = '=')
 {
 	RET strRet;
 	int i = 0;
@@ -503,7 +503,7 @@ RET _base64_encode(const char *pStr, size_t len, char chrTail)
 			char_array_4[3] = char_array_3[2] & 0x3f;
 			for (i = 0; (i <4); i++)
 			{
-				strRet.append(1, base64_chars[char_array_4[i]]);
+				strRet.append(1, strBase64Chars[char_array_4[i]]);
 			}
 			i = 0;
 		}
@@ -522,7 +522,7 @@ RET _base64_encode(const char *pStr, size_t len, char chrTail)
 
 		for (j = 0; (j < i + 1); j++)
 		{
-			strRet.append(1, base64_chars[char_array_4[j]]);
+			strRet.append(1, strBase64Chars[char_array_4[j]]);
 		}
 
 		if (0 != chrTail)
@@ -537,12 +537,7 @@ RET _base64_encode(const char *pStr, size_t len, char chrTail)
 	return strRet;
 }
 
-string strutil::base64_encode(const char *pStr, size_t len, char chrTail)
-{
-    return _base64_encode<char>(pStr, len, chrTail);
-}
-
-string strutil::base64_decode(const char *pStr, size_t len, char chrTail)
+static string _base64_decode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = '=')
 {
     int i = 0;
     int j = 0;
@@ -550,11 +545,11 @@ string strutil::base64_decode(const char *pStr, size_t len, char chrTail)
     unsigned char char_array_4[4], char_array_3[3];
     std::string ret;
 
-    while (len-- && (pStr[in_] != chrTail) && base64_chars.find(pStr[in_]) != string::npos) {
+    while (len-- && (pStr[in_] != chrTail) && strBase64Chars.find(pStr[in_]) != string::npos) {
         char_array_4[i++] = pStr[in_]; in_++;
         if (i ==4) {
             for (i = 0; i <4; i++)
-                char_array_4[i] = (unsigned char)base64_chars.find(char_array_4[i]);
+                char_array_4[i] = (unsigned char)strBase64Chars.find(char_array_4[i]);
 
             char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
             char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
@@ -570,7 +565,7 @@ string strutil::base64_decode(const char *pStr, size_t len, char chrTail)
             char_array_4[j] = 0;
 
         for (j = 0; j <4; j++)
-            char_array_4[j] = (unsigned char)base64_chars.find(char_array_4[j]);
+            char_array_4[j] = (unsigned char)strBase64Chars.find(char_array_4[j]);
 
         char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
         char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
@@ -580,4 +575,30 @@ string strutil::base64_decode(const char *pStr, size_t len, char chrTail)
     }
 
     return ret;
+}
+
+string strutil::base64_encode(const char *pStr, size_t len, const char *pszBase, char chrTail)
+{
+	if (pszBase)
+	{
+		string strBase64Chars(pszBase, 64);
+		return _base64_encode<char>(pStr, len, strBase64Chars, chrTail);
+	}
+	else
+	{
+		return _base64_encode<char>(pStr, len);
+	}
+}
+
+string strutil::base64_decode(const char *pStr, size_t len, const char *pszBase, char chrTail)
+{
+	if (pszBase)
+	{
+		string strBase64Chars(pszBase, 64);
+		return _base64_decode(pStr, len, strBase64Chars, chrTail);
+	}
+	else
+	{
+		return _base64_decode(pStr, len);
+	}
 }
