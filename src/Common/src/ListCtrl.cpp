@@ -782,14 +782,12 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 	{
 		if (CDDS_ITEMPOSTPAINT == nmcd.dwDrawStage)
 		{
-			if (!m_cbPostDraw)
+			if (m_cbPostDraw)
 			{
-				return;
+				tagLVDrawSubItem lvcd(lvnmcd);
+				lvcd.crText = m_para.crText;
+				m_cbPostDraw(lvcd);
 			}
-
-			tagLVDrawSubItem lvcd(lvnmcd);
-			lvcd.crText = m_para.crText;
-			m_cbPostDraw(lvcd);
 		}
 		else if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == nmcd.dwDrawStage)
 		{
