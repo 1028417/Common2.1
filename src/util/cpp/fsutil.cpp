@@ -452,56 +452,24 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
     return true;
 }
 
-long fsutil::lSeek(FILE *pf, long offset, int origin)
+long fsutil::fSeekTell(FILE *pf, long offset, int origin)
 {
-#if __ios || __mac
-    return lseek(_fileno(pf), offset, origin);
-
-#elif __windows
     if (fseek(pf, offset, origin))
     {
         return -1;
     }
+
     return ftell(pf);
-
-#else
-    if (feof(pf))
-    {
-        rewind(pf);
-    }
-    else
-    {
-        setbuf(pf, NULL);
-    }
-
-    return lseek(_fileno(pf), offset, origin);
-#endif
 }
 
-long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
+long long fsutil::fSeekTell64(FILE *pf, long long offset, int origin)
 {
-#if __ios || __mac
-    return lseek(_fileno(pf), offset, origin);
-
-#elif __windows
-    if (_fseeki64(pf, offset, origin))
+    if (fseek64(pf, offset, origin))
     {
         return -1;
     }
-    return _ftelli64(pf);
 
-#else
-    if (feof(pf))
-    {
-       rewind(pf);
-    }
-    else
-    {
-        setbuf(pf, NULL);
-    }
-
-    return lseek64(_fileno(pf), offset, origin);
-#endif
+    return ftell64(pf);
 }
 
 #if __winvc
