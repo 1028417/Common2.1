@@ -454,7 +454,17 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 
 long fsutil::lSeek(FILE *pf, long offset, int origin)
 {
-#if __android
+#if __ios || __mac
+    return lseek(_fileno(pf), offset, origin);
+
+#elif __windows
+    if (fseek(pf, offset, origin))
+    {
+        return -1;
+    }
+    return ftell(pf);
+
+#else
     if (feof(pf))
     {
         rewind(pf);
@@ -465,15 +475,8 @@ long fsutil::lSeek(FILE *pf, long offset, int origin)
     }
 
     return lseek(_fileno(pf), offset, origin);
-
-#else
-	return (long)lSeek64(pf, offset, origin);
 #endif
 }
-
-#if __winvc
-#include <corecrt_io.h>
-#endif
 
 long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
 {
@@ -481,7 +484,11 @@ long long fsutil::lSeek64(FILE *pf, long long offset, int origin)
     return lseek(_fileno(pf), offset, origin);
 
 #elif __windows
-    return _lseeki64(_fileno(pf), offset, origin);
+    if (_fseeki64(pf, offset, origin))
+    {
+        return -1;
+    }
+    return _ftelli64(pf);
 
 #else
     if (feof(pf))
