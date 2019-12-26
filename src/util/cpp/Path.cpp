@@ -113,8 +113,8 @@ inline static int _sort(const wstring& lhs, const wstring& rhs)
 #if __windows
     return strutil::collate(lhs, rhs);
 #else
-    return strutil::toQstr(lhs).compare(strutil::toQstr(rhs), Qt::CaseSensitivity::CaseInsensitive);
-    //.localeAwareCompare(strutil::toQstr(rhs.GetName()));
+    return __WS2Q(lhs).compare(__WS2Q(rhs), Qt::CaseSensitivity::CaseInsensitive);
+    //.localeAwareCompare(__WS2Q(rhs.GetName()));
 #endif
 
 	return 1;

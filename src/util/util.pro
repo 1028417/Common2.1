@@ -44,7 +44,8 @@ win32 {
     platform = win
     DESTDIR = ../../bin
 
-    QMAKE_POST_LINK += copy /Y ..\..\bin\xutil.dll ..\..\..\XMusic\bin
+    QMAKE_POST_LINK += copy /Y ..\..\bin\xutil.dll ..\..\..\XMusic\bin && \
+        copy /Y ..\..\bin\libxutil.a ..\..\..\XMusic\bin
 } else {
     DEFINES += HAVE_CONFIG_H
 

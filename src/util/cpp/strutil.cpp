@@ -30,7 +30,7 @@ int strutil::collate(const wstring& lhs, const wstring& rhs)
 {
 	return wcscoll(lhs.c_str(), rhs.c_str());
 
-    //return toQstr(lhs).localeAwareCompare(toQstr(rhs));
+    //return __WS2Q(lhs).localeAwareCompare(__WS2Q(rhs));
 }
 
 int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
@@ -39,7 +39,7 @@ int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
     return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
         , rhs.c_str(), rhs.c_str() + rhs.size());
 #else
-    return g_collate_CN.compare(toQstr(lhs), toQstr(rhs));
+    return g_collate_CN.compare(__WS2Q(lhs), __WS2Q(rhs));
 #endif
 }
 
@@ -184,13 +184,28 @@ void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRe
     _split(strText, wcSplitor, vecRet, bTrim);
 }
 
-bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2)
+bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t maxlen)
 {
+    if (0 == maxlen)
+    {
 #if __windows
-    return 0 == _wcsicmp(str1.c_str(), str2.c_str());
+        return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #else
-    return 0 == toQstr(str1).compare(toQstr(str2), Qt::CaseSensitivity::CaseInsensitive);
+        return 0 == __WS2Q(str1).compare(__WS2Q(str2), Qt::CaseSensitivity::CaseInsensitive);
 #endif
+    }
+    else
+    {
+#if __windows
+        return 0 == _wcsnicmp(str1.c_str(), str2.c_str(), maxlen);
+#else
+        size_t size = str1.size();
+        cauto t_str1 = __W2Q(str1.c_str(), MIN(maxlen, size)).toStdString();
+        size = str2.size();
+        cauto t_str2 = __W2Q(str2.c_str(), MIN(maxlen, size)).toStdString();
+        return 0 == strncasecmp(t_str1.c_str(), t_str2.c_str(), maxlen);
+#endif
+    }
 }
 
 void strutil::lowerCase(wstring& str)
@@ -336,14 +351,19 @@ using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 static utf8_convert g_utf8Convert;
 #endif
 
-bool strutil::checkUtf8(const char *pStr, size_t len)
+bool strutil::checkUtf8(const char *pStr, int len)
 {
+    if (-1 == len)
+    {
+        len = strlen(pStr);
+    }
+
 	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
 	unsigned char chr = *pStr;
 	bool bAllAscii = true;
-	for (size_t uIndex = 0; uIndex < len; ++uIndex)
+    for (int nIdx = 0; nIdx < len; ++nIdx)
 	{
-		chr = *(pStr + uIndex);
+        chr = *(pStr + nIdx);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
 		if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
@@ -392,41 +412,54 @@ bool strutil::checkUtf8(const char *pStr, size_t len)
 	return true;
 }
 
-wstring strutil::fromUtf8(const char *pStr, size_t len)
+wstring strutil::fromUtf8(const char *pStr, int len)
 {
+    if (-1 == len)
+    {
+        len = strlen(pStr);
+    }
+    if (len <= 0)
+    {
+        return L"";
+    }
+
 #if __winvc
 	return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
-    return QString::fromUtf8(pStr, len).toStdWString();
+    return __A2Q(pStr, len).toStdWString();
 #endif
 }
 
-string strutil::toUtf8(const wchar_t *pStr, size_t len)
+string strutil::toUtf8(const wchar_t *pStr, int len)
 {
+    if (-1 == len)
+    {
+        len = wcslen(pStr);
+    }
+    if (len <= 0)
+    {
+        return "";
+    }
+
 #if __winvc
     return g_utf8Convert.to_bytes(pStr, pStr+len);
 #else
-    return strutil::toQstr(wstring(pStr, len)).toUtf8().constData();
+    return __W2Q(pStr, len).toUtf8().constData();
 #endif
 }
 
-string strutil::toUtf8(const wstring& str)
+wstring strutil::toWstr(const char *pStr, int len)
 {
-#if __winvc
-    return toUtf8(str.c_str(), str.size());
-#else
-    return strutil::toQstr(str).toUtf8().constData();
-#endif
-}
+    if (-1 == len)
+    {
+        len = strlen(pStr);
+    }
+    if (len <= 0)
+    {
+        return L"";
+    }
 
-wstring strutil::toWstr(const char *pStr, size_t len)
-{
 #if __winvc
-	if (0 == len)
-	{
-		return L"";
-	}
-
 	TBuffer<wchar_t> buff(len+1);
 	if (mbstowcs_s(NULL, buff, len+1, pStr, len))
 	{
@@ -436,27 +469,22 @@ wstring strutil::toWstr(const char *pStr, size_t len)
 	return buff.ptr();
 
 #else
-    return QString::fromStdString(string(pStr, len)).toStdWString();
+    return __A2Q(pStr, len).toStdWString();
 #endif
 }
 
-wstring strutil::toWstr(const string& str)
+string strutil::toStr(const wchar_t *pStr, int len)
 {
-#if __winvc
-    return toWstr(str.c_str(), str.size());
-#else
-    return QString::fromStdString(str).toStdWString();
-#endif
-}
+    if (-1 == len)
+    {
+        len = wcslen(pStr);
+    }
+    if (len <= 0)
+    {
+        return "";
+    }
 
-string strutil::toStr(const wchar_t *pStr, size_t len)
-{
 #if __winvc
-	if (0 == len)
-	{
-		return "";
-	}
-
 	len *= 2;
 	TD_CharBuffer buff(len+1);
     if (wcstombs_s(NULL, buff, len, pStr, len))
@@ -467,16 +495,7 @@ string strutil::toStr(const wchar_t *pStr, size_t len)
     return buff.ptr();
 
 #else
-    return QString::fromStdWString(wstring(pStr, len)).toStdString();
-#endif
-}
-
-string strutil::toStr(const wstring& str)
-{
-#if __winvc
-    return toStr(str.c_str(), str.size());
-#else
-    return QString::fromStdWString(str).toStdString();
+    return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
 }
 
@@ -484,7 +503,7 @@ static const std::string g_strBase64Chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
 
 template <typename T, typename RET = basic_string<T, char_traits<T>, allocator<T>>>
-RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = '=')
+RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = 0)
 {
 	RET strRet;
 	int i = 0;
@@ -525,7 +544,7 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 			strRet.append(1, strBase64Chars[char_array_4[j]]);
 		}
 
-		if (0 != chrTail)
+		if (chrTail != '\0')
 		{
 			while ((i++ < 3))
 			{
@@ -537,7 +556,7 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 	return strRet;
 }
 
-static string _base64_decode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = '=')
+static string _base64_decode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = 0)
 {
     int i = 0;
     int j = 0;

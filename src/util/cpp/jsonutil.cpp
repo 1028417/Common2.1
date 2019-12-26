@@ -9,14 +9,17 @@ bool jsonutil::get(const JValue& jValue, wstring& strRet)
     }
 
 	cauto str = jValue.asString();
-	if (strutil::checkUtf8(str))
-	{
-		strRet = strutil::fromUtf8(str);
-	}
-	else
-	{
-		strRet = strutil::toWstr(str);
-	}
+    if (!str.empty())
+    {
+        if (strutil::checkUtf8(str))
+        {
+            strRet = strutil::fromUtf8(str);
+        }
+        else
+        {
+            strRet = strutil::toWstr(str);
+        }
+    }
 
     return true;
 }
