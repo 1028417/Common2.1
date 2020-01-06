@@ -5,8 +5,8 @@
 
 int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 {
-	CFolderDlg* pInstance = (CFolderDlg*)lpData;
-	pInstance->_handleCallBack(hWnd, uMsg, lParam);
+	CFolderDlg* pFolderDlg = (CFolderDlg*)lpData;
+	pFolderDlg->_handleCallBack(hWnd, uMsg, lParam);
 	return 0;
 }
 
