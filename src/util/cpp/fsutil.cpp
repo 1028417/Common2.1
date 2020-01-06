@@ -545,13 +545,14 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
         return false;
     }
 
-#if __winvc
-    wstring strFind(strDir);
-    if (!checkPathTail(strDir.back()))
+    auto t_strDir = strDir;
+    if (!checkPathTail(t_strDir.back()))
     {
-        strFind.push_back(__wcDirSeparator);
+        t_strDir.push_back(__wcDirSeparator);
     }
 
+#if __winvc
+    wstring strFind(t_strDir);
     if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
     {
         strFind.append(pstrFilter).append(L"*");
@@ -600,7 +601,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     (void)::FindClose(hFindFile);
 
 #else
-    QDir dir(__WS2Q(strDir));
+    QDir dir(__WS2Q(t_strDir));
     if(!dir.exists())
     {
         return false;
