@@ -35,9 +35,9 @@ long CZipFile::_readCurrent(void *buf, size_t len) const
 	return nCount;
 }
 
-long CZipFile::_read(const tagUnzfile& unzFileInfo, void *buf, size_t len) const
+long CZipFile::_read(const tagUnzfile& unzFile, void *buf, size_t len) const
 {
-	unz_file_pos file_pos{ unzFileInfo.pos_in_zip_directory, unzFileInfo.num_of_file };
+	unz_file_pos file_pos{ unzFile.pos_in_zip_directory, unzFile.num_of_file };
 	int nRet = unzGoToFilePos(m_unzfile, &file_pos);
 	if (nRet != UNZ_OK)
 	{
@@ -87,16 +87,16 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 			return false;
 		}
 
-        tagUnzfile unzFileInfo;
-        unzFileInfo.uFileSize = file_info.uncompressed_size;
-        unzFileInfo.strPath = lpFileName;
+        tagUnzfile unzFile;
+        unzFile.uFileSize = file_info.uncompressed_size;
+        unzFile.strPath = lpFileName;
 
-        bool bDir = ((char)__wcSlant == unzFileInfo.strPath.back());  // (unzFileInfo.external_fa & __DirFlag);
+        bool bDir = ((char)__wcSlant == unzFile.strPath.back());  // (unzFile.external_fa & __DirFlag);
         if (bDir)
         {
-            m_lstUnzdirInfo.push_back(unzFileInfo);
+            m_lstUnzdirInfo.push_back(unzFile);
 
-            m_lstUnzfileInfo.emplace_back(true, &m_lstUnzdirInfo.back());
+            m_lstUnzfile.emplace_back(true, &m_lstUnzdirInfo.back());
 		}
 		else
         {
@@ -107,11 +107,11 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 				return false;
 			}
 
-			unzFileInfo.pos_in_zip_directory = file_pos.pos_in_zip_directory;
-			unzFileInfo.num_of_file = file_pos.num_of_file;
+			unzFile.pos_in_zip_directory = file_pos.pos_in_zip_directory;
+			unzFile.num_of_file = file_pos.num_of_file;
 
-            auto pFileInfo = &(m_mapUnzfileInfo[unzFileInfo.strPath] = unzFileInfo);
-            m_lstUnzfileInfo.emplace_back(false, pFileInfo);
+            auto pFileInfo = &(m_mapUnzfile[unzFile.strPath] = unzFile);
+            m_lstUnzfile.emplace_back(false, pFileInfo);
 		}
 	} while (unzGoToNextFile(unzfile) == UNZ_OK);
 
@@ -210,7 +210,7 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 
 	(void)unzGoToFirstFile(m_unzfile);
 
-    for (cauto pr : m_lstUnzfileInfo)
+    for (cauto pr : m_lstUnzfile)
     {
         auto& unzfile = *pr.second;
         if (pr.first)

@@ -12,6 +12,17 @@ void fsutil::trimPathTail(wstring& strPath)
     }
 }
 
+void fsutil::trimPathTail(string& strPath)
+{
+    if (!strPath.empty())
+    {
+        if (checkPathTail(strPath.back()))
+        {
+            strPath.pop_back();
+        }
+    }
+}
+
 FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 {
 #if __windows
@@ -207,6 +218,16 @@ wstring fsutil::GetParentDir(const wstring& strPath)
     __EnsureReturn(!strPath.empty(), L"");
 
     wstring strParentDir;
+    SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
+
+    return strParentDir;
+}
+
+string fsutil::GetParentDir(const string& strPath)
+{
+    __EnsureReturn(!strPath.empty(), "");
+
+    string strParentDir;
     SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
 
     return strParentDir;
@@ -471,24 +492,35 @@ long long fsutil::fSeekTell64(FILE *pf, long long offset, int origin)
 #define chdir _chdir
 #endif
 
-static wstring _getCwd()
+static string _getCwd()
 {
     //return QDir::currentPath().toStdWString();
 
-    wstring strCwd;
+    string strCwd;
     char *pCwd = getcwd(NULL, 0);
     if (NULL != pCwd)
     {
-        strCwd = strutil::toWstr(pCwd);
+        strCwd = pCwd;
         free(pCwd);
     }
 
     return strCwd;
 }
 
-static wstring g_strWorkDir;
+static string g_strWorkDir;
 
-wstring fsutil::workDir()
+bool fsutil::setWorkDir(const string& strWorkDir)
+{
+    if (chdir(strWorkDir.c_str()))
+    {
+        return false;
+    }
+
+    g_strWorkDir = _getCwd();
+    return true;
+}
+
+string fsutil::workDir()
 {
     if (g_strWorkDir.empty())
     {
@@ -498,23 +530,12 @@ wstring fsutil::workDir()
     return g_strWorkDir;
 }
 
-bool fsutil::setWorkDir(const wstring& strWorkDir)
-{
-    if (chdir(strutil::toStr(strWorkDir).c_str()))
-    {
-        return false;
-    }
-
-    g_strWorkDir = _getCwd();
-    return true;
-}
-
 #if __windows
-wstring fsutil::getModuleDir(wchar_t *pszModuleName)
+string fsutil::getModuleDir(char *pszModuleName)
 {
-    wchar_t pszPath[MAX_PATH];
+    char pszPath[MAX_PATH];
     memzero(pszPath);
-    ::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+    ::GetModuleFileNameA(::GetModuleHandleA(pszModuleName), pszPath, sizeof(pszPath));
     return GetParentDir(pszPath);
 }
 #endif

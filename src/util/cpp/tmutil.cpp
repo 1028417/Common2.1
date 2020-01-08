@@ -35,9 +35,21 @@ static wstring _formatTime(const tm& atm, const wstring& strFormat)
 {
 	wchar_t lpBuff[64];
 	memzero(lpBuff);
-    if (!wcsftime(lpBuff, sizeof(lpBuff), strFormat.c_str(), &atm))
+	if (!wcsftime(lpBuff, sizeof(lpBuff), strFormat.c_str(), &atm))
 	{
 		return L"";
+	}
+
+	return lpBuff;
+}
+
+static string _formatTime(const tm& atm, const string& strFormat)
+{
+	char lpBuff[64];
+	memzero(lpBuff);
+	if (!strftime(lpBuff, sizeof(lpBuff), strFormat.c_str(), &atm))
+	{
+		return "";
 	}
 
 	return lpBuff;
@@ -92,6 +104,22 @@ wstring tmutil::formatTime64(const wstring& strFormat, time64_t tTime)
     if (_localtime64_s(&atm, &tTime))
 	{
 		return L"";
+	}
+
+	return _formatTime(atm, strFormat);
+}
+
+string tmutil::formatTime64(const string& strFormat, time64_t tTime)
+{
+	if (-1 == tTime)
+	{
+		tTime = (time64_t)time(0);
+	}
+
+	tm atm;
+	if (_localtime64_s(&atm, &tTime))
+	{
+		return "";
 	}
 
 	return _formatTime(atm, strFormat);
