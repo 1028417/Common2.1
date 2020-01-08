@@ -7,7 +7,7 @@
 #define __DirFlag FILE_ATTRIBUTE_DIRECTORY
 #else
 #define __DirFlag S_IFDIR
-#define _mkdir(x) mkdir(x, 0777)
+//#define _mkdir(x) mkdir(x, 0777)
 #endif
 
 long CZipFile::_readCurrent(void *buf, size_t len) const
@@ -214,8 +214,8 @@ bool CZipFile::unzip(const wstring& strDstDir) const
     {
         auto& unzfile = *pr.second;
         if (pr.first)
-		{
-            if (_mkdir((t_strDstDir + unzfile.strPath).c_str()))
+        {
+            if (fsutil::createDir((t_strDstDir + unzfile.strPath).c_str()))
 			{
 				return false;
 			}
