@@ -35,7 +35,7 @@ long CZipFile::_readCurrent(void *buf, size_t len) const
 	return nCount;
 }
 
-long CZipFile::read(const tagUnzFileInfo& unzFileInfo, void *buf, size_t len) const
+long CZipFile::_read(const tagUnzfile& unzFileInfo, void *buf, size_t len) const
 {
 	unz_file_pos file_pos{ unzFileInfo.pos_in_zip_directory, unzFileInfo.num_of_file };
 	int nRet = unzGoToFilePos(m_unzfile, &file_pos);
@@ -87,30 +87,31 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 			return false;
 		}
 
-		tagUnzFileInfo unzFileInfo;
-		unzFileInfo.uFileSize = file_info.uncompressed_size;
+        tagUnzfile unzFileInfo;
+        unzFileInfo.uFileSize = file_info.uncompressed_size;
+        unzFileInfo.strPath = lpFileName;
 
-		unzFileInfo.strPath = lpFileName;
-		unzFileInfo.bDir = ((char)__wcSlant == unzFileInfo.strPath.back());  // (unzFileInfo.external_fa & __DirFlag);
+        bool bDir = ((char)__wcSlant == unzFileInfo.strPath.back());  // (unzFileInfo.external_fa & __DirFlag);
+        if (bDir)
+        {
+            m_lstUnzdirInfo.push_back(unzFileInfo);
 
-		if (unzFileInfo.bDir)
-		{
-            m_lstUnzDirInfo.push_back(unzFileInfo);
-            m_lstUnzFileInfo.push_back(&m_lstUnzDirInfo.back());
+            m_lstUnzfileInfo.emplace_back(true, &m_lstUnzdirInfo.back());
 		}
 		else
-		{
+        {
 			nRet = unzGetFilePos(unzfile, &file_pos);
 			if (nRet != UNZ_OK)
 			{
 				(void)unzClose(unzfile);
 				return false;
 			}
+
 			unzFileInfo.pos_in_zip_directory = file_pos.pos_in_zip_directory;
 			unzFileInfo.num_of_file = file_pos.num_of_file;
 
-            auto pFileInfo = &(m_mapUnzFileInfo[unzFileInfo.strPath] = unzFileInfo);
-            m_lstUnzFileInfo.push_back(pFileInfo);
+            auto pFileInfo = &(m_mapUnzfileInfo[unzFileInfo.strPath] = unzFileInfo);
+            m_lstUnzfileInfo.emplace_back(false, pFileInfo);
 		}
 	} while (unzGoToNextFile(unzfile) == UNZ_OK);
 
@@ -209,25 +210,26 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 
 	(void)unzGoToFirstFile(m_unzfile);
 
-    for (cauto pInfo : m_lstUnzFileInfo)
-	{
-		if (pInfo->bDir)
+    for (cauto pr : m_lstUnzfileInfo)
+    {
+        auto& unzfile = *pr.second;
+        if (pr.first)
 		{
-			if (_mkdir((t_strDstDir + pInfo->strPath).c_str()))
+            if (_mkdir((t_strDstDir + unzfile.strPath).c_str()))
 			{
 				return false;
 			}
 		}
 		else
 		{
-			TD_ByteBuffer buff(pInfo->uFileSize);
-            if (_readCurrent(buff, pInfo->uFileSize) != (long)pInfo->uFileSize)
+            TD_ByteBuffer buff(unzfile.uFileSize);
+            if (_readCurrent(buff, unzfile.uFileSize) != (long)unzfile.uFileSize)
 			{
 				return false;
 			}
-            OFStream ofs(t_strDstDir + pInfo->strPath, true);
+            OFStream ofs(t_strDstDir + unzfile.strPath, true);
 			__EnsureReturn(ofs, false);
-            if (!ofs.writex(buff, pInfo->uFileSize))
+            if (!ofs.writex(buff, unzfile.uFileSize))
 			{
 				return false;
 			}
