@@ -190,7 +190,7 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
 	return _open("", &zfunc);
 }
 
-long CZipFile::unzip(const tagUnzfile& unzFile, const wstring& strDstFile)
+long CZipFile::unzip(const tagUnzfile& unzFile, const string& strDstFile)
 {
     CByteBuffer bbfFile;
     int nCount = this->read(unzFile, bbfFile);
