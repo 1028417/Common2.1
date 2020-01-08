@@ -190,6 +190,24 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
 	return _open("", &zfunc);
 }
 
+long CZipFile::unzip(const tagUnzfile& unzFile, const wstring& strDstFile)
+{
+    CByteBuffer bbfFile;
+    int nCount = this->read(unzFile, bbfFile);
+    if (nCount <= 0)
+    {
+        return nCount;
+    }
+
+    OFStream obs(strDstFile, true);
+    if (!obs)
+    {
+        return -1;
+    }
+
+    return obs.writex(bbfFile);
+}
+
 bool CZipFile::unzip(const wstring& strDstDir) const
 {
 	if (NULL == m_unzfile)
