@@ -378,54 +378,10 @@ bool fsutil::createDir(const wstring& strDir)
         return false;
     }
 
-#else
-    if (!QDir().mkpath(__WS2Q(strDir)))
-    {
-        return false;
-    }
-#endif
-
     return true;
-}
-
-bool fsutil::createDir(const string& strDir)
-{
-#if __windows
-    if (!::CreateDirectoryA(strDir.c_str(), NULL))
-    {
-        auto ret = ::GetLastError();
-        if (ERROR_ALREADY_EXISTS == ret)
-        {
-            return true;
-        }
-
-        if (ERROR_PATH_NOT_FOUND == ret)
-        {
-            if (!createDir(fsutil::GetParentDir(strDir)))
-            {
-                return false;
-            }
-
-            if (!::CreateDirectoryA(strDir.c_str(), NULL))
-            {
-                ret = ::GetLastError();
-                return false;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
 #else
-    if (!QDir().mkpath(__S2Q(strDir)))
-    {
-        return false;
-    }
+    return QDir().mkpath(__WS2Q(strDir));
 #endif
-
-    return true;
 }
 
 bool fsutil::removeDir(const wstring& strDir)
