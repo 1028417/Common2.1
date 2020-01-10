@@ -348,40 +348,63 @@ bool fsutil::existFile(const wstring& strFile)
     return existPath(strFile, false);
 }
 
-bool fsutil::createDir(const wstring& strDir)
+#if __windows
+inline static BOOL CreateDirectoryT(const wstring& strDir)
+{
+	return ::CreateDirectoryW(strDir.c_str(), NULL);
+}
+
+inline static BOOL CreateDirectoryT(const string& strDir)
+{
+	return ::CreateDirectoryA(strDir.c_str(), NULL);
+}
+#endif
+
+template <class T>
+static bool _createDirT(const T& strDir)
 {
 #if __windows
-    if (!::CreateDirectory(strDir.c_str(), NULL))
-    {
-        auto ret = ::GetLastError();
-        if (ERROR_ALREADY_EXISTS == ret)
-        {
-            return true;
-        }
+	if (!CreateDirectoryT(strDir.c_str()))
+	{
+		auto ret = ::GetLastError();
+		if (ERROR_ALREADY_EXISTS == ret)
+		{
+			return true;
+		}
 
-        if (ERROR_PATH_NOT_FOUND == ret)
-        {
-            if (!createDir(fsutil::GetParentDir(strDir)))
-            {
-                return false;
-            }
+		if (ERROR_PATH_NOT_FOUND == ret)
+		{
+			if (!_createDirT(fsutil::GetParentDir(strDir)))
+			{
+				return false;
+			}
 
-            if (!::CreateDirectory(strDir.c_str(), NULL))
-            {
-                ret = ::GetLastError();
-                return false;
-            }
+			if (!CreateDirectoryT(strDir.c_str()))
+			{
+				ret = ::GetLastError();
+				return false;
+			}
 
-            return true;
-        }
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    return true;
+	return true;
 #else
-    return QDir().mkpath(__WS2Q(strDir));
+	return QDir().mkpath(strutil::toQstr(strDir));
 #endif
+}
+
+bool fsutil::createDir(const wstring& strDir)
+{
+	return _createDirT(strDir);
+}
+
+bool fsutil::createDir(const string& strDir)
+{
+	return _createDirT(strDir);
 }
 
 bool fsutil::removeDir(const wstring& strDir)

@@ -144,7 +144,8 @@ BOOL CMainApp::InitInstance()
 			}
 			else
 			{
-				//::SetWindowPos(g_hMainWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+				//::SetWindowPos(g_hMainWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+				//::SetWindowPos(g_hMainWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 				::SetForegroundWindow(g_hMainWnd);
 			}
 		}
