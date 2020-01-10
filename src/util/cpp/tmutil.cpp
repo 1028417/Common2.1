@@ -114,7 +114,7 @@ inline static T _formatTime64T(const T& strFormat, time64_t tTime)
     tm atm;
     if (_localtime64_s(&atm, &tTime))
     {
-        return L"";
+        return T();
     }
 
     return _formatTime(atm, strFormat);

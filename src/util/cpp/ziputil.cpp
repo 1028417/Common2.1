@@ -91,7 +91,7 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
         unzFile.uFileSize = file_info.uncompressed_size;
         unzFile.strPath = lpFileName;
 
-        bool bDir = ((char)__wcSlant == unzFile.strPath.back());  // (unzFile.external_fa & __DirFlag);
+        bool bDir = (__chrSlant == unzFile.strPath.back());  // (unzFile.external_fa & __DirFlag);
         if (bDir)
         {
             m_lstUnzdirInfo.push_back(unzFile);
@@ -223,7 +223,7 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 	string t_strDstDir(strutil::toStr(strDstDir));
 	if (strDstDir.empty() || !fsutil::checkPathTail(strDstDir.back()))
 	{
-		t_strDstDir.push_back((char)__wcDirSeparator);
+		t_strDstDir.push_back((char)__wchDirSeparator);
 	}
 
 	(void)unzGoToFirstFile(m_unzfile);

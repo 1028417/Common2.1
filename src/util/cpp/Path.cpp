@@ -20,7 +20,7 @@ wstring XFile::absPath() const
         WString strAbsPath = m_fileInfo.pParent->absPath();
         if (!strAbsPath->empty())
         {
-            strAbsPath << __wcDirSeparator;
+            strAbsPath << __wchDirSeparator;
         }
         strAbsPath << m_fileInfo.strName;
         return strAbsPath;
@@ -37,7 +37,7 @@ wstring XFile::oppPath() const
     }
 
     WString strOppPath(m_fileInfo.pParent->oppPath());
-    strOppPath << __wcDirSeparator << m_fileInfo.strName;
+    strOppPath << __wchDirSeparator << m_fileInfo.strName;
     return strOppPath;
 }
 

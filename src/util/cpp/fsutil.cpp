@@ -247,7 +247,7 @@ static void _GetFileName(const T& strPath, T *pstrTitle, T *pstrExtName)
     T strFileName;
     _SplitPath<T>(strPath, NULL, &strFileName);
 
-    auto pos = strFileName.find_last_of(__wcDot);
+    auto pos = strFileName.find_last_of(__wchDot);
     if (T::npos != pos)
     {
         if (NULL != pstrExtName)
@@ -548,15 +548,55 @@ string fsutil::workDir()
     return g_strWorkDir;
 }
 
+//readlink("/proc/self/exe",
 #if __windows
-string fsutil::getModuleDir(char *pszModuleName)
+string fsutil::getModuleDir()
 {
-    //readlink("/proc/self/exe",
+	return getModuleDir((char*)NULL);
+}
 
-    char pszPath[MAX_PATH];
-    memzero(pszPath);
-    ::GetModuleFileNameA(::GetModuleHandleA(pszModuleName), pszPath, sizeof(pszPath));
-    return GetParentDir(pszPath);
+string fsutil::getModuleDir(const char *pszModuleName)
+{
+	char pszPath[MAX_PATH];
+	memzero(pszPath);
+	::GetModuleFileNameA(::GetModuleHandleA(pszModuleName), pszPath, sizeof(pszPath));
+	return GetParentDir(pszPath);
+}
+
+wstring fsutil::getModuleDir(const wchar_t *pszModuleName)
+{
+	wchar_t pszPath[MAX_PATH];
+	memzero(pszPath);
+	::GetModuleFileNameW(::GetModuleHandleW(pszModuleName), pszPath, sizeof(pszPath));
+	return GetParentDir(pszPath);
+}
+
+template <class T, class C>
+inline static T _getModuleSubPathT(const T& strSubPath, C pszModuleName)
+{
+	auto strModulePath = fsutil::getModuleDir(pszModuleName);
+
+	if (!strSubPath.empty())
+	{
+		if (!fsutil::checkPathTail(strSubPath.front()))
+		{
+			strModulePath.append(1, __chrBackSlant);
+		}
+
+		strModulePath.append(strSubPath);
+	}
+
+	return strModulePath;
+}
+
+string fsutil::getModuleSubPath(const string& strSubPath, const char *pszModuleName)
+{
+	return _getModuleSubPathT(strSubPath, pszModuleName);
+}
+
+wstring fsutil::getModuleSubPath(const wstring& strSubPath, const wchar_t *pszModuleName)
+{
+	return _getModuleSubPathT(strSubPath, pszModuleName);
 }
 #endif
 
@@ -568,8 +608,8 @@ wstring fsutil::getHomeDir()
 }
 #endif
 
-static const wstring g_wsDot(1, __wcDot);
-static const wstring g_wsDotDot(2, __wcDot);
+static const wstring g_wsDot(1, __chrDot);
+static const wstring g_wsDotDot(2, __chrDot);
 
 /*  std::list<std::wstring> lstDrivers;
     winfsutil::getSysDrivers(lstDrivers);
@@ -589,7 +629,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     auto t_strDir = strDir;
     if (!checkPathTail(t_strDir.back()))
     {
-        t_strDir.push_back(__wcDirSeparator);
+        t_strDir.push_back(__wchDirSeparator);
     }
 
 #if __winvc
