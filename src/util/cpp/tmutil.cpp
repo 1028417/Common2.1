@@ -55,7 +55,8 @@ static string _formatTime(const tm& atm, const string& strFormat)
 	return lpBuff;
 }
 
-wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
+template <class T>
+inline static T _formatTimeT(const T& strFormat, time32_t tTime)
 {
     if (-1 == tTime)
 	{
@@ -63,20 +64,29 @@ wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
 	}
 
     struct tm _tm;
-
 #if __windows
     if (_localtime32_s(&_tm, &tTime))
 	{
-		return L"";
+        return T();
 	}
 #else
     if (localtime_r(&tTime, &_tm))
     {
-        return L"";
+        return T();
     }
 #endif
 
     return _formatTime(_tm, strFormat);
+}
+
+wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
+{
+    return _formatTimeT(strFormat, tTime);
+}
+
+string tmutil::formatTime(const string& strFormat, time32_t tTime)
+{
+    return _formatTimeT(strFormat, tTime);
 }
 
 #if __windows
@@ -93,36 +103,31 @@ bool tmutil::time64ToTM(time64_t time, tagTM& tm)
     return true;
 }
 
-wstring tmutil::formatTime64(const wstring& strFormat, time64_t tTime)
+template <class T>
+inline static T _formatTime64T(const T& strFormat, time64_t tTime)
 {
     if (-1 == tTime)
-	{
+    {
         tTime = (time64_t)time(0);
-	}
+    }
 
-	tm atm;
+    tm atm;
     if (_localtime64_s(&atm, &tTime))
-	{
-		return L"";
-	}
+    {
+        return L"";
+    }
 
-	return _formatTime(atm, strFormat);
+    return _formatTime(atm, strFormat);
+}
+
+wstring tmutil::formatTime64(const wstring& strFormat, time64_t tTime)
+{
+    return _formatTime64T(strFormat, tTime);
 }
 
 string tmutil::formatTime64(const string& strFormat, time64_t tTime)
 {
-	if (-1 == tTime)
-	{
-		tTime = (time64_t)time(0);
-	}
-
-	tm atm;
-	if (_localtime64_s(&atm, &tTime))
-	{
-		return "";
-	}
-
-	return _formatTime(atm, strFormat);
+    return _formatTime64T(strFormat, tTime);
 }
 
 time64_t tmutil::transFileTime(unsigned long dwLowDateTime, unsigned long dwHighDateTime)
