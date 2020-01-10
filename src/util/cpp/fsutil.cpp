@@ -602,9 +602,36 @@ wstring fsutil::getModuleSubPath(const wstring& strSubPath, const wchar_t *pszMo
 
 #if !__winvc
 #include <QStandardPaths>
-wstring fsutil::getHomeDir()
+QString fsutil::getHomeDir()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::HomeLocation).toStdWString();
+    return QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+}
+
+static QString _getHomePath(const QString& qsSubDir)
+{
+    auto qsHomeDir = fsutil::getHomeDir();
+
+    if (!qsSubDir.isEmpty())
+    {
+        if (!fsutil::checkPathTail((wchar_t)qsSubDir.front().unicode()))
+        {
+            qsHomeDir.append(__wchDirSeparator);
+        }
+
+        qsHomeDir.append(qsSubDir);
+    }
+
+    return qsHomeDir;
+}
+
+string fsutil::getHomePath(const string& strSubDir)
+{
+    return _getHomePath(__S2Q(strSubDir)).toStdString();
+}
+
+wstring fsutil::getHomePath(const wstring& strSubDir)
+{
+    return _getHomePath(__WS2Q(strSubDir)).toStdWString();
 }
 #endif
 
