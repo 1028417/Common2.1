@@ -515,15 +515,14 @@ static string _getCwd()
 {
     //return QDir::currentPath().toStdWString();
 
-    string strCwd;
-    char *pCwd = getcwd(NULL, 0);
-    if (NULL != pCwd)
+    char pszCwd[MAX_PATH];
+    memzero(pszCwd);
+    if (getcwd(pszCwd, sizeof(pszCwd)) == NULL)
     {
-        strCwd = pCwd;
-        free(pCwd);
+        return "";
     }
 
-    return strCwd;
+    return pszCwd;
 }
 
 static string g_strWorkDir;
@@ -552,6 +551,8 @@ string fsutil::workDir()
 #if __windows
 string fsutil::getModuleDir(char *pszModuleName)
 {
+    //readlink("/proc/self/exe",
+
     char pszPath[MAX_PATH];
     memzero(pszPath);
     ::GetModuleFileNameA(::GetModuleHandleA(pszModuleName), pszPath, sizeof(pszPath));
