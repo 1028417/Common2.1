@@ -1082,7 +1082,7 @@ void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 		return;
 	}
 
-	m_vecAsyncTaskFlag.assign((size_t)nItemCount, FALSE);
+	m_vecAsyncTaskFlag.assign((UINT)nItemCount, FALSE);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (!isReportView())

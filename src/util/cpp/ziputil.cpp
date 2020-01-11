@@ -199,13 +199,7 @@ long CZipFile::unzip(const tagUnzfile& unzFile, const string& strDstFile)
         return nCount;
     }
 
-    OFStream obs(strDstFile, true);
-    if (!obs)
-    {
-        return -1;
-    }
-
-    return obs.writex(bbfFile);
+    return OFStream::writefile(strDstFile, true, bbfFile);
 }
 
 bool CZipFile::unzip(const wstring& strDstDir) const
@@ -245,9 +239,7 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 			{
 				return false;
 			}
-            OFStream ofs(t_strDstDir + unzfile.strPath, true);
-			__EnsureReturn(ofs, false);
-            if (!ofs.writex(buff, unzfile.uFileSize))
+            if (!OFStream::writefilex(t_strDstDir + unzfile.strPath, true, buff))
 			{
 				return false;
 			}
@@ -271,12 +263,10 @@ void CZipFile::close()
 static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 	, const function<int(const CByteBuffer&, CByteBuffer&)>& cb)
 {
-    IFStream ifs(strSrcFile);
-    __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData, (size_t)ifs);
-    __EnsureReturn(bbfData, 0);
-
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
+    __EnsureReturn(bbfData, -1);
+    
 	CByteBuffer bbfOutput;
 	int len = cb(bbfData, bbfOutput);
 	if (len < 0)
@@ -288,9 +278,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 		return 0;
 	}
 
-	OFStream ofs(strDstFile, true);
-	__EnsureReturn(ofs, -1);
-    if (!ofs.writex(bbfOutput, (size_t)len))
+	if (!OFStream::writefilex(strDstFile, true, bbfOutput, (size_t)len))
 	{
 		return -1;
 	}
@@ -343,17 +331,13 @@ long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
 #if !__winvc
 long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
-    IFStream ifs(strSrcFile);
-    __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData, (size_t)ifs.size());
-    __EnsureReturn(bbfData, 0);
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
+    __EnsureReturn(bbfData, -1);
 
     cauto baOutput = qCompress(bbfData, bbfData->size(), nCompressLecvel);
 
-    OFStream ofs(strDstFile, true);
-    __EnsureReturn(ofs, -1);
-    if (!ofs.writex(baOutput.data(), (size_t)baOutput.size()))
+    if (!OFStream::writefilex(strDstFile, true, baOutput.data(), (size_t)baOutput.size()))
 	{
 		return -1;
 	}
@@ -363,17 +347,13 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 
 long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
-    IFStream ifs(strSrcFile);
-    __EnsureReturn(ifs, -1);
     CByteBuffer bbfData;
-    (void)ifs.readex(bbfData, (size_t)ifs);
-    __EnsureReturn(bbfData, 0);
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
+    __EnsureReturn(bbfData, -1);
 
     cauto baOutput = qUncompress(bbfData, bbfData->size());
 
-    OFStream ofs(strDstFile, true);
-    __EnsureReturn(ofs, -1);
-    if (!ofs.writex(baOutput.data(), (size_t)baOutput.size()))
+    if (!OFStream::writefilex(strDstFile, true, baOutput.data(), (size_t)baOutput.size()))
 	{
 		return -1;
 	}
