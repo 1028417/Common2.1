@@ -264,8 +264,7 @@ static int _zcompressFile(const wstring& strSrcFile, const wstring& strDstFile
 	, const function<int(const CByteBuffer&, CByteBuffer&)>& cb)
 {
     CByteBuffer bbfData;
-    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
-    __EnsureReturn(bbfData, -1);
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0 && bbfData, -1);
     
 	CByteBuffer bbfOutput;
 	int len = cb(bbfData, bbfOutput);
@@ -332,8 +331,7 @@ long ziputil::zUncompressFile(const wstring& strSrcFile, const wstring& strDstFi
 long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile, int nCompressLecvel)
 {
     CByteBuffer bbfData;
-    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
-    __EnsureReturn(bbfData, -1);
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0 && bbfData, -1);
 
     cauto baOutput = qCompress(bbfData, bbfData->size(), nCompressLecvel);
 
@@ -348,8 +346,7 @@ long ziputil::qCompressFile(const wstring& strSrcFile, const wstring& strDstFile
 long ziputil::qUncompressFile(const wstring& strSrcFile, const wstring& strDstFile)
 {
     CByteBuffer bbfData;
-    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0, -1);
-    __EnsureReturn(bbfData, -1);
+    __EnsureReturn(IFStream::readfile(strSrcFile, bbfData)>0 && bbfData, -1);
 
     cauto baOutput = qUncompress(bbfData, bbfData->size());
 
