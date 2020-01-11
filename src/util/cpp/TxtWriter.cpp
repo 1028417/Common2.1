@@ -14,15 +14,15 @@ static const char __UCS2Head_BigEndian[]{ (char)0xfe, (char)0xff };
 
 bool CTxtWriter::_writeHead()
 {
-	if (E_TxtEncodeType::TET_UCS2_LittleEndian == m_eEncodeType)
+	if (_isUcsLittleEndian())
     {
         return m_ofs.writex(__UCS2Head_LittleEndian, sizeof __UCS2Head_LittleEndian);
 	}
-	else if (E_TxtEncodeType::TET_UCS2_BigEndian == m_eEncodeType)
+	else if (_isUcsBigEndian())
     {
         return m_ofs.writex(__UCS2Head_BigEndian, sizeof __UCS2Head_BigEndian);
 	}
-	else if (E_TxtEncodeType::TET_UTF8_WithBom == m_eEncodeType)
+	else if (_isUtf8WithBom())
     {
         return m_ofs.writex(__UTF8Bom, sizeof __UTF8Bom);
 	}
@@ -58,25 +58,11 @@ bool CTxtWriter::open(const string& strFile, bool bTrunc)
 	return true;
 }
 
-bool CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
+bool CTxtWriter::_write(const void *ptr, size_t len, bool bEndLine)
 {
-	if (len != 0)
+	if (!m_ofs.writex(ptr, len))
 	{
-		if (_isUnicode())
-		{
-			cauto str = strutil::toWstr(pStr);
-            if (!m_ofs.writex(str.c_str(), str.size() * 2))
-			{
-				return false;
-			}
-		}
-		else
-		{
-            if (!m_ofs.writex(pStr, len))
-			{
-				return false;
-			}
-		}
+		return false;
 	}
 
 	if (bEndLine)
@@ -94,42 +80,9 @@ bool CTxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
 	return true;
 }
 
-bool CTxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
-{
-	size_t size = 0;
-	if (len != 0)
-	{
-		if (E_TxtEncodeType::TET_Asc == m_eEncodeType)
-		{
-			cauto str = strutil::toStr(pStr);
-            size = m_ofs.writex(str.c_str(), str.size());
-		}
-		else if (_isUtf8())
-		{
-			cauto str = strutil::toUtf8(pStr);
-            size = m_ofs.writex(str.c_str(), str.size());
-		}
-		else
-		{
-            size = m_ofs.writex(pStr, len * 2);
-		}
-	}
-
-	if (bEndLine)
-	{
-		size += _writeEndLine();
-	}
-
-#if __isdebug
-    m_ofs.flush();
-#endif
-
-	return size;
-}
-
 bool CTxtWriter::_writeEndLine()
 {
-	if (_isUnicode())
+	if (_isUcsLittleEndian() || _isUcsBigEndian())
 	{
 		if (E_EOLFlag::eol_n == m_eEOLFlag)
 		{
@@ -191,34 +144,17 @@ static E_TxtHeadType _checkHead(const char *&lpData, size_t &len)
 	return E_TxtHeadType::THT_None;
 }
 
-static wstring _to_UCS2_BigEndian(const char *lpData, size_t len)
-{
-	TD_CharBuffer buff(len);
-	memcpy(buff, lpData, len);
-	char *ptr = buff;
-	char chr = 0;
-	for (size_t uIdx = 0; uIdx < len/2; uIdx++)
-	{
-		chr = *ptr;
-		*ptr = *(ptr+1);
-		
-		ptr++;
-		*ptr = chr;
-	}
-
-	return wstring((wchar_t*)buff.ptr(), len / 2);
-}
-
 void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
 {
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
     {
-        strText = strutil::toStr((wchar_t*)lpData, len / 2);
+        strText.append(strutil::toStr((const wchar_t*)lpData, len / 2));
     }
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
 	{
-        strText = strutil::toStr(_to_UCS2_BigEndian(lpData, len));
+		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
+        strText.append(strutil::toStr(str));
 	}
 	else
 	{
@@ -231,18 +167,19 @@ void CTxtReader::_readData(const char *lpData, size_t len, wstring& strText)
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
 	{
-		strText.append((wchar_t*)lpData, len / 2);
+		strText.append((const wchar_t*)lpData, len / 2);
 	}
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
 	{
-        strText = _to_UCS2_BigEndian(lpData, len);
+		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
+        strText.append(str);
 	}
 	else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType || strutil::checkUtf8(lpData, len))
 	{
-        strText = strutil::fromUtf8(lpData, len);
+        strText.append(strutil::fromUtf8(lpData, len));
 	}
 	else
 	{
-        strText = strutil::toWstr(lpData, len);
+        strText.append(strutil::toWstr(lpData, len));
 	}
 }

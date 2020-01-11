@@ -444,8 +444,18 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
 #if __winvc
     return g_utf8Convert.to_bytes(pStr, pStr+len);
 #else
-    return __W2Q(pStr, len).toUtf8().constData();
+    return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
+}
+
+wstring& strutil::transEndian(wstring& str)
+{
+	for (auto& wch : str)
+	{
+		wch = (wch << 8) | (wch >> 8);
+	}
+
+	return str;
 }
 
 wstring strutil::toWstr(const char *pStr, int len)
