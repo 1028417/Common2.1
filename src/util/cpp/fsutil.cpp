@@ -316,36 +316,57 @@ wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
     return strPath.substr(strBaseDir.size());
 }
 
-bool fsutil::existPath(const wstring& strPath, bool bDir)
+#if __windows
+inline static DWORD _getFileAttr(const wstring& strPath)
+{
+    return ::GetFileAttributesW(strPath.c_str());
+}
+
+inline static DWORD _getFileAttr(const string& strPath)
+{
+    return ::GetFileAttributesA(strPath.c_str());
+}
+#endif
+
+template <class S>
+inline static bool _existPath(const S& strPath, bool bDir)
 {
 #if __windows
-    DWORD dwFileAttr = ::GetFileAttributesW(strPath.c_str());
+    DWORD dwFileAttr = _getFileAttr(strPath);
     if (INVALID_FILE_ATTRIBUTES == dwFileAttr)
     {
         return false;
     }
 
-    return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;
+    if (bDir)
+    {
+        return dwFileAttr & FILE_ATTRIBUTE_DIRECTORY;
+    }
 
 #else
-    QFileInfo fi(__WS2Q(strPath));
+    QFileInfo fi(strutil::toQstr(strPath));
     if (!fi.exists())
     {
         return false;
     }
 
-    return fi.isDir() == bDir;
+    if (bDir)
+    {
+        return fi.isDir();
+    }
 #endif
+
+    return true;
 }
 
-bool fsutil::existDir(const wstring& strDir)
+bool fsutil::existPath(const wstring& strPath, bool bDir)
 {
-    return existPath(strDir, true);
+    return _existPath(strPath, bDir);
 }
 
-bool fsutil::existFile(const wstring& strFile)
+bool fsutil::existPath(const string& strPath, bool bDir)
 {
-    return existPath(strFile, false);
+    return _existPath(strPath, bDir);
 }
 
 #if __windows
