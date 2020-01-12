@@ -532,7 +532,17 @@ long long fsutil::fSeekTell64(FILE *pf, long long offset, int origin)
 #define chdir _chdir
 #endif
 
-static string _getCwd()
+bool fsutil::setWorkDir(const string& strWorkDir)
+{
+    if (chdir(strWorkDir.c_str()))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+string fsutil::workDir()
 {
     //return QDir::currentPath().toStdWString();
 
@@ -544,29 +554,6 @@ static string _getCwd()
     }
 
     return pszCwd;
-}
-
-static string g_strWorkDir;
-
-bool fsutil::setWorkDir(const string& strWorkDir)
-{
-    if (chdir(strWorkDir.c_str()))
-    {
-        return false;
-    }
-
-    g_strWorkDir = _getCwd();
-    return true;
-}
-
-string fsutil::workDir()
-{
-    if (g_strWorkDir.empty())
-    {
-        g_strWorkDir = _getCwd();
-    }
-
-    return g_strWorkDir;
 }
 
 //readlink("/proc/self/exe",
@@ -601,7 +588,7 @@ inline static T _getModuleSubPathT(const T& strSubPath, C pszModuleName)
 	{
 		if (!fsutil::checkPathTail(strSubPath.front()))
 		{
-			strModulePath.append(1, __chrBackSlant);
+            strModulePath.push_back(__chrBackSlant);
 		}
 
 		strModulePath.append(strSubPath);

@@ -202,7 +202,7 @@ long CZipFile::unzip(const tagUnzfile& unzFile, const string& strDstFile)
     return OFStream::writefile(strDstFile, true, bbfFile);
 }
 
-bool CZipFile::unzip(const wstring& strDstDir) const
+bool CZipFile::unzip(const string& strDstDir) const
 {
 	if (NULL == m_unzfile)
 	{
@@ -214,8 +214,8 @@ bool CZipFile::unzip(const wstring& strDstDir) const
 		return false;
 	}
 
-	string t_strDstDir(strutil::toStr(strDstDir));
-	if (strDstDir.empty() || !fsutil::checkPathTail(strDstDir.back()))
+    string t_strDstDir(strDstDir);
+    if (t_strDstDir.empty() || !fsutil::checkPathTail(t_strDstDir.back()))
 	{
 		t_strDstDir.push_back((char)__wchDirSeparator);
 	}

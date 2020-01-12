@@ -532,7 +532,7 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 			char_array_4[3] = char_array_3[2] & 0x3f;
 			for (i = 0; (i <4); i++)
 			{
-				strRet.append(1, strBase64Chars[char_array_4[i]]);
+                strRet.push_back(strBase64Chars[char_array_4[i]]);
 			}
 			i = 0;
 		}
@@ -551,14 +551,14 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 
 		for (j = 0; (j < i + 1); j++)
 		{
-			strRet.append(1, strBase64Chars[char_array_4[j]]);
+            strRet.push_back(strBase64Chars[char_array_4[j]]);
 		}
 
 		if (chrTail != '\0')
 		{
 			while ((i++ < 3))
 			{
-				strRet.append(1, chrTail);
+                strRet.push_back(chrTail);
 			}
 		}
 	}
