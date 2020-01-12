@@ -621,7 +621,7 @@ static QString _getHomePath(const QString& qsSubDir)
 
     if (!qsSubDir.isEmpty())
     {
-        if (!fsutil::checkPathTail((wchar_t)qsSubDir.front().unicode()))
+        if (!fsutil::checkPathTail((wchar_t)qsSubDir.at(0).unicode()))
         {
             qsHomeDir.append(__wchDirSeparator);
         }
