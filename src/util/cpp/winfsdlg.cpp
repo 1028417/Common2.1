@@ -232,7 +232,7 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 	m_strInitialDir = opt.strInitialDir;
 	m_ofn.lpstrInitialDir = m_strInitialDir.c_str();
 
-	::ZeroMemory(m_lpstrFileName, sizeof(m_lpstrFileName));
+	memzero(m_lpstrFileName);
 	if (!opt.strFileName.empty())
 	{
 		::lstrcat(m_lpstrFileName, opt.strFileName.c_str());
@@ -240,7 +240,7 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 	m_ofn.lpstrFile = m_lpstrFileName;
 	m_ofn.nMaxFile = sizeof(m_lpstrFileName) / sizeof(m_lpstrFileName[0]);
 
-    ::ZeroMemory(m_lpstrFilter, sizeof(m_lpstrFilter));
+	memzero(m_lpstrFilter);
 	m_ofn.lpstrFilter = m_lpstrFilter;
 	if (!opt.strFilter.empty())
 	{
@@ -313,7 +313,10 @@ wstring CFileDlg::ShowOpenSingle()
 		return L"";
 	}
 
-	return m_lpstrFileName;
+	wstring strFileName = m_lpstrFileName;
+	memzero(m_lpstrFileName);
+
+	return strFileName;
 }
 
 wstring CFileDlg::ShowOpenMulti(list<wstring>& lstFiles)
@@ -343,18 +346,27 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 		}
 	}
 
+	wstring strDir;
 	if (lstFiles.empty())
 	{
 		lstFiles.push_back(m_lpstrFileName);
 
-		return fsutil::GetParentDir(m_lpstrFileName);
+		strDir = fsutil::GetParentDir(m_lpstrFileName);
+	}
+	else
+	{
+		strDir = m_lpstrFileName;
+
+		for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
+		{
+			*itrFile = strDir + __wchDirSeparator + *itrFile;
+		}
 	}
 
-	wstring strDir = m_lpstrFileName;
-	for (list<wstring>::iterator itrFile = lstFiles.begin()++; itrFile != lstFiles.end(); itrFile++)
-	{
-		*itrFile = strDir + __wchDirSeparator + *itrFile;
-	}
+	memzero(m_lpstrFileName);
+
+	m_strInitialDir = strDir;
+	m_ofn.lpstrInitialDir = m_strInitialDir.c_str();
 
 	return strDir;
 }
