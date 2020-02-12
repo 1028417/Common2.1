@@ -345,6 +345,36 @@ wstring strutil::replaceChars_r(const wstring& str, const wstring& strFindChars,
     return strRet;
 }
 
+void strutil::eraseChar(wstring& str, wchar_t chrFind)
+{
+	for (auto itr = str.begin(); itr != str.end(); )
+	{
+		if (*itr == chrFind)
+		{
+			itr = str.erase(itr);
+		}
+		else
+		{
+			++itr;
+		}
+	}
+}
+
+void strutil::eraseChars(wstring& str, const wstring& strFindChars)
+{
+	for (auto itr=str.begin(); itr!=str.end(); )
+	{
+		if (wstring::npos != strFindChars.find(*itr))
+		{
+			itr = str.erase(itr);
+		}
+		else
+		{
+			++itr;
+		}
+	}
+}
+
 #if __winvc
 #include <codecvt>
 using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
