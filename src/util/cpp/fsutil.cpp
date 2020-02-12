@@ -428,6 +428,19 @@ bool fsutil::createDir(const string& strDir)
 	return _createDirT(strDir);
 }
 
+bool fsutil::removeDirTree(const wstring& strDir)
+{
+	(void)fsutil::findSubFile(strDir, [&](const wstring& strSubFile) {
+		(void)removeFile(strDir + __wchDirSeparator + strSubFile);
+	});
+
+	(void)fsutil::findSubDir(strDir, [&](const wstring& strSubDir) {
+		(void)removeDirTree(strDir + __wchDirSeparator + strSubDir);
+	});
+
+	return removeDir(strDir);
+}
+
 bool fsutil::removeDir(const wstring& strDir)
 {
 #if __windows
