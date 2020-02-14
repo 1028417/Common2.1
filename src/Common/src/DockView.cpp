@@ -417,6 +417,16 @@ BOOL CDockView::AddPage(CPage& Page)
 	return TRUE;
 }
 
+BOOL CDockView::RemovePage(CPage& Page)
+{
+	PageVector::iterator itPage = std::find(m_vctPages.begin(), m_vctPages.end(), &Page);
+	__EnsureReturn(itPage != m_vctPages.end(), FALSE);
+
+	(void)__super::RemovePage(*itPage);
+
+	return TRUE;
+}
+
 BOOL CDockView::SetActivePage(CPage& Page)
 {
 	int nActivePage = __super::GetActiveIndex();

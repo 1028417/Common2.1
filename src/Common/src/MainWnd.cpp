@@ -187,6 +187,13 @@ BOOL CMainWnd::AddPage(CPage& Page, E_DockViewType eViewType)
 	});
 }
 
+void CMainWnd::RemovePage(CPage& Page)
+{
+	m_mapDockViews.any([&](auto& pr) {
+		return pr.second->RemovePage(Page);
+	});
+}
+
 BOOL CMainWnd::ActivePage(CPage& Page)
 {
 	return m_mapDockViews.any([&](auto& pr) {
