@@ -201,13 +201,6 @@ BOOL CMainWnd::ActivePage(CPage& Page)
 	});
 }
 
-/*BOOL CMainWnd::SetPageTitle(CPage& Page, const CString& cstrTitle, int iImage)
-{
-	return m_mapDockViews.any([&](auto& pr) {
-		return pr.second->SetPageTitle(Page, cstrTitle, iImage);
-	});
-}*/
-
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
 	if (0 != m_WndInfo.uMinWidth && 0 != m_WndInfo.uMinHeight)
