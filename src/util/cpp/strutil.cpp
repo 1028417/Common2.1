@@ -331,40 +331,11 @@ void strutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t ch
     }
 }
 
-wstring strutil::replaceChar_r(const wstring& str, wchar_t chrFind, wchar_t chrReplace)
-{
-    wstring strRet(str);
-    replaceChar(strRet, chrFind, chrReplace);
-    return strRet;
-}
-
-wstring strutil::replaceChars_r(const wstring& str, const wstring& strFindChars, wchar_t chrReplace)
-{
-    wstring strRet(str);
-    replaceChars(strRet, strFindChars, chrReplace);
-    return strRet;
-}
-
 void strutil::eraseChar(wstring& str, wchar_t chrFind)
 {
 	for (auto itr = str.begin(); itr != str.end(); )
 	{
 		if (*itr == chrFind)
-		{
-			itr = str.erase(itr);
-		}
-		else
-		{
-			++itr;
-		}
-	}
-}
-
-void strutil::eraseChars(wstring& str, const wstring& strFindChars)
-{
-	for (auto itr=str.begin(); itr!=str.end(); )
-	{
-		if (wstring::npos != strFindChars.find(*itr))
 		{
 			itr = str.erase(itr);
 		}
