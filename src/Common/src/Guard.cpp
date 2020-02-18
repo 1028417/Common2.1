@@ -4,13 +4,13 @@
 
 #include "Common/App.h"
 
-CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
+CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bLockUpdate)
 	: m_wnd(wnd)
-	, m_bFlag(bFlag)
+	, m_bLockUpdate(bLockUpdate)
 {
 	if (m_wnd)
 	{
-		if (m_bFlag)
+		if (m_bLockUpdate)
 		{
 			m_bLocked = TRUE == wnd.LockWindowUpdate();
 		}
@@ -24,16 +24,10 @@ CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bFlag)
 
 CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard& other)
 	: m_wnd(other.m_wnd)
-	, m_bFlag(other.m_bFlag)
+	, m_bLockUpdate(other.m_bLockUpdate)
 	, m_bLocked(other.m_bLocked)
 {
-	other.m_bFlag = false;
-}
-
-CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard&& other)
-	: CRedrawLockGuard((CRedrawLockGuard&)other)
-{
-	other.m_bFlag = false;
+	other.m_bLocked = false;
 }
 
 CRedrawLockGuard::~CRedrawLockGuard()
@@ -47,7 +41,7 @@ void CRedrawLockGuard::Unlock()
 	{
 		m_bLocked = false;
 
-		if (m_bFlag)
+		if (m_bLockUpdate)
 		{
 			m_wnd.UnlockWindowUpdate();
 		}
