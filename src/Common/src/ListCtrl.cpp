@@ -3,8 +3,6 @@
 
 #include "Common/ListCtrl.h"
 
-CCompatableFont g_fontCustom;
-
 BEGIN_MESSAGE_MAP(CListHeader, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 END_MESSAGE_MAP()
@@ -734,12 +732,14 @@ bool CObjectList::GetRenameText(UINT uItem, wstring& strRenameText)
 	return true;
 }
 
+static CCompatableFont m_fontCustom;
+
 void CObjectList::SetCustomFont(CDC& dc, float fFontSizeOffset, bool bUnderline)
 {
-	(void)g_fontCustom.DeleteObject();
-	if (g_fontCustom.create(m_font, fFontSizeOffset, 0, false, bUnderline))
+	(void)m_fontCustom.DeleteObject();
+	if (m_fontCustom.create(m_font, fFontSizeOffset, 0, false, bUnderline))
 	{
-		(void)dc.SelectObject(g_fontCustom);
+		(void)dc.SelectObject(m_fontCustom);
 	}
 }
 

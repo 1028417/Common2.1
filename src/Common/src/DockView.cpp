@@ -105,7 +105,7 @@ void CViewTab::SetTabStyle(E_TabStyle eTabStyle)
 
 BOOL CViewTab::SetFontSize(float fFontSizeOffset)
 {	
-	return m_font.setFont(*this, fFontSizeOffset);
+	return m_font.setFont(*this, fFontSizeOffset, 401);
 }
 
 void CViewTab::SetTrackMouse(const CB_TrackMouseEvent& cbMouseEvent)

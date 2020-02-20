@@ -424,11 +424,11 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 		return false;
 	}
 
-	logFont.lfQuality = ANTIALIASED_QUALITY;
-
+	logFont.lfQuality = CLEARTYPE_NATURAL_QUALITY; // CLEARTYPE_QUALITY
+	logFont.lfOutPrecision = OUT_TT_PRECIS; // OUT_TT_ONLY_PRECIS
+	logFont.lfClipPrecision = CLIP_CHARACTER_PRECIS;
 	logFont.lfCharSet = DEFAULT_CHARSET;
-
-	wcscpy_s(logFont.lfFaceName, L"Î¢ÈíÑÅºÚ");
+	//logFont.lfPitchAndFamily = DEFAULT_PITCH;
 
 	int nOffset = (int)round(logFont.lfHeight*abs(m_fFontSizeOffset));
 	if (m_fFontSizeOffset > 0)
@@ -440,7 +440,7 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 		logFont.lfHeight -= nOffset;
 	}
 
-	if (0 != m_lfWeight)
+	if (m_lfWeight >= 0)
 	{
 		logFont.lfWeight = m_lfWeight;
 	}
@@ -459,7 +459,19 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 	{
 		cb(logFont);
 	}
-		
+
+	wstring	strFaceName = L"Î¢ÈíÑÅºÚ";
+	if (400 == logFont.lfWeight)
+	{
+		strFaceName.append(L" Semilight");
+	}
+	else if (logFont.lfWeight < 400)
+	{
+		strFaceName = L"Î¢ÈíÑÅºÚ Light";
+	}
+	
+	wcscpy_s(logFont.lfFaceName, strFaceName.c_str());
+
 	if (!CreateFontIndirect(&logFont))
 	{
 		return false;
