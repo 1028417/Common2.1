@@ -467,7 +467,7 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 	}
 	else if (logFont.lfWeight < 400)
 	{
-		strFaceName = L"Î¢ÈíÑÅºÚ Light";
+		strFaceName.append(L" Light");
 	}
 	
 	wcscpy_s(logFont.lfFaceName, strFaceName.c_str());
