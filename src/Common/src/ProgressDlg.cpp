@@ -158,7 +158,7 @@ void CProgressDlg::OnCancel()
 {
 	if (m_bFinished)
 	{
-		__super::OnOK();
+		CDialog::OnOK();
 		return;
 	}
 	
@@ -179,7 +179,7 @@ void CProgressDlg::OnCancel()
 		(void)CMainApp::GetMainApp()->DoEvents(); // ±ØÐëµÄ
 	}
 
-	__super::OnCancel();
+	CDialog::OnCancel();
 }
 
 void CProgressDlg::Close()

@@ -174,7 +174,7 @@ Copy /Y "$(ProjectDir)$(OutDir)..\libs\$(TargetName).lib" "$(ProjectDir)$(OutDir
     <ClInclude Include="..\..\inc\Common\App.h" />
     <ClInclude Include="..\..\inc\Common\CDispatch.h" />
     <ClInclude Include="..\..\inc\Common\Common.h" />
-    <ClInclude Include="..\..\inc\Common\DialogT.h" />
+    <ClInclude Include="..\..\inc\Common\TDialog.h" />
     <ClInclude Include="..\..\inc\Common\DockView.h" />
     <ClInclude Include="..\..\inc\Common\DragDrop.h" />
     <ClInclude Include="..\..\inc\Common\Guard.h" />

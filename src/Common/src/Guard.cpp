@@ -412,11 +412,6 @@ bool CMenuGuard::clonePopup(CWnd *pWnd, UINT uItemHeight, float fFontSize)
 
 bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 {
-	if (NULL != m_hObject)
-	{
-		return false;
-	}
-
 	LOGFONT logFont;
 	::ZeroMemory(&logFont, sizeof(logFont));
 	if (0 == font.GetLogFont(&logFont))
@@ -471,6 +466,11 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 	}
 	
 	wcscpy_s(logFont.lfFaceName, strFaceName.c_str());
+
+	if (m_hObject)
+	{
+		this->DeleteObject();
+	}
 
 	if (!CreateFontIndirect(&logFont))
 	{
@@ -554,14 +554,11 @@ bool CCompatableFont::create(CWnd& wnd, float fFontSizeOffset, LONG lfWeight, bo
 
 bool CCompatableFont::setFont(CWnd& wnd, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
 {
-	if (NULL == m_hObject)
+	if (!create(wnd, fFontSizeOffset, lfWeight, bItalic, bUnderline))
 	{
-		if (!create(wnd, fFontSizeOffset, lfWeight, bItalic, bUnderline))
-		{
-			return false;
-		}
+		return false;
 	}
-
+	
 	(void)wnd.SetFont(this);
 
 	return true;

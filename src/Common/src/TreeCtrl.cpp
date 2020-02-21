@@ -12,6 +12,8 @@ void CBaseTree::PreSubclassWindow()
 {
 	__super::PreSubclassWindow();
 
+	SetFontSize(0);
+
 	(void)ModifyStyle(0, TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS);
 }
 

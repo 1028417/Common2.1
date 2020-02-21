@@ -74,9 +74,6 @@
     <ClInclude Include="..\..\inc\Common\Common.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\Common\DialogT.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\Common\Guard.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\Common\MainWnd.h">
       <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\Common\TDialog.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

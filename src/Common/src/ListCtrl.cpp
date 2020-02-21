@@ -38,7 +38,7 @@ BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
 void CObjectList::PreSubclassWindow()
 {
 	__super::PreSubclassWindow();
-
+	
 	(void)ModifyStyle(0, LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS);
 
 	(void)SetExtendedStyle(GetExtendedStyle()
@@ -90,12 +90,9 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 BOOL CObjectList::InitFont(COLORREF crText, float fFontSizeOffset)
 {
 	__AssertReturn(SetTextColor(crText), FALSE);
-
-	if (0 != fFontSizeOffset)
-	{
-		__AssertReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
-	}
-
+	
+	__AssertReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
+	
 	__AssertReturn(m_fontUnderline.create(*this, 0, 0, false, true), FALSE);
 
 	return TRUE;
