@@ -194,11 +194,28 @@ void CMainWnd::RemovePage(CPage& Page)
 	});
 }
 
-BOOL CMainWnd::ActivePage(CPage& Page)
+BOOL CMainWnd::ActivePage(CPage& Page, bool bForceFocus)
 {
-	return m_mapDockViews.any([&](auto& pr) {
-		return pr.second->SetActivePage(Page);
-	});
+	if (NULL == Page.m_hWnd)
+	{
+		return m_mapDockViews.any([&](auto& pr) {
+			return pr.second->SetActivePage(Page);
+		});
+	}
+	else if (!Page.IsWindowVisible())
+	{
+		auto pParent = Page.GetParentSheet();
+		__EnsureReturn(pParent, FALSE);
+		pParent->SetActivePage(&Page);
+
+		(void)Page.SetFocus();
+	}
+	else if (bForceFocus)
+	{
+		(void)Page.SetFocus();
+	}
+
+	return TRUE;
 }
 
 void CMainWnd::OnGetMinMaxInfo(MINMAXINFO* lpMMI)

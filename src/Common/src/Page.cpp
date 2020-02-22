@@ -34,31 +34,6 @@ void CPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 }
 
-BOOL CPage::Active(bool bForceFocus)
-{
-	if (NULL == this->m_hWnd)
-	{
-		CMainWnd *pMainWnd = CMainWnd::getMainWnd();
-		__EnsureReturn(pMainWnd, FALSE);
-
-		__EnsureReturn(pMainWnd->ActivePage(*this), FALSE);
-	}
-	else if (!::IsWindowVisible(this->m_hWnd))
-	{
-		auto pParent = GetParentSheet();
-		__EnsureReturn(pParent, FALSE);
-		pParent->SetActivePage(this);
-
-		(void)this->SetFocus();
-	}
-	else if (bForceFocus)
-	{
-		(void)this->SetFocus();
-	}
-
-	return TRUE;
-}
-
 void CPage::SetTitle(const CString& cstrTitle, int iImage)
 {
 	m_cstrTitle = cstrTitle; // 可能是不附在DockView上的独立view
