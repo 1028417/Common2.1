@@ -385,6 +385,11 @@ template <class T>
 static bool _createDirT(const T& strDir)
 {
 #if __windows
+	if (strDir.size() <= 3)
+	{
+		return false;
+	}
+
 	if (!CreateDirectoryT(strDir.c_str()))
 	{
 		auto ret = ::GetLastError();

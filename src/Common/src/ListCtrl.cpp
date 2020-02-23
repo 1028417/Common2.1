@@ -1079,7 +1079,7 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
 		return;
 	}
 
-	m_vecAsyncTaskFlag.assign((UINT)nItemCount, FALSE);
+	m_vecAsyncTaskResult.assign((UINT)nItemCount, -1);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (!isReportView())
@@ -1093,31 +1093,29 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
 			return false;
 		}
 
-		UINT uCount = MIN((UINT)GetItemCount(), m_vecAsyncTaskFlag.size());
+		UINT uCount = MIN((UINT)GetItemCount(), m_vecAsyncTaskResult.size());
 		for (UINT uItem = (UINT)nTopItem; uItem < uCount; uItem++)
 		{
-			BOOL& bAsyncTaskFlag = m_vecAsyncTaskFlag[uItem];
-			if (bAsyncTaskFlag)
+			auto& nAsyncTaskResult = m_vecAsyncTaskResult[uItem];
+			if (nAsyncTaskResult >= 0)
 			{
 				continue;
 			}
-			bAsyncTaskFlag = TRUE;
-
-			cb(uItem);
+			
+			nAsyncTaskResult = cb(uItem);
 						
 			return true;
 		}
 
 		for (UINT uItem = 0; uItem < (UINT)nTopItem; uItem++)
 		{
-			BOOL& bAsyncTaskFlag = m_vecAsyncTaskFlag[uItem];
-			if (bAsyncTaskFlag)
+			auto& nAsyncTaskResult = m_vecAsyncTaskResult[uItem];
+			if (nAsyncTaskResult >= 0)
 			{
 				continue;
 			}
-			bAsyncTaskFlag = TRUE;
 
-			cb(uItem);
+			nAsyncTaskResult = cb(uItem);
 			
 			return true;
 		}
