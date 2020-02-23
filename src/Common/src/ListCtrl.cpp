@@ -1071,7 +1071,7 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 	return htinfo;
 }
 
-void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
+void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
 	int nItemCount = GetItemCount();
 	if (0 == nItemCount)
@@ -1079,7 +1079,7 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
 		return;
 	}
 
-	m_vecAsyncTaskResult.assign((UINT)nItemCount, -1);
+	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (!isReportView())
@@ -1093,62 +1093,52 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
 			return false;
 		}
 
-		UINT uCount = MIN((UINT)GetItemCount(), m_vecAsyncTaskResult.size());
+		UINT uCount = MIN((UINT)GetItemCount(), m_vecAsyncTaskStatus.size());
 		for (UINT uItem = (UINT)nTopItem; uItem < uCount; uItem++)
 		{
-			auto& nAsyncTaskResult = m_vecAsyncTaskResult[uItem];
-			if (nAsyncTaskResult >= 0)
+			auto& bAsyncTaskStatus = m_vecAsyncTaskStatus[uItem];
+			if (!bAsyncTaskStatus)
 			{
-				continue;
+				bAsyncTaskStatus = TRUE;
+				cb(uItem);
+				return true;
 			}
-			
-			nAsyncTaskResult = cb(uItem);
-						
-			return true;
 		}
 
 		for (UINT uItem = 0; uItem < (UINT)nTopItem; uItem++)
 		{
-			auto& nAsyncTaskResult = m_vecAsyncTaskResult[uItem];
-			if (nAsyncTaskResult >= 0)
+			auto& bAsyncTaskStatus = m_vecAsyncTaskStatus[uItem];
+			if (!bAsyncTaskStatus)
 			{
-				continue;
+				bAsyncTaskStatus = TRUE;
+				cb(uItem);
+				return true;
 			}
-
-			nAsyncTaskResult = cb(uItem);
-			
-			return true;
 		}
 
 		return false;
 	});
 }
 
-void CObjectList::AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
+void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
 	_AsyncTask(uElapse, [&, cb](UINT uItem) {
-		bool bRet = cb(uItem);
+		cb(uItem);
 
 		Update(uItem);
-
-		return bRet;
 	});
 }
 
-void CObjectList::AsyncTask(UINT uElapse, cfn_bool_t<CListObject&> cb)
+void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<CListObject&> cb)
 {
 	AsyncTask(uElapse, [&, cb](UINT uItem) {
-		bool bRet = false;
-
 		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
-			bRet = cb(*pObject);
+			cb(*pObject);
 			
 			UpdateItem(uItem, pObject);
 		}
-
-		return bRet;
 	});
 }
 
