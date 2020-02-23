@@ -1071,7 +1071,7 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 	return htinfo;
 }
 
-void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
+void CObjectList::_AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
 {
 	int nItemCount = GetItemCount();
 	if (0 == nItemCount)
@@ -1126,17 +1126,31 @@ void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 	});
 }
 
-void CObjectList::AsyncTask(UINT uElapse, const function<bool(CListObject& object)>& cb)
+void CObjectList::AsyncTask(UINT uElapse, cfn_bool_t<UINT> cb)
+{
+	_AsyncTask(uElapse, [&, cb](UINT uItem) {
+		bool bRet = cb(uItem);
+
+		Update(uItem);
+
+		return bRet;
+	});
+}
+
+void CObjectList::AsyncTask(UINT uElapse, cfn_bool_t<CListObject&> cb)
 {
 	AsyncTask(uElapse, [&, cb](UINT uItem) {
+		bool bRet = false;
+
 		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
-			if (cb(*pObject))
-			{
-				UpdateItem(uItem, pObject);
-			}
+			bRet = cb(*pObject);
+			
+			UpdateItem(uItem, pObject);
 		}
+
+		return bRet;
 	});
 }
 
