@@ -1,10 +1,28 @@
 
 #include "util.h"
 
+time32_t tmutil::time32()
+{
+#if __windows
+	return _time32(NULL);
+#else
+	return (time32_t)time(NULL);
+#endif
+}
+
+time64_t tmutil::time64()
+{
+#if __windows
+	return _time64(NULL);
+#else
+	return time(NULL);
+#endif
+}
+
 void tmutil::getCurrentTime(int& nHour, int& nMinute)
 {
     tagTM tm;
-    timeToTM((time32_t)time(0), tm);
+    timeToTM(time32(), tm);
 
     nHour = tm.tm_hour;
     nMinute = tm.tm_min;
@@ -60,7 +78,7 @@ inline static T _formatTimeT(const T& strFormat, time32_t tTime)
 {
     if (-1 == tTime)
 	{
-        tTime = (time32_t)time(0);
+        tTime = time32();
 	}
 
     struct tm _tm;
@@ -108,7 +126,7 @@ inline static T _formatTime64T(const T& strFormat, time64_t tTime)
 {
     if (-1 == tTime)
     {
-        tTime = (time64_t)time(0);
+        tTime = time64();
     }
 
     tm atm;
