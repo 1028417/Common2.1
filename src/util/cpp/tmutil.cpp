@@ -78,7 +78,7 @@ inline static T _formatTimeT(const T& strFormat, time32_t tTime)
 {
     if (-1 == tTime)
 	{
-        tTime = time32();
+        tTime = tmutil::time32();
 	}
 
     struct tm _tm;
@@ -126,7 +126,7 @@ inline static T _formatTime64T(const T& strFormat, time64_t tTime)
 {
     if (-1 == tTime)
     {
-        tTime = time64();
+        tTime = tmutil::time64();
     }
 
     tm atm;
