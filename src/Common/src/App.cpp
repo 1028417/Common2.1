@@ -65,7 +65,7 @@ void CMainApp::sync(const CB_Sync& cb)
 	::SleepEx(-1, TRUE);
 }
 
-void CMainApp::sync(UINT uDelayTime, const CB_Sync& cb)
+void CMainApp::async(UINT uDelayTime, const CB_Sync& cb)
 {
 	if (0 == uDelayTime)
 	{
@@ -564,7 +564,7 @@ int CMainApp::showMsg(const wstring& strMsg, const wstring& strTitle, UINT nType
 		strText.append(nAppend, ' ');
 	}
 
-	return pWnd->MessageBox(strText.c_str(), (L" " + strTitle).c_str(), nType);
+	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
 
 void CMainApp::showMsg(const wstring& strMsg, class CPage& wndPage)

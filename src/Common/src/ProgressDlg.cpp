@@ -3,6 +3,9 @@
 
 #include "Common/ProgressDlg.h"
 
+#define WM_SetProgress WM_USER+1
+#define WM_SetStatusText WM_USER+2
+
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -13,8 +16,6 @@ BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
 	ON_MESSAGE(WM_SetProgress, &CProgressDlg::OnSetProgress)
 
 	ON_MESSAGE(WM_SetStatusText, &CProgressDlg::OnSetStatusText)
-
-	ON_MESSAGE(WM_EndProgress, &CProgressDlg::OnEndProgress)
 END_MESSAGE_MAP()
 
 INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
@@ -46,8 +47,11 @@ BOOL CProgressDlg::OnInitDialog()
 
 		if (!m_bFinished)
 		{
-			(void)this->PostMessage(WM_EndProgress);
-		}	
+			CMainApp::GetMainApp()->sync([=]() {
+				_endProgress();
+			});
+			m_bFinished = true;
+		}
 	}, false);
 
 	return TRUE;
@@ -129,17 +133,6 @@ void CProgressDlg::_updateProgress()
 	(void)m_wndProgressCtrl.SetPos(m_uProgress);
 }
 
-LRESULT CProgressDlg::OnEndProgress(WPARAM wParam, LPARAM lParam)
-{
-	_endProgress();
-	
-	m_bFinished = true;
-	
-	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
-
-	return 0;
-}
-
 void CProgressDlg::_endProgress()
 {
 	if (0 != m_uMaxProgress)
@@ -152,6 +145,8 @@ void CProgressDlg::_endProgress()
 		m_wndProgressCtrl.SetRange(0, 1);
 		(void)m_wndProgressCtrl.SetPos(1);
 	}
+
+	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 }
 
 void CProgressDlg::OnCancel()

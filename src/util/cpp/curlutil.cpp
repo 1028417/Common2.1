@@ -108,13 +108,13 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
 #endif
 #endif*/
 
-    if (curlOpt.timeout > 0)
-    {
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, curlOpt.timeout);
-    }
     if (curlOpt.connectTimeout > 0)
     {
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, curlOpt.connectTimeout);
+    }
+    if (curlOpt.timeout > 0)
+    {
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, curlOpt.timeout);
     }
 
     if (curlOpt.lowSpeedLimit > 0)
@@ -269,7 +269,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 
         if (cbProgress)
         {
-            if (!cbProgress(dltotal, dlnow))
+            if (!cbProgress(m_beginTime, dltotal, dlnow))
             {
                 return -1;
             }
