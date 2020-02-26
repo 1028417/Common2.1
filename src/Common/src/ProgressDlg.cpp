@@ -159,7 +159,7 @@ void CProgressDlg::OnCancel()
 	
 	this->pause(true);
 
-	if (IDYES != this->showMsgBox(L"确认取消?", MB_YESNO))
+	if (IDYES != this->msgBox(L"确认取消?", MB_YESNO))
 	{
 		this->pause(false);
 		return;

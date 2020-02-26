@@ -548,7 +548,7 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
 
-int CMainApp::showMsg(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
+int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
 {
 	if (NULL == pWnd)
 	{
@@ -567,12 +567,12 @@ int CMainApp::showMsg(const wstring& strMsg, const wstring& strTitle, UINT nType
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
 
-void CMainApp::showMsg(const wstring& strMsg, class CPage& wndPage)
+void CMainApp::msgBox(const wstring& strMsg, class CPage& wndPage)
 {
 	showMsg(strMsg, (wstring)wndPage.GetTitle(), &wndPage);
 }
 
-bool CMainApp::showConfirmMsg(const wstring& strMsg, class CPage& wndPage)
+bool CMainApp::confirmBox(const wstring& strMsg, class CPage& wndPage)
 {
-	return showConfirmMsg(strMsg, (wstring)wndPage.GetTitle());
+	return confirmBox(strMsg, (wstring)wndPage.GetTitle());
 }
