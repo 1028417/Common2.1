@@ -569,7 +569,7 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 
 void CMainApp::msgBox(const wstring& strMsg, class CPage& wndPage)
 {
-	showMsg(strMsg, (wstring)wndPage.GetTitle(), &wndPage);
+	msgBox(strMsg, (wstring)wndPage.GetTitle(), &wndPage);
 }
 
 bool CMainApp::confirmBox(const wstring& strMsg, class CPage& wndPage)
