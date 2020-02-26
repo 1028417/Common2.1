@@ -1,28 +1,6 @@
 ﻿
 #include "util.h"
 
-void fsutil::trimPathTail(wstring& strPath)
-{
-    if (!strPath.empty())
-    {
-        if (checkPathTail(strPath.back()))
-        {
-            strPath.pop_back();
-        }
-    }
-}
-
-void fsutil::trimPathTail(string& strPath)
-{
-    if (!strPath.empty())
-    {
-        if (checkPathTail(strPath.back()))
-        {
-            strPath.pop_back();
-        }
-    }
-}
-
 FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 {
 #if __windows
@@ -502,11 +480,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #else
     if (existFile(strDstFile))
     {
-        wstring t_strSrcFile = strSrcFile;
-        wstring t_strDstFile = strDstFile;
-        transFSSlant(t_strSrcFile);
-        transFSSlant(t_strDstFile);
-        if (!strutil::matchIgnoreCase(t_strSrcFile, t_strDstFile))
+        //if (!strutil::matchIgnoreCase(transFSSlant_r(strSrcFile), transFSSlant_r(strDstFile)))
         {
             if (!removeFile(strDstFile))
             {
