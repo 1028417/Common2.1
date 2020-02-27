@@ -28,7 +28,9 @@ BOOL CMainWnd::Create(tagMainWndInfo& MainWndInfo)
 
 	__AssertReturn(this->CreateEx(WS_EX_OVERLAPPEDWINDOW, lpszClassName, m_WndInfo.strText.c_str()
 		, dwStyle, 0, 0, m_WndInfo.uWidth, m_WndInfo.uHeight, NULL, m_WndInfo.hMenu), FALSE);
-	
+
+	m_font.setFont(*this);
+
 	return TRUE;
 }
 

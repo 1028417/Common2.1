@@ -361,9 +361,11 @@ BOOL CDockView::Create()
 	}
 
 	__AssertReturn(__super::Create(m_pParentWnd, dwStyle, WS_EX_CONTROLPARENT), FALSE);
+	m_font.setFont(*this);
 
 	__AssertReturn(m_wndTabCtrl.SubclassWindow(this->GetTabControl()->GetSafeHwnd()), FALSE);
-	
+	m_wndTabCtrl.SetFont(&m_font);
+
 	__AssertReturn(m_wndTabCtrl.init(m_ViewStyle.TabStyle), FALSE);
 
 	return TRUE;

@@ -457,7 +457,7 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 	{
 		strFaceName.append(L" Light");
 	}
-	
+
 	wcscpy_s(logFont.lfFaceName, strFaceName.c_str());
 
 	if (m_hObject)
