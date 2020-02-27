@@ -319,12 +319,7 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	{
 		dc.SetBkMode(TRANSPARENT);
 
-		CFont *pFontPrev = dc.GetCurrentFont();
-		CCompatableFont font;
-		if (font.create(*pFontPrev, m_bTopMenu ? m_fTopFontSize : m_fFontSize))
-		{
-			(void)dc.SelectObject(&font);
-		}
+		CDCFontGuard DCFontGuard(dc, m_bTopMenu ? m_fTopFontSize : m_fFontSize);
 
 		if (m_bTopMenu)
 		{
@@ -351,8 +346,6 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 			this->GetMenuString((UINT)nItemID, strText, MF_BYCOMMAND);
 		}
 		dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		
-		(void)dc.SelectObject(pFontPrev);
 	}
 }
 
@@ -488,7 +481,7 @@ bool CCompatableFont::_create(CDC& dc, const CB_CompatableFont& cb)
 		return false;
 	}
 
-	return create(*pFont, cb);
+	return _create(*pFont, cb);
 }
 
 bool CCompatableFont::_create(CWnd& wnd, const CB_CompatableFont& cb)
@@ -499,27 +492,12 @@ bool CCompatableFont::_create(CWnd& wnd, const CB_CompatableFont& cb)
 		return false;
 	}
 
-	if (!create(*pFont, cb))
+	if (!_create(*pFont, cb))
 	{
 		return false;
 	}
 	
 	return true;
-}
-
-bool CCompatableFont::create(CFont& font, const CB_CompatableFont& cb)
-{
-	return _create(font, cb);
-}
-
-bool CCompatableFont::create(CDC& dc, const CB_CompatableFont& cb)
-{
-	return _create(dc, cb);
-}
-
-bool CCompatableFont::create(CWnd& wnd, const CB_CompatableFont& cb)
-{
-	return _create(wnd, cb);
 }
 
 bool CCompatableFont::create(CFont& font, float fFontSizeOffset, LONG lfWeight, bool bItalic, bool bUnderline)
