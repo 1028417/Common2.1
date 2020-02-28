@@ -543,22 +543,18 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 
 	wstring strText(L"  ");
 	strText.append(strMsg);
+	strutil::replace(strText, L"\n", L"  \n  ");
 
-	int nAppend = (50 - (int)strMsg.size()) / 2;
-	if (nAppend > 0)
+	if (strText.find('\n') == wstring::npos)
 	{
-		strText.append(nAppend, ' ');
+		int nAppend = (50 - (int)strMsg.size()) / 2;
+		if (nAppend > 0)
+		{
+			strText.append(nAppend, ' ');
+		}
 	}
 
+	strText.append(L"\n");
+
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
-}
-
-void CMainApp::msgBox(const wstring& strMsg, class CPage& wndPage)
-{
-	msgBox(strMsg, (wstring)wndPage.GetTitle(), &wndPage);
-}
-
-bool CMainApp::confirmBox(const wstring& strMsg, class CPage& wndPage)
-{
-	return confirmBox(strMsg, (wstring)wndPage.GetTitle());
 }
