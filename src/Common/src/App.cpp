@@ -541,17 +541,20 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 		pWnd = CMainApp::GetMainApp()->m_pMainWnd;
 	}
 
-	wstring strText(L"  ");
-	strText.append(strMsg);
-	strutil::replace(strText, L"\n", L"  \n  ");
+	wstring strText(L"    ");
+	strText.append(strMsg).append(L"    ");
 
 	if (strText.find('\n') == wstring::npos)
 	{
-		int nAppend = (50 - (int)strMsg.size()) / 2;
+		int nAppend = (80 - (int)strText.size()) / 2;
 		if (nAppend > 0)
 		{
 			strText.append(nAppend, ' ');
 		}
+	}
+	else
+	{
+		strutil::replace(strText, L"\n", L"    \n    ");
 	}
 
 	strText.append(L"\n ");
