@@ -108,7 +108,7 @@ string tmutil::formatTime(const string& strFormat, time32_t tTime)
 }
 
 #if __windows
-bool tmutil::time64ToTM(time64_t time, tagTM& tm)
+bool tmutil::timeToTM(time64_t time, tagTM& tm)
 {
     struct tm _tm;
     if (_localtime64_s(&_tm, &time))
@@ -138,12 +138,12 @@ inline static T _formatTime64T(const T& strFormat, time64_t tTime)
     return _formatTime(atm, strFormat);
 }
 
-wstring tmutil::formatTime64(const wstring& strFormat, time64_t tTime)
+wstring tmutil::formatTime(const wstring& strFormat, time64_t tTime)
 {
     return _formatTime64T(strFormat, tTime);
 }
 
-string tmutil::formatTime64(const string& strFormat, time64_t tTime)
+string tmutil::formatTime(const string& strFormat, time64_t tTime)
 {
     return _formatTime64T(strFormat, tTime);
 }
