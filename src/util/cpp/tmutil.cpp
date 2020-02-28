@@ -4,7 +4,7 @@
 void tmutil::getCurrentTime(int& nHour, int& nMinute)
 {
     tagTM tm;
-    timeToTM(__time, tm);
+    timeToTM(time(0), tm);
 
     nHour = tm.tm_hour;
     nMinute = tm.tm_min;
