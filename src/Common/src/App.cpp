@@ -65,20 +65,6 @@ void CMainApp::sync(const CB_Sync& cb)
 	::SleepEx(-1, TRUE);
 }
 
-void CMainApp::async(UINT uDelayTime, const CB_Sync& cb)
-{
-	if (0 == uDelayTime)
-	{
-		_sync(cb);
-	}
-	else
-	{
-		_sync([=]() {
-			__async(uDelayTime, cb);
-		});
-	}
-}
-
 void CMainApp::thread(cfn_void cb)
 {
 	bool bExit = false;

@@ -4,7 +4,7 @@
 
 #include "Common/App.h"
 
-CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bLockUpdate)
+CRedrawLock::CRedrawLock(CWnd& wnd, bool bLockUpdate)
 	: m_wnd(wnd)
 	, m_bLockUpdate(bLockUpdate)
 {
@@ -22,7 +22,7 @@ CRedrawLockGuard::CRedrawLockGuard(CWnd& wnd, bool bLockUpdate)
 	}
 }
 
-CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard& other)
+CRedrawLock::CRedrawLock(CRedrawLock& other)
 	: m_wnd(other.m_wnd)
 	, m_bLockUpdate(other.m_bLockUpdate)
 	, m_bLocked(other.m_bLocked)
@@ -30,12 +30,12 @@ CRedrawLockGuard::CRedrawLockGuard(CRedrawLockGuard& other)
 	other.m_bLocked = false;
 }
 
-CRedrawLockGuard::~CRedrawLockGuard()
+CRedrawLock::~CRedrawLock()
 {
 	this->Unlock();
 }
 
-void CRedrawLockGuard::Unlock()
+void CRedrawLock::Unlock()
 {
 	if (m_bLocked && m_wnd)
 	{

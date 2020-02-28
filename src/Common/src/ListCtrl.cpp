@@ -153,7 +153,7 @@ void CObjectList::SetImageList(CImglst *pImglst, CImglst *pImglstSmall)
 
 void CObjectList::SetView(E_ListViewType eViewType, bool bArrange)
 {
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	m_para.eViewType = eViewType;
 	(void)__super::SetView((int)eViewType);
@@ -320,7 +320,7 @@ void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos
 
 	DeselectAll();
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	int nItem = 0;// nPos;
 	for (auto& vecText : vecTexts)
@@ -358,7 +358,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 	int nPrevCount = GetItemCount();
 	//__Assert(nPos <= nPrevCount);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	DeselectAll();
 
@@ -449,7 +449,7 @@ void CObjectList::UpdateItems()
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	UINT uItemCount = (UINT)GetItemCount();
 	for (UINT uItem = 0; uItem < uItemCount; ++uItem)
@@ -462,7 +462,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 	
 	bool bReportView = isReportView();
 
@@ -499,7 +499,7 @@ void CObjectList::DeleteObjects(const set<CListObject*>& setDeleteObjects)
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	CListObject *pObject = NULL;
 
@@ -524,7 +524,7 @@ void CObjectList::DeleteItems(const set<UINT>& setItems)
 {
 	__Ensure(m_hWnd);
 
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	for (auto itr = setItems.rbegin(); itr != setItems.rend(); ++itr)
 	{
@@ -676,7 +676,7 @@ void CObjectList::SelectItems(UINT uItem, UINT uSelectCount)
 
 void CObjectList::SelectAll()
 {
-	CRedrawLockGuard RedrawLockGuard(*this);
+	CRedrawLock RedrawLock(*this);
 
 	int nItemCount = GetItemCount();
 	for (int nItem = 0; nItem < nItemCount; ++nItem)
