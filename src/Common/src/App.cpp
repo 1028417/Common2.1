@@ -554,7 +554,7 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 		}
 	}
 
-	strText.append(L"\n");
+	strText.append(L"\n ");
 
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
