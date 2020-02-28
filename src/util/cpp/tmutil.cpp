@@ -76,11 +76,6 @@ static string _formatTime(const tm& atm, const string& strFormat)
 template <class T>
 inline static T _formatTimeT(const T& strFormat, time32_t tTime)
 {
-    if (-1 == tTime)
-	{
-        tTime = tmutil::time32();
-	}
-
     struct tm _tm;
 #if __windows
     if (_localtime32_s(&_tm, &tTime))
