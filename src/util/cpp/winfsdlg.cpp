@@ -361,10 +361,9 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 	{
 		strDir = m_lpstrFileName;
 
-        auto itrFile = lstFiles.begin();
-        for (++itrFile; itrFile != lstFiles.end(); ++itrFile)
+		for (auto& strFile : lstFiles)
 		{
-			*itrFile = strDir + __wchDirSeparator + *itrFile;
+			strFile = strDir + __wchDirSeparator + strFile;
 		}
 	}
 
