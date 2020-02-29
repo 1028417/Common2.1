@@ -208,7 +208,7 @@ bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t m
     }
 }
 
-void strutil::lowerCase(wstring& str)
+inline void strutil::lowerCase(wstring& str)
 {
     for (auto& chr : str)
     {
@@ -216,7 +216,7 @@ void strutil::lowerCase(wstring& str)
     }
 }
 
-void strutil::lowerCase(string& str)
+inline void strutil::lowerCase(string& str)
 {
     for (auto& chr : str)
     {
@@ -238,7 +238,7 @@ string strutil::lowerCase_r(const string& str)
     return strRet;
 }
 
-void strutil::upperCase(wstring& str)
+inline void strutil::upperCase(wstring& str)
 {
     for (auto& chr : str)
     {
@@ -246,7 +246,7 @@ void strutil::upperCase(wstring& str)
     }
 }
 
-void strutil::upperCase(string& str)
+inline void strutil::upperCase(string& str)
 {
     for (auto& chr : str)
     {
