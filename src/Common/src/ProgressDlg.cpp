@@ -126,7 +126,10 @@ LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 void CProgressDlg::_updateProgress()
 {
 	CString cstrProgress;
-	cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
+	if (m_uMaxProgress > 0)
+	{
+		cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
+	}
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
