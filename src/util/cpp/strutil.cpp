@@ -298,7 +298,7 @@ inline static void _replace(S& str, const S& strFind, T pszReplace = NULL, size_
     }
 }
 
-inline void strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
+void strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
 {
 	if (pszReplace)
 	{
@@ -310,7 +310,7 @@ inline void strutil::replace(wstring& str, const wstring& strFind, const wchar_t
 	}
 }
 
-inline void strutil::replace(string& str, const string& strFind, const char *pszReplace)
+void strutil::replace(string& str, const string& strFind, const char *pszReplace)
 {
 	if (pszReplace)
 	{

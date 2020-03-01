@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-inline bool jsonutil::get(const JValue& jValue, string& strRet)
+bool jsonutil::get(const JValue& jValue, string& strRet)
 {
     if (!jValue.isNull())
     {
