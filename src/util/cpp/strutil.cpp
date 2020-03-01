@@ -268,45 +268,68 @@ string strutil::upperCase_r(const string& str)
     return strRet;
 }
 
-template <class T>
-static void _replace(T& str, const T& strFind, const T& strReplace)
+template <class S, typename T=decltype(S().c_str())>
+inline static void _replace(S& str, const S& strFind, T pszReplace = NULL, size_t replaceLen = 0)
 {
     auto findLen = strFind.length();
     if (0 == findLen)
     {
         return;
     }
-
-    auto replaceLen = strReplace.length();
-
+	auto pszFind = strFind.c_str();
+    
     for (size_t pos = 0; pos+findLen <= str.length(); )
     {
-        pos = str.find(strFind.c_str(), pos, findLen);
-        if (T::npos == pos)
+        pos = str.find(pszFind, pos, findLen);
+        if (S::npos == pos)
         {
             break;
         }
 
-        if (0 == replaceLen)
-        {
-            str.erase(pos, findLen);
-        }
-        else
-        {
-            str.replace(pos, findLen, strReplace);
-            pos += replaceLen;
+		if (pszReplace && replaceLen > 0)
+		{
+			str.replace(pos, findLen, pszReplace, replaceLen);
+			pos += replaceLen;
+		}
+		else
+		{
+			str.erase(pos, findLen);
         }
     }
 }
 
+inline void strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
+{
+	if (pszReplace)
+	{
+		_replace(str, strFind, pszReplace, wcslen(pszReplace));
+	}
+	else
+	{
+		_replace(str, strFind);
+	}
+}
+
+inline void strutil::replace(string& str, const string& strFind, const char *pszReplace)
+{
+	if (pszReplace)
+	{
+		_replace(str, strFind, pszReplace, strlen(pszReplace));
+	}
+	else
+	{
+		_replace(str, strFind);
+	}
+}
+
 void strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
 {
-    _replace(str, strFind, strReplace);
+	_replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
 void strutil::replace(string& str, const string& strFind, const string& strReplace)
 {
-    _replace(str, strFind, strReplace);
+	_replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
 void strutil::replaceChar(wstring& str, wchar_t chrFind, wchar_t chrReplace)
