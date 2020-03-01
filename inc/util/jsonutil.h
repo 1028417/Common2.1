@@ -51,7 +51,7 @@ public:
 
     static bool get(const JValue& jValue, string& strRet);
 
-    static bool get(const JValue& jValue, wstring& strRet);
+    //static bool get(const JValue& jValue, wstring& strRet);
     static bool getUtf8(const JValue& jValue, wstring& strRet);
     static bool getGbk(const JValue& jValue, wstring& strRet);
 
