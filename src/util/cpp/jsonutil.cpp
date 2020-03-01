@@ -1,30 +1,7 @@
 
 #include "util.h"
 
-bool jsonutil::get(const JValue& jValue, wstring& strRet)
-{
-    if (jValue.isNull())
-    {
-        return false;
-    }
-
-	cauto str = jValue.asString();
-    if (!str.empty())
-    {
-        if (strutil::checkUtf8(str))
-        {
-            strRet = strutil::fromUtf8(str);
-        }
-        else
-        {
-            strRet = strutil::toWstr(str);
-        }
-    }
-
-    return true;
-}
-
-bool jsonutil::get(const JValue& jValue, string& strRet)
+inline bool jsonutil::get(const JValue& jValue, string& strRet)
 {
     if (!jValue.isNull())
     {
@@ -33,6 +10,55 @@ bool jsonutil::get(const JValue& jValue, string& strRet)
     }
 
     return false;
+}
+
+/*bool jsonutil::get(const JValue& jValue, wstring& strRet)
+{
+    string strValue;
+    if (!get(jValue, strValue))
+    {
+        return false;
+    }
+
+    if (!strValue.empty())
+    {
+        if (strutil::checkUtf8(strValue))
+        {
+            strRet = strutil::fromUtf8(strValue);
+        }
+        else
+        {
+            strRet = strutil::toWstr(strValue);
+        }
+    }
+
+    return true;
+}*/
+
+bool jsonutil::getUtf8(const JValue& jValue, wstring& strRet)
+{
+    string strValue;
+    if (!get(jValue, strValue))
+    {
+        return false;
+    }
+
+    strRet = strutil::fromUtf8(strValue);
+
+    return true;
+}
+
+bool jsonutil::getGbk(const JValue& jValue, wstring& strRet)
+{
+    string strValue;
+    if (!get(jValue, strValue))
+    {
+        return false;
+    }
+
+    strRet = strutil::toWstr(strValue);
+
+    return true;
 }
 
 bool jsonutil::get(const JValue& jValue, bool& bRet)
