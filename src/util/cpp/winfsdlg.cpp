@@ -209,7 +209,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		return L"";
 	}
 
-	TCHAR pszPath[MAX_PATH]{ 0 };
+	wchar_t pszPath[MAX_PATH]{ 0 };
     BOOL bRet = SHGetPathFromIDListW(lpItemIDList, pszPath);
     ::CoTaskMemFree(lpItemIDList);
     if (!bRet)
@@ -217,7 +217,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		return L"";
     }
 
-	m_strInitialDir = strutil::rtrim_r(pszPath, __wchDirSeparator);
+	m_strInitialDir = strutil::rtrim_r(wstring(pszPath), __wchDirSeparator);
 	return m_strInitialDir;
 }
 
