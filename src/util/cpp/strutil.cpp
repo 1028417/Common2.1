@@ -382,7 +382,7 @@ bool strutil::checkUtf8(const char *pStr, int len)
         len = strlen(pStr);
     }
 
-	UINT nBytes = 0;//UFT8可用1-6个字节编码,ASCII用一个字节
+	UINT nBytes = 0;
 	unsigned char chr = *pStr;
 	bool bAllAscii = true;
     for (int nIdx = 0; nIdx < len; ++nIdx)
