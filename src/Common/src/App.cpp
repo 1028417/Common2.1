@@ -544,7 +544,7 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 	wstring strText(L"    ");
 	strText.append(strMsg).append(L"    ");
 
-	/*if (strText.find('\n') == wstring::npos)
+	/*if (strText.find('\n') == __wnpos)
 	{
 		int nAppend = (80 - (int)strText.size()) / 2;
 		if (nAppend > 0)

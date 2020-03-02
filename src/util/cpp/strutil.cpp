@@ -347,7 +347,7 @@ void strutil::replaceChars(wstring& str, const wstring& strFindChars, wchar_t ch
 {
     for (auto& chr : str)
     {
-        if (wstring::npos != strFindChars.find(chr))
+        if (__wnpos != strFindChars.find(chr))
         {
             chr = chrReplace;
         }
@@ -598,7 +598,7 @@ static string _base64_decode(const char *pStr, size_t len, const string& strBase
     unsigned char char_array_4[4], char_array_3[3];
     std::string ret;
 
-    while (len-- && (pStr[in_] != chrTail) && strBase64Chars.find(pStr[in_]) != string::npos) {
+    while (len-- && (pStr[in_] != chrTail) && strBase64Chars.find(pStr[in_]) != __npos) {
         char_array_4[i++] = pStr[in_]; in_++;
         if (i ==4) {
             for (i = 0; i <4; i++)

@@ -139,8 +139,8 @@ time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
     return stat.st_mtime;
 }
 
-template <class T>
-static void _SplitPath(const T& strPath, T *pstrDir, T *pstrFile)
+template <class S>
+static void _SplitPath(const S& strPath, S *pstrDir, S *pstrFile)
 {
     int size = strPath.size();
     for (int pos = size - 1; pos>=0; pos--)
@@ -196,7 +196,7 @@ wstring fsutil::GetParentDir(const wstring& strPath)
     __EnsureReturn(!strPath.empty(), L"");
 
     wstring strParentDir;
-    SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
+	_SplitPath<wstring>(trimPathTail_r(strPath), &strParentDir, NULL);
 
     return strParentDir;
 }
@@ -206,41 +206,49 @@ string fsutil::GetParentDir(const string& strPath)
     __EnsureReturn(!strPath.empty(), "");
 
     string strParentDir;
-    SplitPath(trimPathTail_r(strPath), &strParentDir, NULL);
+	_SplitPath<string>(trimPathTail_r(strPath), &strParentDir, NULL);
 
     return strParentDir;
 }
 
 wstring fsutil::GetFileName(const wstring& strPath)
 {
-    wstring strFileName;
-    SplitPath(strPath, NULL, &strFileName);
+	wstring strFileName;
+	_SplitPath<wstring>(strPath, NULL, &strFileName);
 
-    return strFileName;
+	return strFileName;
 }
 
-template <class T>
-static void _GetFileName(const T& strPath, T *pstrTitle, T *pstrExtName)
+string fsutil::GetFileName(const string& strPath)
 {
-    T strFileName;
-    _SplitPath<T>(strPath, NULL, &strFileName);
+	string strFileName;
+	_SplitPath<string>(strPath, NULL, &strFileName);
 
-    auto pos = strFileName.find_last_of(__wchDot);
-    if (T::npos != pos)
+	return strFileName;
+}
+
+/*template <class S>
+static void _GetFileName(const S& strPath, S *pstrTitle, S *pstrExtName)
+{
+    S strFileName;
+    _SplitPath<S>(strPath, NULL, &strFileName);
+
+    auto pos = strFileName.rfind(__chDot);
+    if (pos != S::npos)
     {
-        if (NULL != pstrExtName)
+        if (pstrExtName)
         {
             *pstrExtName = strFileName.substr(pos+1);
         }
 
-        if (NULL != pstrTitle)
+        if (pstrTitle)
         {
             *pstrTitle = strFileName.substr(0, pos);
         }
     }
     else
     {
-        if (NULL != pstrTitle)
+        if (pstrTitle)
         {
             *pstrTitle = strFileName;
         }
@@ -266,7 +274,7 @@ wstring fsutil::GetFileExtName(const wstring& strPath)
     wstring strExtName;
     _GetFileName<wstring>(strPath, NULL, &strExtName);
     return strExtName;
-}
+}*/
 
 bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
