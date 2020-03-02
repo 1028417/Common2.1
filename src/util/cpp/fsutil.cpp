@@ -227,61 +227,12 @@ string fsutil::GetFileName(const string& strPath)
 	return strFileName;
 }
 
-/*template <class S>
-static void _GetFileName(const S& strPath, S *pstrTitle, S *pstrExtName)
-{
-    S strFileName;
-    _SplitPath<S>(strPath, NULL, &strFileName);
-
-    auto pos = strFileName.rfind(__chDot);
-    if (pos != S::npos)
-    {
-        if (pstrExtName)
-        {
-            *pstrExtName = strFileName.substr(pos+1);
-        }
-
-        if (pstrTitle)
-        {
-            *pstrTitle = strFileName.substr(0, pos);
-        }
-    }
-    else
-    {
-        if (pstrTitle)
-        {
-            *pstrTitle = strFileName;
-        }
-    }
-}
-
-wstring fsutil::getFileTitle(const wstring& strPath)
-{
-    wstring strTitle;
-    _GetFileName<wstring>(strPath, &strTitle, NULL);
-    return strTitle;
-}
-
-string fsutil::getFileTitle(const string& strPath)
-{
-    string strTitle;
-    _GetFileName<string>(strPath, &strTitle, NULL);
-    return strTitle;
-}
-
-wstring fsutil::GetFileExtName(const wstring& strPath)
-{
-    wstring strExtName;
-    _GetFileName<wstring>(strPath, NULL, &strExtName);
-    return strExtName;
-}*/
-
 bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
     auto size = strDir.size();
     __EnsureReturn(size > 0, false);
     __EnsureReturn(size < strSubPath.size(), false);
-
+	
     __EnsureReturn(checkPathTail(*strDir.rbegin()) || checkPathTail(strSubPath[size]), false);
 
     return strutil::matchIgnoreCase(strDir, strSubPath, size);
