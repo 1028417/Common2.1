@@ -43,6 +43,28 @@ int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
 #endif
 }
 
+template <class S>
+inline static bool _endWith(const S& str, const S& strEnd)
+{
+    int pos = (int)str.length() - strEnd.length();
+    if (pos < 0)
+    {
+        return false;
+    }
+
+    return strutil::substr(str, pos) == strEnd;
+}
+
+bool strutil::endWith(const wstring& str, const wstring& strEnd)
+{
+    return _endWith(str, strEnd);
+}
+
+bool strutil::endWith(const string& str, const string& strEnd)
+{
+    return _endWith(str, strEnd);
+}
+
 template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
 static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
 {
