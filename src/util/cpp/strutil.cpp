@@ -136,15 +136,16 @@ bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t m
 }
 
 template <class S, typename T=decltype(S().c_str())>
-inline static void _replace(S& str, const S& strFind, T pszReplace = NULL, size_t replaceLen = 0)
+inline static UINT _replace(S& str, const S& strFind, T pszReplace = NULL, size_t replaceLen = 0)
 {
     auto findLen = strFind.length();
     if (0 == findLen)
     {
-        return;
+        return 0;
     }
 	auto pszFind = strFind.c_str();
     
+	UINT uRet = 0;
     for (size_t pos = 0; pos+findLen <= str.length(); )
     {
         pos = str.find(pszFind, pos, findLen);
@@ -152,6 +153,8 @@ inline static void _replace(S& str, const S& strFind, T pszReplace = NULL, size_
         {
             break;
         }
+
+		uRet++;
 
 		if (pszReplace && replaceLen > 0)
 		{
@@ -163,40 +166,42 @@ inline static void _replace(S& str, const S& strFind, T pszReplace = NULL, size_
 			str.erase(pos, findLen);
         }
     }
+
+	return uRet;
 }
 
-void strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
+UINT strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
 {
 	if (pszReplace)
 	{
-		_replace(str, strFind, pszReplace, wcslen(pszReplace));
+		return _replace(str, strFind, pszReplace, wcslen(pszReplace));
 	}
 	else
 	{
-		_replace(str, strFind);
+		return _replace(str, strFind);
 	}
 }
 
-void strutil::replace(string& str, const string& strFind, const char *pszReplace)
+UINT strutil::replace(string& str, const string& strFind, const char *pszReplace)
 {
 	if (pszReplace)
 	{
-		_replace(str, strFind, pszReplace, strlen(pszReplace));
+		return _replace(str, strFind, pszReplace, strlen(pszReplace));
 	}
 	else
 	{
-		_replace(str, strFind);
+		return _replace(str, strFind);
 	}
 }
 
-void strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
+UINT strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
 {
-	_replace(str, strFind, strReplace.c_str(), strReplace.length());
+	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
-void strutil::replace(string& str, const string& strFind, const string& strReplace)
+UINT strutil::replace(string& str, const string& strFind, const string& strReplace)
 {
-	_replace(str, strFind, strReplace.c_str(), strReplace.length());
+	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
 #if __winvc
