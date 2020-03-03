@@ -612,7 +612,7 @@ static const wstring g_wsDotDot(2, __chrDot);
     winfsutil::getSysDrivers(lstDrivers);
     for (cauto strDriver : lstDrivers)
     {
-        cb(tagFileInfo(true, strDriver));
+        cb(tagFileInfo(strDriver));
     }
 */
 

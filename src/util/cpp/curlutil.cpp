@@ -339,29 +339,10 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
 {
     m_thread.start([=]() {
-        (void)syncDownload(strUrl, uRetryTime, cbProgress);
+        (void)CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
     });
 }
 
-int CDownloader::syncDownload(const string& strUrl, CByteBuffer& bbfData, UINT uRetryTime, CB_DownloadProgress cbProgress)
-{
-    int nRet = CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
-    if (0 == nRet)
-    {
-        (void)_getAllData(bbfData);
-    }
-    return nRet;
-}
-
-int CDownloader::syncDownload(const string& strUrl, CCharBuffer& cbfRet, UINT uRetryTime, CB_DownloadProgress cbProgress)
-{
-    int nRet = CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
-    if (0 == nRet)
-    {
-        (void)_getAllData(cbfRet);
-    }
-    return nRet;
-}
 
 bool CDownloader::_onRecv(char *ptr, size_t size)
 {
