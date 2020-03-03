@@ -452,7 +452,7 @@ LRESULT CMainApp::SendModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	CMainApp *pMainApp = GetMainApp();
 	__EnsureReturn(pMainApp, 0);
 
-	CWaitCursor WaitCursor;
+	__waitCursor;
 
 	LRESULT lResult = pMainApp->getController().handleModuleMessage(uMsg, wParam, lParam);
 	if (0 != lResult)
@@ -477,7 +477,7 @@ void CMainApp::BroadcastModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	CMainApp *pMainApp = GetMainApp();
 	__Ensure(pMainApp);
 
-	CWaitCursor WaitCursor;
+	__waitCursor;
 
 	(void)pMainApp->getController().handleModuleMessage(uMsg, wParam, lParam);
 
