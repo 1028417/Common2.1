@@ -215,9 +215,9 @@ bool CZipFile::unzip(const string& strDstDir) const
 	}
 
     string t_strDstDir(strDstDir);
-    if (t_strDstDir.empty() || !fsutil::checkPathTail(t_strDstDir.back()))
+    if (!fsutil::checkPathTail(t_strDstDir))
 	{
-		t_strDstDir.push_back((char)__wchDirSeparator);
+		t_strDstDir.push_back((char)__wchPathSeparator);
 	}
 
 	(void)unzGoToFirstFile(m_unzfile);

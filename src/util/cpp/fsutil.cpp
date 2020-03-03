@@ -145,7 +145,7 @@ static void _SplitPath(const S& strPath, S *pstrDir, S *pstrFile)
     int size = strPath.size();
     for (int pos = size - 1; pos>=0; pos--)
     {
-        if (fsutil::checkPathTail(strPath[pos]))
+        if (fsutil::checkSeparator(strPath[pos]))
         {
             if (pstrDir)
             {
@@ -182,7 +182,7 @@ wstring fsutil::GetRootDir(const wstring& strPath)
     int size = strPath.size();
     for (int pos = 1; pos < size; pos++)
     {
-        if (checkPathTail(strPath[pos]))
+        if (checkSeparator(strPath[pos]))
         {
             return strPath.substr(1, pos-1);
         }
@@ -229,13 +229,24 @@ string fsutil::GetFileName(const string& strPath)
 
 bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 {
-    auto size = strDir.size();
-    __EnsureReturn(size > 0, false);
-    __EnsureReturn(size < strSubPath.size(), false);
-	
-    __EnsureReturn(checkPathTail(*strDir.rbegin()) || checkPathTail(strSubPath[size]), false);
+	auto size = strDir.size();
+	__EnsureReturn(size > 0, false);
 
-    return strutil::matchIgnoreCase(strDir, strSubPath, size);
+	if (!checkSeparator(strDir.back()))
+	{
+		__EnsureReturn(strSubPath.size() > size + 1, false);
+
+		if (!checkSeparator(strSubPath[size]))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		__EnsureReturn(strSubPath.size() > size, false);
+	}
+
+	return strutil::matchIgnoreCase(strDir, strSubPath, size);
 }
 
 wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
@@ -373,11 +384,11 @@ bool fsutil::createDir(const string& strDir)
 bool fsutil::removeDirTree(const wstring& strDir)
 {
 	(void)fsutil::findSubFile(strDir, [&](const wstring& strSubFile) {
-		(void)removeFile(strDir + __wchDirSeparator + strSubFile);
+		(void)removeFile(strDir + __wchPathSeparator + strSubFile);
 	});
 
 	(void)fsutil::findSubDir(strDir, [&](const wstring& strSubDir) {
-		(void)removeDirTree(strDir + __wchDirSeparator + strSubDir);
+		(void)removeDirTree(strDir + __wchPathSeparator + strSubDir);
 	});
 
 	return removeDir(strDir);
@@ -439,7 +450,7 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
 #else
     if (existFile(strDstFile))
     {
-        //if (!strutil::matchIgnoreCase(transFSSlant_r(strSrcFile), transFSSlant_r(strDstFile)))
+        //if (!strutil::matchIgnoreCase(transSeparator_r(strSrcFile), transSeparator_r(strDstFile)))
         {
             if (!removeFile(strDstFile))
             {
@@ -537,7 +548,7 @@ inline static T _getModuleSubPathT(const T& strSubPath, C pszModuleName)
 
 	if (!strSubPath.empty())
 	{
-		if (!fsutil::checkPathTail(strSubPath.front()))
+		if (!fsutil::checkSeparator(strSubPath.front()))
 		{
             strModulePath.push_back(__chrBackSlant);
 		}
@@ -572,9 +583,9 @@ static QString _getHomePath(const QString& qsSubDir)
 
     if (!qsSubDir.isEmpty())
     {
-        if (!fsutil::checkPathTail((wchar_t)qsSubDir.at(0).unicode()))
+        if (!fsutil::checkSeparator((wchar_t)qsSubDir.at(0).unicode()))
         {
-            qsHomeDir.append(__wchDirSeparator);
+            qsHomeDir.append(__wchPathSeparator);
         }
 
         qsHomeDir.append(qsSubDir);
@@ -613,9 +624,9 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     }
 
     auto t_strDir = strDir;
-    if (!checkPathTail(t_strDir.back()))
+    if (!checkSeparator(t_strDir.back()))
     {
-        t_strDir.push_back(__wchDirSeparator);
+        t_strDir.push_back(__wchPathSeparator);
     }
 
 #if __winvc
