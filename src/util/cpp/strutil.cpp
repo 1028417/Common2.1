@@ -102,11 +102,13 @@ bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t m
 #if __windows
         return 0 == _wcsnicmp(str1.c_str(), str2.c_str(), maxlen);
 #else
-        size_t size = str1.size();
-        cauto t_str1 = __W2Q(str1.c_str(), MIN(maxlen, size)).toStdString();
-        size = str2.size();
-        cauto t_str2 = __W2Q(str2.c_str(), MIN(maxlen, size)).toStdString();
-        return 0 == strncasecmp(t_str1.c_str(), t_str2.c_str(), maxlen);
+        size_t len = str1.size();
+        cauto qstr1 = __W2Q(str1.c_str(), MIN(maxlen, len));
+
+        len = str2.size();
+        cauto qstr2 = QString::fromWCharArray(str2.c_str(), MIN(maxlen, len));
+
+        return 0 == qstr1.compare(qstr2, Qt::CaseSensitivity::CaseInsensitive);
 #endif
     }
 }
