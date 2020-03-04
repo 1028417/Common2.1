@@ -12,24 +12,6 @@ static const char __UTF8Bom[] { (char)0xef, (char)0xbb, (char)0xbf };
 static const char __UCS2Head_LittleEndian[] { (char)0xff, (char)0xfe };
 static const char __UCS2Head_BigEndian[]{ (char)0xfe, (char)0xff };
 
-bool CTxtWriter::_writeHead()
-{
-	if (_isUcsLittleEndian())
-    {
-        return m_ofs.writex(__UCS2Head_LittleEndian, sizeof __UCS2Head_LittleEndian);
-	}
-	else if (_isUcsBigEndian())
-    {
-        return m_ofs.writex(__UCS2Head_BigEndian, sizeof __UCS2Head_BigEndian);
-	}
-	else if (_isUtf8WithBom())
-    {
-        return m_ofs.writex(__UTF8Bom, sizeof __UTF8Bom);
-	}
-
-    return true;
-}
-
 bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
 {
 	bool bExists = fsutil::existFile(strFile);
@@ -58,6 +40,24 @@ bool CTxtWriter::open(const string& strFile, bool bTrunc)
 	return true;
 }
 
+bool CTxtWriter::_writeHead()
+{
+    if (_isUcsLittleEndian())
+    {
+        return m_ofs.writex(__UCS2Head_LittleEndian);
+    }
+    else if (_isUcsBigEndian())
+    {
+        return m_ofs.writex(__UCS2Head_BigEndian);
+    }
+    else if (_isUtf8WithBom())
+    {
+        return m_ofs.writex(__UTF8Bom);
+    }
+
+    return true;
+}
+
 bool CTxtWriter::_write(const void *ptr, size_t len, bool bEndLine)
 {
 	if (!m_ofs.writex(ptr, len))
@@ -84,24 +84,24 @@ bool CTxtWriter::_writeEndLine()
 {
 	if (_isUcsLittleEndian() || _isUcsBigEndian())
 	{
-		if (E_EOLFlag::eol_n == m_eEOLFlag)
+        if (E_EOLType::eol_n == m_eEOLFlag)
 		{
-            return m_ofs.writex(g_pwcEolN, sizeof g_pwcEolN);
+            return m_ofs.writex(g_pwcEolN);
 		}
 		else
 		{
-            return m_ofs.writex(g_pwcEolRN, sizeof g_pwcEolRN);
+            return m_ofs.writex(g_pwcEolRN);
 		}
 	}
 	else
-	{
-		if (E_EOLFlag::eol_n == m_eEOLFlag)
+    {
+        if (E_EOLType::eol_n == m_eEOLFlag)
 		{
-            return m_ofs.writex(g_pchEolN, sizeof g_pchEolN);
+            return m_ofs.writex(g_pchEolN);
 		}
 		else
 		{
-            return m_ofs.writex(g_pchEolRN, sizeof g_pchEolRN);
+            return m_ofs.writex(g_pchEolRN);
 		}
 	}
 }
