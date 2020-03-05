@@ -57,7 +57,8 @@ android {
     INCLUDEPATH += ../../3rd/curl/lib/curl_config_android
 
     platform = android
-    DESTDIR = ../../../XMusic/libs/armeabi-v7a
+    DESTDIR = ../../libs/armeabi-v7a
+    QMAKE_POST_LINK += copy /Y ..\..\libs\armeabi-v7a\libxutil.so ..\..\..\XMusic\libs\armeabi-v7a
 } else: macx {
     LIBS += -L$$PWD/../../libs/mac  #-lnghttp2  -lz
 
