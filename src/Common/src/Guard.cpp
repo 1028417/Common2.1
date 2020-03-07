@@ -298,10 +298,14 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect rcItem = lpDrawItemStruct->rcItem;
 	int nItemID = lpDrawItemStruct->itemID;
 
-	auto crBk = m_bTopMenu ? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
+	COLORREF crBk = 0;
 	if (0 != nItemID && lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		crBk = m_bTopMenu ? BkgColor_Select : BkgColor_Hit;
+	}
+	else
+	{
+		crBk = m_bTopMenu ? GetSysColor(COLOR_MENU) : RGB(251, 251, 251);
 	}
 	dc.FillSolidRect(&rcItem, crBk);
 
@@ -313,13 +317,14 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		rcLine.top = (rcItem.top + rcItem.bottom) / 2;
 		rcLine.bottom = rcLine.top + 1;
 
-		dc.FillSolidRect(&rcLine, RGB(200, 200, 200));
+		dc.FillSolidRect(&rcLine, RGB(234, 234, 234));
 	}
 	else
 	{
 		dc.SetBkMode(TRANSPARENT);
 
-		CDCFontGuard DCFontGuard(dc, m_bTopMenu ? m_fTopFontSize : m_fFontSize);
+		CDCFontGuard DCFontGuard(dc, m_bTopMenu ? m_fTopFontSize : m_fFontSize
+			, m_bTopMenu ? 400 : 0);
 
 		if (m_bTopMenu)
 		{
@@ -427,12 +432,7 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 	{
 		logFont.lfHeight -= nOffset;
 	}
-
-	if (m_lfWeight >= 0)
-	{
-		logFont.lfWeight = m_lfWeight;
-	}
-
+		
 	if (m_bItalic)
 	{
 		logFont.lfItalic = 1;
@@ -448,17 +448,26 @@ bool CCompatableFont::_create(CFont& font, const CB_CompatableFont& cb)
 		cb(logFont);
 	}
 
-	wstring	strFaceName = L"Î¢ÈíÑÅºÚ";
-	if (400 == logFont.lfWeight)
+	if (m_lfWeight > 0)
 	{
-		strFaceName.append(L" Semilight");
+		logFont.lfWeight = m_lfWeight;
 	}
-	else if (logFont.lfWeight < 400)
+	else
 	{
-		strFaceName.append(L" Light");
+		logFont.lfWeight = 0;
 	}
 
-	wcscpy_s(logFont.lfFaceName, strFaceName.c_str());
+	wstring	strFaceName;	
+	if (logFont.lfWeight < 400)
+	{
+		strFaceName = L" Light";
+	}
+	else if (400 == logFont.lfWeight)
+	{
+		strFaceName = L" Semilight";
+	}
+
+	wcscpy_s(logFont.lfFaceName, (L"Î¢ÈíÑÅºÚ" + strFaceName).c_str());
 
 	if (m_hObject)
 	{

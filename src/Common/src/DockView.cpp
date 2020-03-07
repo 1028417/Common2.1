@@ -313,7 +313,7 @@ void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect&
 	CString strText(tci.pszText);
 	strText.Trim();
 
-	//CDCFontGuard DCFontGuard(dc);
+	CDCFontGuard DCFontGuard(dc, 0, 400);
 	dc.DrawText(strText, rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 

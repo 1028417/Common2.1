@@ -11,23 +11,20 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 {
 	LRESULT lResult = CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
 
-	if (m_uHeight != 0)
+	if (m_nHeight > 0)
 	{
 		HD_LAYOUT& hdl = *(HD_LAYOUT*)lParam;
-		hdl.prc->top = hdl.pwpos->cy = m_uHeight;
+		hdl.prc->top = hdl.pwpos->cy = m_nHeight;
 	}
 
 	return lResult;
 }
 
-BOOL CListHeader::Init(UINT uHeight, float fFontSizeOffset)
+BOOL CListHeader::Init(int nHeight, float fFontSizeOffset)
 {
-	if (fFontSizeOffset != 0)
-	{
-		__EnsureReturn(m_font.setFont(*this, fFontSizeOffset), FALSE);
-	}
+	__EnsureReturn(m_font.setFont(*this, fFontSizeOffset, 400), FALSE);
 
-	m_uHeight = uHeight;
+	m_nHeight = nHeight;
 	Invalidate();
 
 	return TRUE;
@@ -63,7 +60,7 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 	{
 		(void)ModifyStyle(0, LVS_NOCOLUMNHEADER);
 	}
-	else if (m_para.nHeaderHeight > 0 || m_para.fHeaderFontSize != 0)
+	//else if (m_para.nHeaderHeight > 0 || m_para.fHeaderFontSize != 0)
 	{
 		__EnsureReturn(InitHeader((UINT)m_para.nHeaderHeight, m_para.fHeaderFontSize), FALSE);
 	}
