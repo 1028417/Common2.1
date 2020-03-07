@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-wstring XFile::name() const
+wstring XFile::fileName() const
 {
     if (m_fileInfo.pParent)
 	{
@@ -13,6 +13,16 @@ wstring XFile::name() const
 	}
 }
 
+wstring XFile::parentDir() const
+{
+	if (m_fileInfo.pParent)
+	{
+		return m_fileInfo.pParent->absPath();
+	}
+
+	return fsutil::GetParentDir(m_fileInfo.strName);
+}
+
 wstring XFile::absPath() const
 {
     if (m_fileInfo.pParent)
@@ -20,10 +30,9 @@ wstring XFile::absPath() const
         WString strAbsPath = m_fileInfo.pParent->absPath();
         if (!strAbsPath->empty())
         {
-            strAbsPath << __wchPathSeparator;
-        }
-        strAbsPath << m_fileInfo.strName;
-        return strAbsPath;
+            strAbsPath << __wchPathSeparator << m_fileInfo.strName;
+			return strAbsPath;
+		}
 	}
 
     return m_fileInfo.strName;
@@ -122,7 +131,7 @@ inline static int _sort(const wstring& lhs, const wstring& rhs)
 
 int CPath::_sort(const XFile& lhs, const XFile& rhs) const
 {
-    return ::_sort(lhs.name(), rhs.name());
+    return ::_sort(lhs.fileName(), rhs.fileName());
 }
 
 void CPath::scan(const CB_PathScan& cb)
@@ -179,7 +188,7 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 		{
 			XFile *pSubFile = NULL;
 			pSubDir->files()([&](XFile& file) {
-                if (strutil::matchIgnoreCase(file.name(), strSubName))
+                if (strutil::matchIgnoreCase(file.fileName(), strSubName))
 				{
 					pSubFile = &file;
 					return false;
@@ -191,7 +200,7 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 		}
 
 		if (!pSubDir->dirs().any([&](CPath& dir) {
-            if (strutil::matchIgnoreCase(dir.name(), strSubName))
+            if (strutil::matchIgnoreCase(dir.fileName(), strSubName))
 			{
 				pSubDir = &dir;
 				return true;
