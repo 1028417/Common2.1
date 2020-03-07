@@ -734,7 +734,7 @@ static CCompatableFont m_fontCustom;
 void CObjectList::SetCustomFont(CDC& dc, float fFontSizeOffset, bool bUnderline)
 {
 	(void)m_fontCustom.DeleteObject();
-	if (m_fontCustom.create(m_font, fFontSizeOffset, 0, false, bUnderline))
+	if (m_fontCustom.create(m_font, fFontSizeOffset, -1, false, bUnderline))
 	{
 		(void)dc.SelectObject(m_fontCustom);
 	}
