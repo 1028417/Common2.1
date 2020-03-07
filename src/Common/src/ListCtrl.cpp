@@ -22,7 +22,7 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 
 BOOL CListHeader::Init(int nHeight, float fFontSizeOffset)
 {
-	__EnsureReturn(m_font.setFont(*this, fFontSizeOffset, 400), FALSE);
+	__EnsureReturn(m_font.setFont(*this, fFontSizeOffset, 0), FALSE);
 
 	m_nHeight = nHeight;
 	Invalidate();
