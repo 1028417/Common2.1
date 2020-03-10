@@ -193,15 +193,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<double>& arrValue)
 
 //CSQLiteDB
 
-CSQLiteDB::CSQLiteDB(const wstring& strFile)
-{
-	if (!strFile.empty())
-	{
-		(void)Connect(strFile);
-	}
-}
-
-bool CSQLiteDB::Connect(const wstring& strPara)
+bool CSQLiteDB::Connect(const wstring& strFile)
 {
     if (m_hDB)
     {
@@ -211,10 +203,9 @@ bool CSQLiteDB::Connect(const wstring& strPara)
     m_strFile.clear();
 
 #if __windows
-    m_nRetCode = sqlite3_open16(strPara.c_str(), (sqlite3**)&m_hDB);
+    m_nRetCode = sqlite3_open16(strFile.c_str(), (sqlite3**)&m_hDB);
 #else
-    string strFile = strutil::toUtf8(strPara);
-    m_nRetCode = sqlite3_open(strFile.c_str(), (sqlite3**)&m_hDB);
+    m_nRetCode = sqlite3_open(strutil::toUtf8(strFile).c_str(), (sqlite3**)&m_hDB);
 #endif
 
     __EnsureReturn(SQLITE_OK == m_nRetCode, false);
