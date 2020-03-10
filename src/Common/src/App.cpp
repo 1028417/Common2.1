@@ -118,22 +118,27 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 	return bFlag ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
 
+void CMainApp::foregroundWnd(HWND hWnd)
+{
+	if (IsIconic(g_hMainWnd))
+	{
+		::ShowWindow(hWnd, SW_RESTORE);
+	}
+	else
+	{
+		//::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		//::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		::SetForegroundWindow(hWnd);
+	}
+}
+
 BOOL CMainApp::InitInstance()
 {
 	if (g_bRuning)
 	{
 		if (g_hMainWnd)
 		{
-			if (IsIconic(g_hMainWnd))
-			{
-				(void)ShowWindow(g_hMainWnd, SW_RESTORE);
-			}
-			else
-			{
-				//::SetWindowPos(g_hMainWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-				//::SetWindowPos(g_hMainWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-				::SetForegroundWindow(g_hMainWnd);
-			}
+			foregroundWnd(g_hMainWnd);
 		}
 
 		return FALSE;
