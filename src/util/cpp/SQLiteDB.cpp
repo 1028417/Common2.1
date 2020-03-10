@@ -211,7 +211,7 @@ bool CSQLiteDB::Connect(const wstring& strFile)
     __EnsureReturn(SQLITE_OK == m_nRetCode, false);
 	__EnsureReturn(m_hDB, false);
 
-    m_strFile = strPara;
+    m_strFile = strFile;
 
 	return true;
 }
