@@ -217,7 +217,7 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		return L"";
     }
 
-	m_strInitialDir = strutil::rtrim_r(wstring(pszPath), __wchPathSeparator);
+	m_strInitialDir = strutil::rtrim_r(wstring(pszPath), __wcPathSeparator);
 	return m_strInitialDir;
 }
 
@@ -363,7 +363,7 @@ wstring CFileDlg::_getMultSel(list<wstring>& lstFiles)
 
 		for (auto& strFile : lstFiles)
 		{
-			strFile = strDir + __wchPathSeparator + strFile;
+			strFile = strDir + __wcPathSeparator + strFile;
 		}
 	}
 

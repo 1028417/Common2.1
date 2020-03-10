@@ -384,11 +384,11 @@ bool fsutil::createDir(const string& strDir)
 bool fsutil::removeDirTree(const wstring& strDir)
 {
 	(void)fsutil::findSubFile(strDir, [&](const wstring& strSubFile) {
-		(void)removeFile(strDir + __wchPathSeparator + strSubFile);
+        (void)removeFile(strDir + __wcPathSeparator + strSubFile);
 	});
 
 	(void)fsutil::findSubDir(strDir, [&](const wstring& strSubDir) {
-		(void)removeDirTree(strDir + __wchPathSeparator + strSubDir);
+        (void)removeDirTree(strDir + __wcPathSeparator + strSubDir);
 	});
 
 	return removeDir(strDir);
@@ -550,7 +550,7 @@ inline static T _getModuleSubPathT(const T& strSubPath, C pszModuleName)
 	{
 		if (!fsutil::checkSeparator(strSubPath.front()))
 		{
-            strModulePath.push_back(__chrBackSlant);
+            strModulePath.push_back(__cPathSeparator);
 		}
 
 		strModulePath.append(strSubPath);
@@ -585,7 +585,7 @@ static QString _getHomePath(const QString& qsSubDir)
     {
         if (!fsutil::checkSeparator((wchar_t)qsSubDir.at(0).unicode()))
         {
-            qsHomeDir.append(__wchPathSeparator);
+            qsHomeDir.append(__wcPathSeparator);
         }
 
         qsHomeDir.append(qsSubDir);
@@ -605,8 +605,8 @@ wstring fsutil::getHomePath(const wstring& strSubDir)
 }
 #endif
 
-static const wstring g_wsDot(1, __chrDot);
-static const wstring g_wsDotDot(2, __chrDot);
+static const wstring g_wsDot(1, __cDot);
+static const wstring g_wsDotDot(2, __cDot);
 
 /*  std::list<std::wstring> lstDrivers;
     winfsutil::getSysDrivers(lstDrivers);
@@ -626,7 +626,7 @@ bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eF
     auto t_strDir = strDir;
     if (!checkSeparator(t_strDir.back()))
     {
-        t_strDir.push_back(__wchPathSeparator);
+        t_strDir.push_back(__wcPathSeparator);
     }
 
 #if __winvc
