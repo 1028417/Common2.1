@@ -66,9 +66,9 @@ bool strutil::endWith(const string& str, const string& strEnd)
 }
 
 template <typename T, class C = basic_string<T, char_traits<T>, allocator<T>>>
-static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
+static void _split(const C& strText, T wcSplitor, vector<C>& vecRet)
 {
-    auto fn = [&](const C& strSub) {
+    /*auto fn = [&](const C& strSub) {
         if (bTrim && wcSplitor != L' ')
         {
             cauto str = strutil::trim_r(strSub);
@@ -81,7 +81,7 @@ static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
         {
             vecRet.push_back(strSub);
         }
-    };
+    };*/
 
     size_t pos = 0;
     while ((pos = strText.find_first_not_of(wcSplitor, pos)) != C::npos)
@@ -89,24 +89,26 @@ static void _split(const C& strText, T wcSplitor, vector<C>& vecRet, bool bTrim)
         auto nextPos = strText.find(wcSplitor, pos);
         if (C::npos == nextPos)
         {
-            fn(strText.substr(pos));
+			cauto strSub = strText.substr(pos);
+            vecRet.push_back(strSub);  //fn(strSub);
             break;
         }
 
-        fn(strText.substr(pos, nextPos - pos));
+		cauto strSub = strText.substr(pos, nextPos - pos);
+		vecRet.push_back(strSub);  //fn(strSub);
 
         pos = nextPos + 1;
     }
 }
 
-void strutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet, bool bTrim)
+void strutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet)
 {
-    _split(strText, wcSplitor, vecRet, bTrim);
+    _split(strText, wcSplitor, vecRet);
 }
 
-void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRet, bool bTrim)
+void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRet)
 {
-    _split(strText, wcSplitor, vecRet, bTrim);
+    _split(strText, wcSplitor, vecRet);
 }
 
 bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t maxlen)

@@ -605,8 +605,8 @@ wstring fsutil::getHomePath(const wstring& strSubDir)
 }
 #endif
 
-static const wstring g_wsDot(1, __cDot);
-static const wstring g_wsDotDot(2, __cDot);
+static const wstring g_wsDot = L".";
+static const wstring g_wsDotDot = L"..";
 
 /*  std::list<std::wstring> lstDrivers;
     winfsutil::getSysDrivers(lstDrivers);
