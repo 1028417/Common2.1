@@ -177,20 +177,6 @@ void fsutil::SplitPath(const string& strPath, string *pstrDir, string *pstrFile)
     _SplitPath(strPath, pstrDir, pstrFile);
 }
 
-wstring fsutil::GetRootDir(const wstring& strPath)
-{
-    int size = strPath.size();
-    for (int pos = 1; pos < size; pos++)
-    {
-        if (checkSeparator(strPath[pos]))
-        {
-            return strPath.substr(1, pos-1);
-        }
-    }
-
-    return L"";
-}
-
 wstring fsutil::GetParentDir(const wstring& strPath)
 {
     __EnsureReturn(!strPath.empty(), L"");
