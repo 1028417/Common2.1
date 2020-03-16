@@ -1143,10 +1143,14 @@ void CObjectList::AsyncLButtondown(cfn_void cb)
 {
 	m_cbLButtondown = cb;
 
-	__async(300, [&]() {
-		if (m_cbLButtondown)
+	auto hWnd = m_hWnd;
+	__async(300, [&, hWnd]() {
+		if (::IsWindowVisible(hWnd))
 		{
-			m_cbLButtondown();
+			if (m_cbLButtondown)
+			{
+				m_cbLButtondown();
+			}
 		}
 	});
 }

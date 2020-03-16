@@ -76,7 +76,14 @@ android {
 }
 }
 
-build_dir = ../../../build/xutil/$$platform
+build_dir = TARGET
+
+#CONFIG += debug_and_release
+CONFIG(debug, debug|release) {
+    build_dir = $$join($$build_dir,,,d)
+}
+
+build_dir = ../../../build/$$build_dir/$$platform
 
 MOC_DIR = $$build_dir
 RCC_DIR = $$build_dir
