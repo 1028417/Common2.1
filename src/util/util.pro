@@ -34,6 +34,12 @@ INCLUDEPATH += ../../3rd/openssl-1.1.0f/include
 INCLUDEPATH += ../../3rd/openssl-1.1.0h/include
 }
 
+mac {
+XMusicDir = ../../../XMusic
+} else {
+XMusicDir = ..\..\..\XMusic
+}
+
 win32 {
     LIBS += -lgdi32  -lcomdlg32  -lole32
 
@@ -42,10 +48,10 @@ win32 {
             $$PWD/../../3rd/openssl-1.1.0h/lib/libssl.lib
 
     platform = win
-    DESTDIR = ../../bin
+    DESTDIR = ..\..\bin
 
-    QMAKE_POST_LINK += copy /Y ..\..\bin\xutil.dll ..\..\..\XMusic\bin && \
-        copy /Y ..\..\bin\libxutil.a ..\..\..\XMusic\bin
+    QMAKE_POST_LINK += copy /Y $$DESTDIR\xutil.dll $$XMusicDir\bin && \
+        copy /Y $$DESTDIR\libxutil.a $$XMusicDir\bin
 } else {
     DEFINES += HAVE_CONFIG_H
 
@@ -57,8 +63,8 @@ android {
     INCLUDEPATH += ../../3rd/curl/lib/curl_config_android
 
     platform = android
-    DESTDIR = ../../libs/armeabi-v7a
-    QMAKE_POST_LINK += copy /Y ..\..\libs\armeabi-v7a\libxutil.so ..\..\..\XMusic\libs\armeabi-v7a
+    DESTDIR = ..\..\libs\armeabi-v7a
+    QMAKE_POST_LINK += copy /Y $$DESTDIR\libxutil.so $$XMusicDir\libs\armeabi-v7a
 } else: macx {
     LIBS += -L$$PWD/../../libs/mac  #-lnghttp2  -lz
 
@@ -67,7 +73,7 @@ android {
     platform = mac
     DESTDIR = ../../bin/mac
 
-    QMAKE_POST_LINK += cp -f ../../bin/mac/libxutil*.dylib ../../../XMusic/bin/mac/
+    QMAKE_POST_LINK += cp -f $$DESTDIR/libxutil*.dylib $$XMusicDir/bin/mac/
 } else: ios {
     INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
 
@@ -78,16 +84,16 @@ android {
 
 #CONFIG += debug_and_release
 CONFIG(debug, debug|release) {
-build_dir = xutild
+BuildDir = xutild
 } else {
-build_dir = xutil
+BuildDir = xutil
 }
-build_dir = ../../../build/$$build_dir/$$platform
+BuildDir = ../../../build/$$BuildDir/$$platform
 
-MOC_DIR = $$build_dir
-RCC_DIR = $$build_dir
-UI_DIR = $$build_dir
-OBJECTS_DIR = $$build_dir
+MOC_DIR = $$BuildDir
+RCC_DIR = $$BuildDir
+UI_DIR = $$BuildDir
+OBJECTS_DIR = $$BuildDir
 
 
 HEADERS += \
