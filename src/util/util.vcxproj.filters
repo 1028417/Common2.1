@@ -58,7 +58,6 @@
     <ClCompile Include="cpp\winfsutil.cpp">
       <Filter>fs</Filter>
     </ClCompile>
-    <ClCompile Include="cpp\mtutil.cpp" />
     <ClCompile Include="cpp\timerutil.cpp" />
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
@@ -135,6 +134,7 @@
     <ClCompile Include="..\..\3rd\bzip2-1.0.6\blocksort.c">
       <Filter>fs\zip\bzip2</Filter>
     </ClCompile>
+    <ClCompile Include="cpp\ThreadGroup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />

@@ -46,7 +46,7 @@
     <ClCompile Include="cpp\jsonutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\winfsdlg.cpp" />
-    <ClCompile Include="cpp\mtutil.cpp" />
+    <ClCompile Include="cpp\ThreadGroup.cpp" />
     <ClCompile Include="cpp\Path.cpp" />
     <ClCompile Include="cpp\fsutil.cpp" />
     <ClCompile Include="cpp\SQLiteDB.cpp" />

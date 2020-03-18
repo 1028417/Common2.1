@@ -176,7 +176,7 @@ E_ListViewType CObjectList::GetView()
 void CObjectList::InitColumn(const TD_ListColumn& lstColumns)
 {
 	m_uColumnCount = 0;
-	for (auto& column : lstColumns)
+	for (cauto column : lstColumns)
 	{
 		(void)__super::InsertColumn(m_uColumnCount, column.bCenter ? column.cstrText : (strutil::wcSpace + column.cstrText)
 			, column.bCenter ? LVCFMT_CENTER : LVCFMT_LEFT, column.uWidth);
@@ -275,7 +275,7 @@ void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, const
 
 void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
 {
-	for (auto& pr : lstText)
+	for (cauto pr : lstText)
 	{
 		if (pr.first < m_uColumnCount)
 		{
@@ -289,7 +289,7 @@ void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstT
 
 void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, const wstring& strPrefix)
 {
-	for (auto& strText : vecText)
+	for (cauto strText : vecText)
 	{
 		if (uSubItem >= m_uColumnCount)
 		{
@@ -320,7 +320,7 @@ void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos
 	CRedrawLock RedrawLock(*this);
 
 	int nItem = 0;// nPos;
-	for (auto& vecText : vecTexts)
+	for (cauto vecText : vecTexts)
 	{
 		if (nItem < nPrevCount)
 		{

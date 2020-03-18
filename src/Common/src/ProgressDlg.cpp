@@ -174,7 +174,10 @@ void CProgressDlg::OnCancel()
 
 	while (0 != this->getActiveCount())
 	{
-		(void)CMainApp::GetMainApp()->DoEvents(); // ±ØÐëµÄ
+		if (CMainApp::GetMainApp()->DoEvents() == E_DoEventsResult::DER_None)
+		{
+			mtutil::usleep(100);
+		}
 	}
 
 	CDialog::OnCancel();

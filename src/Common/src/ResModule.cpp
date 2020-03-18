@@ -62,10 +62,3 @@ LPCDLGTEMPLATE CResModule::loadDialog(UINT uID)
 
 	return lpRes;
 }
-
-BOOL CModuleApp::InitInstance()
-{
-	CMainApp::AddModule(*this);
-
-	return __super::InitInstance();
-}

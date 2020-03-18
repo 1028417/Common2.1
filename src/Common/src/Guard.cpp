@@ -231,7 +231,7 @@ void CMenuEx::EnableItem(UINT uIDItem, bool bEnable)
 
 void CMenuEx::EnableItem(const std::initializer_list<UINT>& ilIDItems, bool bEnable)
 {
-	for (auto& uIDItem : ilIDItems)
+	for (auto uIDItem : ilIDItems)
 	{
 		m_mapMenuItemInfos[uIDItem].bDisable = !bEnable;
 	}
@@ -249,7 +249,7 @@ void CMenuEx::DeleteItem(UINT uIDItem)
 
 void CMenuEx::DeleteItem(const std::initializer_list<UINT>& ilIDItems)
 {
-	for (auto& uIDItem : ilIDItems)
+	for (auto uIDItem : ilIDItems)
 	{
 		m_mapMenuItemInfos[uIDItem].bDelete = true;
 	}

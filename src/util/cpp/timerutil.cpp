@@ -33,9 +33,11 @@ void CALLBACK TimerProc(HWND, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
             timerutil::killTimer(idEvent);
             return;
         }
+		
+		TimerInfo.bPending = false;
     }
 
-    g_mapTimer[idEvent].bPending = false;
+    //g_mapTimer[idEvent].bPending = false;
 }
 #endif
 
@@ -87,8 +89,7 @@ __TimerID timerutil::setTimerEx(UINT uElapse, cfn_bool cb)
 void timerutil::killTimer(UINT_PTR idEvent)
 {
 	::KillTimer(NULL, idEvent);
-
-    (void)g_mapTimer.erase(idEvent);
+	g_mapTimer.erase(idEvent);
 }
 
 bool CWinTimer::_onTimer()

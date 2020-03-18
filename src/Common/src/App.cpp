@@ -15,105 +15,100 @@ static HWND volatile g_hMainWnd = NULL;
 #pragma data_seg()
 #pragma comment(linker,"/section:Shared,RWS")
 
+static vector<CModuleApp*> g_vctModules;
+
 static map<UINT, LPVOID> g_mapInterfaces;
 
 static vector<tagHotkeyInfo> g_vctHotkeyInfos;
 
-static CB_Sync g_cbAsync;
+static fn_void g_fnSync;
 static CCSLock g_lckAsync;
 
-void CMainApp::_sync(const CB_Sync& cb)
+void CMainApp::_sync(const fn_void& fn)
 {
 	g_lckAsync.lock();
 
-	CB_Sync cbPrev = g_cbAsync;
-	if (cbPrev)
+	if (g_fnSync)
 	{
-		g_cbAsync = [=]() {
-			cbPrev();
+		auto fnPrev = g_fnSync;
+		g_fnSync = [=]() {
+			fnPrev();
 
-			cb();
+			fn();
 		};
-
 		g_lckAsync.unlock();
 	}
 	else
 	{
-		g_cbAsync = cb;
-
+		g_fnSync = fn;
 		g_lckAsync.unlock();
 
-		CMainApp::GetMainApp()->PostThreadMessage(WM_NULL, 0, 0);
+		PostThreadMessage(WM_NULL, 0, 0);
 	}
 }
 
-void CMainApp::sync(const CB_Sync& cb)
+BOOL CMainApp::DoEvent(bool bBlock, UINT& uMsg)
 {
-	DWORD dwThreadID = ::GetCurrentThreadId();
-	if (dwThreadID == GetMainApp()->m_nThreadID)
-	{
-		cb();
-		return;
-	}
-	
-	_sync([=]() {
-		cb();
-		
-		mtutil::apcWakeup(dwThreadID);
-	});
-	
-	::SleepEx(-1, TRUE);
-}
-
-void CMainApp::thread(cfn_void cb)
-{
-	bool bExit = false;
-	std::thread thr([&]() {
-		cb();
-
-		bExit = true;
-
-		this->PostThreadMessage(WM_NULL, 0, 0);
-	});
-
 	MSG msg;
-	while (!bExit && ::GetMessage(&msg, NULL, 0, 0))
+	if (bBlock)
 	{
-		if (!AfxPreTranslateMessage(&msg))
+		BOOL bRet = ::GetMessage(&msg, NULL, 0, 0);
+		if (-1 == bRet)
 		{
-			(void)::TranslateMessage(&msg);
-			(void)::DispatchMessage(&msg);
+			return -1;
+		}
+
+		if (0 == bRet)
+		{
+			uMsg = WM_QUIT;
+			(void)::PostThreadMessage(GetCurrentThreadId(), WM_QUIT, 0, 0);
+			return FALSE;
+		}
+	}
+	else
+	{
+		if (!::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			return FALSE;
+		}
+
+		if (WM_QUIT == msg.message)
+		{
+			uMsg = WM_QUIT;
+			(void)::PostThreadMessage(GetCurrentThreadId(), WM_QUIT, 0, 0);
+			return FALSE;
 		}
 	}
 
-	thr.join();
+	uMsg = msg.message;
+
+	if (!AfxPreTranslateMessage(&msg))
+	{
+		(void)::TranslateMessage(&msg);
+		(void)::DispatchMessage(&msg);
+	}
+
+	return TRUE;
 }
 
 E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 {
 	bool bFlag = false;
 
-	MSG msg;
-	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	UINT uMsg = 0;
+	do
 	{
-		bFlag = true;
-
-		if (!AfxPreTranslateMessage(&msg))
+		if (!DoEvent(false, uMsg))
 		{
-			(void)::TranslateMessage(&msg);
-			(void)::DispatchMessage(&msg);
-		}
-
-		if (msg.message == WM_QUIT)
-		{
-			return E_DoEventsResult::DER_Quit;
-		}
-
-		if (bOnce)
-		{
+			if (WM_QUIT == uMsg)
+			{
+				return E_DoEventsResult::DER_Quit;
+			}
 			break;
 		}
-	}
+
+		bFlag = true;
+	} while (!bOnce);
 
 	return bFlag ? E_DoEventsResult::DER_OK : E_DoEventsResult::DER_None;
 }
@@ -177,76 +172,69 @@ void CMainApp::_run()
 {
 	__Assert(getController().init());
 
-	CMainWnd *pMainWnd = getView().show();
+	CMainWnd *pMainWnd = getView().init();
 	g_hMainWnd = pMainWnd->GetSafeHwnd();
 	__Ensure(g_hMainWnd);
 	m_pMainWnd = pMainWnd;
 
-	for (auto& HotkeyInfo : g_vctHotkeyInfos)
+	for (auto pModule : g_vctModules)
 	{
-		if (HotkeyInfo.bGlobal)
-		{
-			(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
-		}
+		pModule->OnReady(*pMainWnd);
 	}
 
-	if (getController().start())
-	{
-		_run(*pMainWnd);
+	__async([&]() {
+		getView().show();
 
-		getController().stop();
-	}
+		__async([&]() {
+			getController().start();
 
-	//for (vector<tagHotkeyInfo>::iterator itrHotkeyInfo = g_vctHotkeyInfos.begin()
-	//	; itrHotkeyInfo != g_vctHotkeyInfos.end(); ++itrHotkeyInfo)
-	//{
-	//	if (itrHotkeyInfo->bGlobal)
-	//	{
-	//		(void)::UnregisterHotKey(g_hMainWnd, itrHotkeyInfo->lParam);
-	//	}
-	//}
-
-	getView().close();
-}
-
-void CMainApp::_run(CMainWnd& MainWnd)
-{
-	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
-	{
-		if (!(*itModule)->OnReady(MainWnd))
-		{
-			return;
-		}
-	}
+			for (cauto HotkeyInfo : g_vctHotkeyInfos)
+			{
+				if (HotkeyInfo.bGlobal)
+				{
+					(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
+				}
+			}
+		});
+	});
 
 	(void)__super::Run();
 
-	for (ModuleVector::iterator itModule = m_vctModules.begin(); itModule != m_vctModules.end(); ++itModule)
+	for (cauto HotkeyInfo : g_vctHotkeyInfos)
 	{
-		(void)(*itModule)->OnQuit();
+		if (HotkeyInfo.bGlobal)
+		{
+			(void)::UnregisterHotKey(g_hMainWnd, HotkeyInfo.lParam);
+		}
 	}
+	
+	for (auto pModule : g_vctModules)
+	{
+		pModule->OnQuit();
+	}
+
+	getView().close();
+
+	getController().stop();
 }
 
 BOOL CMainApp::PreTranslateMessage(MSG* pMsg)
 {
-	if (g_cbAsync)
+	if (g_fnSync)
 	{
 		g_lckAsync.lock();
-		CB_Sync cb = g_cbAsync;
-		g_cbAsync = NULL;
+		auto fn = g_fnSync;
+		g_fnSync = NULL;
 		g_lckAsync.unlock();
 
-		if (WM_QUIT != pMsg->message)
+		if (fn)
 		{
-			if (cb)
-			{
-				cb();
-			}
+			fn();
+		}
 			
-			if (WM_NULL == pMsg->message)
-			{
-				return TRUE;
-			}
+		if (WM_NULL == pMsg->message)
+		{
+			return TRUE;
 		}
 	}
 
@@ -347,9 +335,9 @@ BOOL CMainApp::OnCommand(UINT uID)
 		return TRUE;
 	}
 	
-	for (ModuleVector::iterator itModule=m_vctModules.begin(); itModule!=m_vctModules.end(); ++itModule)
+	for (auto pModule : g_vctModules)
 	{
-		if ((*itModule)->HandleCommand(uID))
+		if (pModule->HandleCommand(uID))
 		{
 			return TRUE;
 		}
@@ -411,7 +399,7 @@ bool CMainApp::_HandleHotkey(tagHotkeyInfo &HotkeyInfo)
 			}
 		}
 
-		for (auto pModule : m_vctModules)
+		for (auto pModule : g_vctModules)
 		{
 			if (pModule->HandleHotkey(HotkeyInfo))
 			{
@@ -430,26 +418,17 @@ void CMainApp::Quit()
 	AfxPostQuitMessage(0);
 }
 
-bool CMainApp::removeMsg(UINT uMsg)
+UINT CMainApp::removeMsg(UINT uMsg)
 {
-	bool bRet = false;
+	UINT uRet = 0;
+
 	MSG msg;
-	do
+	while (::PeekMessage(&msg, NULL, uMsg, uMsg, PM_REMOVE))
 	{
-		bRet = ::PeekMessage(&msg, NULL, uMsg, uMsg, PM_REMOVE);
-	} while (bRet);
+		uRet++;
+	}
 
-	return bRet;
-}
-
-BOOL CMainApp::AddModule(CModuleApp& Module)
-{
-	CMainApp *pMainApp = GetMainApp();
-	__EnsureReturn(pMainApp, FALSE);
-
-	pMainApp->m_vctModules.push_back(&Module);
-
-	return TRUE;
+	return uRet;
 }
 
 LRESULT CMainApp::SendModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -465,7 +444,7 @@ LRESULT CMainApp::SendModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return lResult;
 	}
 
-	for (auto pModule : pMainApp->m_vctModules)
+	for (auto pModule : g_vctModules)
 	{
 		lResult = pModule->HandleMessage(uMsg, wParam, lParam);
 		if (0 != lResult)
@@ -486,7 +465,7 @@ void CMainApp::BroadcastModuleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	(void)pMainApp->getController().handleModuleMessage(uMsg, wParam, lParam);
 
-	for (auto pModule : pMainApp->m_vctModules)
+	for (auto pModule : g_vctModules)
 	{
 		(void)pModule->HandleMessage(uMsg, wParam, lParam);
 	}
@@ -563,4 +542,11 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 	strText.append(L"\n ");
 
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
+}
+
+BOOL CModuleApp::InitInstance()
+{
+	g_vctModules.push_back(this);
+
+	return __super::InitInstance();
 }
