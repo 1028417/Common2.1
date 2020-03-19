@@ -11,21 +11,31 @@ LRESULT CListHeader::OnLayout(WPARAM wParam, LPARAM lParam)
 {
 	LRESULT lResult = CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
 
-	if (m_nHeight > 0)
-	{
-		HD_LAYOUT& hdl = *(HD_LAYOUT*)lParam;
-		hdl.prc->top = hdl.pwpos->cy = m_nHeight;
-	}
-
+	auto& hdl = *(HD_LAYOUT*)lParam;
+	hdl.prc->top = hdl.pwpos->cy = m_uHeight;
+	
 	return lResult;
 }
 
-BOOL CListHeader::Init(int nHeight, float fFontSizeOffset)
+BOOL CListHeader::Init(HWND hWnd, int nHeight)
 {
-	__EnsureReturn(m_font.setFont(*this, fFontSizeOffset, 0), FALSE);
-
-	m_nHeight = nHeight;
-	Invalidate();
+	if (nHeight > 0)
+	{
+		m_uHeight = (UINT)nHeight;
+		if (NULL == m_hWnd)
+		{
+			__AssertReturn(SubclassWindow(hWnd), FALSE);
+		}
+	}
+	else
+	{
+		if (m_hWnd)
+		{
+			UnsubclassWindow();
+		}
+	}
+	
+	::InvalidateRect(hWnd, NULL, TRUE);
 
 	return TRUE;
 }
@@ -56,20 +66,14 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 		InitColumn(m_para.lstColumns);
 	}
 
+	__EnsureReturn(SetHeaderHeight(m_para.nHeaderHeight), FALSE);
 
-	if (0 == m_para.nHeaderHeight)
-	{
-		(void)ModifyStyle(0, LVS_NOCOLUMNHEADER);
-	}
-	__AssertReturn(m_wndHeader.SubclassWindow(CListCtrl::GetHeaderCtrl()->GetSafeHwnd()), FALSE);
-	__EnsureReturn(m_wndHeader.Init(m_para.nHeaderHeight, m_para.fHeaderFontSize), FALSE);
+	auto pHeader = CListCtrl::GetHeaderCtrl();
+	__EnsureReturn(m_fontHeader.create(pHeader->m_hWnd, m_para.fHeaderFontSize, 0), FALSE);
 
-	
-	auto pFont = CListCtrl::GetHeaderCtrl()->GetFont();
-	
 	__EnsureReturn(InitFont(m_para.crText, m_para.fFontSize), FALSE);
 
-	CListCtrl::GetHeaderCtrl()->SetFont(pFont);
+	pHeader->SetFont(&m_fontHeader);
 	
 	if (0 != m_para.uItemHeight)
 	{
@@ -183,6 +187,22 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns)
 
 		m_uColumnCount++;
 	}
+}
+
+BOOL CObjectList::SetHeaderHeight(int nHeaderHeight)
+{
+	if (0 == nHeaderHeight)
+	{
+		(void)ModifyStyle(0, LVS_NOCOLUMNHEADER);
+	}
+	else
+	{
+		(void)ModifyStyle(LVS_NOCOLUMNHEADER, 0);
+
+		__AssertReturn(m_wndHeader.Init(CListCtrl::GetHeaderCtrl()->m_hWnd, nHeaderHeight), FALSE);
+	}
+
+	return true;
 }
 
 BOOL CObjectList::SetItemHeight(UINT uItemHeight)
