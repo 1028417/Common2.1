@@ -56,15 +56,15 @@ BOOL CObjectList::InitCtrl(const tagListPara& para)
 		InitColumn(m_para.lstColumns);
 	}
 
+
 	if (0 == m_para.nHeaderHeight)
 	{
 		(void)ModifyStyle(0, LVS_NOCOLUMNHEADER);
 	}
-	//else if (m_para.nHeaderHeight > 0 || m_para.fHeaderFontSize != 0)
-	{
-		__EnsureReturn(InitHeader((UINT)m_para.nHeaderHeight, m_para.fHeaderFontSize), FALSE);
-	}
+	__AssertReturn(m_wndHeader.SubclassWindow(CListCtrl::GetHeaderCtrl()->GetSafeHwnd()), FALSE);
+	__EnsureReturn(m_wndHeader.Init(m_para.nHeaderHeight, m_para.fHeaderFontSize), FALSE);
 
+	
 	auto pFont = CListCtrl::GetHeaderCtrl()->GetFont();
 	
 	__EnsureReturn(InitFont(m_para.crText, m_para.fFontSize), FALSE);
@@ -183,18 +183,6 @@ void CObjectList::InitColumn(const TD_ListColumn& lstColumns)
 
 		m_uColumnCount++;
 	}
-}
-
-BOOL CObjectList::InitHeader(UINT uHeaderHeight, float fHeaderFontSize)
-{
-	if (!m_wndHeader)
-	{
-		__AssertReturn(m_wndHeader.SubclassWindow(CListCtrl::GetHeaderCtrl()->GetSafeHwnd()), FALSE);
-	}
-
-	__EnsureReturn(m_wndHeader.Init(uHeaderHeight, fHeaderFontSize), FALSE);
-	
-	return TRUE;
 }
 
 BOOL CObjectList::SetItemHeight(UINT uItemHeight)
