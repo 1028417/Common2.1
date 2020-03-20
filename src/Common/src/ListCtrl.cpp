@@ -1083,6 +1083,14 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 
 void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
+	int nItemCount = GetItemCount();
+	if (0 == nItemCount)
+	{
+		m_AsyncTaskTimer.kill();
+		return;
+	}
+	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
+
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (!isReportView())
 		{
@@ -1124,28 +1132,19 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 
 void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
-	int nItemCount = GetItemCount();
-	if (0 == nItemCount)
-	{
-		return;
-	}
-	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
-
 	_AsyncTask(uElapse, [&, cb](UINT uItem) {
 		cb(uItem);
-
 		Update(uItem);
 	});
 }
 
 void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<CListObject&> cb)
 {
-	AsyncTask(uElapse, [&, cb](UINT uItem) {
+	_AsyncTask(uElapse, [&, cb](UINT uItem) {
 		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
-			cb(*pObject);
-			
+			cb(*pObject);			
 			UpdateItem(uItem, pObject);
 		}
 	});
