@@ -998,6 +998,11 @@ BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
 				return TRUE;
 			}
 		}
+
+		if (WM_DESTROY == message)
+		{
+			m_AsyncTaskTimer.kill();
+		}
 	}
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
@@ -1078,14 +1083,6 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 
 void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
-	int nItemCount = GetItemCount();
-	if (0 == nItemCount)
-	{
-		return;
-	}
-
-	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
-
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
 		if (!isReportView())
 		{
@@ -1127,6 +1124,13 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 
 void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
+	int nItemCount = GetItemCount();
+	if (0 == nItemCount)
+	{
+		return;
+	}
+	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
+
 	_AsyncTask(uElapse, [&, cb](UINT uItem) {
 		cb(uItem);
 
