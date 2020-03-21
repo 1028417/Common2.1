@@ -178,9 +178,10 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 		m_strCancelButton = lpszCancelButton;
 	}
 
+	cauto rcWorkArea = getWorkArea(true);
 	if (0 == uWidth)
 	{
-		uWidth = getWorkArea(true).right * 38 / 100;
+		uWidth = rcWorkArea.right * ((rcWorkArea.right > rcWorkArea.bottom) ? 38 : 83) / 100;
 	}
 	if (0 == uHeight)
 	{
