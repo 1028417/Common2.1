@@ -220,7 +220,7 @@ void CPath::remove(XFile *pSubPath)
 {
 	if (pSubPath)
 	{
-		if (pSubPath->fileInfo().bDir)
+		if (pSubPath->isDir())
 		{
 			if (0 != m_paSubDir.del((CPath*)pSubPath))
 			{
