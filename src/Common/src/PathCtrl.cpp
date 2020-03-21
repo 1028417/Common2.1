@@ -33,7 +33,7 @@ BOOL CPathList::InitCtrl(COLORREF crText, float fFontSize, const CSize& szImglst
 	return TRUE;
 }
 
-void CPathList::SetPath(CPathObject& dir)
+void CPathList::ShowDir(CPathObject& dir)
 {
 	TD_PathObjectList paPathObject(dir.dirs());
 	paPathObject.add(dir.files());

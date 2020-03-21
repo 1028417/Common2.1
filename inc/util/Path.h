@@ -195,11 +195,11 @@ public:
 	}
 
     XFile* findSubPath(wstring strSubPath, bool bDir);
-    XFile* findSubFile(wstring strSubFile)
+    XFile* findSubFile(const wstring& strSubFile)
     {
         return findSubPath(strSubFile, false);
     }
-    CPath* findSubDir(wstring strSubDir)
+    CPath* findSubDir(const wstring& strSubDir)
     {
         return (CPath*)findSubPath(strSubDir, true);
     }
