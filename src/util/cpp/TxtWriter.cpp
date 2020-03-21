@@ -149,7 +149,7 @@ void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
     {
-        strText.append(strutil::toStr((const wchar_t*)lpData, len / 2));
+		strText.append(strutil::toStr((const wchar_t*)lpData, len / 2));
     }
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
 	{

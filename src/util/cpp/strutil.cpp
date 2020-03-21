@@ -16,6 +16,9 @@ static struct __localeInit {
 } localeInit;
 
 #if __winvc
+#include <codecvt>
+	static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
+
     static const locale g_locale_CN("Chinese_china");
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
 
@@ -206,23 +209,21 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
 	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
-#if __winvc
-#include <codecvt>
-using utf8_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
-static utf8_convert g_utf8Convert;
-#endif
-
 bool strutil::checkUtf8(const char *pStr, int len)
 {
-    if (-1 == len)
-    {
-        len = strlen(pStr);
-    }
-
+	if (-1 == len)
+	{
+		len = strlen(pStr);
+	}
+	if (len <= 0)
+	{
+		return false;
+	}
+		
 	UINT nBytes = 0;
-	unsigned char chr = *pStr;
+	unsigned char chr = 0;
 	bool bAllAscii = true;
-    for (int nIdx = 0; nIdx < len; ++nIdx)
+    for (int nIdx = 0; nIdx < len; nIdx++)
 	{
         chr = *(pStr + nIdx);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
@@ -266,12 +267,67 @@ bool strutil::checkUtf8(const char *pStr, int len)
 	if (nBytes != 0) {
 		return false;
 	}
-	if (bAllAscii) { //如果全部都是ASCII, 也是UTF8
+	if (bAllAscii) {
 		return false;
 	}
 
 	return true;
 }
+
+/*	auto bytes = (const unsigned char*)pStr;
+	auto end = bytes + len;
+	unsigned int cp = 0;
+	int num = 0;
+
+	while (bytes < end) {
+		if ((*bytes & 0x80) == 0x00) {
+			// U+0000 to U+007F
+			cp = (*bytes & 0x7F);
+			num = 1;
+		}
+		else if ((*bytes & 0xE0) == 0xC0) {
+			// U+0080 to U+07FF
+			cp = (*bytes & 0x1F);
+			num = 2;
+		}
+		else if ((*bytes & 0xF0) == 0xE0) {
+			// U+0800 to U+FFFF
+			cp = (*bytes & 0x0F);
+			num = 3;
+		}
+		else if ((*bytes & 0xF8) == 0xF0) {
+			// U+10000 to U+10FFFF
+			cp = (*bytes & 0x07);
+			num = 4;
+		}
+		else {
+			return false;
+		}
+
+		bytes += 1;
+		for (int i = 1; i < num; ++i) {
+		if ((*bytes & 0xC0) != 0x80)
+		{
+			return false;
+		}
+
+		cp = (cp << 6) | (*bytes & 0x3F);
+			bytes += 1;
+		}
+
+		if ((cp > 0x10FFFF) ||
+			((cp >= 0xD800) && (cp <= 0xDFFF)) ||
+			((cp <= 0x007F) && (num != 1)) ||
+			((cp >= 0x0080) && (cp <= 0x07FF) && (num != 2)) ||
+			((cp >= 0x0800) && (cp <= 0xFFFF) && (num != 3)) ||
+			((cp >= 0x10000) && (cp <= 0x1FFFFF) && (num != 4)))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}*/
 
 wstring strutil::fromUtf8(const char *pStr, int len)
 {
@@ -331,13 +387,21 @@ wstring strutil::toWstr(const char *pStr, int len)
     }
 
 #if __winvc
-	TBuffer<wchar_t> buff(len+1);
-	if (mbstowcs_s(NULL, buff, len+1, pStr, len))
+	wstring strRet(len, L'\0');
+	int nRet = MultiByteToWideChar(CP_ACP, 0, pStr, len, (wchar_t*)strRet.c_str(), len);
+	if (nRet <= 0)
 	{
 		return L"";
 	}
-
-	return buff.ptr();
+	strRet.erase(nRet);
+	return strRet;
+	
+	/*wstring strRet(len, L'\0');
+	if (mbstowcs_s(NULL, (wchar_t*)strRet.c_str(), len+1, pStr, len))
+	{
+		return L"";
+	}
+	return strRet;*/
 
 #else
     return __A2Q(pStr, len).toStdWString();
@@ -356,14 +420,14 @@ string strutil::toStr(const wchar_t *pStr, int len)
     }
 
 #if __winvc
-	len *= 2;
-	TD_CharBuffer buff(len+1);
-    if (wcstombs_s(NULL, buff, len, pStr, len))
-    {
-        return "";
-    }
-
-    return buff.ptr();
+	string strRet(len*2, '\0');
+	int nRet = WideCharToMultiByte(CP_ACP, 0, pStr, len, (char*)strRet.c_str(), len*2, NULL, NULL);
+	if (nRet <= 0)
+	{
+		return "";
+	}
+	strRet.erase(nRet);
+	return strRet;
 
 #else
     return __W2Q(pStr, len).toUtf8().toStdString();
