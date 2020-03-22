@@ -15,6 +15,22 @@ static HWND volatile g_hMainWnd = NULL;
 #pragma data_seg()
 #pragma comment(linker,"/section:Shared,RWS")
 
+bool CMainApp::checkRuning()
+{
+	if (g_bRuning)
+	{
+		if (g_hMainWnd)
+		{
+			CMainApp::foregroundWnd(g_hMainWnd);
+		}
+
+		return true;
+	}
+	g_bRuning = true;
+
+	return false;
+}
+
 static vector<CModuleApp*> g_vctModules;
 
 static map<UINT, LPVOID> g_mapInterfaces;
@@ -115,7 +131,7 @@ E_DoEventsResult CMainApp::DoEvents(bool bOnce)
 
 void CMainApp::foregroundWnd(HWND hWnd)
 {
-	if (IsIconic(g_hMainWnd))
+	if (IsIconic(hWnd))
 	{
 		::ShowWindow(hWnd, SW_RESTORE);
 	}
@@ -129,18 +145,6 @@ void CMainApp::foregroundWnd(HWND hWnd)
 
 BOOL CMainApp::InitInstance()
 {
-	if (g_bRuning)
-	{
-		if (g_hMainWnd)
-		{
-			foregroundWnd(g_hMainWnd);
-		}
-
-		return FALSE;
-	}
-	g_bRuning = true;
-
-
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
 	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
@@ -170,32 +174,26 @@ BOOL CMainApp::InitInstance()
 
 void CMainApp::_run()
 {
-	__Assert(getController().init());
-
-	CMainWnd *pMainWnd = getView().init();
+	CMainWnd *pMainWnd = getView().show();
 	g_hMainWnd = pMainWnd->GetSafeHwnd();
 	__Ensure(g_hMainWnd);
 	m_pMainWnd = pMainWnd;
+	
+	__async([=]() {
+		for (auto pModule : g_vctModules)
+		{
+			pModule->OnReady(*pMainWnd);
+		}
 
-	for (auto pModule : g_vctModules)
-	{
-		pModule->OnReady(*pMainWnd);
-	}
+		getController().start();
 
-	__async([&]() {
-		getView().show();
-
-		__async([&]() {
-			getController().start();
-
-			for (cauto HotkeyInfo : g_vctHotkeyInfos)
+		for (cauto HotkeyInfo : g_vctHotkeyInfos)
+		{
+			if (HotkeyInfo.bGlobal)
 			{
-				if (HotkeyInfo.bGlobal)
-				{
-					(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
-				}
+				(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
 			}
-		});
+		}
 	});
 
 	(void)__super::Run();
