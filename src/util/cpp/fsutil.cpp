@@ -434,14 +434,16 @@ bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
     }
 
 #else
+	if (strutil::matchIgnoreCase(transSeparator_r(strSrcFile), transSeparator_r(strDstFile)))
+	{
+		return true;
+	}
+
     if (existFile(strDstFile))
     {
-        //if (!strutil::matchIgnoreCase(transSeparator_r(strSrcFile), transSeparator_r(strDstFile)))
+        if (!removeFile(strDstFile))
         {
-            if (!removeFile(strDstFile))
-            {
-                return false;
-            }
+            return false;
         }
     }
 
