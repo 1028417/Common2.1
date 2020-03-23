@@ -58,7 +58,7 @@ win32 {
     LIBS += -lcrypto -lssl
 
 android {
-    LIBS += -L$$PWD/../../libs/armeabi-v7a
+    LIBS += -L../../libs/armeabi-v7a
 
     INCLUDEPATH += ../../3rd/curl/lib/curl_config_android
 
@@ -66,7 +66,7 @@ android {
     DESTDIR = ..\..\libs\armeabi-v7a
     QMAKE_POST_LINK += copy /Y $$DESTDIR\libxutil.so $$XMusicDir\libs\armeabi-v7a
 } else: macx {
-    LIBS += -L$$PWD/../../libs/mac  #-lnghttp2  -lz
+    LIBS += -L../../libs/mac  #-lnghttp2  -lz
 
     INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
 

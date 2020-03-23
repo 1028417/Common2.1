@@ -235,19 +235,19 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	return strutil::matchIgnoreCase(strDir, strSubPath, size);
 }
 
-wstring fsutil::GetOppPath(const wstring& strPath, const wstring strBaseDir)
+wstring fsutil::GetOppPath(const wstring strBaseDir, const wstring& strSubPath)
 {
     if (strBaseDir.empty())
     {
-        return strPath;
+        return strSubPath;
     }
 
-    if (!CheckSubPath(strBaseDir, strPath))
+    if (!CheckSubPath(strBaseDir, strSubPath))
     {
         return L"";
     }
 
-    return strPath.substr(strBaseDir.size());
+    return strSubPath.substr(strBaseDir.size());
 }
 
 #if __windows
