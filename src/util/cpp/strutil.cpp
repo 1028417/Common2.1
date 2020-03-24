@@ -365,14 +365,12 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
 #endif
 }
 
-wstring& strutil::transEndian(wstring& str)
+void strutil::transEndian(wstring& str)
 {
 	for (auto& wch : str)
 	{
-		wch = (wch << 8) | (wch >> 8);
-	}
-
-	return str;
+        wch = transEndian(wch);
+    }
 }
 
 wstring strutil::toWstr(const char *pStr, int len)
