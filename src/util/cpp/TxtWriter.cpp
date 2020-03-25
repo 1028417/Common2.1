@@ -1,11 +1,11 @@
 
 #include "util.h"
 
-static const wchar_t g_pwcEolN[] = { L'\n' };
-static const wchar_t g_pwcEolRN[] = { L'\r', L'\n' };
+static const wchar_t g_pwcEolN = L'\n';
+static const wchar_t g_pwcEolRN[] { L'\r', L'\n' };
 
-static const char g_pchEolN[] = { '\n' };
-static const char g_pchEolRN[] = { '\r', '\n' };
+static const char g_pchEolN = '\n';
+static const char g_pchEolRN[] { '\r', '\n' };
 
 static const char __UTF8Bom[] { (char)0xef, (char)0xbb, (char)0xbf };
 
