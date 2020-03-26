@@ -5,7 +5,7 @@ void winfsutil::getSysDrivers(list<wstring>& lstDrivers)
 {
 	#define MAX_DRIVE (_MAX_DRIVE + 1)
 
-	TCHAR pszBuffer[256] = {0};
+	TCHAR pszBuffer[256] {0};
 
 	UINT uCount = ::GetLogicalDriveStringsW(0, NULL);
 

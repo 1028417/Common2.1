@@ -391,7 +391,7 @@ BOOL CDockView::AddPage(CPage& Page)
 	
 	if (E_TabStyle::TS_HideTab != m_ViewStyle.TabStyle.eTabStyle)
 	{
-		TCITEM tci = {0};
+		TCITEM tci {0};
 		tci.mask = TCIF_TEXT;
 		tci.pszText = (LPTSTR)(LPCTSTR)Page.GetTitle();
 		(void)m_wndTabCtrl.SetItem(m_wndTabCtrl.GetItemCount()-1, &tci);

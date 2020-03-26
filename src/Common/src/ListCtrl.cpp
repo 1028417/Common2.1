@@ -216,7 +216,7 @@ BOOL CObjectList::SetItemHeight(UINT uItemHeight)
 
 void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 {
-	LVTILEVIEWINFO LvTileViewInfo = { sizeof(LVTILEVIEWINFO) };
+	LVTILEVIEWINFO LvTileViewInfo { sizeof(LVTILEVIEWINFO) };
 	LvTileViewInfo.dwFlags = LVTVIF_FIXEDSIZE;
 	LvTileViewInfo.sizeTile = { (LONG)cx, (LONG)cy };
 	LvTileViewInfo.dwMask = LVTVIM_TILESIZE;
