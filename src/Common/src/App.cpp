@@ -518,11 +518,6 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 
 int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
 {
-	if (NULL == pWnd)
-	{
-		pWnd = CMainApp::GetMainApp()->m_pMainWnd;
-	}
-
 	wstring strText(L"    ");
 	strText.append(strMsg).append(L"    ");
 
@@ -539,6 +534,10 @@ int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType,
 	
 	strText.append(L"\n ");
 
+	if (NULL == pWnd)
+	{
+		pWnd = CMainApp::GetMainApp()->m_pMainWnd;
+	}
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
 
