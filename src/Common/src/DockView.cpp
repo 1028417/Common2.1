@@ -212,7 +212,7 @@ void CViewTab::OnPaint()
 
 		if (0 == nItem)
 		{
-			MemDC.FillSolidRect(CRect(0, rcItem.top-2, rcClient.right, rcItem.bottom+2), __Color_White);
+			MemDC.FillSolidRect(CRect(0, rcItem.top-2, rcClient.right, rcItem.bottom+2), __crWhite);
 			nHeight = rcItem.Height() + 2;
 		}
 
@@ -265,7 +265,7 @@ void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect&
 
 	graphics.FillPolygon(nItem == nSelItem ? &m_brushSel : &m_brushUnsel, pt, sizeof(pt) / sizeof(pt[0]));
 
-	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 	if (nItem != nSelItem)
 	{
 		if (nItem > 0)

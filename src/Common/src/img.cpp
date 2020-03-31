@@ -137,27 +137,45 @@ void CCompDC::destroy()
 	}
 }
 
-CImg::~CImg()
+BOOL CImg::Load(const wstring& strFile)
 {
 	Destroy();
+	
+	HRESULT hr = __super::Load(strFile.c_str());
+	__EnsureReturn(S_OK == hr, FALSE);
+
+	return TRUE;
 }
 
-BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTarget, bool bHalfToneMode, LPCRECT prcMargin)
+/*for (int x = 0; x < cx; x++)
 {
-	CRect rcDst(rcTarget);
-	dcTarget.FillSolidRect(rcDst, m_crBkgrd);
-	
-	if (NULL != prcMargin)
+	for (int y = 0; y < cy; y++)
 	{
-		rcDst.left = prcMargin->left;
-		rcDst.top = prcMargin->top;
-		rcDst.right -= prcMargin->right;
-		rcDst.bottom -= prcMargin->bottom;
+		byte *pByte = (byte *)GetPixelAddress(x, y);
+		pByte[0] = pByte[0] * pByte[3] / 255;
+		pByte[1] = pByte[1] * pByte[3] / 255;
+		pByte[2] = pByte[2] * pByte[3] / 255;
 	}
+}*/
 
-	int nImgWidth = this->GetWidth();
-	int nImgHeight = this->GetHeight();
-	float fHWRate = (float)nImgHeight / nImgWidth;
+BOOL CImg::DrawEx(HDC hDC, const RECT& rc)
+{
+	return CImage::Draw(hDC, rc, Gdiplus::InterpolationMode::InterpolationModeHighQualityBicubic);
+}
+
+BOOL CImg::DrawEx(HDC hDC, const RECT& rc, bool bHalfToneMode)
+{
+	(void)::SetStretchBltMode(hDC, bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);
+	return CImage::StretchBlt(hDC, rc, SRCCOPY);
+}
+
+BOOL CImg::DrawEx(HDC hDC, const RECT& rc, E_ImgFixMode eFixMode, bool bHalfToneMode)
+{
+	CRect rcDst(rc);
+	
+	int cx = this->GetWidth();
+	int cy = this->GetHeight();
+	float fHWRate = (float)cy / cx;
 
 	int nDstWidth = rcDst.Width();
 	int nDstHeight = rcDst.Height();
@@ -201,102 +219,39 @@ BOOL CImg::StretchBltFix(E_ImgFixMode eFixMode, CDC& dcTarget, const CRect& rcTa
 	if (E_ImgFixMode::IFM_Width == eFixMode)
 	{
 		rcSrc.left = 0;
-		rcSrc.right = nImgWidth;
+		rcSrc.right = cx;
 
-		rcSrc.top = LONG(nImgHeight - nImgWidth*fNeedHWRate) / 2;
+		rcSrc.top = LONG(cy - cx*fNeedHWRate) / 2;
 		rcSrc.top = MAX(rcSrc.top, 0);
 
-		rcSrc.bottom = nImgHeight - rcSrc.top;
+		rcSrc.bottom = cy - rcSrc.top;
 		rcSrc.bottom = MAX(rcSrc.bottom, 0);
 	}
 	else
 	{
 		rcSrc.top = 0;
-		rcSrc.bottom = nImgHeight;
+		rcSrc.bottom = cy;
 
-		rcSrc.left = LONG(nImgWidth - nImgHeight / fNeedHWRate) / 2;
+		rcSrc.left = LONG(cx - cy / fNeedHWRate) / 2;
 		rcSrc.left = MAX(rcSrc.left, 0);
 		
-		rcSrc.right = nImgWidth - rcSrc.left;
+		rcSrc.right = cx - rcSrc.left;
 		rcSrc.right = MAX(rcSrc.right, 0);
 	}
-
-	(void)dcTarget.SetStretchBltMode(bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);
-
-	CDC *pdcThis = GetDC();
-
-	BOOL bRet = dcTarget.StretchBlt(rcDst.left, rcDst.top, nDstWidth, nDstHeight
-		, pdcThis, rcSrc.left, rcSrc.top, rcSrc.Width(), rcSrc.Height(), SRCCOPY);
-
+	
+	(void)::SetStretchBltMode(hDC, bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);
+	BOOL bRet = ::StretchBlt(hDC, rcDst.left, rcDst.top, nDstWidth, nDstHeight
+		, GetDC(), rcSrc.left, rcSrc.top, rcSrc.Width(), rcSrc.Height(), SRCCOPY);
 	this->ReleaseDC();
 
 	return bRet;
 }
 
-BOOL CImg::InitCompDC(E_ImgFixMode eFixMode, bool bHalfToneMode, UINT cx, UINT cy, LPCRECT prcMargin)
-{
-	m_eFixMode = eFixMode;
-
-	m_cx = cx;
-	m_cy = cy;
-	m_rcDst = { 0, 0, (int)cx, (int)cy };
-
-	m_bHalfToneMode = bHalfToneMode;
-	
-	__AssertReturn(m_CompDC.create(cx, cy), FALSE);
-
-	if (NULL != prcMargin)
-	{
-		m_CompDC->FillSolidRect(m_rcDst, __Color_White);
-
-		m_rcDst.left = prcMargin->left;
-		m_rcDst.top = prcMargin->top;
-		m_rcDst.right -= prcMargin->right;
-		m_rcDst.bottom -= prcMargin->bottom;
-	}
-
-	return TRUE;
-}
-
-BOOL CImg::Load(const wstring& strFile)
-{
-	Destroy();
-
-	HRESULT hr = __super::Load(strFile.c_str());
-	__EnsureReturn(S_OK == hr, FALSE);
-
-	return TRUE;
-}
-
-BOOL CImg::LoadEx(const wstring& strFile, const function<E_ImgFixMode(UINT uWidth, UINT uHeight)>& cb)
-{
-	__EnsureReturn(Load(strFile), FALSE);
-
-	E_ImgFixMode eFixMode = m_eFixMode;
-	if (cb)
-	{
-		eFixMode = cb((UINT)CImage::GetWidth(), (UINT)CImage::GetHeight());
-	}
-
-	__EnsureReturn(StretchBltFix(eFixMode, m_CompDC.getDC(), m_rcDst, m_bHalfToneMode), FALSE);
-
-	return TRUE;
-}
-
-BOOL CImg::StretchBltEx(CDC& dcTarget, const CRect& rcTarget)
-{
-	return dcTarget.StretchBlt(rcTarget.left, rcTarget.top, rcTarget.Width(), rcTarget.Height()
-		, &m_CompDC.getDC(), 0, 0, m_cx, m_cy, SRCCOPY);
-}
-
-BOOL CImg::StretchBltEx(CImg& imgTarget)
-{
-	return StretchBltEx(imgTarget.m_CompDC.getDC(), CRect(0, 0, m_cx, m_cy));
-}
-
 BOOL CImglst::Init(UINT cx, UINT cy)
 {
 	__AssertReturn(Create(cx, cy, ILC_COLOR32, 0, 0), FALSE);
+
+	SetBkColor(CLR_NONE);
 
 	__AssertReturn(m_CompDC.create(cx, cy), FALSE);
 	
@@ -324,7 +279,7 @@ BOOL CImglst::Init(CBitmap& bitmap)
 	(void)bitmap.GetBitmap(&bmp);
 	__AssertReturn(Init(bmp.bmHeight, bmp.bmHeight), FALSE);
 
-	(void)Add(&bitmap, __Color_Black);
+	(void)Add(&bitmap, CLR_NONE);
 
 	return TRUE;
 }
@@ -341,13 +296,23 @@ BOOL CImglst::SetFile(const wstring& strFile, bool bHalfToneMode, LPCRECT prcMar
 
 void CImglst::SetImg(CImg& img, bool bHalfToneMode, LPCRECT prcMargin, int nPosReplace)
 {
-	img.StretchBltFix(E_ImgFixMode::IFM_Inner, m_CompDC.getDC(), CRect(0, 0, m_cx, m_cy), bHalfToneMode, prcMargin);
+	CRect rc(0, 0, m_cx, m_cy);
+	m_CompDC.getDC().FillSolidRect(rc, __crWhite);
+
+	if (prcMargin)
+	{
+		rc.left += prcMargin->left;
+		rc.top += prcMargin->top;
+		rc.right -= prcMargin->right;
+		rc.bottom -= prcMargin->bottom;
+	}
+	img.DrawEx(m_CompDC.getDC(), rc, E_ImgFixMode::IFM_Inner, bHalfToneMode);
 
 	m_CompDC.getBitmap([&](CBitmap& bitmap) {
 		SetBitmap(bitmap, nPosReplace);
 	});
 }
-
+// TODO CPngImage
 void CImglst::SetBitmap(CBitmap& bitmap, int nPosReplace)
 {
 	if (nPosReplace >= 0)
@@ -356,7 +321,7 @@ void CImglst::SetBitmap(CBitmap& bitmap, int nPosReplace)
 	}
 	else
 	{
-		(void)Add(&bitmap, __Color_Black);
+		(void)Add(&bitmap, CLR_NONE);
 	}
 }
 

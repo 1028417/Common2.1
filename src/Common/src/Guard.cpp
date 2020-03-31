@@ -299,9 +299,9 @@ void CMenuEx::onDrawItem(CDC& dc, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int nItemID = lpDrawItemStruct->itemID;
 
 	COLORREF crBk = 0;
-	if (0 != nItemID && lpDrawItemStruct->itemState & ODS_SELECTED)
+	if (lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
-		crBk = m_bTopMenu ? BkgColor_Select : BkgColor_Hit;
+		crBk = __crSelect;
 	}
 	else
 	{

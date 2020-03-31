@@ -106,8 +106,8 @@ BOOL CObjectList::InitImglst(const CSize& size, const CSize *pszSmall, const TD_
 
 	if (NULL != pszSmall)
 	{
-		__AssertReturn(m_ImglstSmall.Init(*pszSmall, vecIcons), FALSE);
-		(void)__super::SetImageList(&m_ImglstSmall, LVSIL_SMALL);
+		__AssertReturn(m_smallImglst.Init(*pszSmall, vecIcons), FALSE);
+		(void)__super::SetImageList(&m_smallImglst, LVSIL_SMALL);
 	}
 	else
 	{
@@ -124,8 +124,8 @@ BOOL CObjectList::InitImglst(CBitmap& Bitmap, CBitmap *pBitmapSmall)
 
 	if (NULL != pBitmapSmall)
 	{
-		__AssertReturn(m_ImglstSmall.Init(*pBitmapSmall), FALSE);
-		(void)__super::SetImageList(&m_ImglstSmall, LVSIL_SMALL);
+		__AssertReturn(m_smallImglst.Init(*pBitmapSmall), FALSE);
+		(void)__super::SetImageList(&m_smallImglst, LVSIL_SMALL);
 	}
 	else
 	{
@@ -207,9 +207,9 @@ BOOL CObjectList::SetHeaderHeight(int nHeaderHeight)
 
 BOOL CObjectList::SetItemHeight(UINT uItemHeight)
 {
-	__AssertReturn(m_ImglstSmall.Create(1, uItemHeight, ILC_COLOR, 0, 0), FALSE);
+	__AssertReturn(m_smallImglst.Create(1, uItemHeight, ILC_COLOR, 0, 0), FALSE);
 
-	SetImageList(NULL, &m_ImglstSmall);
+	SetImageList(NULL, &m_smallImglst);
 	
 	return TRUE;
 }
@@ -421,12 +421,7 @@ void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, const wstring&
 	int iImage = -1;
 	GenListItem(Object, isReportView(), vecText, iImage);
 
-	UINT uMask = LVIF_PARAM;
-	if (iImage >= 0)
-	{
-		uMask |= LVIF_IMAGE;
-	}
-	__Assert(SetItem(uItem, 0, uMask, NULL, iImage, 0, 0, (LPARAM)&Object));
+	__Assert(SetItem(uItem, 0, LVIF_PARAM | LVIF_IMAGE, NULL, iImage, 0, 0, (LPARAM)&Object));
 
 	_SetItemTexts<true>(uItem, vecText, strPrefix);
 }
@@ -745,6 +740,8 @@ void CObjectList::SetCustomFont(CDC& dc, float fFontSizeOffset, bool bUnderline)
 	}
 }
 
+//static const CPen g_penSelFocus(0, 1, RGB(220, 240, 255));
+
 void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 {
 	auto& nmcd = lvnmcd.nmcd;
@@ -754,20 +751,36 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 	}
 	else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 	{
+		lvnmcd.clrTextBk = __crWhite;
+
 		if (GetItemState(nmcd.dwItemSpec, LVIS_SELECTED))
 		{
-			lvnmcd.clrTextBk = BkgColor_Select;
-		}
-		else
-		{
-			lvnmcd.clrTextBk = RGB(255, 255, 255);
+			lvnmcd.clrTextBk = __crHit;
+
+			CDC dc;
+			if (dc.Attach(lvnmcd.nmcd.hdc))
+			{
+				if (GetView() == E_ListViewType::LVT_Report || !::IsWindowVisible(GetEditControl()->GetSafeHwnd()))
+				{
+					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crHit);
+					/*auto prevPen = dc.SelectObject(g_penSelFocus);
+					dc.Rectangle(&lvnmcd.nmcd.rc);
+					dc.SelectObject(prevPen);*/
+
+				}
+				else
+				{
+					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crWhite);
+				}
+
+				dc.Detach();
+			}
 		}
 
 		nmcd.uItemState &= ~CDIS_SELECTED;
 		nmcd.uItemState &= ~CDIS_FOCUS;
 
-		bool bReportView = isReportView();
-		if (bReportView)
+		if (isReportView())
 		{
 			if (m_cbDrawSubItem)
 			{
@@ -786,6 +799,7 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 		{
 			if (m_cbPostDraw)
 			{
+				if (0 == lvnmcd.nmcd.rc.right) return; // TODO ¹æ±ÜÄ³bug
 				tagLVDrawSubItem lvcd(lvnmcd);
 				lvcd.crText = m_para.crText;
 				m_cbPostDraw(lvcd);

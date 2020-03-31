@@ -171,7 +171,7 @@ BOOL CObjectCheckTree::InitCtrl()
 	(void)StateBitmap.GetBitmap(&bmp);
 
 	__AssertReturn(m_StateImageList.Create(bmp.bmHeight, bmp.bmHeight, ILC_COLOR32, 0, 0), FALSE);
-	(void)m_StateImageList.Add(&StateBitmap, __Color_Black);
+	(void)m_StateImageList.Add(&StateBitmap, CLR_NONE);
 	
 	(void)StateBitmap.DeleteObject();
 
@@ -507,7 +507,7 @@ void CObjectTree::handleCustomDraw(NMTVCUSTOMDRAW& tvnmcd, LRESULT* pResult)
 		tvnmcd.clrText = GetTextColor();
 		if (nmcd.uItemState & CDIS_SELECTED)
 		{
-			tvnmcd.clrTextBk = BkgColor_Select;
+			tvnmcd.clrTextBk = __crSelect;
 		}
 		else
 		{
