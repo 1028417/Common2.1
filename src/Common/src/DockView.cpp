@@ -185,10 +185,6 @@ void CViewTab::OnPaint()
 
 	DefWindowProc(WM_PAINT, (WPARAM)MemDC.m_hDC, 0);
 	
-	MemDC.SetBkMode(TRANSPARENT);
-
-	Gdiplus::Graphics graphics(MemDC.m_hDC);
-
 	CRect rcItem;
 	auto nItemCount = GetItemCount();
 	int nHeight = 0;
@@ -216,7 +212,7 @@ void CViewTab::OnPaint()
 			nHeight = rcItem.Height() + 2;
 		}
 
-		_drawItem(MemDC, graphics, nItem, rcItem);
+		_drawItem(MemDC, nItem, rcItem);
 	}
 	
 	int y = 0;
@@ -227,7 +223,7 @@ void CViewTab::OnPaint()
 	dc.BitBlt(0, y, rcClient.right, nHeight, &MemDC, 0, y, SRCCOPY);
 }
 
-void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect& rcItem)
+void CViewTab::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 {
 	int nSelItem = GetCurSel();
 
@@ -263,9 +259,9 @@ void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect&
 		}
 	}*/
 
+	Gdiplus::Graphics graphics(dc);
+	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 	graphics.FillPolygon(nItem == nSelItem ? &m_brushSel : &m_brushUnsel, pt, sizeof(pt) / sizeof(pt[0]));
-
-	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
 	if (nItem != nSelItem)
 	{
 		if (nItem > 0)
@@ -302,7 +298,7 @@ void CViewTab::_drawItem(CDC& dc, Gdiplus::Graphics& graphics, int nItem, CRect&
 
 			int nTop = 2+rcItem.top + (rcItem.Height() - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
 
-			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_TRANSPARENT);
+			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_NORMAL);
 
 			rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
 		}
