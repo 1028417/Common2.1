@@ -760,18 +760,16 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 			CDC dc;
 			if (dc.Attach(lvnmcd.nmcd.hdc))
 			{
-				RECT rc = lvnmcd.nmcd.rc;
-				rc.bottom--;
 				if (GetView() == E_ListViewType::LVT_Report || !::IsWindowVisible(GetEditControl()->GetSafeHwnd()))
 				{
-					dc.FillSolidRect(&rc, __crHit);
+					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crHit);
 					/*auto prevPen = dc.SelectObject(g_penSelFocus);
 					dc.Rectangle(&rc);
 					dc.SelectObject(prevPen);*/
 				}
 				else
 				{
-					dc.FillSolidRect(&rc, __crWhite);
+					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crWhite);
 				}
 
 				dc.Detach();
