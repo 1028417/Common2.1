@@ -419,7 +419,7 @@ void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, const wstring&
 {
 	vector<wstring> vecText;
 	int iImage = -1;
-	GenListItem(Object, isReportView(), vecText, iImage);
+	GenListItem(Object, GetView(), vecText, iImage);
 
 	__Assert(SetItem(uItem, 0, LVIF_PARAM | LVIF_IMAGE, NULL, iImage, 0, 0, (LPARAM)&Object));
 
@@ -464,7 +464,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 
 	CRedrawLock RedrawLock(*this);
 	
-	bool bReportView = isReportView();
+	auto eViewType = GetView();
 
 	UINT uItemCount = (UINT)GetItemCount();
 	for (UINT uItem = 0; uItem < uItemCount; uItem++)
@@ -474,7 +474,7 @@ void CObjectList::UpdateColumns(const list<UINT>& lstColumn)
 		{
 			vector<wstring> vecText;
 			int iImage = -1;
-			GenListItem(*pObject, bReportView, vecText, iImage);
+			GenListItem(*pObject, eViewType, vecText, iImage);
 
 			for (auto nColumn : lstColumn)
 			{
@@ -532,9 +532,9 @@ void CObjectList::DeleteItems(const set<UINT>& setItems)
 	}
 }
 
-void CObjectList::GenListItem(CListObject& Object, bool bReportView, vector<wstring>& vecText, int& iImage)
+void CObjectList::GenListItem(CListObject& Object, E_ListViewType eViewType, vector<wstring>& vecText, TD_ListImgIdx& iImage)
 {
-	Object.GenListItem(bReportView, vecText, iImage);
+	Object.GenListItem(eViewType, vecText, iImage);
 }
 
 void CObjectList::SetItemImage(UINT uItem, UINT uImage)
