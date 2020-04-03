@@ -146,31 +146,20 @@ BOOL CImg::Load(const wstring& strFile)
 	return TRUE;
 }
 
-/*for (int x = 0; x < cx; x++)
+BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, E_ImgFixMode eFixMode)
 {
-	for (int y = 0; y < cy; y++)
+	if (E_ImgFixMode::IFM_None == eFixMode)
 	{
-		byte *pByte = (byte *)GetPixelAddress(x, y);
-		pByte[0] = pByte[0] * pByte[3] / 255;
-		pByte[1] = pByte[1] * pByte[3] / 255;
-		pByte[2] = pByte[2] * pByte[3] / 255;
-	}
-}*/
+		(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
+		return CImage::StretchBlt(hDC, rc, SRCCOPY);
 
-BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, bool bHalfToneMode)
-{
-	(void)::SetStretchBltMode(hDC, bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);
-	return CImage::StretchBlt(hDC, rc, SRCCOPY);
-
-	/*/BOOL bRet = ::StretchBlt(hDC, rc.left, rc.top, rc.right - rc.left + 1, rc.bottom - rc.top + 1
+		/*/BOOL bRet = ::StretchBlt(hDC, rc.left, rc.top, rc.right - rc.left + 1, rc.bottom - rc.top + 1
 		, GetDC(), 0, 0, GetWidth(), GetHeight(), SRCCOPY);
-	this->ReleaseDC();
+		this->ReleaseDC();
 
-	return bRet;*/
-}
+		return bRet;*/
+	}
 
-BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, bool bHalfToneMode, E_ImgFixMode eFixMode)
-{
 	CRect rcDst(rc);
 	
 	int cx = this->GetWidth();
@@ -239,7 +228,7 @@ BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, bool bHalfToneMode, E_ImgFixMod
 		rcSrc.right = MAX(rcSrc.right, 0);
 	}
 	
-	(void)::SetStretchBltMode(hDC, bHalfToneMode ? STRETCH_HALFTONE : STRETCH_DELETESCANS);
+	(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
 	return CImage::StretchBlt(hDC, rcDst.left, rcDst.top, nDstWidth, nDstHeight
 		, rcSrc.left, rcSrc.top, rcSrc.Width(), rcSrc.Height(), SRCCOPY);
 	
@@ -311,61 +300,32 @@ void CImglst::SetBitmap(CBitmap& bitmap, int nPosReplace)
 	}
 }
 
-void CImglst::_SetImg(LPCRECT prcMargin, int nPosReplace, cfn_void cb)
+#define __initAdpDC() \
+CRect rc(0, 0, m_cx, m_cy);\
+m_adpDC.destroy();\
+m_adpDC.create(m_cx, m_cy);\
+if (m_crBkg != CLR_NONE) m_adpDC.getDC().FillSolidRect(rc, m_crBkg);
+
+void CImglst::SetImg(Gdiplus::Image& img, LPCRECT prcMargin, int nPosReplace)
 {
-	m_rcAdpDC.SetRect(0, 0, m_cx, m_cy);
+	__initAdpDC();
 
-	m_adpDC.destroy();
-	m_adpDC.create(m_cx, m_cy);
-	if (m_crBkg != CLR_NONE)
-	{
-		m_adpDC.getDC().FillSolidRect(m_rcAdpDC, m_crBkg);
-	}
-
-	if (prcMargin)
-	{
-		m_rcAdpDC.left += prcMargin->left;
-		m_rcAdpDC.top += prcMargin->top;
-		m_rcAdpDC.right -= prcMargin->right;
-		m_rcAdpDC.bottom -= prcMargin->bottom;
-	}
-
-	cb();
+	Gdiplus::Graphics graphics(m_adpDC.getDC());
+	graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQuality);
+	graphics.DrawImage(&img, rc.left, rc.top, rc.Width(), rc.Height());	
 
 	m_adpDC.getBitmap([&](CBitmap& bitmap) {
 		SetBitmap(bitmap, nPosReplace);
 	});
 }
 
-void CImglst::SetImg(Gdiplus::Image& img, LPCRECT prcMargin, int nPosReplace)
+void CImglst::SetImg(CImg& img, E_ImgFixMode eFixMode, int nPosReplace)
 {
-	//m_rcAdpDC.SetRect(0, 0, m_cx, m_cy);
-	//Gdiplus::Graphics graphics(m_adpDC.getDC());
+	__initAdpDC();
 
-	_SetImg(prcMargin, nPosReplace, [&]() {
-		Gdiplus::Graphics graphics(m_adpDC.getDC());
-		graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQuality);
-		graphics.DrawImage(&img, m_rcAdpDC.left, m_rcAdpDC.top, m_rcAdpDC.Width(), m_rcAdpDC.Height());	
-	});
-}
+	img.StretchBltEx(m_adpDC.getDC(), rc, eFixMode);
 
-void CImglst::SetImg(CImg& img, LPCRECT prcMargin, int nPosReplace)
-{
-	_SetImg(prcMargin, nPosReplace, [&]() {
-		img.Draw(m_adpDC.getDC(), m_rcAdpDC, Gdiplus::InterpolationModeHighQualityBicubic);
-	});
-}
-
-void CImglst::SetImg(CImg& img, bool bHalfToneMode, LPCRECT prcMargin, int nPosReplace)
-{
-	_SetImg(prcMargin, nPosReplace, [&]() {
-		img.StretchBltEx(m_adpDC.getDC(), m_rcAdpDC, bHalfToneMode);
-	});
-}
-
-void CImglst::SetImg(CImg& img, bool bHalfToneMode, E_ImgFixMode eFixMode, LPCRECT prcMargin, int nPosReplace)
-{
-	_SetImg(prcMargin, nPosReplace, [&]() {
-		img.StretchBltEx(m_adpDC.getDC(), m_rcAdpDC, bHalfToneMode, eFixMode);
+	m_adpDC.getBitmap([&](CBitmap& bitmap) {
+		SetBitmap(bitmap, nPosReplace);
 	});
 }
