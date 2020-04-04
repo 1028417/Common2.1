@@ -760,7 +760,7 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 			CDC dc;
 			if (dc.Attach(lvnmcd.nmcd.hdc))
 			{
-				if (GetView() == E_ListViewType::LVT_Report || !::IsWindowVisible(GetEditControl()->GetSafeHwnd()))
+				if (GetView() != E_ListViewType::LVT_Icon)// || !::IsWindowVisible(GetEditControl()->GetSafeHwnd()))
 				{
 					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crHit);
 					/*auto prevPen = dc.SelectObject(g_penSelFocus);
