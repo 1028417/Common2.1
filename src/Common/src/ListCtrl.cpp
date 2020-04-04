@@ -785,11 +785,11 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 			{
 				*pResult = CDRF_NOTIFYSUBITEMDRAW;
 			}
-			
-			if (m_cbPostDraw)
-			{
-				*pResult |= CDRF_NOTIFYPOSTPAINT;
-			}
+		}
+
+		if (m_cbPostDraw)
+		{
+			*pResult |= CDRF_NOTIFYPOSTPAINT;
 		}		
 	}
 	else
