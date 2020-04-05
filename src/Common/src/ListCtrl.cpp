@@ -799,7 +799,10 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 		{
 			if (m_cbPostDraw)
 			{
-				if (0 == lvnmcd.nmcd.rc.right) return; // TODO ¹æ±ÜÄ³bug
+				if (0 == lvnmcd.nmcd.rc.right)
+				{
+					return; // TODO ¹æ±ÜÄ³bug
+				}
 				tagLVDrawSubItem lvcd(lvnmcd);
 				lvcd.crText = m_para.crText;
 				m_cbPostDraw(lvcd);
