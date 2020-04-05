@@ -779,7 +779,8 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 		nmcd.uItemState &= ~CDIS_SELECTED;
 		nmcd.uItemState &= ~CDIS_FOCUS;
 
-		if (isReportView())
+		auto eViewType = GetView();
+		if (E_ListViewType::LVT_Report == eViewType)
 		{
 			if (m_cbDrawSubItem)
 			{
@@ -1072,7 +1073,7 @@ void CObjectList::ChangeListCtrlView(short zDelta)
 
 UINT CObjectList::GetHeaderHeight()
 {
-	if (!isReportView())
+	if (GetView() != E_ListViewType::LVT_Report)
 	{
 		return 0;
 	}
@@ -1105,7 +1106,7 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
 
 	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
-		if (!isReportView())
+		if (GetView() != E_ListViewType::LVT_Report)
 		{
 			return false;
 		}
