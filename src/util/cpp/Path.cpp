@@ -17,17 +17,17 @@ wstring XFile::parentDir() const
 {
 	if (m_fileInfo.pParent)
 	{
-		return m_fileInfo.pParent->absPath();
+		return m_fileInfo.pParent->path();
 	}
 
 	return fsutil::GetParentDir(m_fileInfo.strName);
 }
 
-wstring XFile::absPath() const
+wstring XFile::path() const
 {
     if (m_fileInfo.pParent)
 	{
-        WString strAbsPath = m_fileInfo.pParent->absPath();
+        WString strAbsPath = m_fileInfo.pParent->path();
         if (!strAbsPath->empty())
         {
             strAbsPath << __wcPathSeparator << m_fileInfo.strName;
@@ -38,9 +38,9 @@ wstring XFile::absPath() const
     return m_fileInfo.strName;
 }
 
-wstring XFile::oppPath() const
+/*wstring XFile::oppPath() const
 {
-    if (NULL == m_fileInfo.pParent)
+    if (NULL == m_fileInfo.pParent) // attachdirÓÐbug
     {
         return L"";
     }
@@ -48,7 +48,7 @@ wstring XFile::oppPath() const
     WString strOppPath(m_fileInfo.pParent->oppPath());
     strOppPath << __wcPathSeparator << m_fileInfo.strName;
     return strOppPath;
-}
+}*/
 
 const CPath* XFile::rootDir() const
 {
@@ -78,7 +78,7 @@ void CPath::_findFile()
 
 void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 {
-    bool bRet = fsutil::findFile(this->absPath(), [&](tagFileInfo& fileInfo) {
+    bool bRet = fsutil::findFile(this->path(), [&](tagFileInfo& fileInfo) {
         fileInfo.pParent = this;
 
         if (fileInfo.bDir)
