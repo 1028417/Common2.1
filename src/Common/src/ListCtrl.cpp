@@ -740,8 +740,6 @@ void CObjectList::SetCustomFont(CDC& dc, float fFontSizeOffset, bool bUnderline)
 	}
 }
 
-//static const CPen g_penSelFocus(0, 1, RGB(220, 240, 255));
-
 void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 {
 	auto& nmcd = lvnmcd.nmcd;
@@ -751,29 +749,28 @@ void CObjectList::handleCustomDraw(NMLVCUSTOMDRAW& lvnmcd, LRESULT* pResult)
 	}
 	else if (CDDS_ITEMPREPAINT == nmcd.dwDrawStage)
 	{
-		lvnmcd.clrTextBk = __crWhite;
-
 		if (GetItemState(nmcd.dwItemSpec, LVIS_SELECTED))
 		{
 			lvnmcd.clrTextBk = __crHit;
+		}
+		else
+		{
+			lvnmcd.clrTextBk = __crWhite;
+		}
 
-			CDC dc;
-			if (dc.Attach(lvnmcd.nmcd.hdc))
+		CDC dc;
+		if (dc.Attach(lvnmcd.nmcd.hdc))
+		{
+			if (GetView() != E_ListViewType::LVT_Icon)
 			{
-				if (GetView() != E_ListViewType::LVT_Icon)// || !::IsWindowVisible(GetEditControl()->GetSafeHwnd()))
-				{
-					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crHit);
-					/*auto prevPen = dc.SelectObject(g_penSelFocus);
-					dc.Rectangle(&rc);
-					dc.SelectObject(prevPen);*/
-				}
-				else
-				{
-					dc.FillSolidRect(&lvnmcd.nmcd.rc, __crWhite);
-				}
-
-				dc.Detach();
+				dc.FillSolidRect(&lvnmcd.nmcd.rc, lvnmcd.clrTextBk);
 			}
+			else
+			{
+				dc.FillSolidRect(&lvnmcd.nmcd.rc, __crWhite);
+			}
+
+			dc.Detach();
 		}
 
 		nmcd.uItemState &= ~CDIS_SELECTED;
