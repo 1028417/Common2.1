@@ -7,7 +7,7 @@ void CCompDC::getBitmap(cfn_void_t<CBitmap&> cb)
 {
 	if (m_Bitmap.m_hObject)
 	{
-		if (NULL != m_hbmpPrev)
+		if (m_hbmpPrev)
 		{
 			(void)m_dc.SelectObject(m_hbmpPrev);
 			m_hbmpPrev = NULL;
@@ -152,12 +152,6 @@ BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, E_ImgFixMode eFixMode)
 	{
 		(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
 		return CImage::StretchBlt(hDC, rc, SRCCOPY);
-
-		/*/BOOL bRet = ::StretchBlt(hDC, rc.left, rc.top, rc.right - rc.left + 1, rc.bottom - rc.top + 1
-		, GetDC(), 0, 0, GetWidth(), GetHeight(), SRCCOPY);
-		this->ReleaseDC();
-
-		return bRet;*/
 	}
 
 	CRect rcDst(rc);
@@ -290,6 +284,12 @@ void CImglst::SetIcon(HICON hIcon, int nPosReplace)
 
 void CImglst::SetBitmap(CBitmap& bitmap, int nPosReplace)
 {
+	/*auto bmp = Gdiplus::Bitmap::FromHBITMAP(bitmap, NULL);
+	HICON hIcon = NULL;
+	bmp->GetHICON(&hIcon);
+	delete bmp;
+	SetIcon(hIcon, nPosReplace);*/
+	
 	if (nPosReplace >= 0)
 	{
 		(void)__super::Replace(nPosReplace, &bitmap, NULL);
@@ -306,7 +306,7 @@ m_adpDC.destroy();\
 m_adpDC.create(m_cx, m_cy);\
 if (m_crBkg != CLR_NONE) m_adpDC.getDC().FillSolidRect(rc, m_crBkg);
 
-void CImglst::SetImg(Gdiplus::Image& img, LPCRECT prcMargin, int nPosReplace)
+void CImglst::SetImg(Gdiplus::Image& img, int nPosReplace)
 {
 	__initAdpDC();
 

@@ -148,13 +148,11 @@ BOOL CViewTab::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pRe
 		break;
 	case WM_MOUSELEAVE:
 		m_nTrackMouseFlag = 0;
-
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseLeave, CPoint(lParam));
 
 		break;
 	case WM_MOUSEHOVER:
 		//m_nTrackMouseFlag = 0;
-
 		OnTrackMouseEvent(E_TrackMouseEvent::LME_MouseHover, CPoint(lParam));
 
 		break;
@@ -227,7 +225,8 @@ void CViewTab::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 {
 	int nSelItem = GetCurSel();
 
-	Gdiplus::Point pt[]{ { rcItem.left, rcItem.bottom }
+	Gdiplus::Point pt[] {
+		{ rcItem.left, rcItem.bottom }
 		, { rcItem.left, rcItem.top }
 		, { rcItem.right - __Offset, rcItem.top }
 		, { rcItem.right, rcItem.bottom }
@@ -284,23 +283,28 @@ void CViewTab::_drawItem(CDC& dc, int nItem, CRect& rcItem)
 
 	rcItem.left += __Offset/2;
 
-	CImageList *pImgLst = GetImageList();
-	if (NULL != pImgLst)
+	if (tci.iImage >= 0)
 	{
-		IMAGEINFO ImageInfo;
-		memzero(ImageInfo);
-		if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
+		CImageList *pImgLst = GetImageList();
+		if (pImgLst)
 		{
-			if (nItem>0)
+			if (nItem > 0)
 			{
-				rcItem.left += __Offset/2;
+				rcItem.left += __Offset / 2;
 			}
 
-			int nTop = 2+rcItem.top + (rcItem.Height() - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top)) / 2;
+			/*auto sz = rcItem.Height() - 1;
+			pImgLst->DrawEx(&dc, tci.iImage, { rcItem.left, rcItem.top+1 }, { sz, sz }, CLR_NONE, CLR_NONE, ILD_SCALE);
+			rcItem.left += sz;*/
 
-			pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_NORMAL);
-
-			rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
+			IMAGEINFO ImageInfo;
+			memzero(ImageInfo);
+			if (pImgLst->GetImageInfo(tci.iImage, &ImageInfo))
+			{
+				int nTop = 2 + rcItem.top + (rcItem.Height() - (ImageInfo.rcImage.bottom - ImageInfo.rcImage.top + 1)) / 2;
+				pImgLst->Draw(&dc, tci.iImage, { rcItem.left, nTop }, ILD_NORMAL);
+				rcItem.left += (ImageInfo.rcImage.right - ImageInfo.rcImage.left);
+			}
 		}
 	}
 
