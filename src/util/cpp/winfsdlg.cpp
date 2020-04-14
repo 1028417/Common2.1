@@ -71,59 +71,69 @@ void CFolderDlg::_initDlg()
 void CFolderDlg::_relayout()
 {
 	RECT rcClient{ 0,0,0,0 };
-	::GetClientRect(m_hWnd, &rcClient);
-
-	int nWidthOff = rcClient.right - rcClient.left - (m_rcPreClient.right - m_rcPreClient.left);
-	int nHeightOff = rcClient.bottom - rcClient.top - (m_rcPreClient.bottom - m_rcPreClient.top);
-	
-	HWND hWndStatic = NULL;
-	RECT rcStatic{ 0,0,0,0 };
-	while (true)
-	{
-		hWndStatic = ::FindWindowExA(m_hWnd, hWndStatic, "Static", NULL);
-		if (!hWndStatic)
-		{
-			break;
-		}
-
-		(void)::GetWindowRect(hWndStatic, &rcStatic);
-		ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.left);
-		ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.right);
-		rcStatic.top = rcStatic.left;
-		rcStatic.bottom = rcStatic.top + 40;
-		(void)::MoveWindow(hWndStatic, rcStatic.left, rcStatic.left
-			, rcStatic.right - rcStatic.left + nWidthOff, rcStatic.bottom - rcStatic.left, FALSE);
-	}
+    ::GetClientRect(m_hWnd, &rcClient);
+    int nWidthOff = rcClient.right - (m_rcPreClient.right - m_rcPreClient.left);
+    int nHeightOff = rcClient.bottom - (m_rcPreClient.bottom - m_rcPreClient.top);
 
 	RECT rcCancelButton{ 0,0,0,0 };
 	::GetWindowRect(m_hWndCancelButton, &rcCancelButton);
 	::ScreenToClient(m_hWnd, (LPPOINT)&rcCancelButton.left);
 	::ScreenToClient(m_hWnd, (LPPOINT)&rcCancelButton.right);
+    auto yButton = rcCancelButton.top + nHeightOff;
 	auto nBtnWidth = rcCancelButton.right - rcCancelButton.left;
-	::MoveWindow(m_hWndCancelButton, rcCancelButton.left + nWidthOff, rcCancelButton.top + nHeightOff
+    ::MoveWindow(m_hWndCancelButton, rcCancelButton.left + nWidthOff, yButton
 		, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
 
-	::MoveWindow(m_hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 25, rcCancelButton.top + nHeightOff
+    ::MoveWindow(m_hWndOkButton, rcCancelButton.left + nWidthOff - nBtnWidth - 20, yButton
 		, nBtnWidth, rcCancelButton.bottom - rcCancelButton.top, FALSE);
+
+    HWND hWndStatic = NULL;
+    RECT rcStatic{ 0,0,0,0 };
+    while (true)
+    {
+        hWndStatic = ::FindWindowExA(m_hWnd, hWndStatic, "Static", NULL);
+        if (!hWndStatic)
+        {
+            break;
+        }
+
+        (void)::GetWindowRect(hWndStatic, &rcStatic);
+        ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.left);
+        ScreenToClient(m_hWnd, (LPPOINT)&rcStatic.right);
+        rcStatic.top = rcStatic.left;
+        rcStatic.bottom = rcStatic.top + 40;
+        (void)::MoveWindow(hWndStatic, rcStatic.left, yButton+8
+            , rcStatic.right - rcStatic.left + nWidthOff, rcStatic.bottom - rcStatic.left, FALSE);
+    }
 
 	HWND hWndTreeCtrl = ::FindWindowExA(m_hWnd, NULL, "SysTreeView32", NULL);
 	RECT rcTreeCtrl{ 0,0,0,0 };
-	::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
-	ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.left);
-	ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.right);
+    ::GetWindowRect(hWndTreeCtrl, &rcTreeCtrl);
+
+    rcTreeCtrl.left = 0;
+    rcTreeCtrl.right = rcClient.right-1;
+
+    rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
+
+    /*ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.left);
+    ScreenToClient(m_hWnd, (LPPOINT)&rcTreeCtrl.right);
+    rcTreeCtrl.right += nWidthOff;
 	if (!m_strTitle.empty())
 	{
-		rcTreeCtrl.top = rcStatic.bottom;
+        rcTreeCtrl.top = rcStatic.bottom;
 	}
 	else
-	{
-		rcTreeCtrl.top = rcStatic.top;
-	}
-	rcTreeCtrl.bottom = rcCancelButton.top + nHeightOff - 25;
+    {
+        //rcTreeCtrl.top = rcStatic.top;
+        rcTreeCtrl.top = 0;
+    }*/
+
+    rcTreeCtrl.top = 0;
 
 	::SetWindowPos(hWndTreeCtrl, NULL, rcTreeCtrl.left, rcTreeCtrl.top
-		, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top
-        , SWP_NOZORDER);//SWP_HIDEWINDOW);
+        , rcTreeCtrl.right - rcTreeCtrl.left + 1, rcTreeCtrl.bottom - rcTreeCtrl.top + 1
+        , SWP_NOZORDER);
+        //,SWP_HIDEWINDOW);
 	
 //	__async(10, [=]() {
 //		::ShowWindow(hWndTreeCtrl, SW_SHOW);
