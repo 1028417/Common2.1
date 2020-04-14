@@ -3,7 +3,28 @@
 
 #include <ShlObj.h>
 
-int CFolderDlg::BrowseFolderCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+#define __browseInfoFlag BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_BROWSEFORCOMPUTER | BIF_STATUSTEXT
+//| BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_UAHINT;
+
+static int __stdcall _handleCallBack_Init(HWND hWnd, UINT, LPARAM, LPARAM)
+{
+    ::PostMessage(hWnd, WM_CLOSE, 0, 0);
+    return 0;
+}
+
+void CFolderDlg::preInit()
+{
+    mtutil::thread([](){
+        BROWSEINFO browseInfo;
+        ::ZeroMemory(&browseInfo, sizeof(browseInfo));
+        browseInfo.ulFlags = __browseInfoFlag;
+        browseInfo.lpfn = _handleCallBack_Init;
+
+        (void)SHBrowseForFolder(&browseInfo);
+    });
+}
+
+int CFolderDlg::_handleCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 {
 	CFolderDlg* pFolderDlg = (CFolderDlg*)lpData;
 	pFolderDlg->_handleCallBack(hWnd, uMsg, lParam);
@@ -192,11 +213,10 @@ wstring CFolderDlg::Show(HWND hWndOwner, LPCWSTR lpszInitialDir, LPCWSTR lpszTit
 
 	BROWSEINFO browseInfo;
     ::ZeroMemory(&browseInfo, sizeof(browseInfo));
-	browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN | BIF_BROWSEFORCOMPUTER
-		| BIF_STATUSTEXT;// | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_UAHINT;
+    browseInfo.ulFlags = __browseInfoFlag;
 
 	browseInfo.hwndOwner = hWndOwner;
-	browseInfo.lpfn = BrowseFolderCallBack;
+    browseInfo.lpfn = _handleCallBack;
 	browseInfo.lParam = (LPARAM)this;
 
 	LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
