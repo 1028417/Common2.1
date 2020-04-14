@@ -123,12 +123,12 @@ void CFolderDlg::_relayout()
 
 	::SetWindowPos(hWndTreeCtrl, NULL, rcTreeCtrl.left, rcTreeCtrl.top
 		, rcTreeCtrl.right - rcTreeCtrl.left + nWidthOff, rcTreeCtrl.bottom - rcTreeCtrl.top
-		, SWP_HIDEWINDOW);
+        , SWP_NOZORDER);//SWP_HIDEWINDOW);
 	
-	__async(10, [=]() {
-		::ShowWindow(hWndTreeCtrl, SW_SHOW);
-		::SetFocus(hWndTreeCtrl);
-	});
+//	__async(10, [=]() {
+//		::ShowWindow(hWndTreeCtrl, SW_SHOW);
+//		::SetFocus(hWndTreeCtrl);
+//	});
 }
 
 void CFolderDlg::_handleCallBack(HWND hWnd, UINT uMsg, LPARAM lParam)
