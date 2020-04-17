@@ -38,18 +38,6 @@ wstring XFile::path() const
     return m_fileInfo.strName;
 }
 
-/*wstring XFile::oppPath() const
-{
-    if (NULL == m_fileInfo.pParent) // attachdirÓÐbug
-    {
-        return L"";
-    }
-
-    WString strOppPath(m_fileInfo.pParent->oppPath());
-    strOppPath << __wcPathSeparator << m_fileInfo.strName;
-    return strOppPath;
-}*/
-
 const CPath* XFile::rootDir() const
 {
     if (NULL == m_fileInfo.pParent)
@@ -72,6 +60,7 @@ void CPath::_findFile()
 {
 	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
 	{
+        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
 		(void)_onFindFile(m_paSubDir, m_paSubFile);
     }
 }
@@ -98,14 +87,9 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 			}
 		}
 	});
-
     if (bRet)
     {
         m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
-    }
-    else
-    {
-        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
     }
 
 	paSubDir.qsort([&](const CPath& lhs, const CPath& rhs) {
