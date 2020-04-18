@@ -227,7 +227,7 @@ bool CZipFile::unzip(const string& strDstDir) const
         auto& unzfile = *pr.second;
         if (pr.first)
         {
-            if (fsutil::createDir((t_strDstDir + unzfile.strPath).c_str()))
+            if (!fsutil::createDir((t_strDstDir + unzfile.strPath).c_str()))
 			{
 				return false;
 			}
