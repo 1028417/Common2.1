@@ -23,6 +23,10 @@ static struct __localeInit {
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
 
 #else
+#include <QTextCodec>
+    static QTextCodec *g_gbkCodec = QTextCodec::codecForName("GBK");
+    //static QTextCodec *g_utf8Codec = QTextCodec::codecForName("UTF-8");
+
 #include <QLocale>
 #include <QCollator>
     static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
@@ -209,6 +213,54 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
 	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
+bool strutil::checkGbk(unsigned char *pStr, int len)
+{
+    if (-1 == len)
+    {
+        len = strlen(pStr);
+    }
+    if (len <= 0)
+    {
+        return false;
+    }
+
+    bool bAllAscii = true;
+    int nIdx = 0;
+    while (nIdx < len)
+    {
+        auto chr = pStr[nIdx];
+
+        if (chr <= 0x7f)
+        {
+            //编码小于等于127,只有一个字节的编码，兼容ASCII
+            nIdx++;
+            continue;
+        }
+
+        bAllAscii = false;
+
+        //大于127的使用双字节编码
+        if (chr >= 0x81 && chr <= 0xfe)
+        {
+            chr = pStr[nIdx+1];
+            if (chr >= 0x40 && chr <= 0xfe && chr != 0xf7)
+            {
+                nIdx += 2;
+                continue;
+            }
+        }
+
+        return false;
+    }
+
+    if (bAllAscii)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 bool strutil::checkUtf8(const char *pStr, int len)
 {
 	if (-1 == len)
@@ -223,14 +275,14 @@ bool strutil::checkUtf8(const char *pStr, int len)
 	UINT nBytes = 0;
 	unsigned char chr = 0;
 	bool bAllAscii = true;
-    for (int nIdx = 0; nIdx < len; nIdx++)
-	{
+    for (int nIdx = 0; nIdx < len; nIdx++) {
         chr = *(pStr + nIdx);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
-		if (nBytes == 0 && (chr & 0x80) != 0) {
+        if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
 		}
-		if (nBytes == 0) {
+
+        if (nBytes == 0) {
 			//如果不是ASCII码,应该是多字节符,计算字节数
 			if (chr >= 0x80) {
 				if (chr >= 0xFC && chr <= 0xFD) {
@@ -267,6 +319,7 @@ bool strutil::checkUtf8(const char *pStr, int len)
 	if (nBytes != 0) {
 		return false;
 	}
+
 	if (bAllAscii) {
 		return false;
 	}
@@ -343,6 +396,7 @@ wstring strutil::fromUtf8(const char *pStr, int len)
 #if __winvc
 	return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
+    //return g_utf8Codec->toUnicode(pStr, len).toStdWString();
     return __A2Q(pStr, len).toStdWString();
 #endif
 }
@@ -363,14 +417,6 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
 #else
     return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
-}
-
-void strutil::transEndian(wstring& str)
-{
-	for (auto& wch : str)
-	{
-        wch = transEndian(wch);
-    }
 }
 
 wstring strutil::toWstr(const char *pStr, int len)
@@ -431,6 +477,15 @@ string strutil::toStr(const wchar_t *pStr, int len)
     return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
 }
+
+void strutil::transEndian(wstring& str)
+{
+    for (auto& wch : str)
+    {
+        wch = transEndian(wch);
+    }
+}
+
 
 static const std::string g_strBase64Chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
