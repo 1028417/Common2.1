@@ -27,10 +27,11 @@ wstring XFile::path() const
 {
     if (m_fileInfo.pParent)
 	{
-        WString strAbsPath = m_fileInfo.pParent->path();
-        if (!strAbsPath->empty())
+        auto strAbsPath = m_fileInfo.pParent->path();
+        if (!strAbsPath.empty())
         {
-            strAbsPath << __wcPathSeparator << m_fileInfo.strName;
+            strAbsPath.push_back(__wcPathSeparator);
+            strAbsPath.append(m_fileInfo.strName);
 			return strAbsPath;
 		}
 	}

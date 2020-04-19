@@ -75,12 +75,13 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 	unz_file_info file_info;
 	memzero(file_info);
 
-	TD_CharBuffer lpFileName(MAX_PATH + 1);
+	char pszFileName[MAX_PATH + 1];
+	memzero(pszFileName);
 
 	unz_file_pos file_pos{ 0,0 };
 
 	do {
-		int nRet = unzGetCurrentFileInfo(unzfile, &file_info, lpFileName, MAX_PATH, NULL, 0, NULL, 0);
+		int nRet = unzGetCurrentFileInfo(unzfile, &file_info, pszFileName, MAX_PATH, NULL, 0, NULL, 0);
 		if (nRet != UNZ_OK)
 		{
 			(void)unzClose(unzfile);
@@ -89,7 +90,7 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 
         tagUnzfile unzFile;
         unzFile.uFileSize = file_info.uncompressed_size;
-        unzFile.strPath = lpFileName;
+        unzFile.strPath = pszFileName;
 
         bool bDir = (__cSlant == unzFile.strPath.back());  // (unzFile.external_fa & __DirFlag);
         if (bDir)

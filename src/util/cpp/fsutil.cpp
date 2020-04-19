@@ -260,6 +260,17 @@ inline static DWORD _getFileAttr(const string& strPath)
 {
     return ::GetFileAttributesA(strPath.c_str());
 }
+
+#else
+inline static QString _toQstr(const wstring& str)
+{
+    return __WS2Q(str);
+}
+
+inline static QString _toQstr(const string& str)
+{
+    return __WS2Q(strutil::toWstr(str));
+}
 #endif
 
 template <class S>
@@ -278,7 +289,7 @@ inline static bool _existPath(const S& strPath, bool bDir)
     }
 
 #else
-    QFileInfo fi(strutil::toQstr(strPath));
+    QFileInfo fi(_toQstr(strPath));
     if (!fi.exists())
     {
         return false;
@@ -353,7 +364,7 @@ static bool _createDirT(const T& strDir)
 
 	return true;
 #else
-	return QDir().mkpath(strutil::toQstr(strDir));
+    return QDir().mkpath(_toQstr(strDir));
 #endif
 }
 
@@ -565,7 +576,7 @@ QString fsutil::getHomeDir()
     return QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 }
 
-static QString _getHomePath(const QString& qsSubDir)
+QString fsutil::getHomePath(const QString& qsSubDir)
 {
     auto qsHomeDir = fsutil::getHomeDir();
 
@@ -580,16 +591,6 @@ static QString _getHomePath(const QString& qsSubDir)
     }
 
     return qsHomeDir;
-}
-
-string fsutil::getHomePath(const string& strSubDir)
-{
-    return _getHomePath(__S2Q(strSubDir)).toStdString();
-}
-
-wstring fsutil::getHomePath(const wstring& strSubDir)
-{
-    return _getHomePath(__WS2Q(strSubDir)).toStdWString();
 }
 #endif
 

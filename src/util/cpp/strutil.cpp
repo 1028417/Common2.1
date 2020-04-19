@@ -1,6 +1,9 @@
 ﻿
 #include "util.h"
 
+static const string g_s;
+static const wstring g_ws;
+
 #include <locale>
 
 static struct __localeInit {
@@ -134,12 +137,12 @@ bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t m
         return 0 == _wcsnicmp(str1.c_str(), str2.c_str(), maxlen);
 #else
         size_t len = str1.size();
-        cauto qstr1 = __W2Q(str1.c_str(), MIN(maxlen, len));
+        cauto qs1 = __W2Q(str1.c_str(), MIN(maxlen, len));
 
         len = str2.size();
-        cauto qstr2 = QString::fromWCharArray(str2.c_str(), MIN(maxlen, len));
+        cauto qs2 = __W2Q(str2.c_str(), MIN(maxlen, len));
 
-        return 0 == qstr1.compare(qstr2, Qt::CaseSensitivity::CaseInsensitive);
+        return 0 == qs1.compare(qs2, Qt::CaseSensitivity::CaseInsensitive);
 #endif
     }
 }
@@ -213,22 +216,13 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
 	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
 
-bool strutil::checkGbk(unsigned char *pStr, int len)
+bool strutil::checkGbk(const char *pStr, int len)
 {
-    if (-1 == len)
-    {
-        len = strlen(pStr);
-    }
-    if (len <= 0)
-    {
-        return false;
-    }
-
     bool bAllAscii = true;
     int nIdx = 0;
     while (nIdx < len)
     {
-        auto chr = pStr[nIdx];
+        auto chr = (unsigned char)pStr[nIdx];
 
         if (chr <= 0x7f)
         {
@@ -242,7 +236,7 @@ bool strutil::checkGbk(unsigned char *pStr, int len)
         //大于127的使用双字节编码
         if (chr >= 0x81 && chr <= 0xfe)
         {
-            chr = pStr[nIdx+1];
+            chr = (unsigned char)pStr[nIdx+1];
             if (chr >= 0x40 && chr <= 0xfe && chr != 0xf7)
             {
                 nIdx += 2;
@@ -263,11 +257,7 @@ bool strutil::checkGbk(unsigned char *pStr, int len)
 
 bool strutil::checkUtf8(const char *pStr, int len)
 {
-	if (-1 == len)
-	{
-		len = strlen(pStr);
-	}
-	if (len <= 0)
+    if (!_checkLen(pStr, len))
 	{
 		return false;
 	}
@@ -384,32 +374,24 @@ bool strutil::checkUtf8(const char *pStr, int len)
 
 wstring strutil::fromUtf8(const char *pStr, int len)
 {
-    if (-1 == len)
+    if (!_checkLen(pStr, len))
     {
-        len = strlen(pStr);
-    }
-    if (len <= 0)
-    {
-        return L"";
+        return g_ws;
     }
 
 #if __winvc
 	return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
     //return g_utf8Codec->toUnicode(pStr, len).toStdWString();
-    return __A2Q(pStr, len).toStdWString();
+    return QString::fromUtf8(pStr, len).toStdWString();
 #endif
 }
 
 string strutil::toUtf8(const wchar_t *pStr, int len)
 {
-    if (-1 == len)
+    if (!_checkLen(pStr, len))
     {
-        len = wcslen(pStr);
-    }
-    if (len <= 0)
-    {
-        return "";
+        return g_s;
     }
 
 #if __winvc
@@ -421,62 +403,73 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
 
 wstring strutil::toWstr(const char *pStr, int len)
 {
-    if (-1 == len)
+    if (_checkLen(pStr, len))
     {
-        len = strlen(pStr);
-    }
-    if (len <= 0)
-    {
-        return L"";
-    }
+        auto size = std::mbstowcs(nullptr, pStr, len);
+        if (size_t(-1) != size)
+		{
+            wstring str(size, '\0');
+            size = std::mbstowcs((wchar_t*)str.c_str(), pStr, len);
+            if (size_t(-1) != size)
+			{
+                str.erase(size);
+				return str;
+			}
+		}
+	}
 
-#if __winvc
+	return g_ws;
+}
+/*
+#if __windows//__winvc
 	wstring strRet(len, L'\0');
 	int nRet = MultiByteToWideChar(CP_ACP, 0, pStr, len, (wchar_t*)strRet.c_str(), len);
 	if (nRet <= 0)
 	{
-		return L"";
+        return g_ws;
 	}
 	strRet.erase(nRet);
 	return strRet;
 	
-	/*wstring strRet(len, L'\0');
-	if (mbstowcs_s(NULL, (wchar_t*)strRet.c_str(), len+1, pStr, len))
-	{
-		return L"";
-	}
-	return strRet;*/
-
 #else
-    return __A2Q(pStr, len).toStdWString();
+    return QString::fromLocal8Bit(pStr, len).toStdWString();
 #endif
-}
+}*/
 
 string strutil::toStr(const wchar_t *pStr, int len)
 {
-    if (-1 == len)
+    if (_checkLen(pStr, len))
     {
-        len = wcslen(pStr);
-    }
-    if (len <= 0)
-    {
-        return "";
-    }
+        auto size = std::wcstombs(nullptr, pStr, len);
+        if (size_t(-1) != size)
+		{
+            string str(size, '\0');
+            size = std::wcstombs((char*)str.c_str(), pStr, len);
+            if (size_t(-1) != size)
+			{
+                str.erase(size);
+				return str;
+			}
+		}
+	}
 
+    return g_s;
+}
+/*
 #if __winvc
 	string strRet(len*2, '\0');
 	int nRet = WideCharToMultiByte(CP_ACP, 0, pStr, len, (char*)strRet.c_str(), len*2, NULL, NULL);
 	if (nRet <= 0)
 	{
-		return "";
+        return g_s;
 	}
 	strRet.erase(nRet);
 	return strRet;
 
 #else
-    return __W2Q(pStr, len).toUtf8().toStdString();
+    return __W2Q(pStr, len).toLocal8Bit().toStdString();
 #endif
-}
+}*/
 
 void strutil::transEndian(wstring& str)
 {
@@ -486,6 +479,17 @@ void strutil::transEndian(wstring& str)
     }
 }
 
+#if !__winvc
+QString strutil::fromGbk(const char *pStr, int len)
+{
+    return g_gbkCodec->toUnicode(pStr, len);
+}
+
+string strutil::toGbk(const QString& qs)
+{
+    return g_gbkCodec->fromUnicode(qs).toStdString();
+}
+#endif
 
 static const std::string g_strBase64Chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
