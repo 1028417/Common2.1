@@ -108,13 +108,13 @@ bool CTxtWriter::_writeEndLine()
 
 bool ITxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
 {
-    if (_isAsc() || _isUtf8())
+    if (_isANSI() || _isUtf8())
     {
         return _write((const void*)pStr, len, bEndLine);
     }
     else
     {
-        wstring str = strutil::toWstr(pStr);
+        wstring str = strutil::fromStr(pStr, len);
         if (_isUcsBigEndian())
         {
             strutil::transEndian(str);
@@ -126,7 +126,7 @@ bool ITxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
 
 bool ITxtWriter::_write(char ch, bool bEndLine)
 {
-    if (_isAsc() || _isUtf8())
+    if (_isANSI() || _isUtf8())
     {
         return _write(&ch, 1, bEndLine);
     }
@@ -144,9 +144,9 @@ bool ITxtWriter::_write(char ch, bool bEndLine)
 
 bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
 {
-    if (_isAsc())
+    if (_isANSI())
     {
-        cauto str = strutil::toStr(pStr, len);
+        cauto str = strutil::toGbk(pStr, len);
         return _write((const void*)str.c_str(), str.size(), bEndLine);
     }
     else if (_isUtf8())
@@ -167,9 +167,9 @@ bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
 
 bool ITxtWriter::_write(wchar_t wch, bool bEndLine)
 {
-    if (_isAsc())
+    if (_isANSI())
     {
-        cauto str = strutil::toStr(&wch, 1);
+        cauto str = strutil::toGbk(&wch, 1);
         return _write((const void*)str.c_str(), str.size(), bEndLine);
     }
     else if (_isUtf8())
@@ -191,9 +191,9 @@ bool ITxtWriter::_write(wchar_t wch, bool bEndLine)
 #if !__winvc
 bool ITxtWriter::_write(const QString& qstr, bool bEndLine)
 {
-    if (_isAsc())
+    if (_isANSI())
     {
-        cauto str = strutil::toStr(qstr);
+        cauto str = strutil::toGbk(qstr);
         return _write((const void*)str.c_str(), str.size(), bEndLine);
     }
     else if (_isUtf8())
@@ -256,12 +256,12 @@ void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
     {
-		strText.append(strutil::toStr((const wchar_t*)lpData, len / 2));
+        strText.append(strutil::toGbk((const wchar_t*)lpData, len / 2));
     }
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
 	{
 		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
-        strText.append(strutil::toStr(str));
+        strText.append(strutil::toGbk(str));
 	}
 	else
 	{
@@ -281,12 +281,12 @@ void CTxtReader::_readData(const char *lpData, size_t len, wstring& strText)
 		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
         strText.append(str);
 	}
-	else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType || strutil::checkUtf8(lpData, len))
+    else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType)
 	{
         strText.append(strutil::fromUtf8(lpData, len));
 	}
 	else
-	{
-        strText.append(strutil::toWstr(lpData, len));
+    {
+        strText.append(strutil::fromStr(lpData, len));
 	}
 }

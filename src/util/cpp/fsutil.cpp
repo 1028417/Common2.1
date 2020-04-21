@@ -9,7 +9,7 @@ FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
 	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
 	return pf;
 #else
-	return ::fopen(strutil::toStr(strFile).c_str(), strMode.c_str());
+	return ::fopen(strutil::toUtf8(strFile).c_str(), strMode.c_str());
 #endif
 }
 
@@ -97,9 +97,9 @@ bool fsutil::lStat64(const wstring& strFile, tagFileStat64& stat)
 #if __windows
     return 0 == _wstat64(strFile.c_str(), &stat);
 #elif __android
-    return 0 == lstat64(strutil::toStr(strFile).c_str(), &stat);
+    return 0 == lstat64(strutil::toUtf8(strFile).c_str(), &stat);
 #else
-    return 0 == lstat(strutil::toStr(strFile).c_str(), &stat);
+    return 0 == lstat(strutil::toUtf8(strFile).c_str(), &stat);
 #endif
 }
 
@@ -269,7 +269,7 @@ inline static QString _toQstr(const wstring& str)
 
 inline static QString _toQstr(const string& str)
 {
-    return __WS2Q(strutil::toWstr(str));
+    return __WS2Q(strutil::fromStr(str));
 }
 #endif
 
@@ -505,7 +505,7 @@ bool fsutil::setWorkDir(const string& strWorkDir)
 
 string fsutil::workDir()
 {
-    //return QDir::currentPath().toStdWString();
+    //return QDir::currentPath().toUTF8().toStdString();
 
     char pszCwd[MAX_PATH];
     memzero(pszCwd);
@@ -574,23 +574,6 @@ wstring fsutil::getModuleSubPath(const wstring& strSubPath, const wchar_t *pszMo
 QString fsutil::getHomeDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-}
-
-QString fsutil::getHomePath(const QString& qsSubDir)
-{
-    auto qsHomeDir = fsutil::getHomeDir();
-
-    if (!qsSubDir.isEmpty())
-    {
-        if (!fsutil::checkSeparator((wchar_t)qsSubDir.at(0).unicode()))
-        {
-            qsHomeDir.append(__wcPathSeparator);
-        }
-
-        qsHomeDir.append(qsSubDir);
-    }
-
-    return qsHomeDir;
 }
 #endif
 

@@ -132,15 +132,7 @@ bool xmlutil::loadXml(Instream& ins, bool bHtml, tagXmlElementInfo& rootElementI
 	CTxtReader TxtReader;
     auto eHeadType = TxtReader.read(ins, strText);
 
-	bool bUtf8 = false;
-	if (E_TxtHeadType::THT_None == eHeadType)
-	{
-		bUtf8 = strutil::checkUtf8(strText);
-	}
-	else
-	{
-		bUtf8 = E_TxtHeadType::THT_UTF8Bom == eHeadType;
-	}
+	bool bUtf8 = E_TxtHeadType::THT_UTF8Bom == eHeadType || strutil::checkUtf8(strText);
 
 	return loadXml((char *)strText.c_str(), strText.size(), bUtf8, bHtml, rootElementInfo);
 }

@@ -12,43 +12,27 @@ bool jsonutil::get(const JValue& jValue, string& strRet)
     return false;
 }
 
-/*bool jsonutil::get(const JValue& jValue, wstring& strRet)
+bool jsonutil::get(const JValue& jValue, wstring& strRet)
 {
-    string strValue;
-    if (!get(jValue, strValue))
-    {
-        return false;
-    }
+	string strValue;
+	if (!get(jValue, strValue))
+	{
+		return false;
+	}
 
-    if (!strValue.empty())
-    {
-        if (strutil::checkUtf8(strValue))
-        {
-            strRet = strutil::fromUtf8(strValue);
-        }
-        else
-        {
-            strRet = strutil::toWstr(strValue);
-        }
-    }
+	if (strutil::checkUtf8(strValue))
+	{
+		strRet = strutil::fromUtf8(strValue);
+	}
+	else
+	{
+		strRet = strutil::fromGbk(strValue);
+	}
 
-    return true;
-}*/
-
-bool jsonutil::getUtf8(const JValue& jValue, wstring& strRet)
-{
-    string strValue;
-    if (!get(jValue, strValue))
-    {
-        return false;
-    }
-
-    strRet = strutil::fromUtf8(strValue);
-
-    return true;
+	return true;
 }
 
-bool jsonutil::getGbk(const JValue& jValue, wstring& strRet)
+bool jsonutil::get(const JValue& jValue, bool bUtf8, wstring& strRet)
 {
     string strValue;
     if (!get(jValue, strValue))
@@ -56,7 +40,14 @@ bool jsonutil::getGbk(const JValue& jValue, wstring& strRet)
         return false;
     }
 
-    strRet = strutil::toWstr(strValue);
+	if (bUtf8)
+	{
+		strRet = strutil::fromUtf8(strValue);
+	}
+	else
+	{
+		strRet = strutil::fromGbk(strValue);
+	}
 
     return true;
 }
