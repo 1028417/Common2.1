@@ -6,27 +6,9 @@ static const wstring g_ws;
 
 #include <locale>
 
-#define __gbkCP 936
-
-/*static struct __localeInit {
-    __localeInit() {
-#if __windows
-        setlocale(LC_COLLATE, ".936");
-        setlocale(LC_CTYPE, ".936");
-
-        //setlocale(LC_ALL, "");
-        //std::locale::global(std::locale(""));
-#endif
-
-#if !__winvc
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
-#endif
-    }
-} localeInit;*/
-
 #if __winvc
 #include <codecvt>
-	static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
 
     static const locale g_locale_CN("Chinese_china");
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
@@ -41,6 +23,24 @@ static const wstring g_ws;
     static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
     static const QCollator& g_collate_CN = QCollator(g_locale_CN);
 #endif
+
+#define __gbkCP 936
+
+static struct __localeInit {
+    __localeInit() {
+#if __windows
+        //setlocale(LC_COLLATE, ".936");
+        //setlocale(LC_CTYPE, ".936");
+
+        setlocale(LC_ALL, "");
+        std::locale::global(std::locale(""));
+#endif
+
+#if !__winvc
+        QTextCodec::setCodecForLocale(g_gbkCodec);
+#endif
+    }
+} localeInit;
 
 int strutil::collate(const wstring& lhs, const wstring& rhs)
 {
