@@ -4,13 +4,11 @@
 static const string g_s;
 static const wstring g_ws;
 
-#include <locale>
-
 #if __winvc
 #include <codecvt>
     static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
 
-    static const locale g_locale_CN("Chinese_china");
+	static const locale g_locale_CN("Chinese_china");
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
 
 #else
@@ -29,11 +27,18 @@ static const wstring g_ws;
 static struct __localeInit {
     __localeInit() {
 #if __windows
-        //setlocale(LC_COLLATE, ".936");
-        //setlocale(LC_CTYPE, ".936");
+		if (NULL == setlocale(LC_CTYPE, ".936"))
+		{
+			setlocale(LC_CTYPE, "");
+			setlocale(LC_COLLATE, "");
+		}
+		else
+		{
+			setlocale(LC_COLLATE, ".936");
+		}
 
-        setlocale(LC_ALL, "");
-        std::locale::global(std::locale(""));
+        //setlocale(LC_ALL, "Chinese_china");
+        //std::locale::global(std::locale("Chinese_china"));
 #endif
 
 #if !__winvc
