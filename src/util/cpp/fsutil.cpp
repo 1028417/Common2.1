@@ -283,10 +283,7 @@ inline static bool _existPath(const S& strPath, bool bDir)
         return false;
     }
 
-    if (bDir)
-    {
-        return dwFileAttr & FILE_ATTRIBUTE_DIRECTORY;
-    }
+    return bool(dwFileAttr & FILE_ATTRIBUTE_DIRECTORY) == bDir;
 
 #else
     QFileInfo fi(_toQstr(strPath));
@@ -295,13 +292,8 @@ inline static bool _existPath(const S& strPath, bool bDir)
         return false;
     }
 
-    if (bDir)
-    {
-        return fi.isDir();
-    }
+    return fi.isDir() == bDir;
 #endif
-
-    return true;
 }
 
 bool fsutil::existPath(const wstring& strPath, bool bDir)

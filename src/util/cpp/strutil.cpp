@@ -1,8 +1,32 @@
 ﻿
 #include "util.h"
 
+#define __gbkCP 936
+
 static const string g_s;
 static const wstring g_ws;
+
+static struct __localeInit {
+    __localeInit() {
+#if __windows
+        if (NULL == setlocale(LC_CTYPE, ".936"))
+        {
+            setlocale(LC_CTYPE, "");
+            setlocale(LC_COLLATE, "");
+        }
+        else
+        {
+            setlocale(LC_COLLATE, ".936");
+        }
+
+        //setlocale(LC_ALL, "Chinese_china");
+        //std::locale::global(std::locale("Chinese_china"));
+#else
+        setlocale(LC_CTYPE, "");
+        setlocale(LC_COLLATE, "");
+#endif
+    }
+} localeInit;
 
 #if __winvc
 #include <codecvt>
@@ -21,31 +45,6 @@ static const wstring g_ws;
     static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
     static const QCollator& g_collate_CN = QCollator(g_locale_CN);
 #endif
-
-#define __gbkCP 936
-
-static struct __localeInit {
-    __localeInit() {
-#if __windows
-		if (NULL == setlocale(LC_CTYPE, ".936"))
-		{
-			setlocale(LC_CTYPE, "");
-			setlocale(LC_COLLATE, "");
-		}
-		else
-		{
-			setlocale(LC_COLLATE, ".936");
-		}
-
-        //setlocale(LC_ALL, "Chinese_china");
-        //std::locale::global(std::locale("Chinese_china"));
-#endif
-
-#if !__winvc
-        QTextCodec::setCodecForLocale(g_gbkCodec);
-#endif
-    }
-} localeInit;
 
 int strutil::collate(const wstring& lhs, const wstring& rhs)
 {
@@ -443,7 +442,6 @@ wstring strutil::fromGbk(const char *pStr, int len)
         }*/
 
 #else
-        //return QString::fromLocal8Bit(pStr, len).toStdWString();
         return g_gbkCodec->toUnicode(pStr, len).toStdWString();
 #endif
 	}
@@ -477,7 +475,6 @@ string strutil::toGbk(const wchar_t *pStr, int len)
         }*/
 
 #else
-        //return __W2Q(pStr, len).toLocal8Bit().toStdString();
         return g_gbkCodec->fromUnicode(__W2Q(pStr, len)).toStdString();
 #endif
 	}
