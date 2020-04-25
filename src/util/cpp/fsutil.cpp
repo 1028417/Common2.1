@@ -50,7 +50,12 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
 
 	if (!strHeadData.empty())
 	{
-		__EnsureReturn(ofs.writex(strHeadData.c_str(), strHeadData.length()), false);
+		if (!ofs.writex(strHeadData.c_str(), strHeadData.length()))
+		{
+			ofs.close();
+			(void)removeFile(strDstFile);
+			return false;
+		}
 	}
 
     char lpBuff[4096] {0};
@@ -59,26 +64,27 @@ bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, co
         size_t size = ifs.read(lpBuff, 1, sizeof(lpBuff));
         if (0 == size)
         {
-            break;
+            return true;
         }
 
         if (cb)
         {
             if (!cb(lpBuff, size))
             {
-				ofs.close();
-                (void)removeFile(strDstFile);
-                return false;
+                break;
             }
         }
 
         if (!ofs.writex(lpBuff, size))
         {
-            return false;
+			break;
         }
     }
 
-    return true;
+	ofs.close();
+	(void)removeFile(strDstFile);
+
+    return false;
 }
 
 bool fsutil::fStat64(FILE *pf, tagFileStat64& stat)
