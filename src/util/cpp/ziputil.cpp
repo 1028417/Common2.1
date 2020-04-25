@@ -174,6 +174,11 @@ static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
 
 bool CZipFile::open(Instream& ins, const string& strPwd)
 {
+    if (ins.size() == 0)
+    {
+        return false;
+    }
+
 	m_strPwd = strPwd;
 
 	zlib_filefunc_def zfunc;
