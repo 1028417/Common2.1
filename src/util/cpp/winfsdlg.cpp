@@ -14,14 +14,12 @@ static int __stdcall _handleCallBack_Init(HWND hWnd, UINT, LPARAM, LPARAM)
 
 void CFolderDlg::preInit()
 {
-    mtutil::thread([](){
-        BROWSEINFO browseInfo;
-        ::ZeroMemory(&browseInfo, sizeof(browseInfo));
-        browseInfo.ulFlags = __browseInfoFlag;
-        browseInfo.lpfn = _handleCallBack_Init;
+    BROWSEINFO browseInfo;
+    ::ZeroMemory(&browseInfo, sizeof(browseInfo));
+    browseInfo.ulFlags = __browseInfoFlag;
+    browseInfo.lpfn = _handleCallBack_Init;
 
-        (void)SHBrowseForFolder(&browseInfo);
-    });
+    (void)SHBrowseForFolder(&browseInfo);
 }
 
 int CFolderDlg::_handleCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
