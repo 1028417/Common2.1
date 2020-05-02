@@ -8,6 +8,7 @@
 
 static int __stdcall _handleCallBack_Init(HWND hWnd, UINT, LPARAM, LPARAM)
 {
+	::ShowWindow(hWnd, SW_HIDE);
     ::PostMessage(hWnd, WM_CLOSE, 0, 0);
     return 0;
 }
