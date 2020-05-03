@@ -193,7 +193,7 @@ bool CSQLiteDBResult::GetData(UINT uRow, SArray<double>& arrValue)
 
 //CSQLiteDB
 
-bool CSQLiteDB::Connect(const wstring& strFile)
+bool CSQLiteDB::Connect(cwstr strFile)
 {
     if (m_hDB)
     {
@@ -246,7 +246,7 @@ bool CSQLiteDB::Execute(const string& strSql)
     return SQLITE_OK == m_nRetCode;
 }
 
-bool CSQLiteDB::Execute(const wstring& strSql)
+bool CSQLiteDB::Execute(cwstr strSql)
 {
 	return Execute(strutil::toUtf8(strSql));
 }
@@ -277,7 +277,7 @@ IDBResult* CSQLiteDB::Query(const string& strSql)
 	return new CSQLiteDBResult((UINT)nColumnCount, (UINT)nRowCount, pData);;
 }
 
-IDBResult* CSQLiteDB::Query(const wstring& strSql)
+IDBResult* CSQLiteDB::Query(cwstr strSql)
 {
 	return Query(strutil::toUtf8(strSql));
 }

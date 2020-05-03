@@ -102,7 +102,7 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 	});
 }
 
-inline static int _sort(const wstring& lhs, const wstring& rhs)
+inline static int _sort(cwstr lhs, cwstr rhs)
 {
 #if __windows
     return strutil::collate(lhs, rhs);

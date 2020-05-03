@@ -26,7 +26,7 @@ void winfsutil::getSysDrivers(list<wstring>& lstDrivers)
 	}
 }
 
-bool winfsutil::removeDir(const wstring& strPath, HWND hwndParent, const wstring& strTitle)
+bool winfsutil::removeDir(cwstr strPath, HWND hwndParent, cwstr strTitle)
 {
 	SHFILEOPSTRUCT FileOp;
 	ZeroMemory(&FileOp, sizeof(FileOp));
@@ -55,7 +55,7 @@ bool winfsutil::removeDir(const wstring& strPath, HWND hwndParent, const wstring
 	return false;
 }
 
-static void _shellExplore(const wstring& strSelFile, const wstring& strDir=L"", bool bRoot=false, HWND hWnd = NULL)
+static void _shellExplore(cwstr strSelFile, cwstr strDir=L"", bool bRoot=false, HWND hWnd = NULL)
 {
 	wstring strPara = L"/e";
 
@@ -75,11 +75,11 @@ static void _shellExplore(const wstring& strSelFile, const wstring& strDir=L"", 
     (void)::ShellExecuteW(hWnd, L"open", L"explorer",  strPara.c_str(), NULL, SW_MAXIMIZE);
 }
 
-void winfsutil::exploreDir(const wstring& strDir, bool bAsRoot)
+void winfsutil::exploreDir(cwstr strDir, bool bAsRoot)
 {
 	_shellExplore(L"", strDir, bAsRoot);
 }
-void winfsutil::exploreFile(const wstring& strFile)
+void winfsutil::exploreFile(cwstr strFile)
 {
 	_shellExplore(strFile);
 }
@@ -101,7 +101,7 @@ void winfsutil::exploreFile(const wstring& strFile)
 }
 
 // 获取文件类型
-static wstring getFileType(const wstring& extention)
+static wstring getFileType(cwstr extention)
 {
 	if (!extention.empty())
 	{
@@ -136,7 +136,7 @@ HICON winfsutil::getFolderIcon()
 }
 
 // 获取文件图标
-HICON winfsutil::getFileIcon(const wstring& extention)
+HICON winfsutil::getFileIcon(cwstr extention)
 {
 	if (!extention.empty())
 	{

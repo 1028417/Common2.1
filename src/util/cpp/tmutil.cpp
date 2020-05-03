@@ -31,7 +31,7 @@ bool tmutil::timeToTM(time_t tTime, tagTM& tm)
 	return true;
 }
 
-static wstring _formatTime(const tm& atm, const wstring& strFormat)
+static wstring _formatTime(const tm& atm, cwstr strFormat)
 {
 	wchar_t lpBuff[64];
 	memzero(lpBuff);
@@ -74,7 +74,7 @@ inline static T _formatTimeT(const T& strFormat, time32_t tTime)
     return _formatTime(_tm, strFormat);
 }
 
-wstring tmutil::formatTime(const wstring& strFormat, time32_t tTime)
+wstring tmutil::formatTime(cwstr strFormat, time32_t tTime)
 {
     return _formatTimeT(strFormat, tTime);
 }
@@ -97,7 +97,7 @@ inline static T _formatTime64T(const T& strFormat, time64_t tTime)
     return _formatTime(atm, strFormat);
 }
 
-wstring tmutil::formatTime(const wstring& strFormat, time64_t tTime)
+wstring tmutil::formatTime(cwstr strFormat, time64_t tTime)
 {
     return _formatTime64T(strFormat, tTime);
 }

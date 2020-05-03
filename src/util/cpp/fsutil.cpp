@@ -1,7 +1,7 @@
 ﻿
 #include "util.h"
 
-FILE* fsutil::fopen(const wstring& strFile, const string& strMode)
+FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
 	FILE *pf = NULL;
@@ -24,7 +24,7 @@ FILE* fsutil::fopen(const string& strFile, const string& strMode)
 #endif
 }
 
-bool fsutil::copyFile(const wstring& strSrcFile, const wstring& strDstFile)
+bool fsutil::copyFile(cwstr strSrcFile, cwstr strDstFile)
 {
 #if __windows
 	return TRUE == ::CopyFileW(strSrcFile.c_str(), strDstFile.c_str(), FALSE);
@@ -40,7 +40,7 @@ bool fsutil::copyFile(const string& strSrcFile, const string& strDstFile)
 }
 #endif
 
-bool fsutil::copyFileEx(const wstring& strSrcFile, const wstring& strDstFile, const CB_CopyFile& cb, const string& strHeadData)
+bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, const CB_CopyFile& cb, const string& strHeadData)
 {
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, false);
@@ -98,7 +98,7 @@ bool fsutil::fStat64(FILE *pf, tagFileStat64& stat)
 #endif
 }
 
-bool fsutil::lStat64(const wstring& strFile, tagFileStat64& stat)
+bool fsutil::lStat64(cwstr strFile, tagFileStat64& stat)
 {
 #if __windows
     return 0 == _wstat64(strFile.c_str(), &stat);
@@ -109,7 +109,7 @@ bool fsutil::lStat64(const wstring& strFile, tagFileStat64& stat)
 #endif
 }
 
-long long fsutil::GetFileSize64(const wstring& strFile)
+long long fsutil::GetFileSize64(cwstr strFile)
 {
     tagFileStat64 stat;
     memzero(stat);
@@ -133,7 +133,7 @@ time64_t fsutil::GetFileModifyTime64(FILE *pf)
     return stat.st_mtime;
 }
 
-time64_t fsutil::GetFileModifyTime64(const wstring& strFile)
+time64_t fsutil::GetFileModifyTime64(cwstr strFile)
 {
     tagFileStat64 stat;
     memzero(stat);
@@ -173,7 +173,7 @@ static void _SplitPath(const S& strPath, S *pstrDir, S *pstrFile)
     }
 }
 
-void fsutil::SplitPath(const wstring& strPath, wstring *pstrDir, wstring *pstrFile)
+void fsutil::SplitPath(cwstr strPath, wstring *pstrDir, wstring *pstrFile)
 {
     _SplitPath(strPath, pstrDir, pstrFile);
 }
@@ -183,7 +183,7 @@ void fsutil::SplitPath(const string& strPath, string *pstrDir, string *pstrFile)
     _SplitPath(strPath, pstrDir, pstrFile);
 }
 
-wstring fsutil::GetParentDir(const wstring& strPath)
+wstring fsutil::GetParentDir(cwstr strPath)
 {
     __EnsureReturn(!strPath.empty(), L"");
 
@@ -203,7 +203,7 @@ string fsutil::GetParentDir(const string& strPath)
     return strParentDir;
 }
 
-wstring fsutil::GetFileName(const wstring& strPath)
+wstring fsutil::GetFileName(cwstr strPath)
 {
 	wstring strFileName;
 	_SplitPath<wstring>(strPath, NULL, &strFileName);
@@ -219,7 +219,7 @@ string fsutil::GetFileName(const string& strPath)
 	return strFileName;
 }
 
-bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
+bool fsutil::CheckSubPath(cwstr strDir, cwstr strSubPath)
 {
 	auto size = strDir.size();
 	__EnsureReturn(size > 0, false);
@@ -241,7 +241,7 @@ bool fsutil::CheckSubPath(const wstring& strDir, const wstring& strSubPath)
 	return strutil::matchIgnoreCase(strDir, strSubPath, size);
 }
 
-wstring fsutil::GetOppPath(const wstring strBaseDir, const wstring& strSubPath)
+wstring fsutil::GetOppPath(const wstring strBaseDir, cwstr strSubPath)
 {
     if (strBaseDir.empty())
     {
@@ -257,7 +257,7 @@ wstring fsutil::GetOppPath(const wstring strBaseDir, const wstring& strSubPath)
 }
 
 #if __windows
-inline static DWORD _getFileAttr(const wstring& strPath)
+inline static DWORD _getFileAttr(cwstr strPath)
 {
     return ::GetFileAttributesW(strPath.c_str());
 }
@@ -268,7 +268,7 @@ inline static DWORD _getFileAttr(const string& strPath)
 }
 
 #else
-inline static QString _toQstr(const wstring& str)
+inline static QString _toQstr(cwstr str)
 {
     return __WS2Q(str);
 }
@@ -302,7 +302,7 @@ inline static bool _existPath(const S& strPath, bool bDir)
 #endif
 }
 
-bool fsutil::existPath(const wstring& strPath, bool bDir)
+bool fsutil::existPath(cwstr strPath, bool bDir)
 {
     return _existPath(strPath, bDir);
 }
@@ -313,7 +313,7 @@ bool fsutil::existPath(const string& strPath, bool bDir)
 }
 
 #if __windows
-inline static BOOL CreateDirectoryT(const wstring& strDir)
+inline static BOOL CreateDirectoryT(cwstr strDir)
 {
 	return ::CreateDirectoryW(strDir.c_str(), NULL);
 }
@@ -366,7 +366,7 @@ static bool _createDirT(const T& strDir)
 #endif
 }
 
-bool fsutil::createDir(const wstring& strDir)
+bool fsutil::createDir(cwstr strDir)
 {
 	return _createDirT(strDir);
 }
@@ -376,20 +376,20 @@ bool fsutil::createDir(const string& strDir)
 	return _createDirT(strDir);
 }
 
-bool fsutil::removeDirTree(const wstring& strDir)
+bool fsutil::removeDirTree(cwstr strDir)
 {
-	(void)fsutil::findSubFile(strDir, [&](const wstring& strSubFile) {
+	(void)fsutil::findSubFile(strDir, [&](cwstr strSubFile) {
         (void)removeFile(strDir + __wcPathSeparator + strSubFile);
 	});
 
-	(void)fsutil::findSubDir(strDir, [&](const wstring& strSubDir) {
+	(void)fsutil::findSubDir(strDir, [&](cwstr strSubDir) {
         (void)removeDirTree(strDir + __wcPathSeparator + strSubDir);
 	});
 
 	return removeDir(strDir);
 }
 
-bool fsutil::removeDir(const wstring& strDir)
+bool fsutil::removeDir(cwstr strDir)
 {
 #if __windows
     if (!::RemoveDirectoryW(strDir.c_str()))
@@ -412,7 +412,7 @@ bool fsutil::removeDir(const wstring& strDir)
     return true;
 }
 
-bool fsutil::removeFile(const wstring& strFile)
+bool fsutil::removeFile(cwstr strFile)
 {
 #if __windows
     if (!::DeleteFileW(strFile.c_str()))
@@ -433,7 +433,7 @@ bool fsutil::removeFile(const wstring& strFile)
     return true;
 }
 
-bool fsutil::moveFile(const wstring& strSrcFile, const wstring& strDstFile)
+bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile)
 {
 #if __windows
     if (!::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str()
@@ -561,7 +561,7 @@ string fsutil::getModuleSubPath(const string& strSubPath, const char *pszModuleN
 	return _getModuleSubPathT(strSubPath, pszModuleName);
 }
 
-wstring fsutil::getModuleSubPath(const wstring& strSubPath, const wchar_t *pszModuleName)
+wstring fsutil::getModuleSubPath(cwstr strSubPath, const wchar_t *pszModuleName)
 {
 	return _getModuleSubPathT(strSubPath, pszModuleName);
 }
@@ -586,7 +586,7 @@ static const wstring g_wsDotDot = L"..";
     }
 */
 
-bool fsutil::findFile(const wstring& strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
+bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
     if (strDir.empty())
     {

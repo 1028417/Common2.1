@@ -46,14 +46,14 @@ static struct __localeInit {
     static const QCollator& g_collate_CN = QCollator(g_locale_CN);
 #endif
 
-int strutil::collate(const wstring& lhs, const wstring& rhs)
+int strutil::collate(cwstr lhs, cwstr rhs)
 {
 	return wcscoll(lhs.c_str(), rhs.c_str());
 
     //return __WS2Q(lhs).localeAwareCompare(__WS2Q(rhs));
 }
 
-int strutil::collate_cn(const wstring& lhs, const wstring& rhs)
+int strutil::collate_cn(cwstr lhs, cwstr rhs)
 {
 #if __winvc
     return g_collate_CN.compare(lhs.c_str(), lhs.c_str() + lhs.size()
@@ -75,7 +75,7 @@ inline static bool _endWith(const S& str, const S& strEnd)
     return strutil::substr(str, pos) == strEnd;
 }
 
-bool strutil::endWith(const wstring& str, const wstring& strEnd)
+bool strutil::endWith(cwstr str, cwstr strEnd)
 {
     return _endWith(str, strEnd);
 }
@@ -121,7 +121,7 @@ static void _split(const C& strText, T wcSplitor, vector<C>& vecRet)
     }
 }
 
-void strutil::split(const wstring& strText, wchar_t wcSplitor, vector<wstring>& vecRet)
+void strutil::split(cwstr strText, wchar_t wcSplitor, vector<wstring>& vecRet)
 {
     _split(strText, wcSplitor, vecRet);
 }
@@ -131,7 +131,7 @@ void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRe
     _split(strText, wcSplitor, vecRet);
 }
 
-bool strutil::matchIgnoreCase(const wstring& str1, const wstring& str2, size_t maxlen)
+bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 {
     if (0 == maxlen)
     {
@@ -192,7 +192,7 @@ inline static UINT _replace(S& str, const S& strFind, T pszReplace = NULL, size_
 	return uRet;
 }
 
-UINT strutil::replace(wstring& str, const wstring& strFind, const wchar_t *pszReplace)
+UINT strutil::replace(wstring& str, cwstr strFind, const wchar_t *pszReplace)
 {
 	if (pszReplace)
 	{
@@ -216,7 +216,7 @@ UINT strutil::replace(string& str, const string& strFind, const char *pszReplace
 	}
 }
 
-UINT strutil::replace(wstring& str, const wstring& strFind, const wstring& strReplace)
+UINT strutil::replace(wstring& str, cwstr strFind, cwstr strReplace)
 {
 	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
 }
@@ -498,7 +498,7 @@ QString strutil::fromGbk(const string& str)
     return fromGbk(str.c_str(), str.size());
 }*/
 
-string strutil::toGbk(const QString& qs)
+string strutil::toGbk(cqstr qs)
 {
     return g_gbkCodec->fromUnicode(qs).toStdString();
 }

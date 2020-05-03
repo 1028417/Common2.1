@@ -12,7 +12,7 @@ static const char __UTF8Bom[] { (char)0xef, (char)0xbb, (char)0xbf };
 static const char __UCS2Head_LittleEndian[] { (char)0xff, (char)0xfe };
 static const char __UCS2Head_BigEndian[]{ (char)0xfe, (char)0xff };
 
-bool CTxtWriter::open(const wstring& strFile, bool bTrunc)
+bool CTxtWriter::open(cwstr strFile, bool bTrunc)
 {
     bool bWriteHead = bTrunc || !fsutil::existFile(strFile);
 
@@ -189,7 +189,7 @@ bool ITxtWriter::_write(wchar_t wch, bool bEndLine)
 }
 
 #if !__winvc
-bool ITxtWriter::_write(const QString& qstr, bool bEndLine)
+bool ITxtWriter::_write(cqstr qstr, bool bEndLine)
 {
     if (_isANSI())
     {
