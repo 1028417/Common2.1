@@ -136,7 +136,7 @@ void CCompDC::destroy()
 	}
 }
 
-BOOL CImg::Load(const wstring& strFile)
+BOOL CImg::Load(cwstr strFile)
 {
 	Destroy();
 	

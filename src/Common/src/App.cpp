@@ -516,7 +516,7 @@ BOOL CMainApp::_RegGlobalHotkey(HWND hWnd, const tagHotkeyInfo &HotkeyInfo)
 	return ::RegisterHotKey(hWnd, HotkeyInfo.lParam, (UINT)HotkeyInfo.eFlag, HotkeyInfo.uKey);
 }
 
-int CMainApp::msgBox(const wstring& strMsg, const wstring& strTitle, UINT nType, CWnd *pWnd)
+int CMainApp::msgBox(cwstr strMsg, cwstr strTitle, UINT nType, CWnd *pWnd)
 {
 	wstring strText(L"    ");
 	strText.append(strMsg).append(L"    ");

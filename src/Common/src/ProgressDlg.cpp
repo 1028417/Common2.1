@@ -18,7 +18,7 @@ BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
 	ON_MESSAGE(WM_SetStatusText, &CProgressDlg::OnSetStatusText)
 END_MESSAGE_MAP()
 
-INT_PTR CProgressDlg::DoModal(const wstring& strTitle, CWnd *pWndParent)
+INT_PTR CProgressDlg::DoModal(cwstr strTitle, CWnd *pWndParent)
 {
 	m_strTitle = strTitle;
 

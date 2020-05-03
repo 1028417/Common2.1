@@ -224,7 +224,7 @@ void CObjectList::SetTileSize(ULONG cx, ULONG cy)
 }
 
 template <bool _clear_other>
-void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
+void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, cwstr strPrefix)
 {
 	UINT uIndex = 0;
 	for (; uIndex < vecText.size() && uIndex < m_uColumnCount; ++uIndex)
@@ -244,7 +244,7 @@ void CObjectList::_SetItemTexts(UINT uItem, const vector<wstring>& vecText, cons
 	}
 }
 
-int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
+int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, cwstr strPrefix)
 {
 	__EnsureReturn(!vecText.empty(), -1);
 
@@ -265,7 +265,7 @@ int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, const 
 	return nItem;
 }
 
-int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
+int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, cwstr strPrefix)
 {
 	int nItem = InsertItem(uItem, L"");
 	if (nItem >= 0)
@@ -276,12 +276,12 @@ int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstTe
 	return nItem;
 }
 
-void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, const wstring& strPrefix)
+void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, cwstr strPrefix)
 {
 	_SetItemTexts<false>(uItem, vecText, strPrefix);
 }
 
-void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, const wstring& strPrefix)
+void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, cwstr strPrefix)
 {
 	for (cauto pr : lstText)
 	{
@@ -295,7 +295,7 @@ void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstT
 	}
 }
 
-void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, const wstring& strPrefix)
+void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>& vecText, cwstr strPrefix)
 {
 	for (cauto strText : vecText)
 	{
@@ -308,7 +308,7 @@ void CObjectList::SetItemTexts(UINT uItem, UINT uSubItem, const vector<wstring>&
 	}
 }
 
-void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos, const wstring& strPrefix)
+void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos, cwstr strPrefix)
 {
 	if (vecTexts.empty())
 	{
@@ -348,7 +348,7 @@ void CObjectList::SetTexts(const vector<vector<wstring>>& vecTexts)// , int nPos
 	}
 }
 
-void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, const wstring& strPrefix)
+void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, cwstr strPrefix)
 {
 	if (!lstObjects)
 	{
@@ -393,7 +393,7 @@ void CObjectList::SetObjects(const TD_ListObjectList& lstObjects)// , int nPos, 
 	}
 }
 
-void CObjectList::SetColumnText(UINT uColumn, const wstring& strText)
+void CObjectList::SetColumnText(UINT uColumn, cwstr strText)
 {
 	HDITEM hdItem;
 	hdItem.mask = HDI_TEXT;
@@ -401,7 +401,7 @@ void CObjectList::SetColumnText(UINT uColumn, const wstring& strText)
 	CListCtrl::GetHeaderCtrl()->SetItem(uColumn, &hdItem);
 }
 
-int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& strPrefix)
+int CObjectList::InsertObject(CListObject& Object, int nItem, cwstr strPrefix)
 {
 	if (-1 == nItem)
 	{
@@ -415,7 +415,7 @@ int CObjectList::InsertObject(CListObject& Object, int nItem, const wstring& str
 	return nItem;
 }
 
-void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, const wstring& strPrefix)
+void CObjectList::_SetItemObject(UINT uItem, CListObject& Object, cwstr strPrefix)
 {
 	vector<wstring> vecText;
 	int iImage = -1;
