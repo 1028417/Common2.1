@@ -3,7 +3,7 @@
 
 void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock)
 {
-	m_bCancelEvent = false; // m_CancelEvent.reset();
+	m_bRunSignal = true; // m_CancelEvent.reset();
 
     m_vecThreadStatus.assign(uThreadCount, 0);
 
@@ -44,17 +44,17 @@ void CThreadGroup::pause(bool bPause)
 
 void CThreadGroup::cancel()
 {
-	m_bCancelEvent = true; // (void)m_CancelEvent.notify();
+	m_bRunSignal = false; // (void)m_CancelEvent.notify();
 }
 
-bool CThreadGroup::checkCancel()
+bool CThreadGroup::checkStatus()
 {
 	while (m_bPause)
 	{
         mtutil::usleep(50);
 	}
 
-	return m_bCancelEvent; // m_CancelEvent.wait(0);
+	return m_bRunSignal; // !m_CancelEvent.wait(0);
 }
 
 UINT CThreadGroup::getActiveCount()

@@ -57,6 +57,35 @@ void XFile::remove()
 	}
 }
 
+void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPath& dir, TD_XFileList& paSubFile)>& cb)
+{
+	mtutil::usleep(1);
+	dir._findFile();
+	if (!bRunSignal)
+	{
+		return;
+	}
+
+	if (dir.m_paSubFile)
+	{
+		mtutil::usleep(1);
+		cb(dir, dir.m_paSubFile);
+		if (!bRunSignal)
+		{
+			return;
+		}
+	}
+
+	for (auto pSubDir : dir.m_paSubDir)
+	{
+		scanDir(bRunSignal, *pSubDir, cb);
+		if (!bRunSignal)
+		{
+			return;
+		}
+	}
+}
+
 void CPath::_findFile()
 {
 	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
@@ -117,32 +146,6 @@ inline static int _sort(cwstr lhs, cwstr rhs)
 int CPath::_sort(const XFile& lhs, const XFile& rhs) const
 {
     return ::_sort(lhs.fileName(), rhs.fileName());
-}
-
-void CPath::scan(const CB_PathScan& cb)
-{
-	(void)_scan(cb);
-}
-
-bool CPath::_scan(const CB_PathScan& cb)
-{
-	_findFile();
-	if (!cb(*this, m_paSubFile))
-	{
-		return false;
-	}
-
-	for (auto pSubDir : m_paSubDir)
-	{
-		if (!pSubDir->_scan(cb))
-		{
-			return false;
-		}
-
-        mtutil::usleep(1);
-	}
-
-	return true;
 }
 
 XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
