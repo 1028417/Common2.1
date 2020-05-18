@@ -265,7 +265,7 @@ int CObjectList::InsertItemEx(UINT uItem, const vector<wstring>& vecText, cwstr 
 	return nItem;
 }
 
-int CObjectList::InsertItemEx(UINT uItem, const list<pair<UINT, wstring>>& lstText, cwstr strPrefix)
+int CObjectList::InsertItemEx(UINT uItem, const prlist<UINT, wstring>& lstText, cwstr strPrefix)
 {
 	int nItem = InsertItem(uItem, L"");
 	if (nItem >= 0)
@@ -281,7 +281,7 @@ void CObjectList::SetItemTexts(UINT uItem, const vector<wstring>& vecText, cwstr
 	_SetItemTexts<false>(uItem, vecText, strPrefix);
 }
 
-void CObjectList::SetItemTexts(UINT uItem, const list<pair<UINT, wstring>>& lstText, cwstr strPrefix)
+void CObjectList::SetItemTexts(UINT uItem, const prlist<UINT, wstring>& lstText, cwstr strPrefix)
 {
 	for (cauto pr : lstText)
 	{
