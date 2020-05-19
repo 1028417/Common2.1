@@ -378,7 +378,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     while (true)
     {
         auto& strData = m_lstData.front();
-        size_t size = strData.length();
+        size_t size = strData.size();
         if (size <= buffSize)
         {
             memcpy(pBuff, strData.c_str(), size);

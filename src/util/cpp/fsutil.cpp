@@ -50,7 +50,7 @@ bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, const CB_CopyFile& c
 
 	if (!strHeadData.empty())
 	{
-		if (!ofs.writex(strHeadData.c_str(), strHeadData.length()))
+        if (!ofs.writex(strHeadData.c_str(), strHeadData.size()))
 		{
 			ofs.close();
 			(void)removeFile(strDstFile);

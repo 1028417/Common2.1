@@ -66,7 +66,7 @@ int strutil::collate_cn(cwstr lhs, cwstr rhs)
 template <class S>
 inline static bool _endWith(const S& str, const S& strEnd)
 {
-    int pos = (int)str.length() - strEnd.length();
+    int pos = (int)str.size() - strEnd.size();
     if (pos < 0)
     {
         return false;
@@ -160,7 +160,7 @@ bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 template <class S, typename T=decltype(S().c_str())>
 inline static UINT _replace(S& str, const S& strFind, T pszReplace = NULL, size_t replaceLen = 0)
 {
-    auto findLen = strFind.length();
+    auto findLen = strFind.size();
     if (0 == findLen)
     {
         return 0;
@@ -168,7 +168,7 @@ inline static UINT _replace(S& str, const S& strFind, T pszReplace = NULL, size_
 	auto pszFind = strFind.c_str();
     
 	UINT uRet = 0;
-    for (size_t pos = 0; pos+findLen <= str.length(); )
+    for (size_t pos = 0; pos+findLen <= str.size(); )
     {
         pos = str.find(pszFind, pos, findLen);
         if (S::npos == pos)
@@ -218,12 +218,12 @@ UINT strutil::replace(string& str, const string& strFind, const char *pszReplace
 
 UINT strutil::replace(wstring& str, cwstr strFind, cwstr strReplace)
 {
-	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
+    return _replace(str, strFind, strReplace.c_str(), strReplace.size());
 }
 
 UINT strutil::replace(string& str, const string& strFind, const string& strReplace)
 {
-	return _replace(str, strFind, strReplace.c_str(), strReplace.length());
+    return _replace(str, strFind, strReplace.c_str(), strReplace.size());
 }
 
 /* 好像有bug bool strutil::checkGbk(const char *pStr, int len)
