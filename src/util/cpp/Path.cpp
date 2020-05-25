@@ -136,6 +136,7 @@ inline static int _sort(cwstr lhs, cwstr rhs)
 #if __windows
     return strutil::collate(lhs, rhs);
 #else
+    return strutil::collate_cn(lhs, rhs);
     return __WS2Q(lhs).compare(__WS2Q(rhs), Qt::CaseSensitivity::CaseInsensitive);
     //.localeAwareCompare(__WS2Q(rhs.GetName()));
 #endif
