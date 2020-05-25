@@ -12,22 +12,19 @@
 
 long CZipFile::_readCurrent(void *buf, size_t len) const
 {
+    int nRet = 0;
 	if (m_strPwd.empty())
 	{
-		int nRet = unzOpenCurrentFile(m_unzfile);
-		if (nRet != UNZ_OK)
-		{
-			return -1;
-		}
+        nRet = unzOpenCurrentFile(m_unzfile);
 	}
 	else
 	{
-		int nRet = unzOpenCurrentFilePassword(m_unzfile, m_strPwd.c_str());
-		if (nRet != UNZ_OK)
-		{
-			return -1;
-		}
+        nRet = unzOpenCurrentFilePassword(m_unzfile, m_strPwd.c_str());
 	}
+    if (nRet != UNZ_OK)
+    {
+        return -1;
+    }
 
 	long nCount = (long)unzReadCurrentFile(m_unzfile, buf, len);
 	(void)unzCloseCurrentFile(m_unzfile);
