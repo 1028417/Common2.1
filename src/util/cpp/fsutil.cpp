@@ -4,8 +4,13 @@
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-	FILE *pf = NULL;
 	wstring t_strMode(strMode.begin(), strMode.end());
+
+#if __winvc
+	return _wfsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
+#endif
+
+	FILE *pf = NULL;
 	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
 	return pf;
 #else
@@ -16,6 +21,10 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
 {
 #if __windows
+#if __winvc
+	return _fsopen(strFile.c_str(), strMode.c_str(), _SH_DENYNO);
+#endif
+
     FILE *pf = NULL;
     (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
     return pf;
