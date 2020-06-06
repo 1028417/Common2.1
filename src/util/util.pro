@@ -64,7 +64,7 @@ android {
 
     platform = android
     DESTDIR = ..\..\libs\armeabi-v7a
-    QMAKE_POST_LINK += copy /Y $$DESTDIR\libxutil.so $$XMusicDir\libs\armeabi-v7a
+    #QMAKE_POST_LINK += copy /Y $$DESTDIR\libxutil.so $$XMusicDir\libs\armeabi-v7a
 } else: macx {
     LIBS += -L../../libs/mac  #-lnghttp2  -lz
 
