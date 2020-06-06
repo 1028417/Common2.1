@@ -72,7 +72,7 @@ float getDPIRate()
 	return 1;
 }
 
-// XMusicHost目前做法是在清单工具设置“每个监视器高 DPI 识别”
+// XMusicStudio目前做法是在清单工具设置“每个监视器高DPI识别”
 // 开启对话框Per-Monitor DPI Aware支持(至少Win10)
 //BOOL EnablePerMonitorDialogScaling()
 //{
