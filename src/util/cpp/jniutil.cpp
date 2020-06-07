@@ -1,39 +1,11 @@
 
 #include "util.h"
 
-//#include <QAndroidJniObject>
-//#include <QAndroidJniEnvironment>
-#include <QtAndroid>
-
-//#include <QtAndroidExtras>
 //#include <jni.h>
-
-int jniutil::g_jniVer = 0;
-
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    (void)reserved;
-
-    JNIEnv* env = nullptr;
-    if (vm->GetEnv((void**) &env, JNI_VERSION_1_6) == JNI_OK)
-    {
-        return jniutil::g_jniVer = JNI_VERSION_1_6;
-    }
-    else if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) == JNI_OK)
-    {
-        return jniutil::g_jniVer = JNI_VERSION_1_4;
-    }
-    else if (vm->GetEnv((void**) &env, JNI_VERSION_1_2) == JNI_OK)
-    {
-        return jniutil::g_jniVer = JNI_VERSION_1_2;
-    }
-    else if (vm->GetEnv((void**) &env, JNI_VERSION_1_1) == JNI_OK)
-    {
-        return jniutil::g_jniVer = JNI_VERSION_1_1;
-    }
-
-    return JNI_ERR;
-}
+//#include <QAndroidJniEnvironment>
+//#include <QAndroidJniObject>
+#include <QtAndroid>
+//#include <QtAndroidExtras>
 
 //安卓6以上需要动态申请权限
 #if (QT_VERSION >= QT_VERSION_CHECK(5,10,0)) // Qt5.10以上
