@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
+android: QT += androidextras
 
 TARGET = xutil
 TEMPLATE = lib
@@ -18,8 +19,7 @@ DEFINES += TIXML_USE_STL
 !win32: DEFINES += IOAPI_NO_64  # for zlib-miniZip
 
 DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
-            CARES_BUILDING_LIBRARY  #USE_ARES #安卓有问题
-            #USE_IPV6
+            CARES_BUILDING_LIBRARY  #USE_ARES #安卓有问题  #USE_IPV6
 
 INCLUDEPATH += ../../inc/util \
     ../../3rd/zlib-1.2.11 \
@@ -280,6 +280,11 @@ HEADERS += \
     ../../3rd/curl/lib/wildcard.h \
     ../../3rd/curl/lib/x509asn1.h
 
+android {
+HEADERS += ../../inc/util/jniutil.h
+SOURCES += cpp/jniutil.cpp
+}
+
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
 SOURCES += \
@@ -377,7 +382,7 @@ SOURCES += \
     ../../3rd/curl/src/tool_util.c \
     ../../3rd/curl/src/tool_vms.c \
     ../../3rd/curl/src/tool_writeout.c \
-    ../../3rd/curl/src/tool_xattr.c
+    ../../3rd/curl/src/tool_xattr.c \
 
 SOURCES += \
     ../../3rd/curl/lib/altsvc.c \
