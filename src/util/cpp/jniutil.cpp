@@ -7,6 +7,11 @@
 #include <QtAndroid>
 //#include <QtAndroidExtras>
 
+/*int jniutil::buildSdkVerion()
+{
+    return QtAndroid::androidSdkVersion()
+}*/
+
 //安卓6以上需要动态申请权限
 #if (QT_VERSION >= QT_VERSION_CHECK(5,10,0)) // Qt5.10以上
 bool jniutil::requestAndroidPermission(cqstr qsPermission)
