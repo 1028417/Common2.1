@@ -9,10 +9,30 @@
 
 /*int jniutil::buildSdkVerion()
 {
-    return QtAndroid::androidSdkVersion()
+    return QtAndroid::androidSdkVersion();
+    return QAndroidJniObject::getStaticObjectField(
+            "android/os/Build/VERSION", "SDK_INT", "I;");
+}
+
+bool jniutil::checkBuildSdkVerion(cqstr qsVer)
+{
+    return buildSdkVerion() == QAndroidJniObject::getStaticObjectField(
+            "android/os/Build/VERSION_CODES", qsVer, "I;");
+}
+
+int jniutil::androidVerion()
+{
+    return QAndroidJniObject::getStaticObjectField(
+            "system/Environment", "SYSTEM_VERSION_CODE", "I;");
+}
+
+bool jniutil::androidVerion(cqstr qsVer)
+{
+    return buildSdkVerion() == QAndroidJniObject::getStaticObjectField(
+            "android/os/Build/VERSION_CODES", qsVer, "I;");
 }*/
 
-//安卓6以上需要动态申请权限
+//API 23以上需要动态申请权限
 #if (QT_VERSION >= QT_VERSION_CHECK(5,10,0)) // Qt5.10以上
 bool jniutil::requestAndroidPermission(cqstr qsPermission)
 {
@@ -33,14 +53,11 @@ bool jniutil::requestAndroidPermission(cqstr qsPermission)
 // J -- jlong -- long
 bool jniutil::checkMobileConnected()
 {
-    //QAndroidJniEnvironment env;
     return QtAndroid::androidActivity().callMethod<jboolean>("checkMobileConnected", "()Z");
 }
 
 void jniutil::vibrate()
 {
-    //QAndroidJniEnvironment env;
-
     cauto jsName = QAndroidJniObject::getStaticObjectField(
                 "android/content/Context",
                 "VIBRATOR_SERVICE",
