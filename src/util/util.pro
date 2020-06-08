@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       -= gui
-android: QT += androidextras
 
 TARGET = xutil
 TEMPLATE = lib
@@ -279,11 +278,6 @@ HEADERS += \
     ../../3rd/curl/lib/warnless.h \
     ../../3rd/curl/lib/wildcard.h \
     ../../3rd/curl/lib/x509asn1.h
-
-android {
-HEADERS += ../../inc/util/jniutil.h
-SOURCES += cpp/jniutil.cpp
-}
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 
