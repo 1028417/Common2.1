@@ -10,26 +10,14 @@
 /*int jniutil::buildSdkVerion()
 {
     return QtAndroid::androidSdkVersion();
-    return QAndroidJniObject::getStaticObjectField(
-            "android/os/Build/VERSION", "SDK_INT", "I;");
+    return QAndroidJniObject::getStaticField(
+            "android/os/Build/VERSION", "SDK_INT");
 }
 
-bool jniutil::checkBuildSdkVerion(cqstr qsVer)
+bool jniutil::checkBuildSdkVerion(const char *pszVersion)
 {
-    return buildSdkVerion() == QAndroidJniObject::getStaticObjectField(
-            "android/os/Build/VERSION_CODES", qsVer, "I;");
-}
-
-int jniutil::androidVerion()
-{
-    return QAndroidJniObject::getStaticObjectField(
-            "system/Environment", "SYSTEM_VERSION_CODE", "I;");
-}
-
-bool jniutil::androidVerion(cqstr qsVer)
-{
-    return buildSdkVerion() == QAndroidJniObject::getStaticObjectField(
-            "android/os/Build/VERSION_CODES", qsVer, "I;");
+    return buildSdkVerion() == QAndroidJniObject::getStaticField(
+            "android/os/Build/VERSION_CODES", pszVersion);
 }*/
 
 //API 23以上需要动态申请权限
@@ -48,26 +36,38 @@ bool jniutil::requestAndroidPermission(cqstr qsPermission)
 }
 #endif
 
+static QAndroidJniObject _getService(const char *pszName)
+{
+    cauto jniName = QAndroidJniObject::getStaticObjectField(
+                "android/content/Context",
+                pszName,
+                "Ljava/lang/String;");
+    if (!jniName.isValid())
+    {
+        return QAndroidJniObject();
+    }
+
+    return QtAndroid::androidActivity().callObjectMethod(
+                "getSystemService",
+                "(Ljava/lang/String;)Ljava/lang/Object;",
+                jniName.object<jstring>());
+}
+
 // Z -- jboolean -- bllean
 // I -- jint -- int;
 // J -- jlong -- long
 bool jniutil::checkMobileConnected()
 {
-    return QtAndroid::androidActivity().callMethod<jboolean>("checkMobileConnected", "()Z");
+    return QtAndroid::androidActivity().callMethod<jboolean>("checkMobileConnected");
 }
 
 void jniutil::vibrate()
 {
-    cauto jsName = QAndroidJniObject::getStaticObjectField(
-                "android/content/Context",
-                "VIBRATOR_SERVICE",
-                "Ljava/lang/String;");
-
-    cauto jniService = QtAndroid::androidActivity().callObjectMethod(
-                "getSystemService",
-                "(Ljava/lang/String;)Ljava/lang/Object;",
-                jsName.object<jstring>());
-
+    cauto jniService = _getService("VIBRATOR_SERVICE");
+    if (!jniService.isValid())
+    {
+        return;
+    }
     jniService.callMethod<void>("vibrate", "(J)V", jlong(100));
 }
 
@@ -78,5 +78,3 @@ void jniutil::installApk(cqstr qsApkPath)
                 "(Ljava/lang/String;)V",
                 jsApkPath.object<jstring>());
 }
-
-//QAndroidJniObject::callStaticMethod<void>("xmusic/XActivity", "installApk",
