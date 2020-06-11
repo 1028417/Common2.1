@@ -587,14 +587,6 @@ QString fsutil::getHomeDir()
 static const wstring g_wsDot = L".";
 static const wstring g_wsDotDot = L"..";
 
-/*  std::list<std::wstring> lstDrivers;
-    winfsutil::getSysDrivers(lstDrivers);
-    for (cauto strDriver : lstDrivers)
-    {
-        cb(tagFileInfo(strDriver));
-    }
-*/
-
 bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
     if (strDir.empty())
