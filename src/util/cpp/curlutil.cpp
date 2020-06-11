@@ -343,6 +343,16 @@ void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_Down
     });
 }
 
+uint64_t CCurlDownload::cancel()
+{
+    m_bStatus = false;
+
+    m_thread.cancel();
+
+    auto uRecvSize = m_uRecvSize;
+    m_uRecvSize = 0;
+    return uRecvSize;
+}
 
 bool CDownloader::_onRecv(char *ptr, size_t size)
 {
@@ -352,13 +362,6 @@ bool CDownloader::_onRecv(char *ptr, size_t size)
     m_mtxDataLock.unlock();
 
     return true;
-}
-
-void CCurlDownload::cancel()
-{
-    m_bStatus = false;
-
-    m_thread.cancel();
 }
 
 int CDownloader::getData(byte_t *pBuff, size_t buffSize)
