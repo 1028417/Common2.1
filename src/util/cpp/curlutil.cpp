@@ -285,7 +285,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
         }
 
         size *= nmemb;
-        m_uSumSize += size;
+        m_uRecvSize += size;
 
         if (!_onRecv(ptr, size))
         {
@@ -300,9 +300,9 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
-        m_uSumSize = 0;
+        m_uRecvSize = 0;
 
-        _clear();
+        clear();
 
         //m_strErrMsg.clear();
 
@@ -316,7 +316,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 
         if (!m_bStatus)
         {
-            _clear();
+            clear();
             break;
         }
 
@@ -325,7 +325,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 //            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
 //        }
 
-        if (m_uSumSize > 0)
+        if (m_uRecvSize > 0)
         {
             break;
         }
@@ -359,8 +359,6 @@ void CCurlDownload::cancel()
     m_bStatus = false;
 
     m_thread.cancel();
-
-    _clear();
 }
 
 int CDownloader::getData(byte_t *pBuff, size_t buffSize)
@@ -416,7 +414,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
 /*void CDownloader::cutData(uint64_t uPos)
 {
     m_mtxDataLock.lock();
-    uint64_t uReadPos = m_uSumSize - m_uDataSize;
+    uint64_t uReadPos = m_uRecvSize - m_uDataSize;
     if (uPos <= uReadPos)
     {
         m_mtxDataLock.unlock();
@@ -430,12 +428,11 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     (void)getData(buff);
 }*/
 
-void CDownloader::_clear()
+void CDownloader::clear()
 {
     m_mtxDataLock.lock();
 
     m_lstData.clear();
-
     m_uDataSize = 0;
 
     m_mtxDataLock.unlock();
