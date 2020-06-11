@@ -359,6 +359,8 @@ void CCurlDownload::cancel()
     m_bStatus = false;
 
     m_thread.cancel();
+
+    _clear();
 }
 
 int CDownloader::getData(byte_t *pBuff, size_t buffSize)
