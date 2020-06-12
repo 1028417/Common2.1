@@ -316,7 +316,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 
         if (!m_bStatus)
         {
-            clear();
+            //clear(); //统一不清，cancel函数也不清
             break;
         }
 
