@@ -369,7 +369,7 @@ int CDownloader::getData(byte_t *pBuff, size_t buffSize)
     mutex_lock lock(m_mtxDataLock);
     if (m_lstData.empty())
     {
-        if (!status())
+        if (!m_bStatus)
         {
             return -1;
         }
