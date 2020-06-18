@@ -30,9 +30,10 @@ int curlutil::initCurl(string& strVerInfo)
 
     if (p->protocols)
     {
+        ss << "\nprotocols:";
         for (auto protocols = p->protocols; *protocols; protocols++)
         {
-            ss << "\nprotocols: " << *protocols;
+            ss << ' ' << *protocols;
         }
     }
 
