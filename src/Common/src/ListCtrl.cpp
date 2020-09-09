@@ -952,7 +952,14 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 
 BOOL CObjectList::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	if (WM_MOUSEWHEEL == message)
+	if (WM_MBUTTONDOWN == message)
+	{
+		if (m_cbViewChanged)
+		{
+			ChangeListCtrlView(1);
+		}
+	}
+	else if (WM_MOUSEWHEEL == message)
 	{
 		if (m_cbViewChanged)
 		{
