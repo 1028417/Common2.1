@@ -6,6 +6,24 @@
 static const string g_s;
 static const wstring g_ws;
 
+#if __winvc
+#include <codecvt>
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
+
+	static const locale g_locale_CN("Chinese_china");
+    static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
+
+#else
+#include <QTextCodec>
+    static QTextCodec *g_gbkCodec = QTextCodec::codecForName("GBK");
+    //static QTextCodec *g_utf8Codec = QTextCodec::codecForName("UTF-8");
+
+#include <QLocale>
+#include <QCollator>
+    static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
+    static const QCollator& g_collate_CN = QCollator(g_locale_CN);
+#endif
+
 static struct __localeInit {
     __localeInit() {
 #if __windows
@@ -25,26 +43,12 @@ static struct __localeInit {
         setlocale(LC_CTYPE, "");
         setlocale(LC_COLLATE, "");
 #endif
+
+#if !__winvc
+        g_collate_CN.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+#endif
     }
 } localeInit;
-
-#if __winvc
-#include <codecvt>
-    static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
-
-	static const locale g_locale_CN("Chinese_china");
-    static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
-
-#else
-#include <QTextCodec>
-    static QTextCodec *g_gbkCodec = QTextCodec::codecForName("GBK");
-    //static QTextCodec *g_utf8Codec = QTextCodec::codecForName("UTF-8");
-
-#include <QLocale>
-#include <QCollator>
-    static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
-    static const QCollator& g_collate_CN = QCollator(g_locale_CN);
-#endif
 
 int strutil::collate(cwstr lhs, cwstr rhs)
 {
