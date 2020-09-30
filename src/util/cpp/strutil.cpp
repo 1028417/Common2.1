@@ -21,7 +21,7 @@ static const wstring g_ws;
 #include <QLocale>
 #include <QCollator>
     static const QLocale g_locale_CN(QLocale::Chinese, QLocale::China);
-    static const QCollator& g_collate_CN = QCollator(g_locale_CN);
+    static QCollator g_collate_CN(g_locale_CN);
 #endif
 
 static struct __localeInit {
