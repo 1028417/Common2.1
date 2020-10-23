@@ -148,9 +148,10 @@ BOOL CImg::Load(cwstr strFile)
 
 BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, E_ImgFixMode eFixMode)
 {
+	(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
+
 	if (E_ImgFixMode::IFM_None == eFixMode)
 	{
-		(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
 		return CImage::StretchBlt(hDC, rc, SRCCOPY);
 	}
 
@@ -222,7 +223,6 @@ BOOL CImg::StretchBltEx(HDC hDC, const RECT& rc, E_ImgFixMode eFixMode)
 		rcSrc.right = MAX(rcSrc.right, 0);
 	}
 	
-	(void)::SetStretchBltMode(hDC, STRETCH_HALFTONE);
 	return CImage::StretchBlt(hDC, rcDst.left, rcDst.top, nDstWidth, nDstHeight
 		, rcSrc.left, rcSrc.top, rcSrc.Width(), rcSrc.Height(), SRCCOPY);
 	
