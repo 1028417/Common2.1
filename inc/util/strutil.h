@@ -50,7 +50,7 @@ public:
     static int collate(cwstr lhs, cwstr rhs);
     static int collate_cn(cwstr lhs, cwstr rhs);
 
-    UINT checkWordCount(cwstr str);
+    static UINT checkWordCount(cwstr str);
 
 	template <class S>
 	static S substr(const S& str, size_t pos, size_t len = -1)
