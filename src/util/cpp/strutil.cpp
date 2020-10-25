@@ -67,6 +67,29 @@ int strutil::collate_cn(cwstr lhs, cwstr rhs)
 #endif
 }
 
+UINT strutil::checkWordCount(cwstr str)
+{
+    UINT uCount= 0;
+    for (cauto wch : str)
+    {
+        if (wch > 255)
+        {
+            uCount += 2;
+        }
+        else
+        {
+            uCount++;
+        }
+    }
+
+    if (uCount%2 == 0)
+    {
+        uCount++;
+    }
+
+    return uCount/2;
+}
+
 template <class S>
 inline static bool _endWith(const S& str, const S& strEnd)
 {
