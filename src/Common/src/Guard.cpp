@@ -145,33 +145,33 @@ bool CMenuEx::Attach(HMENU hMenu)
 	UINT uAvilbleCount = 0;
 	int nPrevSpliterPos = -1;
 	int nItemCount = this->GetMenuItemCount();
-	for (int nItem = nItemCount-1; nItem >= 0; nItem--)
+	for (int nIdx = nItemCount-1; nIdx >= 0; nIdx--)
 	{
-		int nItemID = (int)this->GetMenuItemID(nItem);
+		int nItemID = (int)this->GetMenuItemID(nIdx);
 		if (-1 == nItemID) // 子菜单
 		{
-			HMENU hSubMenu = this->GetSubMenu(nItem)->m_hMenu;
+			HMENU hSubMenu = this->GetSubMenu(nIdx)->m_hMenu;
 
 			m_lstSubMenu.emplace_back(*this, true);
 			auto& SubMenu = m_lstSubMenu.back();
 			if (!SubMenu.Attach(hSubMenu))
 			{
 				m_lstSubMenu.pop_back();
-				(void)this->RemoveMenu(nItem, MF_BYPOSITION);
+				(void)this->RemoveMenu(nIdx, MF_BYPOSITION);
 				continue;
 			}
 
-			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)hSubMenu);
+			(void)this->ModifyMenu(nIdx, MF_BYPOSITION | MF_OWNERDRAW | MF_POPUP, (UINT)hSubMenu);
 		}
 		else if (0 == nItemID) // 分隔条
 		{
 			if (uAvilbleCount == nPrevSpliterPos + 1)
 			{
-				(void)this->RemoveMenu(nItem, MF_BYPOSITION);
+				(void)this->RemoveMenu(nIdx, MF_BYPOSITION);
 				continue;
 			}
 
-			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW | MF_SEPARATOR);
+			(void)this->ModifyMenu(nIdx, MF_BYPOSITION | MF_OWNERDRAW | MF_SEPARATOR);
 			nPrevSpliterPos = uAvilbleCount;
 		}
 		else
@@ -181,15 +181,19 @@ bool CMenuEx::Attach(HMENU hMenu)
 			{
 				cauto MenuItemInfo = itr->second;
 
-				if (MenuItemInfo.bDelete || MenuItemInfo.bDisable)
+				if (MenuItemInfo.bDelete)
 				{
-					(void)this->RemoveMenu(nItem, MF_BYPOSITION);
-					//(void)this->EnableMenuItem(uIDItem, MF_GRAYED);
+					(void)this->RemoveMenu(nIdx, MF_BYPOSITION);
+					continue;
+				}
+				else if(MenuItemInfo.bDisable)
+				{
+					(void)this->RemoveMenu(nIdx, MF_BYPOSITION); //(void)this->EnableMenuItem(nItemID, MF_GRAYED);
 					continue;
 				}
 			}
 
-			(void)this->ModifyMenu(nItem, MF_BYPOSITION | MF_OWNERDRAW, (UINT)nItemID);
+			(void)this->ModifyMenu(nIdx, MF_BYPOSITION | MF_OWNERDRAW, (UINT)nItemID);
 		}
 
 		uAvilbleCount++;
