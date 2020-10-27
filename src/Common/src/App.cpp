@@ -176,41 +176,43 @@ void CMainApp::_run()
 {
 	CMainWnd *pMainWnd = getView().show();
 	g_hMainWnd = pMainWnd->GetSafeHwnd();
-	__Ensure(g_hMainWnd);
-	m_pMainWnd = pMainWnd;
-	
-	__async([=]() {
-		for (auto pModule : g_vctModules)
-		{
-			pModule->OnReady(*pMainWnd);
-		}
+	if (g_hMainWnd)
+	{
+		m_pMainWnd = pMainWnd;
 
-		getController().start();
+		__async([=]() {
+			for (auto pModule : g_vctModules)
+			{
+				pModule->OnReady(*pMainWnd);
+			}
+
+			getController().start();
+
+			for (cauto HotkeyInfo : g_vctHotkeyInfos)
+			{
+				if (HotkeyInfo.bGlobal)
+				{
+					(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
+				}
+			}
+		});
+
+		(void)__super::Run();
 
 		for (cauto HotkeyInfo : g_vctHotkeyInfos)
 		{
 			if (HotkeyInfo.bGlobal)
 			{
-				(void)_RegGlobalHotkey(g_hMainWnd, HotkeyInfo);
+				(void)::UnregisterHotKey(g_hMainWnd, HotkeyInfo.lParam);
 			}
 		}
-	});
-
-	(void)__super::Run();
-
-	for (cauto HotkeyInfo : g_vctHotkeyInfos)
-	{
-		if (HotkeyInfo.bGlobal)
-		{
-			(void)::UnregisterHotKey(g_hMainWnd, HotkeyInfo.lParam);
-		}
 	}
-	
+
 	for (auto pModule : g_vctModules)
 	{
 		pModule->OnQuit();
 	}
-
+	
 	getView().close();
 
 	getController().stop();
