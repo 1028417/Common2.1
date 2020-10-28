@@ -372,7 +372,7 @@ void CMainWnd::OnDestroy()
 		{
 			pr.second->DestroyWindow();
 		}
-		delete pr.second;
+		//delete pr.second; // TODO ÈÝÒ×±ÀÀ£
 	}
 	m_mapDockViews.clear();
 
