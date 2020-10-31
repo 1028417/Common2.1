@@ -1104,6 +1104,11 @@ const LVHITTESTINFO& CObjectList::hittest(const POINT& ptPos) const
 
 void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 {
+	if (GetView() != E_ListViewType::LVT_Report)
+	{
+		return;
+	}
+
 	int nItemCount = GetItemCount();
 	if (0 == nItemCount)
 	{
