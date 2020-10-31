@@ -1164,14 +1164,20 @@ void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 	});
 }
 
-void CObjectList::AsyncTask(UINT uElapse, cfn_void_t<CListObject&> cb)
+void CObjectList::AsyncTask(UINT uElapse, cfn_bool_t<CListObject&> cb)
 {
 	_AsyncTask(uElapse, [&, cb](UINT uItem) {
 		auto pObject = GetItemObject(uItem);
 		if (pObject)
 		{
-			cb(*pObject);			
-			UpdateItem(uItem, pObject);
+			if (cb(*pObject))
+			{
+				UpdateItem(uItem, pObject);
+			}
+			else
+			{
+				Update(uItem);
+			}
 		}
 	});
 }
