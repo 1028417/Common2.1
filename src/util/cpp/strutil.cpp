@@ -160,6 +160,7 @@ void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRe
 
 bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 {
+    // TODO towlower挨个比较
     if (0 == maxlen)
     {
 #if __windows
