@@ -904,8 +904,8 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 	case LVN_ENDLABELEDIT:
 	{
 		NMLVDISPINFO *pLVDispInfo = reinterpret_cast<NMLVDISPINFO*>(&NMHDR);
-
-		CString cstrNewText(pLVDispInfo->item.pszText);
+		cauto item = pLVDispInfo->item;
+		CString cstrNewText(item.pszText);
 		(void)cstrNewText.Trim();
 		__EnsureReturn(!cstrNewText.IsEmpty(), TRUE);
 
@@ -913,18 +913,18 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		
 		::ShowWindow(GetEditControl()->GetSafeHwnd(), SW_HIDE);
 
-		int nItem = pLVDispInfo->item.iItem;
-		CListObject *pObject = GetItemObject(nItem);
-		if (pObject)
+		auto pObject = (CListObject*)item.lParam;
+		if (OnItemRename(item.iItem, pObject, cstrNewText))
 		{
-			pObject->OnListItemRename((wstring)cstrNewText);
+			if (pObject)
+			{
+				UpdateItem(item.iItem, pObject);
+			}
+			else
+			{
+				(void)__super::SetItemText(item.iItem, 0, cstrNewText);
+			}
 		}
-		else
-		{
-			OnListItemRename(pLVDispInfo->item.iItem, cstrNewText);
-		}
-
-		UpdateItem(pLVDispInfo->item.iItem);
 	}
 
 	break;
