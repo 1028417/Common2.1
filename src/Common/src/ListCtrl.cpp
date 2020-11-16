@@ -161,7 +161,7 @@ void CObjectList::SetView(E_ListViewType eViewType, bool bArrange)
 
 	if (bArrange)
 	{
-		(void)Arrange(0);
+		(void)Arrange(LVA_DEFAULT);
 	}
 }
 
