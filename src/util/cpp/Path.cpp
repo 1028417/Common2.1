@@ -170,10 +170,8 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 	CPath *pSubDir = this;
 	while (!lstSubName.empty())
 	{
-		wstring strSubName = lstSubName.front();
-		lstSubName.pop_front();
-
-		if (lstSubName.empty() && !bDir)
+        cauto strSubName = lstSubName.front();
+        if (lstSubName.size()==1 && !bDir)
         {
             for (auto pFile : pSubDir->files())
             {
@@ -185,19 +183,22 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
             return NULL;
 		}
 
-        pSubDir = NULL;
+        bool bFlag = false;
         for (auto pDir : pSubDir->dirs())
         {
             if (strutil::matchIgnoreCase(pDir->fileName(), strSubName))
             {
                 pSubDir = pDir;
+                bFlag = true;
                 break;
             }
         }
-        if (NULL == pSubDir)
+        if (!bFlag)
         {
             return NULL;
         }
+
+        lstSubName.pop_front();
 	}
 	
 	return pSubDir;
