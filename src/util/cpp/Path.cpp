@@ -156,7 +156,7 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 	list<wstring> lstSubName;
 	while (!strSubPath.empty())
 	{
-		wstring strSubName = fsutil::GetFileName(strSubPath);
+        cauto strSubName = fsutil::GetFileName(strSubPath);
 		if (strSubName.empty())
 		{
 			break;
@@ -174,32 +174,30 @@ XFile *CPath::findSubPath(wstring strSubPath, bool bDir)
 		lstSubName.pop_front();
 
 		if (lstSubName.empty() && !bDir)
-		{
-			XFile *pSubFile = NULL;
-			pSubDir->files()([&](XFile& file) {
-                if (strutil::matchIgnoreCase(file.fileName(), strSubName))
-				{
-					pSubFile = &file;
-					return false;
-				}
-
-				return true;
-			});
-			return pSubFile;
+        {
+            for (auto pFile : pSubDir->files())
+            {
+                if (strutil::matchIgnoreCase(pFile->fileName(), strSubName))
+                {
+                    return pFile;
+                }
+            }
+            return NULL;
 		}
 
-		if (!pSubDir->dirs().any([&](CPath& dir) {
-            if (strutil::matchIgnoreCase(dir.fileName(), strSubName))
-			{
-				pSubDir = &dir;
-				return true;
-			}
-
-			return false;
-		}))
-		{
-			return NULL;
-		}
+        pSubDir = NULL;
+        for (auto pDir : pSubDir->dirs())
+        {
+            if (strutil::matchIgnoreCase(pDir->fileName(), strSubName))
+            {
+                pSubDir = pDir;
+                break;
+            }
+        }
+        if (NULL == pSubDir)
+        {
+            return NULL;
+        }
 	}
 	
 	return pSubDir;
