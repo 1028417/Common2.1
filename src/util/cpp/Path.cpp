@@ -13,16 +13,6 @@ wstring XFile::fileName() const
 	}
 }
 
-wstring XFile::parentDir() const
-{
-	if (m_fileInfo.pParent)
-	{
-		return m_fileInfo.pParent->path();
-	}
-
-	return fsutil::GetParentDir(m_fileInfo.strName);
-}
-
 wstring XFile::path() const
 {
     if (m_fileInfo.pParent)
