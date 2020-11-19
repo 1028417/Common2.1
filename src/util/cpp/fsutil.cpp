@@ -624,6 +624,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
     }
 
     wstring strFileName;
+	tagFileInfo fileInfo;
     do
     {
         if ((FindData.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
@@ -638,11 +639,22 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             continue;
         }
 
-		bool bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-		tagFileInfo fileInfo(bDir, strFileName);
-        fileInfo.uFileSize = FindData.nFileSizeLow; // TODO
-        fileInfo.tCreateTime = tmutil::transFileTime(FindData.ftCreationTime.dwLowDateTime, FindData.ftCreationTime.dwHighDateTime);
-        fileInfo.tModifyTime = tmutil::transFileTime(FindData.ftLastWriteTime.dwLowDateTime, FindData.ftLastWriteTime.dwHighDateTime);
+		fileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		fileInfo.strName.swap(strFileName);
+		if (fileInfo.bDir)
+		{
+			fileInfo.uFileSize = 0;
+			fileInfo.tCreateTime = 0;
+			fileInfo.tModifyTime = 0;
+		}
+		else
+		{
+			fileInfo.uFileSize = FindData.nFileSizeLow; // TODO
+			fileInfo.tCreateTime = tmutil::transFileTime(FindData.ftCreationTime.dwLowDateTime
+				, FindData.ftCreationTime.dwHighDateTime);
+			fileInfo.tModifyTime = tmutil::transFileTime(FindData.ftLastWriteTime.dwLowDateTime
+				, FindData.ftLastWriteTime.dwHighDateTime);
+		}
 
         cb(fileInfo);
     } while (::FindNextFileW(hFindFile, &FindData));
@@ -666,6 +678,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
     /*cauto sortFlag = QDir::SortFlag::DirsFirst | QDir::SortFlag::IgnoreCase
                    | QDir::SortFlag::LocaleAware;*/
 
+	tagFileInfo fileInfo;
     QFileInfoList list = dir.entryInfoList(filter, sortFlag);
     for (int nIdx = 0; nIdx<list.size(); nIdx++)
     {
@@ -682,7 +695,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
         {
             continue;
         }*/
-        cauto strFileName = fi.fileName().toStdWString();
+        auto strFileName = fi.fileName().toStdWString();
         /*if (g_wsDot == strFileName || g_wsDotDot == strFileName)
         {
             continue;
@@ -712,19 +725,27 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             }
         }
 
-        tagFileInfo fileInfo(bDir, strFileName);
-        if (!bDir)
-        {
-            fileInfo.uFileSize = (uint64_t)fi.size();
-        }
-		
+        fileInfo.bDir = bDir;
+        fileInfo.strName.swap(strFileName);
+
+		if (bDir)
+		{
+			fileInfo.uFileSize = 0;
+			fileInfo.tCreateTime = 0;
+			fileInfo.tModifyTime = 0;
+		}
+		else
+		{
+			fileInfo.uFileSize = (uint64_t)fi.size();
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5,13,0))
-        cauto createTime = fi.birthTime();
+			cauto createTime = fi.birthTime();
 #else
-        cauto createTime = fi.created();
+			cauto createTime = fi.created();
 #endif
-        fileInfo.tCreateTime = createTime.toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
-        fileInfo.tModifyTime = fi.lastModified().toTime_t();
+			fileInfo.tCreateTime = createTime.toTime_t(); //.toString("yyyy-MM-dd hh:mm:ss");
+			fileInfo.tModifyTime = fi.lastModified().toTime_t();
+		}
 
         cb(fileInfo);
     }
