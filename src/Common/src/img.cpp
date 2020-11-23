@@ -319,6 +319,28 @@ void CImglst::SetImg(Gdiplus::Image& img, int nPosReplace)
 	});
 }
 
+void CImglst::SetImg(list<Gdiplus::Image>& lstImg, int nPosReplace)
+{
+	__initAdpDC();
+
+	Gdiplus::Graphics graphics(m_adpDC.getDC());
+	graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQuality);
+
+	for (auto& img : lstImg)
+	{
+		graphics.DrawImage(&img, rc.left, rc.top, rc.Width(), rc.Height());
+
+		m_adpDC.getBitmap([&](CBitmap& bitmap) {
+			SetBitmap(bitmap, nPosReplace);
+		});
+
+		if (nPosReplace >= 0)
+		{
+			nPosReplace++;
+		}
+	}
+}
+
 void CImglst::SetImg(CImg& img, E_ImgFixMode eFixMode, int nPosReplace)
 {
 	__initAdpDC();
@@ -328,4 +350,23 @@ void CImglst::SetImg(CImg& img, E_ImgFixMode eFixMode, int nPosReplace)
 	m_adpDC.getBitmap([&](CBitmap& bitmap) {
 		SetBitmap(bitmap, nPosReplace);
 	});
+}
+
+void CImglst::SetImg(list<CImg>& lstImg, E_ImgFixMode eFixMode, int nPosReplace)
+{
+	__initAdpDC();
+
+	for (auto& img : lstImg)
+	{
+		img.StretchBltEx(m_adpDC.getDC(), rc, eFixMode);
+
+		m_adpDC.getBitmap([&](CBitmap& bitmap) {
+			SetBitmap(bitmap, nPosReplace);
+		});
+
+		if (nPosReplace >= 0)
+		{
+			nPosReplace++;
+		}
+	}
 }
