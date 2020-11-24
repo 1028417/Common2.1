@@ -180,6 +180,7 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
 
 	zlib_filefunc_def zfunc;
 	memzero(zfunc);
+    zfunc.opaque = &ins;
 
 	zfunc.zopen_file = zopen_file;
 	zfunc.zread_file = zread_file;
@@ -187,8 +188,6 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
 	zfunc.zseek_file = zseek_file;
 	zfunc.zclose_file = zclose_file;
     zfunc.zerror_file = ztesterror_file;
-
-	zfunc.opaque = &ins;
 
 	return _open("", &zfunc);
 }
