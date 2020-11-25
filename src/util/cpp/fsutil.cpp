@@ -118,7 +118,7 @@ bool fsutil::lStat64(cwstr strFile, tagFileStat64& stat)
 #endif
 }
 
-long long fsutil::GetFileSize64(cwstr strFile)
+int64_t fsutil::GetFileSize64(cwstr strFile)
 {
     tagFileStat64 stat;
     memzero(stat);

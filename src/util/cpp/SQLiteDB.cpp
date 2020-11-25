@@ -71,32 +71,32 @@ inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, long& nValue)
 	return true;
 }
 
-bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, unsigned long& nValue)
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, unsigned long& uValue)
 {
-	long long t_nValue = 0;
+	int64_t t_nValue = 0;
 	__EnsureReturn(GetData(uRow, uColumn, t_nValue), false);
 
-	nValue = (unsigned long)t_nValue;
+	uValue = (unsigned long)t_nValue;
 
 	return true;
 }
 
-inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, long long& nValue)
+inline bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, int64_t& nValue)
 {
 	string strData;
 	__EnsureReturn(GetData(uRow, uColumn, strData), false);
 
-	nValue = atoll(strData.c_str());
+	nValue = atoll(strData.c_str()); // ??_atoi64
 
 	return true;
 }
 
-bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, unsigned long long& nValue)
+bool CSQLiteDBResult::GetData(UINT uRow, UINT uColumn, uint64_t& uValue)
 {
-	long long t_nValue = 0;
+	int64_t t_nValue = 0;
 	__EnsureReturn(GetData(uRow, uColumn, t_nValue), false);
 
-	nValue = (unsigned long long)t_nValue;
+	uValue = (uint64_t)t_nValue;
 
 	return true;
 }
