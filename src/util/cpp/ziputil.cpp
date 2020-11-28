@@ -109,8 +109,6 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 		return false;
 	}*/
 
-    tagUnzDir *pUnzDir = &m_unzRoot;
-
 	unz_file_info file_info;
 	memzero(file_info);
 
@@ -130,9 +128,6 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
         string strPath = pszFileName;
         if (__cSlant == strPath.back())  // (unzFile.external_fa & __DirFlag);
         {
-            pUnzDir->lstSubDir.emplace_back(strPath);
-            pUnzDir = &pUnzDir->lstSubDir.back();
-
             m_lstSubDir.push_back(strPath);
 		}
 		else
@@ -151,8 +146,6 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 
             unzSubFile.pos_in_zip_directory = file_pos.pos_in_zip_directory;
             unzSubFile.num_of_file = file_pos.num_of_file;
-
-            pUnzDir->paSubFile.add(unzSubFile);
 		}
     } while (unzGoToNextFile(pfile) == UNZ_OK);
 
