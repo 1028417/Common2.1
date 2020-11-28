@@ -5,7 +5,8 @@ struct __UtilExt tagUnzfile
 {
     string strPath;
 
-    size_t uFileSize = 0;
+    size_t compressed_size = 0;
+    size_t uncompressed_size = 0;
 
     size_t pos_in_zip_directory = 0;
     size_t num_of_file = 0;
@@ -34,7 +35,7 @@ public:
 private:
     string m_strPwd;
 
-    void* m_unzfile = NULL;
+    void* m_pfile = NULL;
 
     list<tagUnzfile> m_lstUnzdirInfo;
 
@@ -55,7 +56,7 @@ private:
 public:
     operator bool() const
     {
-        return m_unzfile != NULL;
+        return m_pfile != NULL;
     }
 
     const map<string, tagUnzfile>& unzfileMap() const
@@ -94,13 +95,13 @@ public:
 
     long read(const tagUnzfile& unzFile, CByteBuffer& bbfBuff) const
     {
-        if (0 == unzFile.uFileSize)
+        if (0 == unzFile.uncompressed_size)
         {
             return 0;
         }
 
-        auto ptr = bbfBuff.resizeMore(unzFile.uFileSize);
-        return _read(unzFile, ptr, unzFile.uFileSize);
+        auto ptr = bbfBuff.resizeMore(unzFile.uncompressed_size);
+        return _read(unzFile, ptr, unzFile.uncompressed_size);
     }
     long read(const string& strSubFilePath, CByteBuffer& bbfBuff) const
     {
@@ -115,13 +116,13 @@ public:
 
     long read(const tagUnzfile& unzFile, CCharBuffer& cbfBuff) const
     {
-        if (0 == unzFile.uFileSize)
+        if (0 == unzFile.uncompressed_size)
         {
             return 0;
         }
 
-        auto ptr = cbfBuff.resizeMore(unzFile.uFileSize);
-        return _read(unzFile, ptr, unzFile.uFileSize);
+        auto ptr = cbfBuff.resizeMore(unzFile.uncompressed_size);
+        return _read(unzFile, ptr, unzFile.uncompressed_size);
     }
     long read(const string& strSubFilePath, CCharBuffer& cbfBuff) const
     {
