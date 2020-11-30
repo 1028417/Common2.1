@@ -147,7 +147,7 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
     //curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     //curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2)
 
-    /*curl_easy_setopt(curl, CURLOPT_CAPATH, strutil::wstrToStr(fsutil::workDir()).c_str());
+    /*curl_easy_setopt(curl, CURLOPT_CAPATH, fsutil::workDir().c_str());
 #if __windows
     curl_easy_setopt(curl, CURLOPT_CAINFO, "curl-ca-bundle.crt");
 #else

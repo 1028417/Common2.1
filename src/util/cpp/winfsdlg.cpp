@@ -307,7 +307,6 @@ void CFileDlg::_setOpt(const tagFileDlgOpt& opt)
 bool CFileDlg::_show(bool bSaveFile)
 {
 	cauto strWorkDir = fsutil::workDir();
-
 	if (bSaveFile)
 	{
 		if (!::GetSaveFileName(&m_ofn))
