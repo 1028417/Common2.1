@@ -887,7 +887,7 @@ BOOL CObjectList::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		m_cstrRenameText = strRenameText.c_str();
 		pwndEdit->SetWindowText(m_cstrRenameText);
 
-		/*__async([=]() {
+		/*__async([=]{
 			CEdit *pwndEdit = GetEditControl();
 			if (NULL != pwndEdit)
 			{
@@ -1117,7 +1117,7 @@ void CObjectList::_AsyncTask(UINT uElapse, cfn_void_t<UINT> cb)
 	}
 	m_vecAsyncTaskStatus.assign((UINT)nItemCount, FALSE);
 
-	m_AsyncTaskTimer.set(uElapse, [&, cb]() {
+	m_AsyncTaskTimer.set(uElapse, [&, cb]{
 		if (GetView() != E_ListViewType::LVT_Report)
 		{
 			return false;
@@ -1187,7 +1187,7 @@ void CObjectList::AsyncLButtondown(cfn_void cb)
 	m_cbLButtondown = cb;
 
 	auto hWnd = m_hWnd;
-	__async(300, [&, hWnd]() {
+	__async(300, [&, hWnd]{
 		if (::IsWindowVisible(hWnd))
 		{
 			if (m_cbLButtondown)

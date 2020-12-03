@@ -47,7 +47,7 @@ BOOL CProgressDlg::OnInitDialog()
 
 		if (!m_bFinished)
 		{
-			CMainApp::GetMainApp()->sync([=]() {
+			CMainApp::GetMainApp()->sync([=]{
 				_endProgress();
 			});
 			m_bFinished = true;

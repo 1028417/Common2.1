@@ -134,7 +134,7 @@ void CFolderDlg::_relayout()
         , SWP_NOZORDER);
         //,SWP_HIDEWINDOW);
 	
-//	__async(10, [=]() {
+//	__async(10, [=]{
 //		::ShowWindow(hWndTreeCtrl, SW_SHOW);
 //		::SetFocus(hWndTreeCtrl);
 //	});

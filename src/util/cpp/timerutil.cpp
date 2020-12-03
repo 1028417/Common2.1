@@ -53,7 +53,7 @@ __TimerID timerutil::_setTimer(UINT uElapse, cfn_bool cb)
     return idEvent;
 #else
 
-    QTimer::singleShot(uElapse, [=]() {
+    QTimer::singleShot(uElapse, [=]{
         if (cb())
         {
             _setTimer(uElapse, cb);
@@ -64,7 +64,7 @@ __TimerID timerutil::_setTimer(UINT uElapse, cfn_bool cb)
 
 void timerutil::async(UINT uDelayTime, cfn_void cb)
 {
-	(void)_setTimer(uDelayTime, [cb]() {
+	(void)_setTimer(uDelayTime, [cb]{
 		cb();
 		return false;
 	});
@@ -72,7 +72,7 @@ void timerutil::async(UINT uDelayTime, cfn_void cb)
 
 __TimerID timerutil::setTimer(UINT uElapse, cfn_void cb)
 {
-	return _setTimer(uElapse, [cb]() {
+	return _setTimer(uElapse, [cb]{
 		cb();
 		return true;
 	});
@@ -80,7 +80,7 @@ __TimerID timerutil::setTimer(UINT uElapse, cfn_void cb)
 
 __TimerID timerutil::setTimerEx(UINT uElapse, cfn_bool cb)
 {
-	return _setTimer(uElapse, [cb]() {
+	return _setTimer(uElapse, [cb]{
 		return cb();
 	});
 }
@@ -118,7 +118,7 @@ void CWinTimer::_set(cfn_bool cb, UINT uElapse)
 
 	kill();
 
-	m_idTimer = timerutil::setTimerEx(m_uElapse, [=]() {
+	m_idTimer = timerutil::setTimerEx(m_uElapse, [=]{
 		return _onTimer();
 	});
 }

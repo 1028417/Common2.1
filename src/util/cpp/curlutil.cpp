@@ -339,7 +339,7 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 
 void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
 {
-    m_thread.start([=]() {
+    m_thread.start([=]{
         (void)CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
     });
 }

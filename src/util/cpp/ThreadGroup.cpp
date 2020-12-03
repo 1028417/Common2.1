@@ -12,7 +12,7 @@ void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock
 		list<thread> lstThread;
 		for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
 		{
-			lstThread.emplace_back([&, uIndex]() {
+			lstThread.emplace_back([&, uIndex]{
 				cb(uIndex);
 			});
 		}
@@ -26,7 +26,7 @@ void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock
 	{
 		for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
 		{
-			mtutil::thread([=]() {
+			mtutil::thread([=]{
 				m_vecThreadStatus[uIndex] = 1;
 
 				cb(uIndex);

@@ -47,7 +47,7 @@ void CMainApp::_sync(const fn_void& fn)
 	if (g_fnSync)
 	{
 		auto fnPrev = g_fnSync;
-		g_fnSync = [=]() {
+		g_fnSync = [=]{
 			fnPrev();
 
 			fn();
@@ -180,7 +180,7 @@ void CMainApp::_run()
 	{
 		m_pMainWnd = pMainWnd;
 
-		__async([=]() {
+		__async([=]{
 			for (auto pModule : g_vctModules)
 			{
 				pModule->OnReady(*pMainWnd);
