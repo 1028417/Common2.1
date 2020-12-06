@@ -158,9 +158,59 @@ void strutil::split(const string& strText, char wcSplitor, vector<string>& vecRe
     _split(strText, wcSplitor, vecRet);
 }
 
+// TODO
+/*template <class S>
+static bool _matchIgnoreCase(const S& str1, const S& str2, size_t maxlen)
+{
+    if (0 == maxlen)
+    {
+        maxlen = (size_t)-1;
+    }
+
+    auto ptr1 = str1.c_str();
+    auto ptr2 = str2.c_str();
+    auto len1 = str1.size();
+    auto len2 = str2.size();
+
+    auto AaDiff = 'A'-'a';
+
+    for (UINT uIdx = 0; uIdx < len1 && uIdx < len2; uIdx++)
+    {
+        if (uIdx == maxlen)
+        {
+            return true;
+        }
+
+        auto& chr1 = ptr1[uIdx];
+        auto& chr2 = ptr2[uIdx];
+        if (chr1 == chr2)
+        {
+            continue;
+        }
+
+        if (chr1 >= 'a' && chr1 <= 'z')
+        {
+            if (chr1 + AaDiff == chr2)
+            {
+                continue;
+            }
+        }
+        else if (chr1 >= 'A' && chr1 <= 'Z')
+        {
+            if (chr1 - AaDiff == chr2)
+            {
+                continue;
+            }
+        }
+
+        return false;
+    }
+
+    return len1 == len2;
+}*/
+
 bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 {
-    // TODO towlower挨个比较
     if (0 == maxlen)
     {
 #if __windows
