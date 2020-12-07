@@ -163,7 +163,7 @@ public:
         return !m_bRunSignal;
     }
 
-    signal_t usleep(UINT uMs)
+    inline signal_t usleep(UINT uMs)
     {
         if (m_bRunSignal)
         {
@@ -173,7 +173,7 @@ public:
         return m_bRunSignal;
     }
 
-    void start(cfn_void cb, UINT uMsLoop=0)
+    void start(cfn_void cb)
     {
         m_mutex.lock();
 
@@ -183,19 +183,7 @@ public:
             m_mutex.lock(); //__usleep(1); // 等待start函数返回，防止？？
             m_mutex.unlock();
 
-            while (true)
-            {
-                cb();
-                if (0 == uMsLoop)
-                {
-                    break;
-                }
-
-                if (!this->usleep(uMsLoop))
-                {
-                    return;
-                }
-            }
+            cb();
 
             _reset();
         });
@@ -203,33 +191,33 @@ public:
         m_runSignal.wait();
 
         m_mutex.unlock();
-    }
+    }    
 
-    void start(cfn_void_t<signal_t> cb, UINT uMsLoop=0)
+    void start(cfn_void_t<signal_t> cb)
     {
-        start([&, cb]{
+        start([=]{
             cb(m_bRunSignal);
-        }, uMsLoop);
+        });
     }
 
     void start(UINT uMsLoop, cfn_bool cb)
     {
-        start([&, cb]{
-            if (!cb())
-            {
-                _reset();
-            }
-        }, uMsLoop);
+        start([=]{
+            do {
+                if (!cb())
+                {
+                    _reset();
+                    break;
+                }
+            } while (this->usleep(uMsLoop));
+        });
     }
 
     void start(UINT uMsLoop, cfn_bool_t<signal_t> cb)
     {
-        start([&, cb]{
-            if (!cb(m_bRunSignal))
-            {
-                _reset();
-            }
-        }, uMsLoop);
+        start(uMsLoop, [=]{
+            return cb(m_bRunSignal);
+        });
     }
 
     inline bool joinable() const

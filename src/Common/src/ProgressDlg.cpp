@@ -176,7 +176,7 @@ void CProgressDlg::OnCancel()
 	{
 		if (CMainApp::GetMainApp()->DoEvents() == E_DoEventsResult::DER_None)
 		{
-			mtutil::usleep(50);
+			__usleep(50);
 		}
 	}
 
