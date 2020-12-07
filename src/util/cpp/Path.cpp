@@ -49,7 +49,7 @@ void XFile::remove()
 
 void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPath& dir, TD_XFileList& paSubFile)>& cb)
 {
-	mtutil::usleep(1);
+	__usleep(1);
 	dir._findFile();
 	if (!bRunSignal)
 	{
@@ -58,7 +58,7 @@ void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPat
 
 	if (dir.m_paSubFile)
 	{
-		mtutil::usleep(1);
+		__usleep(1);
 		cb(dir, dir.m_paSubFile);
 		if (!bRunSignal)
 		{
