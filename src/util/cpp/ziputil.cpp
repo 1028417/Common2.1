@@ -58,9 +58,11 @@ bool CZipFile::unzOpen(const tagUnzSubFile& unzSubFile)
     return true;
 }
 
+#define _unzRead(buf, len) unzReadCurrentFile(m_pfile, buf, len)
+
 long CZipFile::unzRead(void *buf, size_t len) const
 {
-    return unzReadCurrentFile(m_pfile, buf, len);
+    return _unzRead(buf, len);
 }
 
 #define _unzClose() (void)unzCloseCurrentFile(m_pfile)
@@ -78,7 +80,7 @@ long CZipFile::_read(const tagUnzSubFile& unzSubFile, void *buf, size_t len) con
 		return -1;
 	}
 
-    auto nCount = unzRead(buf, len);
+    auto nCount = _unzRead(buf, len);
     _unzClose();
 
     return nCount;
@@ -282,7 +284,7 @@ bool CZipFile::unzip(const string& strDstDir) const
             return false;
         }
 
-        auto nCount = unzRead(buff, unzSubFile.uncompressed_size);
+        auto nCount = _unzRead(buff, unzSubFile.uncompressed_size);
         _unzClose();
         if (nCount != (long)unzSubFile.uncompressed_size)
         {
