@@ -262,7 +262,7 @@ bool CZipFile::unzip(const string& strDstDir) const
     string t_strDstDir(strDstDir);
     if (!fsutil::checkPathTail(t_strDstDir))
 	{
-		t_strDstDir.push_back((char)__wcPathSeparator);
+        t_strDstDir.push_back(__cPathSeparator);
 	}
 
     (void)unzGoToFirstFile(m_pfile);

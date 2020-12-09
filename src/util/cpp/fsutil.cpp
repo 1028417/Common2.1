@@ -589,19 +589,10 @@ static const wstring g_wsDotDot = L"..";
 
 bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
-    if (strDir.empty())
-    {
-        return false;
-    }
-
-    auto t_strDir = strDir;
-    if (!checkSeparator(t_strDir.back()))
-    {
-        t_strDir.push_back(__wcPathSeparator);
-    }
-
 #if __winvc
-    wstring strFind(t_strDir);
+    wstring strFind(strDir);
+    appendPathTail(strFind);
+
     if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
     {
         strFind.append(pstrFilter).append(L"*");
