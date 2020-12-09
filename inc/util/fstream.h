@@ -83,16 +83,23 @@ public:
     Instream() = default;
     virtual ~Instream() = default;
 
+private:
+    virtual size_t _read(void *buff, size_t size, size_t count) = 0;
+
 public:
-    virtual size_t read(void *buff, size_t size, size_t count) = 0;
+    size_t read(void *buff, size_t size, size_t count)
+    {
+        return _read(buff, size, count);
+    }
+
     inline size_t read(void *buff, size_t size)
     {
-        return read(buff, 1, size);
+        return _read(buff, 1, size);
     }
 
     inline bool readex(void *buff, size_t size)
     {
-        return read(buff, size, 1) == 1;
+        return _read(buff, size, 1) == 1;
     }
 
     template <typename T>
@@ -192,30 +199,31 @@ protected:
 
     uint64_t m_pos = 0;
 
-public:
-    operator bool() const
+private:
+    virtual size_t _read(void *buff, size_t size, size_t count) override
     {
-        return m_ptr && 0!=m_size;
-    }
+        if (NULL == buff || 0 == size || 0 == count)
+        {
+                return 0;
+        }
 
-    virtual size_t read(void *buff, size_t size, size_t count) override
-    {
-                if (NULL == buff || 0 == size || 0 == count)
-                {
-                        return 0;
-                }
+        uint64_t max = (m_size - m_pos) / size;
+        if (max < (uint64_t)count)
+        {
+                count = (size_t)max;
+        }
 
-                uint64_t max = (m_size - m_pos) / size;
-                if (max < (uint64_t)count)
-                {
-                        count = (size_t)max;
-                }
-
-                size *= count;
+        size *= count;
         memcpy(buff, m_ptr+m_pos, size);
         m_pos += size;
 
         return count;
+    }
+
+public:
+    operator bool() const
+    {
+        return m_ptr && 0!=m_size;
     }
 
     virtual bool seek(long long offset, int origin) override
@@ -252,10 +260,10 @@ public:
         return m_pos;
     }
 
-        virtual uint64_t size() override
-        {
-                return m_size;
-        }
+    virtual uint64_t size() override
+    {
+        return m_size;
+    }
 };
 
 class __UtilExt IFStream : public FStream, public Instream
@@ -293,6 +301,11 @@ private:
 		return true;
 	}
 
+    virtual size_t _read(void *buff, size_t size, size_t count) override
+    {
+        return fread(buff, size, count, m_pf);
+    }
+
 public:
     virtual uint64_t size() override
 	{
@@ -307,11 +320,6 @@ public:
 	{
 		return _open(strFile);
 	}
-
-    virtual size_t read(void *buff, size_t size, size_t count) override
-    {
-        return fread(buff, size, count, m_pf);
-    }
 
     virtual bool seek(long long offset, int origin) override
     {

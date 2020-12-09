@@ -43,6 +43,11 @@ public:
         (void)open(ins, strPwd);
     }
 
+    CZipFile(IFStream& ifs, const string& strPwd = "")
+    {
+        (void)open(ifs, strPwd);
+    }
+
     virtual ~CZipFile()
     {
         close();
@@ -89,6 +94,7 @@ public:
     }
 
     bool open(Instream& ins, const string& strPwd = "");
+    bool open(IFStream& ifs, const string& strPwd = "");
 
     void close();
 
