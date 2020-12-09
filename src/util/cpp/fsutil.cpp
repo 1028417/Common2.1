@@ -718,6 +718,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             {
                 if (E_FindFindFilter::FFP_ByExt == eFilter)
                 {
+                    //if (!strutil::matchIgnoreCase(fi.suffix().toStdWString().c_str(), pstrFilter))
                     if (0 != fi.suffix().compare(QString::fromWCharArray(pstrFilter), Qt::CaseSensitivity::CaseInsensitive))
                     {
                         continue;
