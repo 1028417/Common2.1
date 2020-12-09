@@ -194,19 +194,19 @@ static long ZCALLBACK zseek_ins(voidpf opaque, voidpf stream, uLong offset, int 
 	return 0;
 }
 
-/*static int ZCALLBACK zclose_ins(voidpf opaque, voidpf stream)
+static int ZCALLBACK zclose_ins(voidpf opaque, voidpf stream)
 {
     (void)opaque;
     (void)stream;
 	return 0;
 }
 
-static int ZCALLBACK zerror_file(voidpf opaque, voidpf stream)
+static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
 {
     (void)opaque;
     (void)stream;
 	return 0;
-}*/
+}
 
 bool CZipFile::open(Instream& ins, const string& strPwd)
 {
@@ -225,8 +225,8 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
     zfunc.zread_file = zread_ins;
     zfunc.ztell_file = ztell_ins;
     zfunc.zseek_file = zseek_ins;
-    //zfunc.zclose_file = zclose_ins;
-    //zfunc.zerror_file = ztesterror_file;
+    zfunc.zclose_file = zclose_ins;
+    zfunc.zerror_file = ztesterror_file;
 
 	return _open("", &zfunc);
 }
@@ -280,7 +280,7 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
     zfunc.ztell_file = ztell_ifs;
     zfunc.zseek_file = zseek_ifs;
     zfunc.zclose_file = zclose_ifs;
-    //zfunc.zerror_file = ztesterror_file;
+    zfunc.zerror_file = ztesterror_file;
 
     return _open("", &zfunc);
 }
