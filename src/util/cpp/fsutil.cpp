@@ -707,8 +707,9 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
         {
             if (E_FindFindFilter::FFP_ByPrefix == eFilter)
             {
-                wstring strFilter = pstrFilter;
-                if (!strutil::matchIgnoreCase(strFileName.substr(0, strFilter.size()), strFilter))
+                //wstring strFilter = pstrFilter;
+                //cauto strPrefix = strFileName.substr(0, strFilter.size());
+                if (!strutil::matchIgnoreCase(strFileName.c_str(), pstrFilter, wcslen(pstrFilter)))
                 {
                     continue;
                 }
@@ -717,7 +718,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             {
                 if (E_FindFindFilter::FFP_ByExt == eFilter)
                 {
-                    if (!strutil::matchIgnoreCase(fi.suffix().toStdWString(), pstrFilter))
+                    if (0 != fi.suffix().compare(QString::fromWCharArray(pstrFilter), Qt::CaseSensitivity::CaseInsensitive))
                     {
                         continue;
                     }

@@ -207,6 +207,11 @@ static bool _matchIgnoreCase(const S& str1, const S& str2, size_t maxlen)
     }
 
     return len1 == len2;
+}
+
+template <typename C>
+static bool _matchIgnoreCase(const C *pstr1, const C *pstr2, size_t maxlen)
+{
 }*/
 
 bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
@@ -229,6 +234,32 @@ bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 
         len = str2.size();
         cauto qs2 = __W2Q(str2.c_str(), MIN(maxlen, len));
+
+        return 0 == qs1.compare(qs2, Qt::CaseSensitivity::CaseInsensitive);
+#endif
+    }
+}
+
+bool strutil::matchIgnoreCase(cwchr_p pstr1, cwchr_p pstr2, size_t maxlen)
+{
+    if (0 == maxlen)
+    {
+#if __windows
+        return 0 == _wcsicmp(pstr1, pstr2);
+#else
+        return 0 == QString::fromWCharArray(pstr1).compare(QString::fromWCharArray(pstr2), Qt::CaseSensitivity::CaseInsensitive);
+#endif
+    }
+    else
+    {
+#if __windows
+        return 0 == _wcsnicmp(pstr1, pstr2, maxlen);
+#else
+        size_t len = wcslen(pstr1);
+        cauto qs1 = __W2Q(pstr1, MIN(maxlen, len));
+
+        len = wcslen(pstr2);
+        cauto qs2 = __W2Q(pstr2, MIN(maxlen, len));
 
         return 0 == qs1.compare(qs2, Qt::CaseSensitivity::CaseInsensitive);
 #endif
