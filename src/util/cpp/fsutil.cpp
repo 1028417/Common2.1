@@ -653,7 +653,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
     (void)::FindClose(hFindFile);
 
 #else
-    QDir dir(__WS2Q(t_strDir));
+    QDir dir(__WS2Q(strDir));
     if(!dir.exists())
     {
         return false;
