@@ -92,8 +92,8 @@ const RECT& getWorkArea(bool bFullScreen)
 	{
 		rcWorkArea.left = 0;
 		rcWorkArea.top = 0;
-		rcWorkArea.right = GetSystemMetrics(SM_CXSCREEN);
-		rcWorkArea.bottom = GetSystemMetrics(SM_CYSCREEN);
+        rcWorkArea.right = GetSystemMetrics(SM_CXSCREEN)-1;
+        rcWorkArea.bottom = GetSystemMetrics(SM_CYSCREEN)-1;
 	}
 	else
 	{
