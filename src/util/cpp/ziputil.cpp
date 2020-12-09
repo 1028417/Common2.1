@@ -160,43 +160,52 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 
 static voidpf ZCALLBACK zopen_file(voidpf opaque, const char* filename, int mode)
 {
+    (void)opaque;
+    // TODO if !is_open open()
+
 	(void)filename;
 	(void)mode;
-    return opaque;
+
+    return NULL; //opaque;
 }
 
 static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong size)
 {
-	(void)opaque;
-	if (!((Instream*)stream)->readex(buf, size))
+    if (!((Instream*)opaque)->readex(buf, size))
 	{
 		return 0;
 	}
+
+    (void)stream;
 
 	return size;
 }
 
 static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
 {
-    (void)opaque;
-    return (long)((Instream*)stream)->pos();
+    (void)stream;
+    return (long)((Instream*)opaque)->pos();
 }
 
 static long ZCALLBACK zseek_file(voidpf opaque, voidpf stream, uLong offset, int origin)
 {
-    (void)opaque;
-	if (!((Instream*)stream)->seek(offset, origin))
+    if (!((Instream*)opaque)->seek(offset, origin))
 	{
 		return -1;
 	}
+
+    (void)stream;
 
 	return 0;
 }
 
 static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
 {
-	(void)opaque;
+    (void)opaque;
+    // TODO ((Instream*)opaque)->close();
+
     (void)stream;
+
 	return 0;
 }
 

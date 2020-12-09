@@ -13,6 +13,7 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 	FILE *pf = NULL;
 	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
 	return pf;
+
 #else
 	return ::fopen(strutil::toUtf8(strFile).c_str(), strMode.c_str());
 #endif

@@ -23,6 +23,10 @@ protected:
 	{
 		(void)_open(strFile, strMode);
 	}
+    FStream(const string& strFile, const string& strMode)
+    {
+        (void)_open(strFile, strMode);
+    }
 
 	FStream(const FStream& other) = delete;
 	FStream(FStream&& other) = delete;
@@ -413,7 +417,7 @@ public:
         return _open(strFile, bTrunc?"wb":"ab");
     }
 
-    virtual void flush() override
+    void flush() override
     {
         (void)fflush(m_pf);
     }
@@ -422,7 +426,6 @@ public:
 	{
         return fwrite(pData, size, count, m_pf);
 	}
-
     inline size_t write(const void *pData, size_t size)
 	{
         return write(pData, 1, size);
@@ -438,7 +441,6 @@ public:
     {
         return writex(&data, sizeof(data));
     }
-
     template <typename T>
     size_t write(const T* pData, size_t count)
     {
