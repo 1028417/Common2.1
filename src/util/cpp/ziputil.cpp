@@ -86,8 +86,10 @@ long CZipFile::_read(const tagUnzSubFile& unzSubFile, void *buf, size_t len) con
     return nCount;
 }
 
-bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
+bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string& strPwd)
 {
+    m_strPwd = strPwd;
+
     unzFile pfile = NULL;
 	if (pzlib_filefunc_def)
 	{
@@ -158,11 +160,64 @@ bool CZipFile::_open(const char *szFile, void* pzlib_filefunc_def)
 	return true;
 }
 
-static voidpf ZCALLBACK zopen_file(voidpf opaque, const char* filename, int mode)
+static voidpf ZCALLBACK zopen_opaque(voidpf opaque, const char* filename, int mode)
 {
 	(void)filename;
 	(void)mode;
     return opaque;
+}
+
+static int ZCALLBACK ztesterror_opaque(voidpf opaque, voidpf stream)
+{
+    (void)opaque;
+    (void)stream;
+    return 0;
+}
+
+bool CZipFile::_open(void *opaque, void *zread, void *ztell, void *zseek, void *zclose, const string& strPwd)
+{
+    zlib_filefunc_def zfunc;
+    memzero(zfunc);
+    zfunc.opaque = opaque;
+
+    zfunc.zopen_file = zopen_opaque;
+    zfunc.zread_file = (decltype(zfunc.zread_file))zread;
+    zfunc.ztell_file = (decltype(zfunc.ztell_file))ztell;
+    zfunc.zseek_file = (decltype(zfunc.zseek_file))zseek;
+    zfunc.zclose_file = (decltype(zfunc.zclose_file))zclose;
+    zfunc.zerror_file = ztesterror_opaque;
+
+    return _open("", &zfunc, strPwd);
+}
+
+static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong size)
+{
+    (void)stream;
+    return fread(buf, 1, size, (FILE*)opaque); //fread(buf, size, 1, (FILE*)opaque);
+}
+
+static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
+{
+    (void)stream;
+    return ftell((FILE*)opaque);
+}
+
+static long ZCALLBACK zseek_file(voidpf opaque, voidpf stream, uLong offset, int origin)
+{
+    (void)stream;
+    return fseek((FILE*)opaque, offset, origin);
+}
+
+static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
+{
+    fclose((FILE*)opaque);
+    (void)stream;
+    return 0;
+}
+
+bool CZipFile::open(FILE *pf, const string& strPwd)
+{
+    return _open(pf, (void*)zread_file, (void*)ztell_file, (void*)zseek_file, (void*)zclose_file, strPwd);
 }
 
 static uLong ZCALLBACK zread_ins(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -171,8 +226,8 @@ static uLong ZCALLBACK zread_ins(voidpf opaque, voidpf stream, void* buf, uLong 
 
     return ((Instream*)opaque)->read(buf, size);
     /*if (!((Instream*)opaque)->readex(buf, size))
-	{
-		return 0;
+    {
+        return 0;
     }
     return size;*/
 }
@@ -184,28 +239,21 @@ static long ZCALLBACK ztell_ins(voidpf opaque, voidpf stream)
 }
 
 static long ZCALLBACK zseek_ins(voidpf opaque, voidpf stream, uLong offset, int origin)
-{    
+{
     (void)stream;
 
     if (!((Instream*)opaque)->seek(offset, origin))
-	{
-		return -1;
+    {
+        return -1;
     }
-	return 0;
+    return 0;
 }
 
 static int ZCALLBACK zclose_ins(voidpf opaque, voidpf stream)
 {
     (void)opaque;
     (void)stream;
-	return 0;
-}
-
-static int ZCALLBACK ztesterror_file(voidpf opaque, voidpf stream)
-{
-    (void)opaque;
-    (void)stream;
-	return 0;
+    return 0;
 }
 
 bool CZipFile::open(Instream& ins, const string& strPwd)
@@ -215,20 +263,7 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
         return false;
     }
 
-	m_strPwd = strPwd;
-
-	zlib_filefunc_def zfunc;
-	memzero(zfunc);
-    zfunc.opaque = &ins;
-
-    zfunc.zopen_file = zopen_file;
-    zfunc.zread_file = zread_ins;
-    zfunc.ztell_file = ztell_ins;
-    zfunc.zseek_file = zseek_ins;
-    zfunc.zclose_file = zclose_ins;
-    zfunc.zerror_file = ztesterror_file;
-
-	return _open("", &zfunc);
+    return _open(&ins, (void*)zread_ins, (void*)ztell_ins, (void*)zseek_ins, (void*)zclose_ins, strPwd);
 }
 
 static uLong ZCALLBACK zread_ifs(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -269,20 +304,7 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
         return false;
     }
 
-    m_strPwd = strPwd;
-
-    zlib_filefunc_def zfunc;
-    memzero(zfunc);
-    zfunc.opaque = &ifs;
-
-    zfunc.zopen_file = zopen_file;
-    zfunc.zread_file = zread_ifs;
-    zfunc.ztell_file = ztell_ifs;
-    zfunc.zseek_file = zseek_ifs;
-    zfunc.zclose_file = zclose_ifs;
-    zfunc.zerror_file = ztesterror_file;
-
-    return _open("", &zfunc);
+    return _open(&ifs, (void*)zread_ifs, (void*)ztell_ifs, (void*)zseek_ifs, (void*)zclose_ifs, strPwd);
 }
 
 long CZipFile::unzip(const tagUnzSubFile& unzSubFile, const string& strDstFile) const
