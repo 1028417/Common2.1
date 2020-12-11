@@ -1,14 +1,30 @@
 ﻿
 #include "util.h"
 
+/*static FILE* fsopen(cwstr strFile, const string& strMode)
+{
+#if __windows
+    wstring t_strMode(strMode.begin(), strMode.end());
+    return _wfsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
+#endif
+
+#if __windows
+    //return _fsopen(strFile.c_str(), strMode.c_str(), _SH_DENYNO);
+#endif
+}
+
+static FILE* sopen(cwstr strFile, const string& strMode)
+{
+#if __windows
+    wstring t_strMode(strMode.begin(), strMode.end());
+    return _wsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
+#endif
+}*/
+
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
 	wstring t_strMode(strMode.begin(), strMode.end());
-
-#if __winvc
-	return _wfsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
-#endif
 
 	FILE *pf = NULL;
 	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
@@ -22,10 +38,6 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
 {
 #if __windows
-#if __winvc
-	return _fsopen(strFile.c_str(), strMode.c_str(), _SH_DENYNO);
-#endif
-
     FILE *pf = NULL;
     (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
     return pf;
@@ -422,6 +434,8 @@ bool fsutil::removeDir(cwstr strDir)
     return true;
 }
 
+// ::rename();
+// ::remove();
 bool fsutil::removeFile(cwstr strFile)
 {
 #if __windows
