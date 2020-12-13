@@ -29,9 +29,9 @@ inline bool CZipFile::_unzOpen() const
     return true;
 }
 
-inline bool CZipFile::_unzOpen(const tagUnzSubFile& unzSubFile) const
+bool CZipFile::unzOpen(const tagUnzSubFile& unzSubFile) const
 {
-    unz_file_pos file_pos{ unzSubFile.pos_in_zip_directory, unzSubFile.num_of_file };
+    unz_file_pos file_pos { unzSubFile.pos_in_zip_directory, unzSubFile.num_of_file };
     int nRet = unzGoToFilePos(m_pfile, &file_pos);
     if (nRet != UNZ_OK)
     {
@@ -43,17 +43,7 @@ inline bool CZipFile::_unzOpen(const tagUnzSubFile& unzSubFile) const
         return false;
     }
 
-    return true;
-}
-
-bool CZipFile::unzOpen(const tagUnzSubFile& unzSubFile)
-{
-    if (!_unzOpen(unzSubFile))
-    {
-        return false;
-    }
-
-    m_pCurrent = &unzSubFile;
+   ((tagUnzSubFile&)unzSubFile).data_pos = unzGetCurrentFileZStreamPos64(m_pfile);
 
     return true;
 }
@@ -69,13 +59,12 @@ long CZipFile::unzRead(void *buf, size_t len) const
 
 void CZipFile::unzClose()
 {
-    m_pCurrent = NULL;
     _unzClose();
 }
 
 long CZipFile::_read(const tagUnzSubFile& unzSubFile, void *buf, size_t len) const
 {
-    if (!_unzOpen(unzSubFile))
+    if (!unzOpen(unzSubFile))
 	{
 		return -1;
 	}
@@ -102,16 +91,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
     if (NULL == pfile)
 	{
 		return false;
-	}
-	
-	/*unz_global_info zGlobalInfo;
-    memzero(zGlobalInfo);
-    int nRet = unzGetGlobalInfo(unzfile, &zGlobalInfo);
-	if (nRet != UNZ_OK)
-	{
-		(void)unzClose(t_unzfile);
-		return false;
-	}*/
+    }
 
 	unz_file_info file_info;
 	memzero(file_info);
@@ -145,6 +125,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 
             tagUnzSubFile& unzSubFile = m_mapSubfile[strPath];
             unzSubFile.strPath = strPath;
+            unzSubFile.compression_method = file_info.compression_method;
             unzSubFile.compressed_size = file_info.compressed_size;
             unzSubFile.uncompressed_size = file_info.uncompressed_size;
 
@@ -309,7 +290,7 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
 
 long CZipFile::unzip(const tagUnzSubFile& unzSubFile, const string& strDstFile) const
 {
-    if (!_unzOpen(unzSubFile))
+    if (!unzOpen(unzSubFile))
     {
         return -1;
     }
