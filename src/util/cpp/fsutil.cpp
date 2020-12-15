@@ -27,7 +27,8 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 	wstring t_strMode(strMode.begin(), strMode.end());
 
 	FILE *pf = NULL;
-	(void)_wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
+	errno_t eno = _wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
+	(void)eno;
 	return pf;
 
 #else
