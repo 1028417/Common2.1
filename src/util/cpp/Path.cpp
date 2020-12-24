@@ -79,8 +79,8 @@ void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPat
 void CPath::_findFile()
 {
 	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
-	{
-        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
+    {
+        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
 		(void)_onFindFile(m_paSubDir, m_paSubFile);
     }
 }
@@ -106,7 +106,7 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 				paSubFile.add(pSubFile);
 			}
 		}
-	});
+    });
     if (bRet)
     {
         m_eFindFileStatus = E_FindFileStatus::FFS_Exists;

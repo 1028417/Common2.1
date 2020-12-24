@@ -605,11 +605,11 @@ static const wstring g_wsDotDot = L"..";
 
 bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
-#if __winvc
+#if __windows //__winvc
     wstring strFind(strDir);
     appendPathTail(strFind);
 
-    if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
+    /*if (E_FindFindFilter::FFP_ByPrefix == eFilter && pstrFilter)
     {
         strFind.append(pstrFilter).append(L"*");
     }
@@ -617,7 +617,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
     {
         strFind.append(L"*.").append(pstrFilter);
     }
-    else
+    else*/
     {
         strFind.append(L"*");
     }
@@ -646,10 +646,35 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             continue;
         }
 
-		fileInfo.bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        bool bDir = FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+
+        if (pstrFilter)
+        {
+            if (E_FindFindFilter::FFP_ByPrefix == eFilter)
+            {
+                //wstring strFilter = pstrFilter;
+                //cauto strPrefix = strFileName.substr(0, strFilter.size());
+                if (!strutil::matchIgnoreCase(strFileName.c_str(), pstrFilter, wcslen(pstrFilter)))
+                {
+                    continue;
+                }
+            }
+            else if (!bDir)
+            {
+                if (E_FindFindFilter::FFP_ByExt == eFilter)
+                {
+                    if (!strutil::matchIgnoreCase(fsutil::GetFileExtName(strFileName), pstrFilter))
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+
 		fileInfo.strName.swap(strFileName);
-		if (fileInfo.bDir)
-		{
+        fileInfo.bDir = bDir;
+        if (bDir)
+        {
 			fileInfo.uFileSize = 0;
 			fileInfo.tCreateTime = 0;
 			fileInfo.tModifyTime = 0;
@@ -668,7 +693,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
 
     (void)::FindClose(hFindFile);
 
-#else
+#else // windows系统盘检索不了
     QDir dir(__WS2Q(strDir));
     if(!dir.exists())
     {
@@ -734,11 +759,10 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             }
         }
 
-        fileInfo.bDir = bDir;
         fileInfo.strName.swap(strFileName);
-
+        fileInfo.bDir = bDir;
 		if (bDir)
-		{
+        {
 			fileInfo.uFileSize = 0;
 			fileInfo.tCreateTime = 0;
 			fileInfo.tModifyTime = 0;
