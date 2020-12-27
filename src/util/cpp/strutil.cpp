@@ -174,11 +174,15 @@ static bool _matchIgnoreCase(const S& str1, const S& str2, size_t maxlen)
 
     auto AaDiff = 'A'-'a';
 
-    for (UINT uIdx = 0; uIdx < len1 && uIdx < len2; uIdx++)
+    for (UINT uIdx = 0; ; uIdx++)
     {
         if (uIdx == maxlen)
         {
             return true;
+        }
+        if (uIdx >= len1 || uIdx >= len2)
+        {
+            break;
         }
 
         auto& chr1 = ptr1[uIdx];
@@ -202,7 +206,6 @@ static bool _matchIgnoreCase(const S& str1, const S& str2, size_t maxlen)
                 continue;
             }
         }
-
         return false;
     }
 

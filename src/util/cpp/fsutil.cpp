@@ -242,6 +242,63 @@ string fsutil::GetFileName(const string& strPath)
 	return strFileName;
 }
 
+template <class S>
+static bool _matchPath(const S& str1, const S& str2, size_t maxlen)
+{
+    if (0 == maxlen)
+    {
+        maxlen = (size_t)-1;
+    }
+
+    auto ptr1 = str1.c_str();
+    auto ptr2 = str2.c_str();
+    auto len1 = str1.size();
+    auto len2 = str2.size();
+
+    auto AaDiff = 'A'-'a';
+
+    for (UINT uIdx = 0; ; uIdx++)
+    {
+        if (uIdx == maxlen)
+        {
+            return true;
+        }
+        if (uIdx >= len1 || uIdx >= len2)
+        {
+            break;
+        }
+
+        auto& chr1 = ptr1[uIdx];
+        auto& chr2 = ptr2[uIdx];
+        if (chr1 == chr2)
+        {
+            continue;
+        }
+        if (('\\' == chr1 && '/' == chr2) || ('\\' == chr2 && '/' == chr1))
+        {
+            continue;
+        }
+
+        if (chr1 >= 'a' && chr1 <= 'z')
+        {
+            if (chr1 + AaDiff == chr2)
+            {
+                continue;
+            }
+        }
+        else if (chr1 >= 'A' && chr1 <= 'Z')
+        {
+            if (chr1 - AaDiff == chr2)
+            {
+                continue;
+            }
+        }
+        return false;
+    }
+
+    return len1 == len2;
+}
+
 bool fsutil::CheckSubPath(cwstr strDir, cwstr strSubPath)
 {
 	auto size = strDir.size();
@@ -261,7 +318,7 @@ bool fsutil::CheckSubPath(cwstr strDir, cwstr strSubPath)
 		__EnsureReturn(strSubPath.size() > size, false);
 	}
 
-	return strutil::matchIgnoreCase(strDir, strSubPath, size);
+    return _matchPath(strDir, strSubPath, size);
 }
 
 wstring fsutil::GetOppPath(const wstring strBaseDir, cwstr strSubPath)
