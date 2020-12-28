@@ -262,6 +262,15 @@ int curlutil::curlToolDownload(const string& strURL, CB_CURLWrite& cb)
 
 int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
 {
+    m_bStatus = true;
+    int nRet = _syncDownload(strUrl, uRetryTime, cbProgress);
+    m_bStatus = false;
+    return nRet;
+
+}
+
+int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
+{
     auto fnProgress = [&](int64_t dltotal, int64_t dlnow){
         if (!m_bStatus)
         {
@@ -295,8 +304,6 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
 
         return size;
     };
-
-    m_bStatus = true;
 
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
@@ -332,15 +339,22 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
         }
     }
 
-    m_bStatus = false;
-
     return nCurlCode;
 }
 
-void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
+void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress, cfn_void_t<int> cbError)
 {
     m_thread.start([=]{
-        (void)CCurlDownload::syncDownload(strUrl, uRetryTime, cbProgress);
+        m_bStatus = true;
+        int nRet = syncDownload(strUrl, uRetryTime, cbProgress);
+        if (m_bStatus)
+        {
+            m_bStatus = false;
+            if (0 != nRet && cbError)
+            {
+                cbError(nRet);
+            }
+        }
     });
 }
 
