@@ -408,8 +408,9 @@ private:
 		}
 
 		if (prePos < strText.size())
-		{
-            cb(strText.substr(prePos));
+        {
+            auto strSub = strText.substr(prePos);
+            cb(strSub);
         }
 	}
 };
