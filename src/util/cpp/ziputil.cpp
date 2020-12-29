@@ -396,9 +396,27 @@ static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
 
 int ziputil::zCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
 {
-	auto ptr = bbfBuff.resizeMore(len);
-	uLongf destLen = len;
+	uLongf destLen = len * 2;
+	auto ptr = bbfBuff.resizeMore(destLen);
 	int nRet = compress2(ptr, &destLen, (const Bytef*)pData, len, level);
+	if (nRet != Z_OK)
+	{
+		return -1;
+	}
+
+	if (destLen < len)
+	{
+		bbfBuff.resizeLess(len - destLen);
+	}
+
+	return destLen;
+}
+
+int ziputil::zUncompress(const void* pData, size_t len, CByteBuffer& bbfBuff)
+{
+	uLongf destLen = len * 2;
+	auto ptr = bbfBuff.resizeMore(destLen);
+	int nRet = uncompress(ptr, &destLen, (const Bytef*)pData, len);
 	if (nRet != Z_OK)
 	{
 		return -1;
