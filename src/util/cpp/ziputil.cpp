@@ -10,9 +10,9 @@
 //#define _mkdir(x) mkdir(x, 0777)
 #endif
 
-inline static string _subPath(string& strSubPath)
+inline static wstring _subPath(wstring& strSubPath)
 {
-    string strRet;
+    wstring strRet;
     auto pos = strSubPath.find('/');
     if (0 == pos)
     {
@@ -44,7 +44,7 @@ inline static string _subPath(string& strSubPath)
     return strRet;
 }
 
-tagUnzDir& tagUnzDir::addDir(string strSubDir)
+tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
 {
     cauto strName = _subPath(strSubDir);
 
@@ -53,7 +53,7 @@ tagUnzDir& tagUnzDir::addDir(string strSubDir)
     if (itr == mapSubDir.end())
     {
         pSubDir = &mapSubDir[strName];
-        pSubDir->parent = this;
+        //pSubDir->parent = this;
         pSubDir->strName = strName;
     }
     else
@@ -68,12 +68,12 @@ tagUnzDir& tagUnzDir::addDir(string strSubDir)
     return pSubDir->addDir(strSubDir);
 }
 
-tagUnzSubFile& tagUnzDir::addFile(string strSubFile, const tagUnzSubFile& unzSubFile)
+tagUnzSubFile& tagUnzDir::addFile(wstring strSubFile)
 {
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
     {
-        return mapSubFile[strName] = unzSubFile;
+        return mapSubFile[strName];
     }
 
     tagUnzDir *pSubDir = NULL;
@@ -81,7 +81,7 @@ tagUnzSubFile& tagUnzDir::addFile(string strSubFile, const tagUnzSubFile& unzSub
     if (itr == mapSubDir.end())
     {
         pSubDir = &mapSubDir[strName];
-        pSubDir->parent = this;
+        //pSubDir->parent = this;
         pSubDir->strName = strName;
     }
     else
@@ -89,10 +89,10 @@ tagUnzSubFile& tagUnzDir::addFile(string strSubFile, const tagUnzSubFile& unzSub
         pSubDir = &itr->second;
     }
 
-    return pSubDir->addFile(strSubFile, unzSubFile);
+    return pSubDir->addFile(strSubFile);
 }
 
-const tagUnzDir* tagUnzDir::subDir(string strSubDir) const
+const tagUnzDir* tagUnzDir::subDir(wstring strSubDir) const
 {
     cauto strName = _subPath(strSubDir);
     auto itr = mapSubDir.find(strName);
@@ -101,14 +101,14 @@ const tagUnzDir* tagUnzDir::subDir(string strSubDir) const
         return NULL;
     }
 
-    if (strSubDir.empty() || "/" == strSubDir)
+    if (strSubDir.empty() || L"/" == strSubDir)
     {
         return &itr->second;
     }
     return itr->second.subDir(strSubDir);
 }
 
-const tagUnzSubFile* tagUnzDir::subFile(string strSubFile) const
+const tagUnzSubFile* tagUnzDir::subFile(wstring strSubFile) const
 {
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
@@ -228,7 +228,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 			return false;
 		}
 
-        string strPath = pszFileName;
+        cauto strPath = strutil::fromGbk(pszFileName);
         if (__cSlant == strPath.back())  // (unzFile.external_fa & __DirFlag);
         {
             m_mapSubDir[strPath] = &m_root.addDir(strPath);
@@ -242,7 +242,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 				return false;
 			}
 
-            tagUnzSubFile unzSubFile;
+            tagUnzSubFile& unzSubFile = m_root.addFile(strPath);
             unzSubFile.strPath = strPath;
             unzSubFile.compression_method = file_info.compression_method;
             unzSubFile.compressed_size = file_info.compressed_size;
@@ -251,7 +251,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
             unzSubFile.pos_in_zip_directory = file_pos.pos_in_zip_directory;
             unzSubFile.num_of_file = file_pos.num_of_file;
 
-            m_mapSubfile[strPath] = &m_root.addFile(strPath, unzSubFile);
+            m_mapSubfile[strPath] = &unzSubFile;
 		}
     } while (unzGoToNextFile(pfile) == UNZ_OK);
 
@@ -409,7 +409,7 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
     return _open(&ifs, (void*)zread_ifs, (void*)ztell_ifs, (void*)zseek_ifs, (void*)zclose_ifs, strPwd);
 }
 
-long CZipFile::unzip(const tagUnzSubFile& unzSubFile, const string& strDstFile) const
+long CZipFile::unzip(const tagUnzSubFile& unzSubFile, cwstr strDstFile) const
 {
     if (!unzOpen(unzSubFile))
     {
@@ -426,7 +426,7 @@ long CZipFile::unzip(const tagUnzSubFile& unzSubFile, const string& strDstFile) 
     return OFStream::writefile(strDstFile, true, bbfFile);
 }
 
-bool CZipFile::unzip(const string& strDstDir) const
+bool CZipFile::unzip(cwstr strDstDir) const
 {
     if (NULL == m_pfile)
 	{
@@ -438,7 +438,7 @@ bool CZipFile::unzip(const string& strDstDir) const
 		return false;
 	}
 
-    string t_strDstDir(strDstDir);
+    auto t_strDstDir(strDstDir);
     if (!fsutil::checkPathTail(t_strDstDir))
 	{
         t_strDstDir.push_back(__cPathSeparator);
@@ -488,7 +488,10 @@ void CZipFile::close()
         (void)::unzClose(m_pfile);
         m_pfile = NULL;
 
+        m_strPwd.clear();
         m_root.clear();
+        m_mapSubDir.clear();
+        m_mapSubfile.clear();
     }
 }
 
