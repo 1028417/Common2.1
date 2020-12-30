@@ -17,11 +17,38 @@ struct __UtilExt tagUnzSubFile
 
 struct __UtilExt tagUnzDir
 {
-    wstring strPath; //wstring strName;
+    /*tagUnzDir() = default;
+
+    tagUnzDir(const tagUnzDir& parent, cwstr strName)
+        : parent(&parent)
+        , strName(strName)
+    {
+    }
+
+    wstring path() const
+    {
+        if (NULL == parent)
+        {
+            return L"";
+        }
+
+        return parent.path() + L"/" + strName;
+    }
+
+    const tagUnzDir *parent = NULL;
+    wstring strName;*/
 
     map<wstring, tagUnzDir> mapSubDir;
     map<wstring, tagUnzSubFile> mapSubFile;
     //PtrArray<tagUnzSubFile*> paSubFile;
+
+    inline tagUnzDir& _addDir(cwstr strName)
+    {
+        auto& unzSubDir = mapSubDir[strName];
+        //unzSubDir.parent = this;
+        //unzSubDir.strName = strName;
+        return unzSubDir;
+    }
 
     tagUnzDir& addDir(wstring strSubDir);
     tagUnzSubFile& addFile(wstring strSubFile);
@@ -44,8 +71,6 @@ struct __UtilExt tagUnzDir
 
     void clear()
     {
-        strPath.clear(); //strName.clear();
-
         mapSubDir.clear();
         mapSubFile.clear();
         //paSubFile.clear();

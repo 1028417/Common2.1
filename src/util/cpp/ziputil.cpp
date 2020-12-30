@@ -52,8 +52,7 @@ tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
     auto itr = mapSubDir.find(strName);
     if (itr == mapSubDir.end())
     {
-        pSubDir = &mapSubDir[strName];
-        //pSubDir->strName = strName;
+        pSubDir = &_addDir(strName);
     }
     else
     {
@@ -79,8 +78,7 @@ tagUnzSubFile& tagUnzDir::addFile(wstring strSubFile)
     auto itr = mapSubDir.find(strName);
     if (itr == mapSubDir.end())
     {
-        pSubDir = &mapSubDir[strName];
-        //pSubDir->strName = strName;
+        pSubDir = &_addDir(strName);
     }
     else
     {
