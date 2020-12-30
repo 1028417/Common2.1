@@ -53,8 +53,7 @@ tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
     if (itr == mapSubDir.end())
     {
         pSubDir = &mapSubDir[strName];
-        //pSubDir->parent = this;
-        pSubDir->strName = strName;
+        //pSubDir->strName = strName;
     }
     else
     {
@@ -81,8 +80,7 @@ tagUnzSubFile& tagUnzDir::addFile(wstring strSubFile)
     if (itr == mapSubDir.end())
     {
         pSubDir = &mapSubDir[strName];
-        //pSubDir->parent = this;
-        pSubDir->strName = strName;
+        //pSubDir->strName = strName;
     }
     else
     {
