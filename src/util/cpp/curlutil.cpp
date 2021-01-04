@@ -183,12 +183,16 @@ static int progress_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow
     return cb(dltotal, dlnow);
 }
 
-int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+struct tagCurlInfo
 {
-    CURL* curl = curl_easy_init();
-    _initCurl(curl, curlOpt);
+    CURL* curl = NULL;
+    curl_off_t total = 0;
+};
 
-    //curl_easy_setopt(curlhandle, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
+static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+{
+    auto curl = curlInfo.curl;
+    //curl_easy_setopt(curlInfo.curl, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
 
     curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
 
@@ -213,10 +217,22 @@ int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_C
         }
     }
 
+    (void)curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &curlInfo.total);
+
     //curl_easy_reset(curl)
     curl_easy_cleanup(curl);
+    curlInfo.curl = NULL;
 
     return res;
+}
+
+int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+{
+    tagCurlInfo curlInfo;
+    curlInfo.curl = curl_easy_init();
+    _initCurl(curlInfo.curl, curlOpt);
+
+    return _curlDownload(curlInfo, strUrl, cbWrite, cbProgress);
 }
 
 string curlutil::getCurlErrMsg(UINT uCurlCode)
@@ -266,7 +282,6 @@ int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_Downlo
     int nRet = _syncDownload(strUrl, uRetryTime, cbProgress);
     m_bStatus = false;
     return nRet;
-
 }
 
 int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)
@@ -288,20 +303,19 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         return 0;
     };
 
-    auto fnWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
+    auto cbWrite = [&](char *ptr, size_t size, size_t nmemb)->size_t {
         if (!m_bStatus)
         {
             return 0;
         }
 
         size *= nmemb;
-        m_uRecvSize += size;
-
         if (!_onRecv(ptr, size))
         {
             return 0;
         }
 
+        m_uRecvSize += size;
         return size;
     };
 
@@ -309,14 +323,22 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
         m_uRecvSize = 0;
-
+        m_uTotalSize = 0;
         clear();
-
         //m_strErrMsg.clear();
 
         m_beginTime = time(NULL);
 
-        nCurlCode = curlutil::curlDownload(m_curlOpt, strUrl, fnWrite, fnProgress);
+        tagCurlInfo curlInfo;
+        curlInfo.curl = curl_easy_init();
+        _initCurl(curlInfo.curl, m_curlOpt);
+
+        nCurlCode = _curlDownload(curlInfo, strUrl, cbWrite, fnProgress);
+        if (curlInfo.total > 0)
+        {
+            m_uTotalSize = (uint64_t)curlInfo.total;
+        }
+
         if (0 == nCurlCode)
         {
             break;
@@ -342,17 +364,18 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
     return nCurlCode;
 }
 
-void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress, cfn_void_t<int> cbError)
+void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress
+                                  , cfn_void_t<int> cbFinish)
 {
     m_thread.start([=]{
         m_bStatus = true;
-        int nRet = syncDownload(strUrl, uRetryTime, cbProgress);
+        int nRet = _syncDownload(strUrl, uRetryTime, cbProgress);
         if (m_bStatus)
         {
             m_bStatus = false;
-            if (0 != nRet && cbError)
+            if (cbFinish)
             {
-                cbError(nRet);
+                cbFinish(nRet);
             }
         }
     });
