@@ -370,14 +370,11 @@ void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_Down
     m_thread.start([=]{
         m_bStatus = true;
         int nRet = _syncDownload(strUrl, uRetryTime, cbProgress);
-        if (m_bStatus)
+        if (cbFinish)
         {
-            m_bStatus = false;
-            if (cbFinish)
-            {
-                cbFinish(nRet);
-            }
+            cbFinish(nRet);
         }
+        m_bStatus = false;
     });
 }
 
