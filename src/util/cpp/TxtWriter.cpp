@@ -156,7 +156,8 @@ bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
     }
     else if (_isUcsBigEndian())
     {
-        cauto str = strutil::transEndian(pStr, len);
+        wstring str(pStr, len);
+        strutil::transEndian(str);
         return _write((const void*)str.c_str(), str.size()*2, bEndLine);
     }
     else
@@ -213,7 +214,7 @@ bool ITxtWriter::_write(cqstr qstr, bool bEndLine)
 }
 #endif
 
-static E_TxtHeadType _checkHead(const char *&lpData, size_t &len)
+static E_TxtHeadType _checkHead(char *&lpData, size_t &len)
 {
 	size_t headLen = sizeof __UCS2Head_LittleEndian;
 	if (len >= headLen)
@@ -251,7 +252,7 @@ static E_TxtHeadType _checkHead(const char *&lpData, size_t &len)
 	return E_TxtHeadType::THT_None;
 }
 
-void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
+void CTxtReader::_readData(char *lpData, size_t len, string& strText)
 {
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
@@ -259,9 +260,11 @@ void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
         strText.append(strutil::toGbk((const wchar_t*)lpData, len / 2));
     }
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
-	{
-		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
-        strText.append(strutil::toGbk(str));
+    {
+        auto pStr = (wchar_t*)lpData;
+        len /= 2;
+        strutil::transEndian(pStr, len);
+        strText.append(strutil::toGbk(pStr, len));
 	}
 	else
 	{
@@ -269,7 +272,7 @@ void CTxtReader::_readData(const char *lpData, size_t len, string& strText)
 	}
 }
 
-void CTxtReader::_readData(const char *lpData, size_t len, wstring& strText)
+void CTxtReader::_readData(char *lpData, size_t len, wstring& strText)
 {
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
@@ -278,8 +281,10 @@ void CTxtReader::_readData(const char *lpData, size_t len, wstring& strText)
 	}
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
 	{
-		cauto str = strutil::transEndian((const wchar_t*)lpData, len / 2);
-        strText.append(str);
+        auto pStr = (wchar_t*)lpData;
+        len /= 2;
+        strutil::transEndian(pStr, len);
+        strText.append(pStr, len);
 	}
     else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType)
 	{

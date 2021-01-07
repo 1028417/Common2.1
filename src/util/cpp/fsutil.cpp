@@ -4,7 +4,7 @@
 /*static FILE* fsopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-    wstring t_strMode(strMode.begin(), strMode.end());
+    auto t_strMode = strutil::fromAsc(strMode);
     return _wfsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
 #endif
 
@@ -16,7 +16,7 @@
 static FILE* sopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-    wstring t_strMode(strMode.begin(), strMode.end());
+    auto t_strMode = strutil::fromAsc(strMode);
     return _wsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
 #endif
 }*/
@@ -24,7 +24,7 @@ static FILE* sopen(cwstr strFile, const string& strMode)
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-	wstring t_strMode(strMode.begin(), strMode.end());
+    auto t_strMode = strutil::fromAsc(strMode);
 
 	FILE *pf = NULL;
 	errno_t eno = _wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());

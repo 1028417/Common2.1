@@ -6,6 +6,13 @@
 static const string g_s;
 static const wstring g_ws;
 
+static union {char c[4]; uint32_t l;} endian_test{{'l', '?', '?', 'b'}};
+#define __endian (char(endian_test.l))
+#define __lendian (__endian == 'l')
+#define __bendian (__endian == 'b')
+
+//int i=1; (*(char*)&i);
+
 #if __winvc
 #include <codecvt>
     static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
