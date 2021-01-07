@@ -633,46 +633,30 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 	unsigned char char_array_3[3];
 	unsigned char char_array_4[4];
 
-    while (len--)
-	{
+    while (len--) {
         char_array_3[i++] = *(pStr++);
-		if (i == 3)
-		{
+        if (i == 3) {
 			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
 			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
 			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
 			char_array_4[3] = char_array_3[2] & 0x3f;
-			for (i = 0; (i <4); i++)
-			{
-                strRet.push_back(strBase64Chars[char_array_4[i]]);
-			}
+            for (i = 0; i < 4; i++) strRet.push_back(strBase64Chars[char_array_4[i]]);
+
 			i = 0;
 		}
 	}
-	if (i)
-	{
-		for (j = i; j < 3; j++)
-		{
-			char_array_3[j] = '\0';
-		}
+    if (i) {
+        for (j = i; j < 3; j++) char_array_3[j] = '\0';
 
 		char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
 		char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
 		char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
 		char_array_4[3] = char_array_3[2] & 0x3f;
+        for (j = 0; (j < i + 1); j++) strRet.push_back(strBase64Chars[char_array_4[j]]);
 
-		for (j = 0; (j < i + 1); j++)
-		{
-            strRet.push_back(strBase64Chars[char_array_4[j]]);
-		}
-
-		if (chrTail != '\0')
-		{
-			while ((i++ < 3))
-			{
-                strRet.push_back(chrTail);
-			}
-		}
+        if (chrTail != '\0') {
+            while ((i++ < 3)) strRet.push_back(chrTail);
+        }
 	}
 
 	return strRet;
@@ -689,29 +673,24 @@ static string _base64_decode(const char *pStr, size_t len, const string& strBase
     while (len-- && (pStr[in_] != chrTail) && strBase64Chars.find(pStr[in_]) != __npos) {
         char_array_4[i++] = pStr[in_]; in_++;
         if (i ==4) {
-            for (i = 0; i <4; i++)
-                char_array_4[i] = (unsigned char)strBase64Chars.find(char_array_4[i]);
+            for (i = 0; i <4; i++) char_array_4[i] = (unsigned char)strBase64Chars.find(char_array_4[i]);
 
             char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
             char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
             char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+            for (i = 0; i < 3; i++) ret += char_array_3[i];
 
-            for (i = 0; (i < 3); i++)
-                ret += char_array_3[i];
             i = 0;
         }
     }
     if (i) {
-        for (j = i; j <4; j++)
-            char_array_4[j] = 0;
+        for (j = i; j <4; j++) char_array_4[j] = 0;
 
-        for (j = 0; j <4; j++)
-            char_array_4[j] = (unsigned char)strBase64Chars.find(char_array_4[j]);
+        for (j = 0; j <4; j++) char_array_4[j] = (unsigned char)strBase64Chars.find(char_array_4[j]);
 
         char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
         char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
         char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
         for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
     }
 

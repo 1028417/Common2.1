@@ -115,30 +115,15 @@ bool ITxtWriter::_write(const char *pStr, size_t len, bool bEndLine)
     else
     {
         wstring str = strutil::fromStr(pStr, len);
-        if (_isUcsBigEndian())
-        {
-            strutil::transEndian(str);
-        }
-
-        return _write((const void*)str.c_str(), str.size() * 2, bEndLine);
+        return _write(str.c_str(), str.size(), bEndLine);
     }
 }
 
-bool ITxtWriter::_write(char ch, bool bEndLine)
+inline static void _transEndian(char16_t *pStr, size_t len)
 {
-    if (_isANSI() || _isUtf8())
+    for (; len--; pStr++)
     {
-        return _write(&ch, 1, bEndLine);
-    }
-    else
-    {
-        wchar_t wch = ch;
-        if (_isUcsBigEndian())
-        {
-            wch = strutil::transEndian(wch);
-        }
-
-        return _write(&wch, 2, bEndLine);
+        *pStr = (*pStr << 8) | (*pStr >> 8);
     }
 }
 
@@ -154,38 +139,37 @@ bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
         cauto str = strutil::toUtf8(pStr, len);
         return _write((const void*)str.c_str(), str.size(), bEndLine);
     }
-    else if (_isUcsBigEndian())
-    {
-        wstring str(pStr, len);
-        strutil::transEndian(str);
-        return _write((const void*)str.c_str(), str.size()*2, bEndLine);
-    }
-    else
-    {
-        return _write((const void*)pStr, len*2, bEndLine);
-    }
-}
-
-bool ITxtWriter::_write(wchar_t wch, bool bEndLine)
-{
-    if (_isANSI())
-    {
-        cauto str = strutil::toGbk(&wch, 1);
-        return _write((const void*)str.c_str(), str.size(), bEndLine);
-    }
-    else if (_isUtf8())
-    {
-        cauto str = strutil::toUtf8(&wch, 1);
-        return _write((const void*)str.c_str(), str.size(), bEndLine);
-    }
     else
     {
         if (_isUcsBigEndian())
         {
-            wch = strutil::transEndian(wch);
+#if !__winvc
+            u16string str;
+            if (sizeof(wchar_t) != sizeof(char16_t))
+            {
+                str = QString::fromWCharArray(pStr, len).toStdU16String();
+            }
+            else
+            {
+                str.assign((char16_t*)pStr, len);
+            }
+#else
+            u16string str((char16_t*)pStr, len);
+#endif
+            _transEndian((char16_t*)str.c_str(), str.size());
+            return _write((const void*)str.c_str(), str.size() *sizeof(char16_t), bEndLine);
         }
-
-        return _write(&wch, 2, bEndLine);
+        else
+        {
+    #if !__winvc
+            if (sizeof(wchar_t) != sizeof(char16_t))
+            {
+                cauto str = QString::fromWCharArray(pStr, len).toStdU16String();
+                return _write((const void*)str.c_str(), str.size() *sizeof(char16_t), bEndLine);
+            }
+    #endif
+            return _write((const void*)pStr, len *sizeof(wchar_t), bEndLine);
+        }
     }
 }
 
@@ -205,11 +189,7 @@ bool ITxtWriter::_write(cqstr qstr, bool bEndLine)
     else
     {
         wstring str = qstr.toStdWString();
-        if (_isUcsBigEndian())
-        {
-            strutil::transEndian(str);
-        }
-        return _write((const void*)str.c_str(), str.size() * 2, bEndLine);
+        return _write(str.c_str(), str.size(), bEndLine);
     }
 }
 #endif
@@ -252,19 +232,31 @@ static E_TxtHeadType _checkHead(char *&lpData, size_t &len)
 	return E_TxtHeadType::THT_None;
 }
 
+inline static void _praseUcs2(const char16_t *lpData, size_t len, string& str)
+{
+#if !__winvc
+    if (sizeof(char16_t) != sizeof(wchar_t))
+    {
+        str.append(QString::fromUtf16(lpData, len).toStdString());
+        return;
+    }
+#endif
+    str.append(strutil::toUtf8((wchar_t*)lpData, len));
+}
+
 void CTxtReader::_readData(char *lpData, size_t len, string& strText)
 {
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
     {
-        strText.append(strutil::toGbk((const wchar_t*)lpData, len / 2));
+        len /= sizeof(char16_t);
+        _praseUcs2((char16_t*)lpData, len, strText);
     }
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
     {
-        auto pStr = (wchar_t*)lpData;
-        len /= 2;
-        strutil::transEndian(pStr, len);
-        strText.append(strutil::toGbk(pStr, len));
+        len /= sizeof(char16_t);
+        _transEndian((char16_t*)lpData, len);
+        _praseUcs2((char16_t*)lpData, len, strText);
 	}
 	else
 	{
@@ -272,19 +264,31 @@ void CTxtReader::_readData(char *lpData, size_t len, string& strText)
 	}
 }
 
+inline static void _praseUcs2(const char16_t *lpData, size_t len, wstring& str)
+{
+#if !__winvc
+    if (sizeof(char16_t) != sizeof(wchar_t))
+    {
+        str.append(QString::fromUtf16(lpData, len).toStdWString());
+        return;
+    }
+#endif
+    str.append((wchar_t*)lpData, len);
+}
+
 void CTxtReader::_readData(char *lpData, size_t len, wstring& strText)
 {
 	m_eHeadType = _checkHead(lpData, len);
 	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
 	{
-		strText.append((const wchar_t*)lpData, len / 2);
+        len /= sizeof(char16_t);
+        _praseUcs2((char16_t*)lpData, len, strText);
 	}
 	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
-	{
-        auto pStr = (wchar_t*)lpData;
-        len /= 2;
-        strutil::transEndian(pStr, len);
-        strText.append(pStr, len);
+    {
+        len /= sizeof(char16_t);
+        _transEndian((char16_t*)lpData, len);
+        _praseUcs2((char16_t*)lpData, len, strText);
 	}
     else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType)
 	{
