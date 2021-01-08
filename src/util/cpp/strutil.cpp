@@ -6,11 +6,10 @@
 static const string g_s;
 static const wstring g_ws;
 
-static union {char c[4]; uint32_t l;} endian_test{{'l', '?', '?', 'b'}};
+/*static union {char c[4]; uint32_t l;} endian_test{{'l', '?', '?', 'b'}};
 #define __endian (char(endian_test.l))
 #define __lendian (__endian == 'l')
-#define __bendian (__endian == 'b')
-
+#define __bendian (__endian == 'b')*/
 //int i=1; (*(char*)&i);
 
 #if __winvc
@@ -621,38 +620,41 @@ wstring strutil::fromStr(const char *pStr, int len)
 	}
 }
 
-static const std::string g_strBase64Chars =
+static const string g_strBase64 =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789-_";
 
-template <typename T, typename RET = basic_string<T, char_traits<T>, allocator<T>>>
-RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = 0)
+template <class S=string>
+S _base64_encode(const char *pStr, size_t len, const char *pszBase = g_strBase64.c_str(), char chrTail = 0)
 {
-	RET strRet;
-	int i = 0;
-	int j = 0;
-	unsigned char char_array_3[3];
-	unsigned char char_array_4[4];
+    S strRet;
+    uint8_t i = 0;
+    unsigned char char_array_3[3];
+    unsigned char chr = 0;
 
     while (len--) {
         char_array_3[i++] = *(pStr++);
         if (i == 3) {
-			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-			char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-			char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-			char_array_4[3] = char_array_3[2] & 0x3f;
-            for (i = 0; i < 4; i++) strRet.push_back(strBase64Chars[char_array_4[i]]);
+            chr = char_array_3[0] >> 2;
+            strRet.push_back(pszBase[chr]);
+            chr = ((char_array_3[0] & 0x03) << 4) + (char_array_3[1] >> 4);
+            strRet.push_back(pszBase[chr]);
+            chr = ((char_array_3[1] & 0x0f) << 2) + (char_array_3[2] >> 6);
+            strRet.push_back(pszBase[chr]);
+            chr = char_array_3[2] & 0x3f;
+            strRet.push_back(pszBase[chr]);
 
 			i = 0;
 		}
 	}
     if (i) {
-        for (j = i; j < 3; j++) char_array_3[j] = '\0';
+        for (uint8_t j = i; j < 3; j++) char_array_3[j] = 0;
 
-		char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-		char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-		char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+        unsigned char char_array_4[4];
+        char_array_4[0] = char_array_3[0] >> 2;
+        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + (char_array_3[1] >> 4);
+        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + (char_array_3[2] >> 6);
 		char_array_4[3] = char_array_3[2] & 0x3f;
-        for (j = 0; (j < i + 1); j++) strRet.push_back(strBase64Chars[char_array_4[j]]);
+        for (uint8_t j = 0; j < i + 1; j++) strRet.push_back(pszBase[char_array_4[j]]);
 
         if (chrTail != '\0') {
             while ((i++ < 3)) strRet.push_back(chrTail);
@@ -662,51 +664,53 @@ RET _base64_encode(const char *pStr, size_t len, const string& strBase64Chars = 
 	return strRet;
 }
 
-static string _base64_decode(const char *pStr, size_t len, const string& strBase64Chars = g_strBase64Chars, char chrTail = 0)
+template <class S=string>
+static S _base64_decode(const char *pStr, size_t len, const string& strBase = g_strBase64, char chrTail = 0)
 {
-    int i = 0;
-    int j = 0;
+    S strRet;
+    uint8_t i = 0;
     int in_ = 0;
-    unsigned char char_array_4[4], char_array_3[3];
-    std::string ret;
+    unsigned char char_array_4[4];
+    unsigned char chr = 0;
 
-    while (len-- && (pStr[in_] != chrTail) && strBase64Chars.find(pStr[in_]) != __npos) {
+    while (len-- && (pStr[in_] != chrTail) && strBase.find(pStr[in_]) != __npos) {
         char_array_4[i++] = pStr[in_]; in_++;
-        if (i ==4) {
-            for (i = 0; i <4; i++) char_array_4[i] = (unsigned char)strBase64Chars.find(char_array_4[i]);
+        if (i == 4) {
+            for (i = 0; i <4; i++) char_array_4[i] = (unsigned char)strBase.find(char_array_4[i]);
 
-            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-            for (i = 0; i < 3; i++) ret += char_array_3[i];
+            chr = (char_array_4[0] << 2) + (char_array_4[1] >> 4);
+            strRet.push_back(chr);
+            chr = (char_array_4[1] << 4) + (char_array_4[2] >> 2);
+            strRet.push_back(chr);
+            chr = (char_array_4[2] << 6) + char_array_4[3];
+            strRet.push_back(chr);
 
             i = 0;
         }
     }
     if (i) {
-        for (j = i; j <4; j++) char_array_4[j] = 0;
+        for (uint8_t j = i; j < 4; j++) char_array_4[j] = 0;
+        for (uint8_t j = 0; j < 4; j++) char_array_4[j] = (unsigned char)strBase.find(char_array_4[j]);
 
-        for (j = 0; j <4; j++) char_array_4[j] = (unsigned char)strBase64Chars.find(char_array_4[j]);
-
-        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-        for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
+        unsigned char char_array_3[3];
+        char_array_3[0] = (char_array_4[0] << 2) + (char_array_4[1] >> 4);
+        char_array_3[1] = (char_array_4[1] << 4) + (char_array_4[2] >> 2);
+        char_array_3[2] = (char_array_4[2] << 6) + char_array_4[3];
+        for (uint8_t j = 0; j < i - 1; j++) strRet.push_back(char_array_3[j]);
     }
 
-    return ret;
+    return strRet;
 }
 
 string strutil::base64_encode(const char *pStr, size_t len, const char *pszBase, char chrTail)
 {
 	if (pszBase)
-	{
-		string strBase64Chars(pszBase, 64);
-		return _base64_encode<char>(pStr, len, strBase64Chars, chrTail);
+    {
+        return _base64_encode(pStr, len, pszBase, chrTail);
 	}
 	else
 	{
-		return _base64_encode<char>(pStr, len);
+        return _base64_encode(pStr, len);
 	}
 }
 
@@ -714,8 +718,8 @@ string strutil::base64_decode(const char *pStr, size_t len, const char *pszBase,
 {
 	if (pszBase)
 	{
-		string strBase64Chars(pszBase, 64);
-		return _base64_decode(pStr, len, strBase64Chars, chrTail);
+        string strBase(pszBase, 64);
+        return _base64_decode(pStr, len, strBase, chrTail);
 	}
 	else
 	{
