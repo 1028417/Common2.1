@@ -143,7 +143,7 @@ bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
     {
         if (_isUcsBigEndian())
         {
-#if !__winvc
+#if !__windows
             u16string str;
             if (sizeof(wchar_t) != sizeof(char16_t))
             {
@@ -161,7 +161,7 @@ bool ITxtWriter::_write(const wchar_t *pStr, size_t len, bool bEndLine)
         }
         else
         {
-    #if !__winvc
+    #if !__windows
             if (sizeof(wchar_t) != sizeof(char16_t))
             {
                 cauto str = QString::fromWCharArray(pStr, len).toStdU16String();
@@ -234,7 +234,7 @@ static E_TxtHeadType _checkHead(char *&lpData, size_t &len)
 
 inline static void _praseUcs2(const char16_t *lpData, size_t len, string& str)
 {
-#if !__winvc
+#if !__windows
     if (sizeof(char16_t) != sizeof(wchar_t))
     {
         str.append(QString::fromUtf16(lpData, len).toStdString());
@@ -266,7 +266,7 @@ void CTxtReader::_readData(char *lpData, size_t len, string& strText)
 
 inline static void _praseUcs2(const char16_t *lpData, size_t len, wstring& str)
 {
-#if !__winvc
+#if !__windows
     if (sizeof(char16_t) != sizeof(wchar_t))
     {
         str.append(QString::fromUtf16(lpData, len).toStdWString());
