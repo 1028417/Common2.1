@@ -4,7 +4,7 @@
 #if __winvc
 #include "dirent.h"
 #else
-#include "dirent.h"
+#include <dirent.h>
 #endif
 
 #include <fstream>
@@ -582,7 +582,7 @@ static int Minizip(string src, const string& dest, E_ZMethod method = E_ZMethod:
 	{
 		t_method = Z_DEFLATED;
 	}
-	else if (E_ZMethod::ZM_Deflated == method)
+	else if (E_ZMethod::ZM_BZip2ed == method)
 	{
 		t_method = Z_BZIP2ED;
 	}
