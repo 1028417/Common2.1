@@ -135,6 +135,9 @@
       <Filter>fs\zip\bzip2</Filter>
     </ClCompile>
     <ClCompile Include="cpp\ThreadGroup.cpp" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\zip.c">
+      <Filter>fs\zip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />

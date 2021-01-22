@@ -1,14 +1,26 @@
 
 #include "util.h"
 
-#include "contrib/minizip/unzip.h"
-
-#if __windows
-#define __DirFlag FILE_ATTRIBUTE_DIRECTORY
+#if __winvc
+#include "dirent.h"
 #else
-#define __DirFlag S_IFDIR
-//#define _mkdir(x) mkdir(x, 0777)
+#include "dirent.h"
 #endif
+
+#include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+extern "C"
+{
+#include "zlib.h"
+#include "contrib/minizip/unzip.h"
+#include "contrib/minizip/zip.h"
+}
+
+/*#if !__windows
+#define mkdir(x) mkdir(x, 0777)
+#endif*/
 
 inline static wstring _subPath(wstring& strSubPath)
 {
@@ -224,6 +236,11 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 			return false;
 		}
 
+#if __windows
+#define __DirFlag S_IFDIR //FILE_ATTRIBUTE_DIRECTORY //windows也有S_IFDIR
+#else
+#define __DirFlag S_IFDIR
+#endif
         cauto strPath = strutil::fromGbk(pszFileName);
         if (__cSlant == strPath.back())  // (unzFile.external_fa & __DirFlag);
         {
@@ -491,6 +508,162 @@ void CZipFile::close()
     }
 }
 
+static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<string>& vFiles)
+{
+    if (dirPrefix.empty() || dirName.empty())
+        return;
+    string dirNameTmp = dirName;
+    string dirPre = dirPrefix;
+
+    if (dirNameTmp.find_last_of(__cPathSeparator) != dirNameTmp.length() - 1)
+        dirNameTmp.push_back(__cPathSeparator);
+    if (dirNameTmp[0] == __cPathSeparator)
+        dirNameTmp = dirNameTmp.substr(1);
+    if (dirPre.find_last_of(__cPathSeparator) != dirPre.length() - 1)
+        dirPre.push_back(__cPathSeparator);
+
+    string path;
+
+    path = dirPre + dirNameTmp;
+
+
+    struct stat fileStat;
+    DIR* pDir = opendir(path.c_str());
+    if (!pDir) return;
+
+    struct dirent* pDirEnt = NULL;
+    while ( (pDirEnt = readdir(pDir)) != NULL )
+    {
+        if (strcmp(pDirEnt->d_name,".") == 0 || strcmp(pDirEnt->d_name,"..") == 0)
+            continue;
+
+        string tmpDir = dirPre + dirNameTmp + pDirEnt->d_name;
+        if (stat(tmpDir.c_str(),&fileStat) != 0)
+            continue;
+
+        string innerDir = dirNameTmp + pDirEnt->d_name;
+        if ((fileStat.st_mode & S_IFDIR) == S_IFDIR)
+        {
+            EnumDirFiles(dirPrefix,innerDir,vFiles);
+            continue;
+        }
+
+        vFiles.push_back(innerDir);
+    }
+
+    if (pDir)
+        closedir(pDir);
+}
+
+static int WriteInZipFile(zipFile zFile,const string& file)
+{
+    fstream f(file.c_str(),std::ios::binary | std::ios::in);
+    f.seekg(0, std::ios::end);
+    auto size = (unsigned long)f.tellg();
+    f.seekg(0, std::ios::beg);
+    if ( size <= 0 )
+    {
+        return zipWriteInFileInZip(zFile,NULL,0);
+    }
+    char* buf = new char[size];
+    f.read(buf,size);
+    int ret = zipWriteInFileInZip(zFile,buf,size);
+    delete[] buf;
+    return ret;
+}
+
+static int Minizip(string src, const string& dest, E_ZMethod method = E_ZMethod::ZM_Deflated, int level = 0)
+{
+    if (src.find_last_of(__cPathSeparator) == src.length() - 1)
+        src = src.substr(0,src.length()-1);
+
+	int t_method = 0;
+	if (E_ZMethod::ZM_Deflated == method)
+	{
+		t_method = Z_DEFLATED;
+	}
+	else if (E_ZMethod::ZM_Deflated == method)
+	{
+		t_method = Z_BZIP2ED;
+	}
+
+    struct stat fileInfo;
+    stat(src.c_str(), &fileInfo);
+    if (S_ISREG(fileInfo.st_mode)) {
+        zipFile zFile = zipOpen(dest.c_str(),APPEND_STATUS_CREATE);
+        if (zFile == NULL) {
+            //cout<<"openfile failed"<<endl;
+            return -1;
+        }
+
+        zip_fileinfo zFileInfo;
+        memset(&zFileInfo, 0, sizeof (zFileInfo));
+        int ret = zipOpenNewFileInZip(zFile,src.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
+        if (ret != ZIP_OK) {
+            //cout<<"openfile in zip failed"<<endl;
+            zipClose(zFile, NULL);
+            return -1;
+        }
+
+        ret = WriteInZipFile(zFile,src);
+        if (ret != ZIP_OK) {
+            //cout<<"write in zip failed"<<endl;
+            zipClose(zFile,NULL);
+            return -1;
+        }
+        zipClose(zFile, NULL);
+        //cout<<"zip ok"<<endl;
+    }
+    else if (S_ISDIR(fileInfo.st_mode)) {
+        zipFile zFile = zipOpen(dest.c_str(), APPEND_STATUS_CREATE);
+        if (zFile == NULL) {
+            //cout<<"openfile failed"<<endl;
+            return -1;
+        }
+
+		size_t pos = src.find_last_of(__cPathSeparator);
+		string dirName = src.substr(pos + 1);
+		string dirPrefix = src.substr(0, pos);
+        vector<string> vFiles;
+        EnumDirFiles(dirPrefix, dirName, vFiles);
+
+        for (cauto strFile : vFiles)
+		{
+			zip_fileinfo zFileInfo;
+            memset(&zFileInfo, 0, sizeof (zFileInfo));
+
+			auto t_strFile = strFile;
+			t_strFile.erase(0, t_strFile.find(__cPathSeparator)+1);
+			strutil::replaceChar(t_strFile, '\\', '/');
+            int ret = zipOpenNewFileInZip(zFile,t_strFile.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
+            if (ret != ZIP_OK) {
+                //cout<<"openfile in zip failed"<<endl;
+                zipClose(zFile,NULL);
+                return -1;
+            }
+            ret = WriteInZipFile(zFile, dirPrefix + __cPathSeparator + strFile);
+            if (ret != ZIP_OK) {
+                //cout<<"write in zip failed"<<endl;
+                zipClose(zFile,NULL);
+                return -1;
+            }
+        }
+
+        zipClose(zFile,NULL);
+    }
+    return 0;
+}
+
+bool ziputil::zipDir(const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
+{
+	auto nRet = Minizip(strSrcDir, strDstFile, method, level);
+	if (nRet != 0)
+	{
+		return false;
+	}
+	return true;
+}
+
 static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
 	, const function<int(const CByteBuffer&, CByteBuffer&)>& cb)
 {
@@ -516,7 +689,7 @@ static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
 	return len;
 }
 
-int ziputil::zCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
+int czCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
 {
 	uLongf destLen = len * 2;
 	auto ptr = bbfBuff.resizeMore(destLen);

@@ -30,6 +30,7 @@
     <ClCompile Include="..\..\3rd\json\json_reader.cpp" />
     <ClCompile Include="..\..\3rd\json\json_value.cpp" />
     <ClCompile Include="..\..\3rd\json\json_writer.cpp" />
+    <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\zip.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\crc32.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\deflate.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\gzclose.c" />
@@ -152,7 +153,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -194,7 +195,7 @@ Copy /Y "$(OutDir)..\libs\$(TargetName).lib" "$(OutDir)..\..\XMusic\libs\"
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
