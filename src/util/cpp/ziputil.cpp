@@ -656,6 +656,7 @@ static int Minizip(string src, const string& dest, E_ZMethod method = E_ZMethod:
 
 bool ziputil::zipDir(const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
 {
+	//(void)::remove(strDstFile.c_str());
 	auto nRet = Minizip(strSrcDir, strDstFile, method, level);
 	if (nRet != 0)
 	{
@@ -689,7 +690,7 @@ static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
 	return len;
 }
 
-int czCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
+int ziputil::zCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
 {
 	uLongf destLen = len * 2;
 	auto ptr = bbfBuff.resizeMore(destLen);
