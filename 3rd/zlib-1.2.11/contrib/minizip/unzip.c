@@ -72,7 +72,7 @@
         //#define NOUNCRYPT
 #endif
 
-#define HAVE_BZIP2
+//#define HAVE_BZIP2 //统一在预编译中定义
 
 #include "zlib.h"
 #include "unzip.h"
