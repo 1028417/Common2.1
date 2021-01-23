@@ -574,8 +574,9 @@ static int WriteInZipFile(zipFile zFile,const string& file)
 
 static int Minizip(string src, const string& dest, E_ZMethod method = E_ZMethod::ZM_Deflated, int level = 0)
 {
-    if (src.find_last_of(__cPathSeparator) == src.length() - 1)
+    if (src.find_last_of(__cPathSeparator) == (src.length() - 1)) {
         src = src.substr(0,src.length()-1);
+    }
 
 	int t_method = 0;
 	if (E_ZMethod::ZM_Deflated == method)
