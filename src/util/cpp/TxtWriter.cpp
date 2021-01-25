@@ -244,15 +244,15 @@ inline static void _praseUcs2(const char16_t *lpData, size_t len, string& str)
     str.append(strutil::toUtf8((wchar_t*)lpData, len));
 }
 
-void CTxtReader::_readData(char *lpData, size_t len, string& strText)
+E_TxtHeadType CTxtReader::_readData(char *lpData, size_t len, string& strText)
 {
-	m_eHeadType = _checkHead(lpData, len);
-	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
+	E_TxtHeadType eHeadType = _checkHead(lpData, len);
+	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == eHeadType)
     {
         len /= sizeof(char16_t);
         _praseUcs2((char16_t*)lpData, len, strText);
     }
-	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
+	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == eHeadType)
     {
         len /= sizeof(char16_t);
         _transEndian((char16_t*)lpData, len);
@@ -262,6 +262,7 @@ void CTxtReader::_readData(char *lpData, size_t len, string& strText)
 	{
 		strText.append(lpData, len);
 	}
+	return eHeadType;
 }
 
 inline static void _praseUcs2(const char16_t *lpData, size_t len, wstring& str)
@@ -276,21 +277,21 @@ inline static void _praseUcs2(const char16_t *lpData, size_t len, wstring& str)
     str.append((wchar_t*)lpData, len);
 }
 
-void CTxtReader::_readData(char *lpData, size_t len, wstring& strText)
+E_TxtHeadType CTxtReader::_readData(char *lpData, size_t len, wstring& strText)
 {
-	m_eHeadType = _checkHead(lpData, len);
-	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == m_eHeadType)
+	E_TxtHeadType eHeadType = _checkHead(lpData, len);
+	if (E_TxtHeadType::THT_UCS2Head_LittleEndian == eHeadType)
 	{
         len /= sizeof(char16_t);
         _praseUcs2((char16_t*)lpData, len, strText);
 	}
-	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == m_eHeadType)
+	else if (E_TxtHeadType::THT_UCS2Head_BigEndian == eHeadType)
     {
         len /= sizeof(char16_t);
         _transEndian((char16_t*)lpData, len);
         _praseUcs2((char16_t*)lpData, len, strText);
 	}
-    else if (E_TxtHeadType::THT_UTF8Bom == m_eHeadType)
+    else if (E_TxtHeadType::THT_UTF8Bom == eHeadType)
 	{
         strText.append(strutil::fromUtf8(lpData, len));
 	}
@@ -298,4 +299,5 @@ void CTxtReader::_readData(char *lpData, size_t len, wstring& strText)
     {
         strText.append(strutil::fromStr(lpData, len));
 	}
+	return eHeadType;
 }
