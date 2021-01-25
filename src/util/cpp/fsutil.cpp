@@ -1,35 +1,16 @@
 ﻿
 #include "util.h"
 
-/*static FILE* fsopen(cwstr strFile, const string& strMode)
-{
-#if __windows
-    auto t_strMode = strutil::fromAsc(strMode);
-    return _wfsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
-#endif
-
-#if __windows
-    //return _fsopen(strFile.c_str(), strMode.c_str(), _SH_DENYNO);
-#endif
-}
-
-static FILE* sopen(cwstr strFile, const string& strMode)
-{
-#if __windows
-    auto t_strMode = strutil::fromAsc(strMode);
-    return _wsopen(strFile.c_str(), t_strMode.c_str(), _SH_DENYNO);
-#endif
-}*/
-
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-    auto t_strMode = strutil::fromAsc(strMode);
+	return fsopen(strFile, strMode);
+    /*auto t_strMode = strutil::fromAsc(strMode);
 
 	FILE *pf = NULL;
 	errno_t eno = _wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
 	(void)eno;
-	return pf;
+	return pf;*/
 
 #else
 	return ::fopen(strutil::toUtf8(strFile).c_str(), strMode.c_str());
@@ -39,9 +20,10 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
 {
 #if __windows
-    FILE *pf = NULL;
+	return fsopen(strFile, strMode);
+    /*FILE *pf = NULL;
     (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
-    return pf;
+    return pf;*/
 #else
     return ::fopen(strFile.c_str(), strMode.c_str());
 #endif
