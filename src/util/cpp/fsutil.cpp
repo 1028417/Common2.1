@@ -225,13 +225,8 @@ string fsutil::GetFileName(const string& strPath)
 }
 
 template <class S>
-static bool _matchPath(const S& str1, const S& str2, size_t maxlen)
+static bool _matchPath(const S& str1, const S& str2, size_t maxlen = (size_t)-1)
 {
-    if (0 == maxlen)
-    {
-        maxlen = (size_t)-1;
-    }
-
     auto ptr1 = str1.c_str();
     auto ptr2 = str2.c_str();
     auto len1 = str1.size();
@@ -279,6 +274,15 @@ static bool _matchPath(const S& str1, const S& str2, size_t maxlen)
     }
 
     return len1 == len2;
+}
+
+bool fsutil::MatchPath(cwstr strPath1, cwstr strPath2)
+{
+	return _matchPath(strPath1, strPath2);
+}
+bool fsutil::MatchPath(const string& strPath1, const string& strPath2)
+{
+	return _matchPath(strPath1, strPath2);
 }
 
 bool fsutil::CheckSubPath(cwstr strDir, cwstr strSubPath)
