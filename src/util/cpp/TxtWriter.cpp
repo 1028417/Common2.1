@@ -60,10 +60,13 @@ bool CTxtWriter::_writeHead()
 
 bool CTxtWriter::_write(const void *ptr, size_t len, bool bEndLine)
 {
-	if (!m_ofs.writex(ptr, len))
-	{
-		return false;
-	}
+    if (len)
+    {
+        if (!m_ofs.writex(ptr, len))
+        {
+            return false;
+        }
+    }
 
 	if (bEndLine)
 	{
