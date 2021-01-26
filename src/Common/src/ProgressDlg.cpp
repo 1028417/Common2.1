@@ -34,17 +34,12 @@ INT_PTR CProgressDlg::DoModal(cwstr strTitle, CWnd *pWndParent)
 BOOL CProgressDlg::OnInitDialog()
 {
 	__super::OnInitDialog();
-
 	(void)this->SetWindowText(m_strTitle.c_str());
 
 	m_bFinished = false;
-
 	(void)this->start(1, [&](UINT) {
-		if (m_fnWork)
-		{
-			m_fnWork(*this);
-		}
-
+		__usleep(100);
+		m_fnWork(*this);
 		if (!m_bFinished)
 		{
 			CMainApp::GetMainApp()->sync([=]{
