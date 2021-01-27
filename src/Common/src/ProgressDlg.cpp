@@ -125,6 +125,10 @@ void CProgressDlg::_updateProgress()
 	{
 		cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
 	}
+	else
+	{
+		cstrProgress.Format(_T("%d/"), m_uProgress);
+	}
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
