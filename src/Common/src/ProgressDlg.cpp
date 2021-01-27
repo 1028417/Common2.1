@@ -127,7 +127,7 @@ void CProgressDlg::_updateProgress()
 	}
 	else
 	{
-		cstrProgress.Format(_T("%d/"), m_uProgress);
+		cstrProgress.Format(_T("%d"), m_uProgress);
 	}
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
 
