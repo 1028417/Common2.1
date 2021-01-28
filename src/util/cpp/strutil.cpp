@@ -1,7 +1,7 @@
 ﻿
 #include "util.h"
 
-#define __gbkCP 936
+#define CP_GBK 936u
 
 static const string g_s;
 static const wstring g_ws;
@@ -14,7 +14,7 @@ static const wstring g_ws;
 
 #if __winvc
 #include <codecvt>
-    static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
+    //全asc的转utf8很多崩溃 static std::wstring_convert<std::codecvt_utf8<wchar_t>> g_utf8Convert;
 
 	static const locale g_locale_CN("Chinese_china");
     static const collate<wchar_t>& g_collate_CN = use_facet<collate<wchar_t>>(g_locale_CN);
@@ -218,10 +218,10 @@ bool strutil::matchIgnoreCase(cwchr_p pstr1, cwchr_p pstr2, size_t maxlen)
 #if __windows
         return 0 == _wcsnicmp(pstr1, pstr2, maxlen);
 #else
-        size_t len = wcslen(pstr1);
+        size_t len = _checkLen(pstr1);
         cauto qs1 = __W2Q(pstr1, MIN(maxlen, len));
 
-        len = wcslen(pstr2);
+        len = _checkLen(pstr2);
         cauto qs2 = __W2Q(pstr2, MIN(maxlen, len));
 
         return 0 == qs1.compare(qs2, Qt::CaseSensitivity::CaseInsensitive);
@@ -268,7 +268,7 @@ UINT strutil::replace(wstring& str, cwstr strFind, const wchar_t *pszReplace)
 {
 	if (pszReplace)
 	{
-		return _replace(str, strFind, pszReplace, wcslen(pszReplace));
+		return _replace(str, strFind, pszReplace, _checkLen(pszReplace));
 	}
 	else
 	{
@@ -280,7 +280,7 @@ UINT strutil::replace(string& str, const string& strFind, const char *pszReplace
 {
 	if (pszReplace)
 	{
-		return _replace(str, strFind, pszReplace, strlen(pszReplace));
+		return _replace(str, strFind, pszReplace, _checkLen(pszReplace));
 	}
 	else
 	{
@@ -467,7 +467,8 @@ wstring strutil::fromUtf8(const char *pStr, int len)
     }
 
 #if __winvc
-	return g_utf8Convert.from_bytes(pStr, pStr+len);
+	return fromMbs(CP_GBK, pStr, len);
+	//return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
     //return g_utf8Codec->toUnicode(pStr, len).toStdWString();
     return QString::fromUtf8(pStr, len).toStdWString();
@@ -482,7 +483,8 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
     }
 
 #if __winvc
-    return g_utf8Convert.to_bytes(pStr, pStr+len);
+	return toMbs(CP_UTF8, pStr, len);
+    //return g_utf8Convert.to_bytes(pStr, pStr+len);
 #else
     return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
@@ -490,68 +492,85 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
 
 wstring strutil::fromGbk(const char *pStr, int len)
 {
-    if (_checkLen(pStr, len))
-    {
-#if __windows
-        wstring strRet(len, L'\0');
-        int nRet = MultiByteToWideChar(__gbkCP, 0, pStr, len, (wchar_t*)strRet.c_str(), len);
-        if (nRet > 0)
-        {
-            strRet.erase(nRet);
-            return strRet;
-        }
-
-        /*auto size = std::mbstowcs(nullptr, pStr, len);
-        if (size_t(-1) != size)
-		{
-            wstring str(size, '\0');
-            size = std::mbstowcs((wchar_t*)str.c_str(), pStr, len);
-            if (size_t(-1) != size)
-			{
-                str.erase(size);
-				return str;
-			}
-        }*/
-
-#else
-        return g_gbkCodec->toUnicode(pStr, len).toStdWString();
-#endif
+	if (!_checkLen(pStr, len))
+	{
+		return g_ws;
 	}
 
+#if __windows
+		return fromMbs(CP_GBK, pStr, len);
+#else
+		return g_gbkCodec->toUnicode(pStr, len).toStdWString();
+#endif
+}
+
+#if __windows
+string strutil::toMbs(UINT uCodePage, const wchar_t *pStr, int len)
+{
+	if (_checkLen(pStr, len))
+	{
+		auto size = WideCharToMultiByte(uCodePage, 0, pStr, len, NULL, 0, NULL, NULL);
+		if (size > 0)
+		{
+			string strRet(size, '\0');
+			size = WideCharToMultiByte(uCodePage, 0, pStr, len, (char*)strRet.c_str(), size, NULL, NULL);
+			if (size > 0)
+			{
+				strRet.erase(size);
+				return strRet;
+			}
+		}
+
+		/*auto size = std::wcstombs(nullptr, pStr, len);
+		if (size_t(-1) != size)
+		{
+			string str(size, '\0');
+			size = std::wcstombs((char*)str.c_str(), pStr, len);
+			if (size_t(-1) != size)
+			{
+				str.erase(size);
+				return str;
+			}
+		}*/
+    }
+    return g_s;
+}
+
+wstring strutil::fromMbs(UINT uCodePage, const char *pStr, int len)
+{
+	if (_checkLen(pStr, len))
+	{
+		wstring strRet(len, L'\0');
+		auto size = MultiByteToWideChar(uCodePage, 0, pStr, len, (wchar_t*)strRet.c_str(), len);
+		if (size > 0)
+		{
+			strRet.erase(size);
+			return strRet;
+		}
+
+	    /*auto size = len;//std::mbstowcs(nullptr, pStr, len);
+		//if (size_t(-1) != size) {
+			wstring str(size, '\0');
+			size = std::mbstowcs((wchar_t*)str.c_str(), pStr, len);
+			if (size_t(-1) != size)
+			{
+				str.erase(size);
+				return str;
+			}
+		//}*/
+	}
 	return g_ws;
 }
 
+#endif
+
 string strutil::toGbk(const wchar_t *pStr, int len)
 {
-    if (_checkLen(pStr, len))
-    {
 #if __windows
-        string strRet(len*2, '\0');
-        int nRet = WideCharToMultiByte(__gbkCP, 0, pStr, len, (char*)strRet.c_str(), len*2, NULL, NULL);
-        if (nRet > 0)
-        {
-            strRet.erase(nRet);
-            return strRet;
-        }
-
-        /*auto size = std::wcstombs(nullptr, pStr, len);
-        if (size_t(-1) != size)
-		{
-            string str(size, '\0');
-            size = std::wcstombs((char*)str.c_str(), pStr, len);
-            if (size_t(-1) != size)
-			{
-                str.erase(size);
-				return str;
-			}
-        }*/
-
+	return toMbs(CP_GBK, pStr, len);
 #else
-        return g_gbkCodec->fromUnicode(__W2Q(pStr, len)).toStdString();
+	return g_gbkCodec->fromUnicode(__W2Q(pStr, len)).toStdString();
 #endif
-	}
-
-    return g_s;
 }
 
 #if !__winvc
