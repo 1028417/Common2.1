@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-void CThreadGroup::start(UINT uThreadCount, const CB_WorkThread& cb, bool bBlock)
+void CThreadGroup::start(UINT uThreadCount, CB_WorkThread cb, bool bBlock)
 {
 	m_bRunSignal = true; // m_CancelEvent.reset();
 

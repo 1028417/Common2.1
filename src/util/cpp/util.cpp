@@ -102,4 +102,28 @@ const RECT& getWorkArea(bool bFullScreen)
 
 	return rcWorkArea;
 }
+
+bool execBat(cwstr strBatFile, bool bBlock, int nShow, const wchar_t *pszDir)
+{
+	SHELLEXECUTEINFOW seInfo;
+	memset(&seInfo, 0, sizeof(seInfo));
+	seInfo.cbSize = sizeof(seInfo);
+	seInfo.lpFile = strBatFile.c_str();
+	seInfo.lpDirectory = pszDir ? pszDir : fsutil::GetParentDir(strBatFile).c_str();
+	seInfo.nShow = nShow;
+	if (bBlock)
+	{
+		seInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+	}
+	if (!ShellExecuteExW(&seInfo))
+	{
+		return false;
+	}
+
+	if (bBlock)
+	{
+		WaitForSingleObject(seInfo.hProcess, INFINITE);
+	}
+	return true;
+}
 #endif
