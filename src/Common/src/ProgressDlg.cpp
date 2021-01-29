@@ -63,9 +63,9 @@ BOOL CProgressDlg::OnInitDialog()
 
 inline void CProgressDlg::SetStatusText(cwstr strStatusText)
 {
-	m_csLock.lock();	
+	m_mutex.lock();
 	m_strStatusText = strStatusText;
-	m_csLock.unlock();
+	m_mutex.unlock();
 	(void)this->PostMessage(WM_SetStatusText);
 }
 
@@ -84,12 +84,12 @@ static wstring g_strStatusText;
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
-	if (!m_csLock.try_lock())
+	if (!m_mutex.try_lock())
 	{
 		return TRUE;
 	}
 	g_strStatusText.swap(m_strStatusText);
-	m_csLock.unlock();
+	m_mutex.unlock();
 
 	(void)CMainApp::removeMsg(WM_SetStatusText);
 
