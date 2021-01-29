@@ -55,7 +55,7 @@ BOOL CProgressDlg::OnInitDialog()
 				m_wndProgressCtrl.SetPos(1);
 			}
 
-			(void)this->SetDlgItemText(IDC_STATIC_STATUS, L"完成");
+			(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 		}
 	}, false);
 
