@@ -63,16 +63,10 @@ BOOL CProgressDlg::OnInitDialog()
 
 inline void CProgressDlg::SetStatusText(const CString& cstrStatusText)
 {
-	if (m_csLock.try_lock())
-	{
-		m_mtx.lock();
-		m_cstrStatusText = cstrStatusText;
-		m_mtx.unlock();
-
-		(void)this->PostMessage(WM_SetStatusText);
-
-		m_csLock.unlock();
-	}
+	m_csLock.lock();	
+	m_cstrStatusText = cstrStatusText;
+	m_csLock.unlock();
+	(void)this->PostMessage(WM_SetStatusText);
 }
 
 void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)
@@ -87,13 +81,14 @@ void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProg
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
-	CString cstrStatusText;
-	m_mtx.lock();
-	cstrStatusText.Append(m_cstrStatusText);
-	m_mtx.unlock();
+	if (!m_csLock.try_lock())
+	{
+		return TRUE;
+	}
+	auto cstrStatusText = m_cstrStatusText;
+	m_csLock.unlock();
 
 	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
-	(void)CMainApp::removeMsg(WM_SetStatusText);
 
 	return TRUE;
 }
