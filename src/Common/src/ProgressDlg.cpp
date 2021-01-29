@@ -43,7 +43,8 @@ BOOL CProgressDlg::OnInitDialog()
 		if (!m_bFinished)
 		{
 			m_bFinished = true;
-			__usleep(10);
+
+			(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 
 			if (m_uMaxProgress)
 			{
@@ -54,8 +55,6 @@ BOOL CProgressDlg::OnInitDialog()
 				m_wndProgressCtrl.SetRange(0, 1);
 				m_wndProgressCtrl.SetPos(1);
 			}
-
-			(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 		}
 	}, false);
 
@@ -64,12 +63,6 @@ BOOL CProgressDlg::OnInitDialog()
 
 inline void CProgressDlg::SetStatusText(const CString& cstrStatusText)
 {
-	if (m_bFinished)
-	{
-		(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
-		return;
-	}
-
 	if (m_csLock.try_lock())
 	{
 		m_mtx.lock();
@@ -94,16 +87,13 @@ void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProg
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
-	if (!m_bFinished)
-	{
-		CString cstrStatusText;
-		m_mtx.lock();
-		cstrStatusText.Append(m_cstrStatusText);
-		m_mtx.unlock();
+	CString cstrStatusText;
+	m_mtx.lock();
+	cstrStatusText.Append(m_cstrStatusText);
+	m_mtx.unlock();
 
-		(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
-		(void)CMainApp::removeMsg(WM_SetStatusText);
-	}
+	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
+	(void)CMainApp::removeMsg(WM_SetStatusText);
 
 	return TRUE;
 }
