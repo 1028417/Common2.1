@@ -107,7 +107,7 @@ void CMainWnd::resizeView(bool bManual)
 
 	g_bResizing = true;
 
-	(void)__mainApp->DoEvents();
+	(void)__app->DoEvents();
 
 	g_bResizing = false;
 

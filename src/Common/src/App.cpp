@@ -538,7 +538,7 @@ int CMainApp::msgBox(cwstr strMsg, cwstr strTitle, UINT nType, CWnd *pWnd)
 
 	if (NULL == pWnd)
 	{
-		pWnd = __mainApp->m_pMainWnd;
+		pWnd = __app->m_pMainWnd;
 	}
 	return pWnd->MessageBoxW(strText.c_str(), (L" " + strTitle).c_str(), nType);
 }
