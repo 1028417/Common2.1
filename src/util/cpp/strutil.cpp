@@ -1,8 +1,6 @@
 ﻿
 #include "util.h"
 
-#define CP_GBK 936u
-
 static const string g_s;
 static const wstring g_ws;
 
@@ -298,7 +296,7 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
     return _replace(str, strFind, strReplace.c_str(), strReplace.size());
 }
 
-/* 好像有bug bool strutil::checkGbk(const char *pStr, int len)
+/* 好像有bug bool strutil::checkGbk(const char *pStr, size_t len)
 {
 	if (!_checkLen(pStr, len))
 	{
@@ -342,7 +340,7 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
     return true;
 }*/
 
-bool strutil::checkUtf8(const char *pStr, int len)
+bool strutil::checkUtf8(const char *pStr, size_t len)
 {
     if (!_checkLen(pStr, len))
 	{
@@ -459,7 +457,7 @@ bool strutil::checkUtf8(const char *pStr, int len)
 	return true;
 }*/
 
-wstring strutil::fromUtf8(const char *pStr, int len)
+wstring strutil::fromUtf8(const char *pStr, size_t len)
 {
     if (!_checkLen(pStr, len))
     {
@@ -467,7 +465,7 @@ wstring strutil::fromUtf8(const char *pStr, int len)
     }
 
 #if __winvc
-	return fromMbs(CP_UTF8, pStr, len);
+	return fromMbs(pStr, len, CP_UTF8);
 	//return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
     //return g_utf8Codec->toUnicode(pStr, len).toStdWString();
@@ -475,7 +473,7 @@ wstring strutil::fromUtf8(const char *pStr, int len)
 #endif
 }
 
-string strutil::toUtf8(const wchar_t *pStr, int len)
+string strutil::toUtf8(const wchar_t *pStr, size_t len)
 {
     if (!_checkLen(pStr, len))
     {
@@ -483,14 +481,14 @@ string strutil::toUtf8(const wchar_t *pStr, int len)
     }
 
 #if __winvc
-	return toMbs(CP_UTF8, pStr, len);
+	return toMbs(pStr, len, CP_UTF8);
     //return g_utf8Convert.to_bytes(pStr, pStr+len);
 #else
     return __W2Q(pStr, len).toUtf8().toStdString();
 #endif
 }
 
-wstring strutil::fromGbk(const char *pStr, int len)
+wstring strutil::fromGbk(const char *pStr, size_t len)
 {
 	if (!_checkLen(pStr, len))
 	{
@@ -498,16 +496,32 @@ wstring strutil::fromGbk(const char *pStr, int len)
 	}
 
 #if __windows
-		return fromMbs(CP_GBK, pStr, len);
+		return fromMbs(pStr, len, CP_GBK);
 #else
 		return g_gbkCodec->toUnicode(pStr, len).toStdWString();
 #endif
 }
 
-#if __windows
-string strutil::toMbs(UINT uCodePage, const wchar_t *pStr, int len)
+string strutil::toGbk(const wchar_t *pStr, size_t len)
 {
-	if (_checkLen(pStr, len))
+#if __windows
+	return toMbs(pStr, len, CP_GBK);
+#else
+	return g_gbkCodec->fromUnicode(__W2Q(pStr, len)).toStdString();
+#endif
+}
+
+#if !__winvc
+string strutil::toGbk(cqstr qs)
+{
+	return g_gbkCodec->fromUnicode(qs).toStdString();
+}
+#endif
+
+#if __windows
+string strutil::toMbs(const wchar_t *pStr, size_t len, UINT uCodePage)
+{
+	if (len)
 	{
 		auto size = WideCharToMultiByte(uCodePage, 0, pStr, len, NULL, 0, NULL, NULL);
 		if (size > 0)
@@ -536,9 +550,9 @@ string strutil::toMbs(UINT uCodePage, const wchar_t *pStr, int len)
     return g_s;
 }
 
-wstring strutil::fromMbs(UINT uCodePage, const char *pStr, int len)
+wstring strutil::fromMbs(const char *pStr, size_t len, UINT uCodePage)
 {
-	if (_checkLen(pStr, len))
+	if (len)
 	{
 		wstring strRet(len, L'\0');
 		auto size = MultiByteToWideChar(uCodePage, 0, pStr, len, (wchar_t*)strRet.c_str(), len);
@@ -561,41 +575,9 @@ wstring strutil::fromMbs(UINT uCodePage, const char *pStr, int len)
 	}
 	return g_ws;
 }
-
 #endif
 
-string strutil::toGbk(const wchar_t *pStr, int len)
-{
-#if __windows
-	return toMbs(CP_GBK, pStr, len);
-#else
-	return g_gbkCodec->fromUnicode(__W2Q(pStr, len)).toStdString();
-#endif
-}
-
-#if !__winvc
-/*QString strutil::fromGbk(const char *pStr, int len)
-{
-    if (!_checkLen(pStr, len))
-    {
-        return "";
-    }
-
-    return g_gbkCodec->toUnicode(pStr, len);
-}
-
-QString strutil::fromGbk(const string& str)
-{
-    return fromGbk(str.c_str(), str.size());
-}*/
-
-string strutil::toGbk(cqstr qs)
-{
-    return g_gbkCodec->fromUnicode(qs).toStdString();
-}
-#endif
-
-string strutil::toAsc(const wchar_t *pStr, int len)
+string strutil::toAsc(const wchar_t *pStr, size_t len)
 {
     if (!_checkLen(pStr, len))
     {
@@ -611,7 +593,7 @@ string strutil::toAsc(const wchar_t *pStr, int len)
     return str;
 }
 
-wstring strutil::fromAsc(const char *pStr, int len)
+wstring strutil::fromAsc(const char *pStr, size_t len)
 {
     if (!_checkLen(pStr, len))
     {
@@ -627,7 +609,7 @@ wstring strutil::fromAsc(const char *pStr, int len)
     return str;
 }
 
-wstring strutil::fromStr(const char *pStr, int len)
+wstring strutil::fromStr(const char *pStr, size_t len)
 {
 	if (strutil::checkUtf8(pStr, len))
 	{
