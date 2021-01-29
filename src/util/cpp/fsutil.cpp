@@ -505,7 +505,7 @@ bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile)
 {
 #if __windows
     if (!::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str()
-        , MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
+        , MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED)) //如移动到一个不同的卷，则复制文件并删除原文件
     {
         return false;
     }
