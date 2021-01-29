@@ -85,11 +85,11 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 	{
 		return TRUE;
 	}
+	(void)CMainApp::removeMsg(WM_SetStatusText);
 	auto cstrStatusText = m_cstrStatusText;
 	m_csLock.unlock();
 
 	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
-
 	return TRUE;
 }
 
@@ -114,8 +114,8 @@ LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_bFinished)
 	{
-		_updateProgress();
 		(void)CMainApp::removeMsg(WM_SetProgress);
+		_updateProgress();
 	}
 	return TRUE;
 }
