@@ -122,7 +122,7 @@ static bool _matchIgnoreCase(const S& str1, const S& str2, size_t maxlen)
 {
     if (0 == maxlen)
     {
-        maxlen = (size_t)-1;
+        maxlen = __size_max;
     }
 
     auto ptr1 = str1.c_str();
@@ -177,8 +177,12 @@ static bool _matchIgnoreCase(const C *pstr1, const C *pstr2, size_t maxlen)
 
 bool strutil::matchIgnoreCase(cwstr str1, cwstr str2, size_t maxlen)
 {
-    if (0 == maxlen)
-    {
+	if (0 == maxlen)
+	{
+		return true;
+	}
+	if (__size_max == maxlen)
+	{
 #if __windows
         return 0 == _wcsicmp(str1.c_str(), str2.c_str());
 #else
@@ -504,6 +508,11 @@ wstring strutil::fromGbk(const char *pStr, size_t len)
 
 string strutil::toGbk(const wchar_t *pStr, size_t len)
 {
+	if (!_checkLen(pStr, len))
+	{
+		return g_s;
+	}
+
 #if __windows
 	return toMbs(pStr, len, CP_GBK);
 #else
@@ -536,11 +545,11 @@ string strutil::toMbs(const wchar_t *pStr, size_t len, UINT uCodePage)
 		}
 
 		/*auto size = std::wcstombs(nullptr, pStr, len);
-		if (size_t(-1) != size)
+		if (__size_max != size)
 		{
 			string str(size, '\0');
 			size = std::wcstombs((char*)str.c_str(), pStr, len);
-			if (size_t(-1) != size)
+			if (__size_max != size)
 			{
 				str.erase(size);
 				return str;
@@ -563,10 +572,10 @@ wstring strutil::fromMbs(const char *pStr, size_t len, UINT uCodePage)
 		}
 
 	    /*auto size = len;//std::mbstowcs(nullptr, pStr, len);
-		//if (size_t(-1) != size) {
+		//if (__size_max != size) {
 			wstring str(size, '\0');
 			size = std::mbstowcs((wchar_t*)str.c_str(), pStr, len);
-			if (size_t(-1) != size)
+			if (__size_max != size)
 			{
 				str.erase(size);
 				return str;
@@ -611,6 +620,11 @@ wstring strutil::fromAsc(const char *pStr, size_t len)
 
 wstring strutil::fromStr(const char *pStr, size_t len)
 {
+	if (!_checkLen(pStr, len))
+	{
+		return g_ws;
+	}
+
 	if (strutil::checkUtf8(pStr, len))
 	{
 		return strutil::fromUtf8(pStr, len);
