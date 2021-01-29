@@ -304,10 +304,10 @@ UINT strutil::replace(string& str, const string& strFind, const string& strRepla
 	}
 
     bool bAllAscii = true;
-    int nIdx = 0;
-    while (nIdx < len)
+    size_t uIdx = 0;
+    while (uIdx < len)
     {
-        auto chr = (unsigned char)pStr[nIdx];
+        auto chr = (unsigned char)pStr[uIdx];
 
         if (chr <= 0x7f)
         {
@@ -350,8 +350,8 @@ bool strutil::checkUtf8(const char *pStr, size_t len)
 	UINT nBytes = 0;
 	unsigned char chr = 0;
 	bool bAllAscii = true;
-    for (int nIdx = 0; nIdx < len; nIdx++) {
-        chr = *(pStr + nIdx);
+    for (size_t uIdx = 0; uIdx < len; uIdx++) {
+        chr = *(pStr + uIdx);
 		//判断是否ASCII编码,如果不是,说明有可能是UTF8,ASCII用7位编码,最高位标记为0,0xxxxxxx
         if (nBytes == 0 && (chr & 0x80) != 0) {
 			bAllAscii = false;
@@ -586,9 +586,9 @@ string strutil::toAsc(const wchar_t *pStr, size_t len)
 
     string str;
     str.resize(len);
-    for (int nIdx = 0; nIdx < len; nIdx++)
+    for (size_t uIdx = 0; uIdx < len; uIdx++)
     {
-        str[nIdx] = (char)pStr[nIdx];
+        str[uIdx] = (char)pStr[uIdx];
     }
     return str;
 }
@@ -602,9 +602,9 @@ wstring strutil::fromAsc(const char *pStr, size_t len)
 
     wstring str;
     str.resize(len);
-    for (int nIdx = 0; nIdx < len; nIdx++)
+    for (size_t uIdx = 0; uIdx < len; uIdx++)
     {
-        str[nIdx] = pStr[nIdx];
+        str[uIdx] = pStr[uIdx];
     }
     return str;
 }
