@@ -467,7 +467,7 @@ wstring strutil::fromUtf8(const char *pStr, int len)
     }
 
 #if __winvc
-	return fromMbs(CP_GBK, pStr, len);
+	return fromMbs(CP_UTF8, pStr, len);
 	//return g_utf8Convert.from_bytes(pStr, pStr+len);
 #else
     //return g_utf8Codec->toUnicode(pStr, len).toStdWString();
