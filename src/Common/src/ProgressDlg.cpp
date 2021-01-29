@@ -61,17 +61,17 @@ BOOL CProgressDlg::OnInitDialog()
 	return TRUE;
 }
 
-inline void CProgressDlg::SetStatusText(const CString& cstrStatusText)
+inline void CProgressDlg::SetStatusText(cwstr strStatusText)
 {
 	m_csLock.lock();	
-	m_cstrStatusText = cstrStatusText;
+	m_strStatusText = strStatusText;
 	m_csLock.unlock();
 	(void)this->PostMessage(WM_SetStatusText);
 }
 
-void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProgress)
+void CProgressDlg::SetStatusText(cwstr strStatusText, UINT uOffsetProgress)
 {
-	SetStatusText(cstrStatusText);
+	SetStatusText(strStatusText);
 
 	if (0 != uOffsetProgress)
 	{
@@ -79,17 +79,21 @@ void CProgressDlg::SetStatusText(const CString& cstrStatusText, UINT uOffsetProg
 	}
 }
 
+
+static wstring g_strStatusText;
+
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_csLock.try_lock())
 	{
 		return TRUE;
 	}
-	(void)CMainApp::removeMsg(WM_SetStatusText);
-	auto cstrStatusText = m_cstrStatusText;
+	g_strStatusText.swap(m_strStatusText);
 	m_csLock.unlock();
 
-	(void)this->SetDlgItemText(IDC_STATIC_STATUS, cstrStatusText);
+	(void)CMainApp::removeMsg(WM_SetStatusText);
+
+	(void)this->SetDlgItemText(IDC_STATIC_STATUS, g_strStatusText.c_str());
 	return TRUE;
 }
 
