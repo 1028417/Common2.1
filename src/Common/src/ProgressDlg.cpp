@@ -42,7 +42,7 @@ BOOL CProgressDlg::OnInitDialog()
 		m_fnWork(*this);
 		if (!m_bFinished)
 		{
-			CMainApp::GetMainApp()->sync([=]{
+			__mainApp->sync([=]{
 				_endProgress();
 			});
 			m_bFinished = true;
@@ -177,7 +177,7 @@ void CProgressDlg::OnCancel()
 
 	while (0 != this->getActiveCount())
 	{
-		if (CMainApp::GetMainApp()->DoEvents() == E_DoEventsResult::DER_None)
+		if (__mainApp->DoEvents() == E_DoEventsResult::DER_None)
 		{
 			__usleep(50);
 		}
