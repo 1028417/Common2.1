@@ -42,10 +42,18 @@ BOOL CProgressDlg::OnInitDialog()
 		m_fnWork(*this);
 		if (!m_bFinished)
 		{
-			__app->sync([=]{
-				_endProgress();
-			});
 			m_bFinished = true;
+
+			if (m_uMaxProgress)
+			{
+				SetProgress(m_uMaxProgress);
+			}
+			else
+			{
+				SetProgress(1, 1);
+			}
+
+			SetStatusText(L"完成");
 		}
 	}, false);
 
@@ -137,22 +145,6 @@ void CProgressDlg::_updateProgress()
 		cstrProgress.Format(_T("%d"), m_uProgress);
 	}
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
-}
-
-void CProgressDlg::_endProgress()
-{
-	if (m_uMaxProgress)
-	{
-		m_uProgress = m_uMaxProgress;
-		_updateProgress();
-	}
-	else
-	{
-		m_wndProgressCtrl.SetRange(0, 1);
-		(void)m_wndProgressCtrl.SetPos(1);
-	}
-
-	(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
 }
 
 void CProgressDlg::OnCancel()
