@@ -189,6 +189,5 @@ void CProgressDlg::OnCancel()
 void CProgressDlg::Close()
 {
 	m_bFinished = true;
-
 	this->PostMessage(WM_SYSCOMMAND, SC_CLOSE);
 }
