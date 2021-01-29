@@ -120,24 +120,28 @@ LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
 
 void CProgressDlg::_updateProgress()
 {
+	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
+	(void)m_wndProgressCtrl.SetPos(m_uProgress);
+
 	CString cstrProgress;
-	if (m_uMaxProgress > 0)
+	if (m_uMaxProgress)
 	{
 		cstrProgress.Format(_T("%d/%d"), m_uProgress, m_uMaxProgress);
 	}
 	else
 	{
+		if (0 == m_uProgress)
+		{
+			return;
+		}
 		cstrProgress.Format(_T("%d"), m_uProgress);
 	}
 	(void)this->SetDlgItemText(IDC_STATIC_PROGRESS, cstrProgress);
-
-	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
-	(void)m_wndProgressCtrl.SetPos(m_uProgress);
 }
 
 void CProgressDlg::_endProgress()
 {
-	if (0 != m_uMaxProgress)
+	if (m_uMaxProgress)
 	{
 		m_uProgress = m_uMaxProgress;
 		_updateProgress();
