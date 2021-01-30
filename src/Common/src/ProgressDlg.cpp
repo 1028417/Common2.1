@@ -64,9 +64,9 @@ BOOL CProgressDlg::OnInitDialog()
 inline void CProgressDlg::SetStatusText(cwstr strStatusText)
 {
 	m_mutex.lock();
-	m_strStatusText = strStatusText;
-	m_mutex.unlock();
+	m_strStatusText.assign(strStatusText.begin(), strStatusText.end());
 	(void)this->PostMessage(WM_SetStatusText);
+	m_mutex.unlock();
 }
 
 void CProgressDlg::SetStatusText(cwstr strStatusText, UINT uOffsetProgress)
@@ -79,7 +79,6 @@ void CProgressDlg::SetStatusText(cwstr strStatusText, UINT uOffsetProgress)
 	}
 }
 
-
 static wstring g_strStatusText;
 
 LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
@@ -89,11 +88,11 @@ LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 	g_strStatusText.swap(m_strStatusText);
+	(void)CMainApp::removeMsg(WM_SetStatusText);
 	m_mutex.unlock();
 
-	(void)CMainApp::removeMsg(WM_SetStatusText);
-
 	(void)this->SetDlgItemText(IDC_STATIC_STATUS, g_strStatusText.c_str());
+
 	return TRUE;
 }
 
