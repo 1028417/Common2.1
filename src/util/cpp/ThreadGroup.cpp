@@ -9,7 +9,7 @@ void CThreadGroup::start(UINT uThreadCount, CB_WorkThread cb, bool bBlock)
 
 	for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
 	{
-		auto pthr = new thread([&, uIndex] {
+		auto pthr = new thread([=] {
 			m_vecThreadStatus[uIndex] = 1;
 			cb(uIndex);
 			m_vecThreadStatus[uIndex] = 0;
