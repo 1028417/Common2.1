@@ -5,35 +5,21 @@ void CThreadGroup::start(UINT uThreadCount, CB_WorkThread cb, bool bBlock)
 {
 	m_bRunSignal = true; // m_CancelEvent.reset();
 
-    m_vecThreadStatus.assign(uThreadCount, 0);
+	m_vecThreadStatus.assign(uThreadCount, 0);
+
+	for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
+	{
+		auto pthr = new thread([&, uIndex] {
+			m_vecThreadStatus[uIndex] = 1;
+			cb(uIndex);
+			m_vecThreadStatus[uIndex] = 0;
+		});
+		m_lstThread.push_back(pthr);
+	}
 
 	if (bBlock)
 	{
-		list<thread> lstThread;
-		for (UINT uIndex = 0; uIndex < uThreadCount; uIndex++)
-		{
-			lstThread.emplace_back([&, uIndex]{
-				cb(uIndex);
-			});
-		}
-
-		for (auto& thread : lstThread)
-		{
-			thread.join();
-		}
-	}
-	else
-	{
-		for (UINT uIndex = 0; uIndex < uThreadCount; ++uIndex)
-		{
-			mtutil::thread([=]{
-				m_vecThreadStatus[uIndex] = 1;
-
-				cb(uIndex);
-
-				m_vecThreadStatus[uIndex] = 0;
-			});
-		}
+		join();
 	}
 }
 

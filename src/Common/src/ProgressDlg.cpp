@@ -164,7 +164,7 @@ void CProgressDlg::OnCancel()
 
 	this->pause(false);
 
-	while (0 != this->getActiveCount())
+	while (0 != this->())
 	{
 		if (__app->DoEvents() == E_DoEventsResult::DER_None)
 		{
