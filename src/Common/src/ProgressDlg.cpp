@@ -3,8 +3,7 @@
 
 #include "Common/ProgressDlg.h"
 
-#define WM_SetProgress WM_USER+1
-#define WM_SetStatusText WM_USER+2
+#define WM_UpateStatus WM_USER+1
 
 void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -13,9 +12,7 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
-	ON_MESSAGE(WM_SetProgress, &CProgressDlg::OnSetProgress)
-
-	ON_MESSAGE(WM_SetStatusText, &CProgressDlg::OnSetStatusText)
+	ON_MESSAGE(WM_UpateStatus, &CProgressDlg::OnUpateStatus)
 END_MESSAGE_MAP()
 
 INT_PTR CProgressDlg::DoModal(cwstr strTitle, CWnd *pWndParent)
@@ -37,26 +34,27 @@ BOOL CProgressDlg::OnInitDialog()
 	(void)this->SetWindowText(m_strTitle.c_str());
 
 	m_bFinished = false;
-	(void)this->start(1, [&](UINT) {
-		__usleep(10);
-		m_fnWork(*this);
-		if (!m_bFinished)
-		{
-			m_bFinished = true;
-
-			(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
-
-			if (m_uMaxProgress)
+	__async(10, [&] {
+		(void)this->start(1, [&](UINT) {
+			m_fnWork(*this);
+			if (!m_bFinished)
 			{
-				m_wndProgressCtrl.SetPos(m_uMaxProgress);
+				m_bFinished = true;
+
+				(void)::SetDlgItemText(m_hWnd, IDCANCEL, L"完成");
+
+				if (m_uMaxProgress)
+				{
+					m_wndProgressCtrl.SetPos(m_uMaxProgress);
+				}
+				else
+				{
+					m_wndProgressCtrl.SetRange(0, 1);
+					m_wndProgressCtrl.SetPos(1);
+				}
 			}
-			else
-			{
-				m_wndProgressCtrl.SetRange(0, 1);
-				m_wndProgressCtrl.SetPos(1);
-			}
-		}
-	}, false);
+		}, false);
+	});
 
 	return TRUE;
 }
@@ -65,8 +63,8 @@ inline void CProgressDlg::SetStatusText(cwstr strStatusText)
 {
 	m_mutex.lock();
 	m_strStatusText.assign(strStatusText.begin(), strStatusText.end());
-	(void)this->PostMessage(WM_SetStatusText);
 	m_mutex.unlock();
+	(void)this->PostMessage(WM_UpateStatus);
 }
 
 void CProgressDlg::SetStatusText(cwstr strStatusText, UINT uOffsetProgress)
@@ -79,27 +77,10 @@ void CProgressDlg::SetStatusText(cwstr strStatusText, UINT uOffsetProgress)
 	}
 }
 
-static wstring g_strStatusText;
-
-LRESULT CProgressDlg::OnSetStatusText(WPARAM wParam, LPARAM lParam)
-{
-	if (!m_mutex.try_lock())
-	{
-		return TRUE;
-	}
-	g_strStatusText.swap(m_strStatusText);
-	(void)CMainApp::removeMsg(WM_SetStatusText);
-	m_mutex.unlock();
-
-	(void)this->SetDlgItemText(IDC_STATIC_STATUS, g_strStatusText.c_str());
-
-	return TRUE;
-}
-
 inline void CProgressDlg::SetProgress(UINT uProgress)
 {
 	m_uProgress = uProgress;
-	(void)this->PostMessage(WM_SetProgress);
+	(void)this->PostMessage(WM_UpateStatus);
 }
 
 void CProgressDlg::SetProgress(UINT uProgress, UINT uMaxProgress)
@@ -113,18 +94,43 @@ inline void CProgressDlg::ForwardProgress(UINT uOffSet)
 	this->SetProgress(m_uProgress + uOffSet);
 }
 
-LRESULT CProgressDlg::OnSetProgress(WPARAM wParam, LPARAM lParam)
+UINT g_uProgress = 0;
+UINT g_uMaxProgress = 0;
+static wstring g_strStatusText;
+
+LRESULT CProgressDlg::OnUpateStatus(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_bFinished)
 	{
-		(void)CMainApp::removeMsg(WM_SetProgress);
+		(void)CMainApp::removeMsg(WM_UpateStatus);
+		__app->DoEvent(false);
 		_updateProgress();
 	}
+
+	if (!m_strStatusText.empty())
+	{
+		if (m_mutex.try_lock())
+		{
+			g_strStatusText.swap(m_strStatusText);
+			m_mutex.unlock();
+
+			(void)this->SetDlgItemText(IDC_STATIC_STATUS, g_strStatusText.c_str());
+			g_strStatusText.clear();
+		}
+	}
+	
 	return TRUE;
 }
 
 void CProgressDlg::_updateProgress()
 {
+	if (g_uProgress == m_uProgress && g_uMaxProgress == m_uMaxProgress)
+	{
+		return;
+	}
+	g_uProgress = m_uProgress;
+	g_uMaxProgress = m_uMaxProgress;
+
 	m_wndProgressCtrl.SetRange(0, m_uMaxProgress);
 	m_wndProgressCtrl.SetPos(m_uProgress);
 
