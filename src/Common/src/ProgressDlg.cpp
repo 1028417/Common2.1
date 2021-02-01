@@ -38,7 +38,7 @@ BOOL CProgressDlg::OnInitDialog()
 
 	m_bFinished = false;
 	(void)this->start(1, [&](UINT) {
-		__usleep(100);
+		__usleep(10);
 		m_fnWork(*this);
 		if (!m_bFinished)
 		{
