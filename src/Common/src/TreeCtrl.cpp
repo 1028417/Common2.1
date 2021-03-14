@@ -547,7 +547,6 @@ BOOL CObjectTree::handleNMNotify(NMHDR& NMHDR, LRESULT* pResult)
 		NMTVDISPINFO *pTVDispInfo = reinterpret_cast<NMTVDISPINFO*>(&NMHDR);
 
 		CString cstrNewName(pTVDispInfo->item.pszText);
-		(void)cstrNewName.Trim();
 		__EnsureReturn(!cstrNewName.IsEmpty(), TRUE);
 
 		CTreeObject *pObject = GetItemObject(pTVDispInfo->item.hItem);
