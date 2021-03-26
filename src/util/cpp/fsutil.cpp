@@ -501,11 +501,15 @@ bool fsutil::removeFile(cwstr strFile)
     return true;
 }
 
-bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile)
+bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile, bool bReplaceExisting)
 {
 #if __windows
-    if (!::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str()
-        , MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED)) //如移动到一个不同的卷，则复制文件并删除原文件
+	DWORD dwFlags = MOVEFILE_COPY_ALLOWED; //如移动到一个不同的卷，则复制文件并删除原文件
+	if (bReplaceExisting)
+	{
+		dwFlags |= MOVEFILE_REPLACE_EXISTING;
+	}
+    if (!::MoveFileEx(strSrcFile.c_str(), strDstFile.c_str(), dwFlags))
     {
         return false;
     }
@@ -518,6 +522,10 @@ bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile)
 
     if (existFile(strDstFile))
     {
+		if (!bReplaceExisting)
+		{
+			return false;
+		}
         if (!removeFile(strDstFile))
         {
             return false;
