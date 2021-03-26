@@ -107,12 +107,12 @@ void CPath::_findFile()
 
 void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 {
-    bool bRet = fsutil::findFile(this->path(), [&](tagFileInfo& fileInfo) {
-        fileInfo.pParent = this;
+    bool bRet = fsutil::findFile(this->path(), [&](tagFileInfo& fi) {
+        fi.pParent = this;
 
-        if (fileInfo.bDir)
+        if (fi.bDir)
 		{
-			XFile *pSubDir = _newSubDir(fileInfo);
+            XFile *pSubDir = _newSubDir(fi);
 			if (pSubDir)
 			{
 				paSubDir.add(pSubDir);
@@ -120,7 +120,7 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 		}
 		else
 		{
-			XFile *pSubFile = _newSubFile(fileInfo);
+            XFile *pSubFile = _newSubFile(fi);
 			if (pSubFile)
 			{
 				paSubFile.add(pSubFile);

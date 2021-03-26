@@ -444,12 +444,12 @@ bool fsutil::createDir(const string& strDir)
 
 bool fsutil::removeDirTree(cwstr strDir)
 {
-	(void)fsutil::findSubFile(strDir, [&](cwstr strSubFile) {
-        (void)removeFile(strDir + __wcPathSeparator + strSubFile);
+    (void)fsutil::findSubFile(strDir, [&](tagFileInfo& fi) {
+        (void)removeFile(strDir + __wcPathSeparator + fi.strName);
 	});
 
-	(void)fsutil::findSubDir(strDir, [&](cwstr strSubDir) {
-        (void)removeDirTree(strDir + __wcPathSeparator + strSubDir);
+    (void)fsutil::findSubDir(strDir, [&](tagFileInfo& fi) {
+        (void)removeDirTree(strDir + __wcPathSeparator + fi.strName);
 	});
 
 	return removeDir(strDir);
