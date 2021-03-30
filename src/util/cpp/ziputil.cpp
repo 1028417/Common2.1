@@ -528,10 +528,10 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<st
 
 
     struct stat fileStat;
-    DIR* pDir = opendir(path.c_str());
+    DIR *pDir = opendir(path.c_str());
     if (!pDir) return;
 
-    struct dirent* pDirEnt = NULL;
+    struct dirent *pDirEnt = NULL;
     while ( (pDirEnt = readdir(pDir)) != NULL )
     {
         if (strcmp(pDirEnt->d_name,".") == 0 || strcmp(pDirEnt->d_name,"..") == 0)
@@ -691,7 +691,7 @@ static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
 	return len;
 }
 
-int ziputil::zCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int level)
+int ziputil::zCompress(const void *pData, size_t len, CByteBuffer& bbfBuff, int level)
 {
 	uLongf destLen = len * 2;
 	auto ptr = bbfBuff.resizeMore(destLen);
@@ -709,7 +709,7 @@ int ziputil::zCompress(const void* pData, size_t len, CByteBuffer& bbfBuff, int 
 	return destLen;
 }
 
-int ziputil::zUncompress(const void* pData, size_t len, CByteBuffer& bbfBuff)
+int ziputil::zUncompress(const void *pData, size_t len, CByteBuffer& bbfBuff)
 {
     uLongf destLen = len * 3;
 	auto ptr = bbfBuff.resizeMore(destLen);

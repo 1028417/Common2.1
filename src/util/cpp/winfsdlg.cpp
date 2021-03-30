@@ -25,7 +25,7 @@ void CFolderDlg::preInit()
 
 int CFolderDlg::_handleCallBack(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 {
-	CFolderDlg* pFolderDlg = (CFolderDlg*)lpData;
+    CFolderDlg *pFolderDlg = (CFolderDlg*)lpData;
 	pFolderDlg->_handleCallBack(hWnd, uMsg, lParam);
 	return 0;
 }
