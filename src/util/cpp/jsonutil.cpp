@@ -97,7 +97,7 @@ bool jsonutil::getHex(const JValue& jValue, unsigned int& uRet)
 }
 
 #ifdef JSON_HAS_INT64
-bool jsonutil::get(const JValue& jValue, Json::Value::Int64& nRet)
+bool jsonutil::get(const JValue& jValue, JValue::Int64& nRet)
 {
     if (!jValue.isNull())
     {
@@ -108,7 +108,7 @@ bool jsonutil::get(const JValue& jValue, Json::Value::Int64& nRet)
     return false;
 }
 
-bool jsonutil::get(const JValue& jValue, Json::Value::UInt64& uRet)
+bool jsonutil::get(const JValue& jValue, JValue::UInt64& uRet)
 {
     if (jValue.isUInt() || jValue.isUInt64())
     {
