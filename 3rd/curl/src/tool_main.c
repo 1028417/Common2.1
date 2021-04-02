@@ -310,9 +310,6 @@ int curltool_main(int argc, char *argv[],  void (*pfnHook)(CURL *curl))
 {
     g_pfnHook = pfnHook;
 
-    //g_lpWriteCB = lpWriteCB;
-    //g_lpWriteData = lpWriteData;
-
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
