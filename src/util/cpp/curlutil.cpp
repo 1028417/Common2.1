@@ -3,7 +3,7 @@
 
 #include "util.h"
 
-extern "C" int curlInit();
+extern "C" int curltool_init();
 extern "C" int curltool_main(int argc, char *argv[], void (*pfnHook)(CURL *curl));
 
 static CURLSH *g_curlShare = NULL;
@@ -11,6 +11,10 @@ static CURLSH *g_curlShare = NULL;
 int curlutil::initCurl(string& strVerInfo)
 {
     curl_version_info_data *p = curl_version_info(CURLVERSION_NOW);
+    if (NULL == p)
+    {
+        return -1;
+    }
 
     stringstream ss;
     ss << "age: " << p->age;
@@ -58,30 +62,30 @@ int curlutil::initCurl(string& strVerInfo)
 
     strVerInfo.append(ss.str());
 
-    if (!curlInit())
+    int nRet = curltool_init(); //curl_global_init(CURL_GLOBAL_DEFAULT);
+    if (CURLE_OK == nRet)
     {
-        return false;
+        g_curlShare = curl_share_init();
+        if (g_curlShare)
+        {
+            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
+        }
     }
 
-    g_curlShare = curl_share_init();
-    if (NULL == g_curlShare)
-    {
-        return false;
-    }
-
-    curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-    curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-    curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-    curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-    curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
-
-    return true;
+    return nRet;
 }
 
 void curlutil::freeCurl()
 {
-    curl_share_cleanup(g_curlShare);
-    g_curlShare = NULL;
+    if (g_curlShare)
+    {
+        curl_share_cleanup(g_curlShare);
+        g_curlShare = NULL;
+    }
 
     curl_global_cleanup();
 }

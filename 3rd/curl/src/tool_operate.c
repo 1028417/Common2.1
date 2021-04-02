@@ -2100,8 +2100,8 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     else
 #endif
 
-      extern void tool_perform_hook(CURL *curl);
-      tool_perform_hook(per->curl);
+      extern void tool_perform_hook(CURL *curl); //by lhyuan
+      tool_perform_hook(per->curl); //by lhyuan
       result = curl_easy_perform(per->curl);
 
     /* store the result of the actual transfer */

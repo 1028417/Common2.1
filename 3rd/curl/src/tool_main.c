@@ -154,9 +154,32 @@ static CURLcode main_init(struct GlobalConfig *config)
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
   if(config->first) {
-    /* Initialise the config */
-    config_init(config->first);
-    config->first->global = config;
+    /* Perform the libcurl initialization */
+/*by lhyuan
+    result = curl_global_init(CURL_GLOBAL_DEFAULT);
+    if(!result) {
+*/
+      /* Get information about libcurl */
+/*by lhyuan
+      result = get_libcurl_info();
+
+      if(!result) {
+*/
+        /* Initialise the config */
+        config_init(config->first);
+        config->first->global = config;
+/*by lhyuan
+      }
+      else {
+        helpf(stderr, "error retrieving curl library information\n");
+        free(config->first);
+      }
+    }
+    else {
+      helpf(stderr, "error initializing curl library\n");
+      free(config->first);
+    }
+*/
   }
   else {
     helpf(stderr, "error initializing curl\n");
@@ -189,7 +212,9 @@ static void main_free(struct GlobalConfig *config)
 {
   /* Cleanup the easy handle */
   /* Main cleanup */
-  //curl_global_cleanup();
+/*by lhyuan
+  curl_global_cleanup();
+*/
   convert_cleanup();
   metalink_cleanup();
 #ifdef USE_NSS
@@ -253,7 +278,7 @@ static void restore_terminal(void)
 #endif
 }
 
-int curlInit()
+int curltool_init() //by lhyuan
 {
     /* Perform the libcurl initialization */
     int result = curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -265,9 +290,9 @@ int curlInit()
     return result;
 }
 
-static void (*g_pfnHook)(CURL *curl) = NULL;
+static void (*g_pfnHook)(CURL *curl) = NULL; //by lhyuan
 
-void tool_perform_hook(CURL *curl)
+void tool_perform_hook(CURL *curl) //by lhyuan
 {
     if (g_pfnHook)
     {
@@ -278,6 +303,9 @@ void tool_perform_hook(CURL *curl)
 /*
 ** curl tool main function.
 */
+/*by lhyuan
+int main(int argc, char *argv[])
+{*/
 int curltool_main(int argc, char *argv[],  void (*pfnHook)(CURL *curl))
 {
     g_pfnHook = pfnHook;

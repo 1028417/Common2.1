@@ -19,7 +19,9 @@ DEFINES += HAVE_BZIP2
 !win32: DEFINES += IOAPI_NO_64 #for zlib-miniZip
 
 DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
-            CARES_BUILDING_LIBRARY  #USE_ARES #安卓有问题  #USE_IPV6
+            CARES_BUILDING_LIBRARY #USE_ARES #安卓有问题  #USE_IPV6
+
+DEFINES += HAVE_UNISTD_H #for curl7.76
 
 INCLUDEPATH += ../../inc/util \
     ../../3rd/zlib-1.2.11 \
