@@ -263,19 +263,18 @@ static void tool_perform_hook(CURL *curl)
         return;
     }
 
-    if (g_pCURLToolHook->fnWrite)
-    {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)curl_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&g_pCURLToolHook->fnWrite);
-    }
-
     if (g_pCURLToolHook->fnProgress)
     {
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, (void*)progress_callback);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, (void*)&g_pCURLToolHook->fnProgress);
     }
 
-    if (g_pCURLToolHook->fnRead)
+    if (g_pCURLToolHook->fnWrite)
+    {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)curl_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&g_pCURLToolHook->fnWrite);
+    }
+    else if (g_pCURLToolHook->fnRead)
     {
         curl_easy_setopt(curl, CURLOPT_READFUNCTION, (void*)curl_callback);
         curl_easy_setopt(curl, CURLOPT_READDATA, (void*)&g_pCURLToolHook->fnRead);
