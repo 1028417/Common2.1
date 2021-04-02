@@ -167,9 +167,9 @@ static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
     }
 }
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    CB_CURLWrite& cb = *(CB_CURLWrite*)userdata;
+    CB_CURL& cb = *(CB_CURL*)userdata;
     return cb(ptr, size, nmemb);
 }
 
@@ -189,14 +189,14 @@ struct tagCurlInfo
     curl_off_t total = 0;
 };
 
-static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
 {
     auto curl = curlInfo.curl;
     //curl_easy_setopt(curlInfo.curl, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
 
     curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)curl_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&cbWrite);
 
     if (cbProgress)
@@ -226,7 +226,7 @@ static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURLWri
     return res;
 }
 
-int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURLWrite& cbWrite, CB_CURLProgress& cbProgress)
+int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
 {
     tagCurlInfo curlInfo;
     curlInfo.curl = curl_easy_init();
@@ -265,7 +265,7 @@ static void tool_perform_hook(CURL *curl)
 
     if (g_pCURLToolHook->fnWrite)
     {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)curl_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&g_pCURLToolHook->fnWrite);
     }
 
@@ -273,6 +273,12 @@ static void tool_perform_hook(CURL *curl)
     {
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, (void*)progress_callback);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, (void*)&g_pCURLToolHook->fnProgress);
+    }
+
+    if (g_pCURLToolHook->fnRead)
+    {
+        curl_easy_setopt(curl, CURLOPT_READFUNCTION, (void*)curl_callback);
+        curl_easy_setopt(curl, CURLOPT_READDATA, (void*)&g_pCURLToolHook->fnRead);
     }
 }
 
