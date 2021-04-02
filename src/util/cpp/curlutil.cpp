@@ -4,7 +4,7 @@
 #include "util.h"
 
 extern "C" int curlInit();
-extern "C" int curltool_main(int argc, char *argv[], void *lpWriteCB, void *lpWriteData);
+extern "C" int curltool_main(int argc, char *argv[], void (*pfnHook)(CURL *curl));
 
 static CURLSH *g_curlShare = NULL;
 
@@ -249,31 +249,50 @@ string curlutil::getCurlErrMsg(UINT uCurlCode)
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV);
 //curl_easy_pause(__curlptr, CURLPAUSE_RECV_CONT);
 
-static int _callCURLTool(const list<string>& lstParams
-                         , void *lpWriteCB = NULL, void *lpWriteData = NULL)
+/*https使用curl时可加参数“-k”，对应代码：
+curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0);
+curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYHOST, 0);
+作用是接受服务器的ssl证书而不管合不合法，参数等同于“--insecure”*/
+
+static tagCURlToolHook *g_pCURLToolHook = NULL;
+
+static void tool_perform_hook(CURL *curl)
 {
-    vector<char *> argv{(char*)"curl", (char*)"-k"};
-    for (const auto& strPara : lstParams)
+    if (NULL == g_pCURLToolHook)
     {
-        argv.push_back((char*)strPara.c_str());
+        return;
     }
 
-    static mutex s_mutex;
-    s_mutex.lock();
-    int nRet = curltool_main(argv.size(), &argv.front(), lpWriteCB, lpWriteData);
-    s_mutex.unlock();
-    return nRet;
+    if (g_pCURLToolHook->fnWrite)
+    {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&g_pCURLToolHook->fnWrite);
+    }
+
+    if (g_pCURLToolHook->fnProgress)
+    {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, (void*)progress_callback);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, (void*)&g_pCURLToolHook->fnProgress);
+    }
 }
 
-int curlutil::curlToolPerform(const list<string>& lstParams)
+int curlutil::curlToolPerform(const list<string>& lstParams, tagCURlToolHook *pCURLToolHook)
 {
-    return _callCURLTool(lstParams);
-}
+     vector<char *> argv{(char*)"curl", (char*)"-k"};
+     for (const auto& strPara : lstParams)
+     {
+         argv.push_back((char*)strPara.c_str());
+     }
 
-int curlutil::curlToolDownload(const string& strURL, CB_CURLWrite& cb)
-{
-    list<string> lstParams(1, strURL);
-    return _callCURLTool(lstParams, (void*)write_callback, (void*)&cb);
+     static mutex s_mutex;
+     s_mutex.lock();
+
+     g_pCURLToolHook = pCURLToolHook;
+
+     int nRet = curltool_main(argv.size(), &argv.front(), tool_perform_hook);
+
+     s_mutex.unlock();
+     return nRet;
 }
 
 int CCurlDownload::syncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress)

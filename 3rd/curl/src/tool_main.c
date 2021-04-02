@@ -265,16 +265,25 @@ int curlInit()
     return result;
 }
 
-void *g_lpWriteCB = NULL;
-void *g_lpWriteData = NULL;
+static void (*g_pfnHook)(CURL *curl) = NULL;
+
+void tool_perform_hook(CURL *curl)
+{
+    if (g_pfnHook)
+    {
+        g_pfnHook(curl);
+    }
+}
 
 /*
 ** curl tool main function.
 */
-int curltool_main(int argc, char *argv[], void *lpWriteCB, void *lpWriteData)
+int curltool_main(int argc, char *argv[],  void (*pfnHook)(CURL *curl))
 {
-    g_lpWriteCB = lpWriteCB;
-    g_lpWriteData = lpWriteData;
+    g_pfnHook = pfnHook;
+
+    //g_lpWriteCB = lpWriteCB;
+    //g_lpWriteData = lpWriteData;
 
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
