@@ -431,15 +431,18 @@ long CZipFile::unzip(const tagUnzSubFile& unzSubFile, cwstr strDstFile) const
 
     CByteBuffer bbfFile;
     int nCount = this->read(unzSubFile, bbfFile);
-    if (nCount <= 0)
+    if (nCount >= 0)
     {
-        return nCount;
+        if (!OFStream::writefilex(strDstFile, true, bbfFile))
+        {
+            return -1;
+        }
     }
 
-    return OFStream::writefile(strDstFile, true, bbfFile);
+    return nCount;
 }
 
-bool CZipFile::unzip(cwstr strDstDir) const
+bool CZipFile::unzipAll(cwstr strDstDir) const
 {
     if (NULL == m_pfile)
 	{
