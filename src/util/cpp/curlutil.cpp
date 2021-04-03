@@ -6,7 +6,7 @@
 extern "C" int curltool_init();
 extern "C" int curltool_main(int argc, char *argv[], void (*pfnHook)(CURL *curl));
 
-static CURLSH *g_curlShare = NULL;
+//有问题，各种崩溃 static CURLSH *g_curlShare = NULL;
 
 int curlutil::initCurl(string& strVerInfo)
 {
@@ -63,39 +63,41 @@ int curlutil::initCurl(string& strVerInfo)
     strVerInfo.append(ss.str());
 
     int nRet = curltool_init(); //curl_global_init(CURL_GLOBAL_DEFAULT);
-    if (CURLE_OK == nRet)
-    {
-        g_curlShare = curl_share_init();
-        if (g_curlShare)
-        {
-            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-            curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
-        }
+    if (CURLE_OK != nRet)
+    {        
+        return nRet;
     }
 
-    return nRet;
+    /*g_curlShare = curl_share_init();
+    if (g_curlShare)
+    {
+        curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+        curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+        curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+        curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+        curl_share_setopt(g_curlShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
+    }*/
+
+    return CURLE_OK;
 }
 
 void curlutil::freeCurl()
 {
-    if (g_curlShare)
+    /*if (g_curlShare)
     {
         curl_share_cleanup(g_curlShare);
         g_curlShare = NULL;
-    }
+    }*/
 
     curl_global_cleanup();
 }
 
 static void _initCurl(CURL* curl, const tagCurlOpt& curlOpt)
 {
-    if (curlOpt.bShare)
+    /*if (curlOpt.bShare)
     {
         curl_easy_setopt(curl, CURLOPT_SHARE, g_curlShare);
-    }
+    }*/
 
     //curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, curlOpt.dnsCacheTimeout);
 

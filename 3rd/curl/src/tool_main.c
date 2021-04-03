@@ -282,7 +282,7 @@ int curltool_init() //by lhyuan
 {
     /* Perform the libcurl initialization */
     int result = curl_global_init(CURL_GLOBAL_DEFAULT);
-    if (0 == result)
+    if (CURLE_OK == result)
     {
         result = get_libcurl_info();
     }
