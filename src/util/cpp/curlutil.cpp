@@ -374,7 +374,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
             break;
         }
 
-        if (!m_bStatus)
+        if (!fnProgress(0,0)) //!m_bStatus)
         {
             //clear(); //统一不清，cancel函数也不清
             break;
@@ -394,8 +394,8 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
     return nCurlCode;
 }
 
-void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, CB_DownloadProgress cbProgress
-                                  , cfn_void_t<int> cbFinish)
+void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, cfn_void_t<int> cbFinish
+                                  , CB_DownloadProgress cbProgress)
 {
     m_thread.start([=]{
         m_bStatus = true;
