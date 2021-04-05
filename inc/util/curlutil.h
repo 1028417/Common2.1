@@ -58,7 +58,7 @@ public:
     tagCURlToolDownloadHook(signal_t bRunSignal, CB_CURL& fnWrite=NULL)
         : tagCURlToolHook([&](int64_t, int64_t){
         return bRunSignal;
-    }, fnWrite)
+    }, fnWrite, NULL)
     {
     }
 };
