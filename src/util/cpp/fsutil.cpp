@@ -478,8 +478,16 @@ bool fsutil::removeDir(cwstr strDir)
     return true;
 }
 
-// ::rename();
-// ::remove();
+bool fsutil::removeDir(const string& strDir)
+{
+    return 0 == ::_rmdir(strDir.c_str());
+}
+
+bool fsutil::removeFile(const string& strFile)
+{
+    return 0 == ::remove(strFile.c_str());
+}
+
 bool fsutil::removeFile(cwstr strFile)
 {
 #if __windows
@@ -501,6 +509,7 @@ bool fsutil::removeFile(cwstr strFile)
     return true;
 }
 
+// ::rename();
 bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile, bool bReplaceExisting)
 {
 #if __windows

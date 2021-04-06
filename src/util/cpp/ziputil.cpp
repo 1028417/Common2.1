@@ -18,7 +18,9 @@ extern "C"
 #include "contrib/minizip/zip.h"
 }
 
-/*#if !__windows
+/*#if __windows
+#define mkdir(x) _mkdir(x)
+#else
 #define mkdir(x) mkdir(x, 0777)
 #endif*/
 
