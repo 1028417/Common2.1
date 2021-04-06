@@ -512,7 +512,7 @@ bool fsutil::removeFile(cwstr strFile)
     return true;
 }
 
-// ::rename();
+// ::rename好像实现不了移动
 bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile, bool bReplaceExisting)
 {
 #if __windows
