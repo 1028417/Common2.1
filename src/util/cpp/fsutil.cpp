@@ -480,6 +480,9 @@ bool fsutil::removeDir(cwstr strDir)
 
 bool fsutil::removeDir(const string& strDir)
 {
+#if !__windows
+#define _rmdir rmdir
+#endif
     return 0 == ::_rmdir(strDir.c_str());
 }
 
