@@ -189,15 +189,8 @@ static int progress_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow
     return cb(dltotal, dlnow);
 }
 
-struct tagCurlInfo
+static int _curlDownload(CURL *curl, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress, curl_off_t *total = NULL)
 {
-    CURL* curl = NULL;
-    curl_off_t total = 0;
-};
-
-static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
-{
-    auto curl = curlInfo.curl;
     //curl_easy_setopt(curlInfo.curl, CURLOPT_RESUME_FROM_LARGE, resume_position)参数resume_position必须是curl_off_t，不能使int或double，否则会导致数据异常
 
     curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
@@ -223,22 +216,22 @@ static int _curlDownload(tagCurlInfo& curlInfo, const string& strUrl, CB_CURL& c
         }
     }
 
-    (void)curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &curlInfo.total);
+    if (total)
+    {
+        (void)curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, total);
+    }
 
     //curl_easy_reset(curl)
     curl_easy_cleanup(curl);
-    curlInfo.curl = NULL;
 
     return res;
 }
 
 int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
 {
-    tagCurlInfo curlInfo;
-    curlInfo.curl = curl_easy_init();
-    _initCurl(curlInfo.curl, curlOpt);
-
-    return _curlDownload(curlInfo, strUrl, cbWrite, cbProgress);
+    auto curl = curl_easy_init();
+    _initCurl(curl, curlOpt);
+    return _curlDownload(curl, strUrl, cbWrite, cbProgress);
 }
 
 string curlutil::getCurlErrMsg(UINT uCurlCode)
@@ -326,6 +319,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         {
             if (!cbProgress(m_beginTime, dltotal, dlnow))
             {
+                m_bStatus = false;
                 return -1;
             }
         }
@@ -342,6 +336,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         size *= nmemb;
         if (!_onRecv(ptr, size))
         {
+            m_bStatus = false;
             return 0;
         }
 
@@ -352,21 +347,20 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
     int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
-        m_uRecvSize = 0;
-        m_uTotalSize = 0;
+        m_uTotalSize = 0; //http头传过来的预期长度
+        m_uRecvSize = 0; //已接收长度
         clear();
         //m_strErrMsg.clear();
 
         m_beginTime = time(NULL);
 
-        tagCurlInfo curlInfo;
-        curlInfo.curl = curl_easy_init();
-        _initCurl(curlInfo.curl, m_curlOpt);
-
-        nCurlCode = _curlDownload(curlInfo, strUrl, cbWrite, fnProgress);
-        if (curlInfo.total > 0)
+        auto curl = curl_easy_init();
+        _initCurl(curl, m_curlOpt);
+        curl_off_t total = 0;
+        nCurlCode = _curlDownload(curl, strUrl, cbWrite, fnProgress, &total);
+        if (total > 0)
         {
-            m_uTotalSize = (uint64_t)curlInfo.total;
+            m_uTotalSize = (uint64_t)total;
         }
 
         if (0 == nCurlCode)
@@ -414,9 +408,7 @@ uint64_t CCurlDownload::cancel()
 
     m_thread.cancel();
 
-    auto uRecvSize = m_uRecvSize;
-    m_uRecvSize = 0;
-    return uRecvSize;
+    return m_uRecvSize;
 }
 
 bool CDownloader::_onRecv(char *ptr, size_t size)
