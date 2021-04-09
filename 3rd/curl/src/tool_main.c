@@ -278,15 +278,18 @@ static void restore_terminal(void)
 #endif
 }
 
-int curltool_init() //by lhyuan
+int curltool_init(curl_version_info_data **lpCurlInfo) //by lhyuan
 {
     /* Perform the libcurl initialization */
     int result = curl_global_init(CURL_GLOBAL_DEFAULT);
     if (CURLE_OK == result)
     {
         result = get_libcurl_info();
+        if (lpCurlInfo)
+        {
+            *lpCurlInfo = curlinfo;
+        }
     }
-
     return result;
 }
 

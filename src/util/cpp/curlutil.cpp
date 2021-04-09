@@ -3,14 +3,20 @@
 
 #include "util.h"
 
-extern "C" int curltool_init();
+extern "C" int curltool_init(curl_version_info_data **lpCurlInfo);
 extern "C" int curltool_main(int argc, char *argv[], void (*pfnHook)(CURL *curl));
 
 //有问题，各种崩溃 static CURLSH *g_curlShare = NULL;
 
 int curlutil::initCurl(string& strVerInfo)
 {
-    curl_version_info_data *p = curl_version_info(CURLVERSION_NOW);
+    curl_version_info_data *p = NULL;
+    int nRet = curltool_init(&p); //curl_global_init(CURL_GLOBAL_DEFAULT);
+    if (CURLE_OK != nRet)
+    {
+        return nRet;
+    }
+
     if (NULL == p)
     {
         return -1;
@@ -61,12 +67,6 @@ int curlutil::initCurl(string& strVerInfo)
     if (p->quic_version) ss << "\nquic_version: " << p->quic_version;
 
     strVerInfo.append(ss.str());
-
-    int nRet = curltool_init(); //curl_global_init(CURL_GLOBAL_DEFAULT);
-    if (CURLE_OK != nRet)
-    {        
-        return nRet;
-    }
 
     /*g_curlShare = curl_share_init();
     if (g_curlShare)
