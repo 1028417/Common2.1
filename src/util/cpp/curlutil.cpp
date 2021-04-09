@@ -227,11 +227,22 @@ static int _curlDownload(CURL *curl, const string& strUrl, CB_CURL& cbWrite, CB_
     return res;
 }
 
-int curlutil::curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
+int curlutil::_curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CB_CURL& cbWrite, CB_CURLProgress& cbProgress)
 {
     auto curl = curl_easy_init();
     _initCurl(curl, curlOpt);
-    return _curlDownload(curl, strUrl, cbWrite, cbProgress);
+    return ::_curlDownload(curl, strUrl, cbWrite, cbProgress);
+}
+
+// 适合下载短文件，可以忽略cbfProfile->append的开销
+int curlutil::_curlDownload(const tagCurlOpt& curlOpt, const string& strUrl, CCharBuffer& cbfProfile
+                 , CB_CURLProgress& cbProgress)
+{
+    return _curlDownload(curlOpt, strUrl, [&](char *ptr, size_t size, size_t nmemb){
+        size *= nmemb;
+        cbfProfile->append(ptr, size);
+        return size;
+    }, cbProgress);
 }
 
 string curlutil::getCurlErrMsg(UINT uCurlCode)
@@ -357,7 +368,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         auto curl = curl_easy_init();
         _initCurl(curl, m_curlOpt);
         curl_off_t total = 0;
-        nCurlCode = _curlDownload(curl, strUrl, cbWrite, fnProgress, &total);
+        nCurlCode = ::_curlDownload(curl, strUrl, cbWrite, fnProgress, &total);
         if (total > 0)
         {
             m_uTotalSize = (uint64_t)total;
