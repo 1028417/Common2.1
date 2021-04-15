@@ -657,9 +657,13 @@ wstring fsutil::getModuleSubPath(cwstr strSubPath, const wchar_t *pszModuleName)
 
 #if !__winvc
 #include <QStandardPaths>
-QString fsutil::getHomeDir()
+wstring fsutil::getHomeDir()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    auto strHomeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation).toStdWString();
+#if __windows
+    strutil::replaceChar(strHomeDir, L'/', L'\\');
+#endif
+    return strHomeDir;
 }
 #endif
 
