@@ -667,8 +667,10 @@ wstring fsutil::getHomeDir()
 }
 #endif
 
+#if __windows
 static const wstring g_wsDot = L".";
 static const wstring g_wsDotDot = L"..";
+#endif
 
 bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, const wchar_t *pstrFilter)
 {
