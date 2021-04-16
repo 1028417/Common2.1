@@ -47,60 +47,11 @@ void XFile::remove()
 	}
 }
 
-void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPath& dir, TD_XFileList& paSubFile)>& cb)
-{
-	__usleep(1);
-	dir._findFile();
-	if (!bRunSignal)
-	{
-		return;
-	}
-
-	if (dir.m_paSubFile)
-	{
-		__usleep(1);
-		cb(dir, dir.m_paSubFile);
-		if (!bRunSignal)
-		{
-			return;
-		}
-    }
-
-    /*for (auto pSubDir : dir.m_paSubDir)
-	{
-		scanDir(bRunSignal, *pSubDir, cb);
-		if (!bRunSignal)
-		{
-			return;
-        }
-    }*/
-    //性能优化
-    for (auto itr = dir.m_paSubDir.begin(); itr != dir.m_paSubDir.end(); )
-    {
-        auto pSubDir = *itr;
-        scanDir(bRunSignal, *pSubDir, cb);
-        if (!bRunSignal)
-        {
-            return;
-        }
-
-        if (pSubDir->count() == 0)
-        {
-            delete pSubDir;
-            itr = dir.m_paSubDir.erase(itr);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-}
-
 void CPath::_findFile()
 {
 	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
     {
-        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
+        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
 		(void)_onFindFile(m_paSubDir, m_paSubFile);
     }
 }
@@ -127,9 +78,9 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 			}
 		}
     });
-    if (bRet)
+    if (!bRet)
     {
-        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
+        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
     }
 
 	paSubDir.qsort([&](const CPath& lhs, const CPath& rhs) {
