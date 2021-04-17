@@ -665,6 +665,20 @@ wstring fsutil::getHomeDir()
 #endif
     return strHomeDir;
 }
+
+QFileInfoList fsutil::fileInfoList(QDir& dir, QDir::SortFlag sortFlag)
+{
+    //cauto filter = QDir::Filter::NoFilter;
+    cauto filter = QDir::Filter::Dirs | QDir::Filter::Files
+            | QDir::Filter::NoSymLinks
+            | QDir::Filter::Readable //| QDir::Filter::Hidden
+            | QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot;
+
+    /*cauto sortFlag = QDir::SortFlag::DirsFirst | QDir::SortFlag::IgnoreCase
+                   | QDir::SortFlag::LocaleAware;*/
+
+    return dir.entryInfoList(filter, sortFlag);
+}
 #endif
 
 #if __windows
@@ -769,21 +783,11 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
         return false;
     }
 
-    //cauto filter = QDir::Filter::NoFilter;
-    cauto filter = QDir::Filter::Dirs | QDir::Filter::Files
-            | QDir::Filter::NoSymLinks
-            | QDir::Filter::Readable //| QDir::Filter::Hidden
-            | QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot;
-
-    cauto sortFlag = QDir::SortFlag::NoSort;
-    /*cauto sortFlag = QDir::SortFlag::DirsFirst | QDir::SortFlag::IgnoreCase
-                   | QDir::SortFlag::LocaleAware;*/
-
-	tagFileInfo fileInfo;
-    QFileInfoList list = dir.entryInfoList(filter, sortFlag);
-    for (int nIdx = 0; nIdx<list.size(); nIdx++)
+    tagFileInfo fileInfo;
+    cauto fiList = fileInfoList(dir);
+    for (int nIdx = 0; nIdx<fiList.size(); nIdx++)
     {
-        const QFileInfo& fi = list.at(nIdx);
+        const QFileInfo& fi = fiList.at(nIdx);
         /*if (fi.isSymLink())
         {
             continue;
