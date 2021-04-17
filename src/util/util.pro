@@ -117,7 +117,8 @@ HEADERS += \
     ../../inc/util/SQLiteDB.h \
     ../../inc/util/jsonutil.h \
     ../../inc/util/xmlutil.h \
-    ../../inc/sstl/*.h
+    ../../inc/sstl/*.h \
+    ../../inc/util/ziputil.h
 
 win32: SOURCES += cpp/winfsutil.cpp  cpp/winfsdlg.cpp
 

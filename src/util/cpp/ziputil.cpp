@@ -60,7 +60,17 @@ inline static wstring _subPath(wstring& strSubPath)
 
 tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
 {
-    cauto strName = _subPath(strSubDir);
+    wstring strName;
+    auto pos = strSubDir.find('/');
+    if (pos != __wnpos)
+    {
+        strName = strSubDir.substr(0, pos);
+        strSubDir.erase(0, pos+1);
+    }
+    else
+    {
+        strName.swap(strSubDir);
+    }
 
     tagUnzDir *pSubDir = NULL;
     auto itr = mapSubDir.find(strName);
@@ -243,9 +253,10 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 #else
 #define __DirFlag S_IFDIR
 #endif
-        cauto strPath = strutil::fromGbk(pszFileName);
+        auto strPath = strutil::fromGbk(pszFileName);
         if (__cSlant == strPath.back())  // (unzFile.external_fa & __DirFlag);
         {
+            strPath.pop_back();
             m_mapSubDir[strPath] = &m_root.addDir(strPath);
 		}
 		else
