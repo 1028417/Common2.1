@@ -47,18 +47,42 @@ void XFile::remove()
 	}
 }
 
+void CPath::assign(const TD_PathList& paSubDir, const TD_XFileList& paSubFile)
+{
+    for (auto pDir : paSubDir)
+    {
+        pDir->m_fileInfo.pParent = this;
+    }
+    m_paSubDir.assign(paSubDir);
+    m_paSubFile.assign(paSubFile);
+
+    m_bFindFileStatus = true;
+}
+
+void CPath::assign(TD_PathList&& paSubDir, TD_XFileList&& paSubFile)
+{
+    for (auto pDir : paSubDir)
+    {
+        pDir->m_fileInfo.pParent = this;
+    }
+    m_paSubDir.swap(paSubDir);
+    m_paSubFile.swap(paSubFile);
+
+    m_bFindFileStatus = true;
+}
+
 void CPath::_findFile()
 {
-	if (E_FindFileStatus::FFS_None == m_eFindFileStatus)
-    {
-        m_eFindFileStatus = E_FindFileStatus::FFS_Exists;
+    if (!m_bFindFileStatus)
+    {        
+        m_bFindFileStatus = true;
 		(void)_onFindFile(m_paSubDir, m_paSubFile);
     }
 }
 
 void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 {
-    bool bRet = fsutil::findFile(this->path(), [&](tagFileInfo& fi) {
+    (void)fsutil::findFile(this->path(), [&](tagFileInfo& fi) {
         fi.pParent = this;
 
         if (fi.bDir)
@@ -78,10 +102,6 @@ void CPath::_onFindFile(TD_PathList& paSubDir, TD_XFileList& paSubFile)
 			}
 		}
     });
-    if (!bRet)
-    {
-        m_eFindFileStatus = E_FindFileStatus::FFS_NotExists;
-    }
 
 	paSubDir.qsort([&](const CPath& lhs, const CPath& rhs) {
 		return _sort(lhs, rhs) < 0;
@@ -202,5 +222,5 @@ void CPath::clear()
 	}
 	m_paSubFile.clear();
 
-	m_eFindFileStatus = E_FindFileStatus::FFS_None;
+    m_bFindFileStatus = false;
 }
