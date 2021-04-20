@@ -81,6 +81,55 @@ void CPath::assign(TD_PathList&& paSubDir, TD_XFileList&& paSubFile)
     m_bFindFileStatus = true;
 }
 
+void CPath::scanDir(const bool& bRunSignal, CPath& dir, const function<void(CPath& dir, TD_XFileList& paSubFile)>& cb)
+{
+	__usleep(1);
+	dir._findFile();
+	if (!bRunSignal)
+	{
+		return;
+	}
+
+	if (dir.m_paSubFile)
+	{
+		__usleep(1);
+		cb(dir, dir.m_paSubFile);
+		if (!bRunSignal)
+		{
+			return;
+		}
+    }
+
+    /*for (auto pSubDir : dir.m_paSubDir)
+	{
+		scanDir(bRunSignal, *pSubDir, cb);
+		if (!bRunSignal)
+		{
+			return;
+        }
+    }*/
+    //性能优化
+    for (auto itr = dir.m_paSubDir.begin(); itr != dir.m_paSubDir.end(); )
+    {
+        auto pSubDir = *itr;
+        scanDir(bRunSignal, *pSubDir, cb);
+        if (!bRunSignal)
+        {
+            return;
+        }
+
+        if (pSubDir->count() == 0)
+        {
+            delete pSubDir;
+            itr = dir.m_paSubDir.erase(itr);
+        }
+        else
+        {
+            ++itr;
+        }
+    }
+}
+
 void CPath::_findFile()
 {
     if (!m_bFindFileStatus)
