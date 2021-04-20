@@ -54,6 +54,11 @@ void CPath::assign(const TD_PathList& paSubDir, const TD_XFileList& paSubFile)
         pDir->m_fileInfo.pParent = this;
     }
     m_paSubDir.assign(paSubDir);
+
+    for (auto pFile : paSubFile)
+    {
+        pFile->m_fileInfo.pParent = this;
+    }
     m_paSubFile.assign(paSubFile);
 
     m_bFindFileStatus = true;
@@ -66,6 +71,11 @@ void CPath::assign(TD_PathList&& paSubDir, TD_XFileList&& paSubFile)
         pDir->m_fileInfo.pParent = this;
     }
     m_paSubDir.swap(paSubDir);
+
+    for (auto pFile : paSubFile)
+    {
+        pFile->m_fileInfo.pParent = this;
+    }
     m_paSubFile.swap(paSubFile);
 
     m_bFindFileStatus = true;
