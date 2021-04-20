@@ -682,7 +682,7 @@ QFileInfoList fsutil::fileInfoList(QDir& dir, QDir::SortFlag sortFlag)
 #endif
 
 #if __windows
-static const wstring g_wsDot = L".";
+static const wstring g_wsDot = __wsDot;
 static const wstring g_wsDotDot = L"..";
 #endif
 

@@ -125,6 +125,8 @@ struct __UtilExt tagFileInfo
 
 #define __wcDot L'.'
 
+#define __wsDot L"."
+
 class __UtilExt fsutil
 {
 public:
