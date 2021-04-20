@@ -746,7 +746,7 @@ bool fsutil::findFile(cwstr strDir, CB_FindFile cb, E_FindFindFilter eFilter, co
             {
                 if (E_FindFindFilter::FFP_ByExt == eFilter)
                 {
-                    if (!strutil::matchIgnoreCase(fsutil::GetFileExtName(strFileName), pstrFilter))
+                    if (!fsutil::checkExtName(strFileName, pstrFilter))
                     {
                         continue;
                     }
