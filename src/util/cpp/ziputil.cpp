@@ -54,11 +54,10 @@ inline static wstring _subPath(wstring& strSubPath)
 
     strSubPath.erase(0, pos);
 
-    strutil::lowerCase(strRet);
     return strRet;
 }
 
-tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
+CUnzDir& CUnzDir::addSubDir(wstring strSubDir)
 {
     wstring strName;
     auto pos = strSubDir.find('/');
@@ -72,25 +71,15 @@ tagUnzDir& tagUnzDir::addDir(wstring strSubDir)
         strName.swap(strSubDir);
     }
 
-    tagUnzDir *pSubDir = NULL;
-    auto itr = mapSubDir.find(strName);
-    if (itr == mapSubDir.end())
-    {
-        pSubDir = &_addDir(strName);
-    }
-    else
-    {
-        pSubDir = &itr->second;
-    }
-
+    auto& subDir = mapSubDir[strName];
     if (strSubDir.empty())
     {
-        return *pSubDir;
+        return subDir;
     }
-    return pSubDir->addDir(strSubDir);
+    return subDir.addSubDir(strSubDir);
 }
 
-tagUnzSubFile& tagUnzDir::addFile(wstring strSubFile)
+tagUnzFile& CUnzDir::addSubFile(wstring strSubFile)
 {
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
@@ -98,37 +87,36 @@ tagUnzSubFile& tagUnzDir::addFile(wstring strSubFile)
         return mapSubFile[strName];
     }
 
-    tagUnzDir *pSubDir = NULL;
-    auto itr = mapSubDir.find(strName);
-    if (itr == mapSubDir.end())
-    {
-        pSubDir = &_addDir(strName);
-    }
-    else
-    {
-        pSubDir = &itr->second;
-    }
-
-    return pSubDir->addFile(strSubFile);
+    return mapSubDir[strName].addSubFile(strSubFile);
 }
 
-const tagUnzDir* tagUnzDir::subDir(wstring strSubDir) const
+inline const CUnzDir* CUnzDir::_subDir(cwstr strName) const
+{
+    auto itr = mapSubDir.find(strName);//(strutil::lowerCast_r(strName));
+    if (itr == mapSubDir.end())
+    {
+        return NULL;
+    }
+    return &itr->second;
+}
+
+const CUnzDir* CUnzDir::subDir(wstring strSubDir) const
 {
     cauto strName = _subPath(strSubDir);
-    auto itr = mapSubDir.find(strName);
-    if (itr == mapSubDir.end())
+    auto subDir = _subDir(strName);
+    if (NULL == subDir)
     {
         return NULL;
     }
 
     if (strSubDir.empty() || L"/" == strSubDir)
     {
-        return &itr->second;
+        return subDir;
     }
-    return itr->second.subDir(strSubDir);
+    return subDir->subDir(strSubDir);
 }
 
-const tagUnzSubFile* tagUnzDir::subFile(wstring strSubFile) const
+const tagUnzFile* CUnzDir::subFile(wstring strSubFile) const
 {
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
@@ -141,12 +129,12 @@ const tagUnzSubFile* tagUnzDir::subFile(wstring strSubFile) const
         return &itr->second;
     }
 
-    auto itr = mapSubDir.find(strName);
-    if (itr == mapSubDir.end())
+    auto subDir = _subDir(strName);
+    if (NULL == subDir)
     {
         return NULL;
     }
-    return itr->second.subFile(strSubFile);
+    return subDir->subFile(strSubFile);
 }
 
 inline bool CZipFile::_unzOpen() const
@@ -168,9 +156,9 @@ inline bool CZipFile::_unzOpen() const
     return true;
 }
 
-bool CZipFile::unzOpen(const tagUnzSubFile& unzSubFile) const
+bool CZipFile::unzOpen(const tagUnzFile& unzFile) const
 {
-    unz_file_pos file_pos { unzSubFile.pos_in_zip_directory, unzSubFile.num_of_file };
+    unz_file_pos file_pos { unzFile.pos_in_zip_directory, unzFile.num_of_file };
     int nRet = unzGoToFilePos(m_pfile, &file_pos);
     if (nRet != UNZ_OK)
     {
@@ -182,7 +170,7 @@ bool CZipFile::unzOpen(const tagUnzSubFile& unzSubFile) const
         return false;
     }
 
-   ((tagUnzSubFile&)unzSubFile).data_pos = unzGetCurrentFileZStreamPos64(m_pfile);
+   ((tagUnzFile&)unzFile).data_pos = unzGetCurrentFileZStreamPos64(m_pfile);
 
     return true;
 }
@@ -201,9 +189,9 @@ void CZipFile::unzClose()
     _unzClose();
 }
 
-long CZipFile::_read(const tagUnzSubFile& unzSubFile, void *buf, size_t len) const
+long CZipFile::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
 {
-    if (!unzOpen(unzSubFile))
+    if (!unzOpen(unzFile))
 	{
 		return -1;
 	}
@@ -253,11 +241,12 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 #else
 #define __DirFlag S_IFDIR
 #endif
-        auto strPath = strutil::fromGbk(pszFileName);
+        auto strPath = strutil::checkUtf8(pszFileName)?
+                    strutil::fromUtf8(pszFileName):strutil::fromGbk(pszFileName);
         if (__cSlant == strPath.back())  // (unzFile.external_fa & __DirFlag);
         {
             strPath.pop_back();
-            m_mapSubDir[strPath] = &m_root.addDir(strPath);
+            m_lstSubDir.emplace_back(strPath, &m_root.addSubDir(strPath));
 		}
 		else
         {
@@ -268,16 +257,16 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 				return false;
 			}
 
-            tagUnzSubFile& unzSubFile = m_root.addFile(strPath);
-            unzSubFile.strPath = strPath;
-            unzSubFile.compression_method = file_info.compression_method;
-            unzSubFile.compressed_size = file_info.compressed_size;
-            unzSubFile.uncompressed_size = file_info.uncompressed_size;
+            tagUnzFile& unzFile = m_root.addSubFile(strPath);
+            unzFile.strPath = strPath;
+            unzFile.compression_method = file_info.compression_method;
+            unzFile.compressed_size = file_info.compressed_size;
+            unzFile.uncompressed_size = file_info.uncompressed_size;
 
-            unzSubFile.pos_in_zip_directory = file_pos.pos_in_zip_directory;
-            unzSubFile.num_of_file = file_pos.num_of_file;
+            unzFile.pos_in_zip_directory = file_pos.pos_in_zip_directory;
+            unzFile.num_of_file = file_pos.num_of_file;
 
-            m_mapSubfile[strPath] = &unzSubFile;
+            m_lstSubFile.emplace_back(strPath, &unzFile);
 		}
     } while (unzGoToNextFile(pfile) == UNZ_OK);
 
@@ -435,15 +424,15 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
     return _open(&ifs, (void*)zread_ifs, (void*)ztell_ifs, (void*)zseek_ifs, (void*)zclose_ifs, strPwd);
 }
 
-long CZipFile::unzip(const tagUnzSubFile& unzSubFile, cwstr strDstFile) const
+long CZipFile::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
 {
-    if (!unzOpen(unzSubFile))
+    if (!unzOpen(unzFile))
     {
         return -1;
     }
 
     CByteBuffer bbfFile;
-    int nCount = this->read(unzSubFile, bbfFile);
+    int nCount = this->read(unzFile, bbfFile);
     if (nCount >= 0)
     {
         if (!OFStream::writefilex(strDstFile, true, bbfFile))
@@ -475,7 +464,7 @@ bool CZipFile::unzipAll(cwstr strDstDir) const
 
     (void)unzGoToFirstFile(m_pfile);
 
-    for (cauto pr : m_mapSubDir)
+    for (cauto pr : m_lstSubDir)
     {
         if (!fsutil::createDir((t_strDstDir + pr.first).c_str()))
         {
@@ -483,23 +472,23 @@ bool CZipFile::unzipAll(cwstr strDstDir) const
         }
     }
 
-    for (cauto pr : m_mapSubfile)
+    for (cauto pr : m_lstSubFile)
     {
-        auto& unzSubFile = *pr.second;
-        TD_ByteBuffer buff(unzSubFile.uncompressed_size);
+        auto& unzFile = *pr.second;
+        TD_ByteBuffer buff(unzFile.uncompressed_size);
         if (!_unzOpen())
         {
             return false;
         }
 
-        auto nCount = _unzRead(buff, unzSubFile.uncompressed_size);
+        auto nCount = _unzRead(buff, unzFile.uncompressed_size);
         _unzClose();
-        if (nCount != (long)unzSubFile.uncompressed_size)
+        if (nCount != (long)unzFile.uncompressed_size)
         {
             return false;
         }
 
-        if (!OFStream::writefilex(t_strDstDir + unzSubFile.strPath, true, buff))
+        if (!OFStream::writefilex(t_strDstDir + unzFile.strPath, true, buff))
         {
             return false;
         }
@@ -519,8 +508,8 @@ void CZipFile::close()
 
         m_strPwd.clear();
         m_root.clear();
-        m_mapSubDir.clear();
-        m_mapSubfile.clear();
+        m_lstSubDir.clear();
+        m_lstSubFile.clear();
     }
 }
 
