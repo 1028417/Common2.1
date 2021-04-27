@@ -149,6 +149,7 @@ time64_t fsutil::GetFileModifyTime64(cwstr strFile)
     return stat.st_mtime;
 }
 
+/*安卓没有创建时间这一说
 time64_t fsutil::GetFileCreateTime64(FILE *pf)
 {
     tagFileStat64 stat;
@@ -169,7 +170,7 @@ time64_t fsutil::GetFileCreateTime64(cwstr strFile)
     }
 
     return stat.st_ctime;
-}
+}*/
 
 template <class S>
 static void _SplitPath(const S& strPath, S *pstrDir, S *pstrFile)
