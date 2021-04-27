@@ -94,6 +94,7 @@ bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, const CB_CopyFile& c
 
 bool fsutil::fStat64(FILE *pf, tagFileStat64& stat)
 {
+    memzero(stat);
 #if __windows
     return 0 == _fstat64(_fileno(pf), &stat);
 #elif __android
@@ -105,6 +106,7 @@ bool fsutil::fStat64(FILE *pf, tagFileStat64& stat)
 
 bool fsutil::lStat64(cwstr strFile, tagFileStat64& stat)
 {
+    memzero(stat);
 #if __windows
     return 0 == _wstat64(strFile.c_str(), &stat);
 #elif __android
@@ -117,7 +119,6 @@ bool fsutil::lStat64(cwstr strFile, tagFileStat64& stat)
 int64_t fsutil::GetFileSize64(cwstr strFile)
 {
     tagFileStat64 stat;
-    memzero(stat);
     if (!lStat64(strFile, stat))
     {
         return -1;
@@ -129,7 +130,6 @@ int64_t fsutil::GetFileSize64(cwstr strFile)
 time64_t fsutil::GetFileModifyTime64(FILE *pf)
 {
     tagFileStat64 stat;
-    memzero(stat);
     if (!fStat64(pf, stat))
     {
         return -1;
@@ -141,13 +141,34 @@ time64_t fsutil::GetFileModifyTime64(FILE *pf)
 time64_t fsutil::GetFileModifyTime64(cwstr strFile)
 {
     tagFileStat64 stat;
-    memzero(stat);
     if (!lStat64(strFile, stat))
     {
         return -1;
     }
 
     return stat.st_mtime;
+}
+
+time64_t fsutil::GetFileCreateTime64(FILE *pf)
+{
+    tagFileStat64 stat;
+    if (!fStat64(pf, stat))
+    {
+        return -1;
+    }
+
+    return stat.st_ctime;
+}
+
+time64_t fsutil::GetFileCreateTime64(cwstr strFile)
+{
+    tagFileStat64 stat;
+    if (!lStat64(strFile, stat))
+    {
+        return -1;
+    }
+
+    return stat.st_ctime;
 }
 
 template <class S>
