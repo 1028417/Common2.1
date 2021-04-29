@@ -11,7 +11,7 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 	return pf;*/
 
 #else
-    return ::fopen64(strutil::toUtf8(strFile).c_str(), strMode.c_str());
+    return ::fopen(strutil::toUtf8(strFile).c_str(), strMode.c_str());
 #endif
 }
 //fopen64安卓、ios、mac都没有，linux底层加O_LARGEFILE标记，_FILE_OFFSET_BITS=64后fopen也能打开大文件
@@ -23,7 +23,7 @@ FILE* fsutil::fopen(const string& strFile, const string& strMode)
     errno_t eno = fopen_s(&pf, strFile.c_str(), strMode.c_str());
     return pf;*/
 #else
-    return ::fopen64(strFile.c_str(), strMode.c_str());
+    return ::fopen(strFile.c_str(), strMode.c_str());
 #endif
 }
 
