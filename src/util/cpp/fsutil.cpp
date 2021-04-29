@@ -4,10 +4,8 @@
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
-	return fsopen(strFile, strMode);
-    /*auto t_strMode = strutil::fromAsc(strMode);
-
-	FILE *pf = NULL;
+    return fsopen(strFile, strMode);
+    /*FILE *pf = NULL;
 	errno_t eno = _wfopen_s(&pf, strFile.c_str(), t_strMode.c_str());
 	(void)eno;
 	return pf;*/
@@ -16,13 +14,13 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
     return ::fopen64(strutil::toUtf8(strFile).c_str(), strMode.c_str());
 #endif
 }
-
+//fopen64安卓、ios、mac都没有，linux底层加O_LARGEFILE标记，_FILE_OFFSET_BITS=64后fopen也能打开大文件
 FILE* fsutil::fopen(const string& strFile, const string& strMode)
 {
 #if __windows
 	return fsopen(strFile, strMode);
     /*FILE *pf = NULL;
-    (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
+    errno_t eno = fopen_s(&pf, strFile.c_str(), strMode.c_str());
     return pf;*/
 #else
     return ::fopen64(strFile.c_str(), strMode.c_str());
