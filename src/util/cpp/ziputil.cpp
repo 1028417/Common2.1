@@ -1,4 +1,4 @@
-
+﻿
 #include "util.h"
 
 #if __winvc
@@ -479,25 +479,36 @@ bool CZipFile::unzipAll(cwstr strDstDir) const
 
     for (cauto pr : m_lstSubFile)
     {
-        auto& unzFile = *pr.second;
-        TD_ByteBuffer buff(unzFile.uncompressed_size);
+		auto& unzFile = *pr.second;
+		OFStream ofs(t_strDstDir + unzFile.strPath, true);
+		if (!ofs)
+		{
+			return false;
+		}
+
         if (!_unzOpen())
         {
             return false;
         }
 
-        auto nCount = _unzRead(buff, unzFile.uncompressed_size);
-        _unzClose();
-        if (nCount != (long)unzFile.uncompressed_size)
-        {
-            return false;
-        }
+#define __unzipBuff 4094
+		TD_ByteBuffer buff(__unzipBuff);
+		int nCount = 0;
+		do {
+			nCount = _unzRead(buff, __unzipBuff);
+			if (nCount <= 0)
+			{
+				break;
+			}
 
-        if (!OFStream::writefilex(t_strDstDir + unzFile.strPath, true, buff))
-        {
-            return false;
-        }
+			if (!ofs.writex(buff, (size_t)nCount))
+			{
+				_unzClose();
+				return false;
+			}
+		} while (0);
 
+		_unzClose();
         (void)unzGoToNextFile(m_pfile);
 	}
 
