@@ -7,7 +7,6 @@
 #include <dirent.h>
 #endif
 
-#include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -158,8 +157,8 @@ inline bool CZipFile::_unzOpen() const
 
 bool CZipFile::unzOpen(const tagUnzFile& unzFile) const
 {
-    unz_file_pos file_pos { unzFile.pos_in_zip_directory, unzFile.num_of_file };
-    int nRet = unzGoToFilePos(m_pfile, &file_pos);
+    unz64_file_pos file_pos { unzFile.pos_in_zip_directory, unzFile.num_of_file };
+    int nRet = unzGoToFilePos64(m_pfile, &file_pos);
     if (nRet != UNZ_OK)
     {
         return false;
@@ -202,34 +201,34 @@ long CZipFile::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
     return nCount;
 }
 
-bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string& strPwd)
+bool CZipFile::_open(const char *szFile, void *zfunc, const string& strPwd)
 {
     m_strPwd = strPwd;
 
     unzFile pfile = NULL;
-	if (pzlib_filefunc_def)
+    if (zfunc)
 	{
-        pfile = unzOpen2(szFile, (zlib_filefunc_def*)pzlib_filefunc_def);
+        pfile = ::unzOpen2_64(szFile, (zlib_filefunc64_def*)zfunc);
 	}
 	else
 	{
-        pfile = ::unzOpen(szFile);
+        pfile = ::unzOpen64(szFile);
 	}
     if (NULL == pfile)
-	{
+    {
 		return false;
     }
 
-	unz_file_info file_info;
+    unz_file_info64 file_info;
 	memzero(file_info);
 
 	char pszFileName[MAX_PATH + 1];
 	memzero(pszFileName);
 
-	unz_file_pos file_pos{ 0,0 };
+    unz64_file_pos file_pos{ 0,0 };
 
 	do {
-        int nRet = unzGetCurrentFileInfo(pfile, &file_info, pszFileName, MAX_PATH, NULL, 0, NULL, 0);
+        int nRet = unzGetCurrentFileInfo64(pfile, &file_info, pszFileName, MAX_PATH, NULL, 0, NULL, 0);
 		if (nRet != UNZ_OK)
 		{
             (void)::unzClose(pfile);
@@ -250,7 +249,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 		}
 		else
         {
-            nRet = unzGetFilePos(pfile, &file_pos);
+            nRet = unzGetFilePos64(pfile, &file_pos);
 			if (nRet != UNZ_OK)
 			{
                 (void)::unzClose(pfile);
@@ -277,7 +276,7 @@ bool CZipFile::_open(const char *szFile, void *pzlib_filefunc_def, const string&
 	return true;
 }
 
-static voidpf ZCALLBACK zopen_opaque(voidpf opaque, const char* filename, int mode)
+static voidpf ZCALLBACK zopen_opaque(voidpf opaque, const void* filename, int mode)
 {
 	(void)filename;
 	(void)mode;
@@ -293,14 +292,14 @@ static int ZCALLBACK ztesterror_opaque(voidpf opaque, voidpf stream)
 
 bool CZipFile::_open(void *opaque, void *zread, void *ztell, void *zseek, void *zclose, const string& strPwd)
 {
-    zlib_filefunc_def zfunc;
+    zlib_filefunc64_def zfunc;
     memzero(zfunc);
     zfunc.opaque = opaque;
 
-    zfunc.zopen_file = zopen_opaque;
+    zfunc.zopen64_file = zopen_opaque;
     zfunc.zread_file = (decltype(zfunc.zread_file))zread;
-    zfunc.ztell_file = (decltype(zfunc.ztell_file))ztell;
-    zfunc.zseek_file = (decltype(zfunc.zseek_file))zseek;
+    zfunc.ztell64_file = (decltype(zfunc.ztell64_file))ztell;
+    zfunc.zseek64_file = (decltype(zfunc.zseek64_file))zseek;
     zfunc.zclose_file = (decltype(zfunc.zclose_file))zclose;
     zfunc.zerror_file = ztesterror_opaque;
 
@@ -313,16 +312,16 @@ static uLong ZCALLBACK zread_file(voidpf opaque, voidpf stream, void* buf, uLong
     return fread(buf, 1, size, (FILE*)opaque); //fread(buf, size, 1, (FILE*)opaque);
 }
 
-static long ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
+static ZPOS64_T ZCALLBACK ztell_file(voidpf opaque, voidpf stream)
 {
     (void)stream;
-    return ftell((FILE*)opaque);
+    return ftell64((FILE*)opaque);
 }
 
-static long ZCALLBACK zseek_file(voidpf opaque, voidpf stream, uLong offset, int origin)
+static long ZCALLBACK zseek_file(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
 {
     (void)stream;
-    return fseek((FILE*)opaque, offset, origin);
+    return fseek64((FILE*)opaque, offset, origin);
 }
 
 static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
@@ -334,7 +333,9 @@ static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
 
 bool CZipFile::open(FILE *pf, const string& strPwd)
 {
-    return _open(pf, (void*)zread_file, (void*)ztell_file, (void*)zseek_file, (void*)zclose_file, strPwd);
+    tell64_file_func ztell64_file = ztell_file;
+    seek64_file_func zseek64_file = zseek_file;
+    return _open(pf, (void*)zread_file, (void*)ztell64_file, (void*)zseek64_file, (void*)zclose_file, strPwd);
 }
 
 static uLong ZCALLBACK zread_ins(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -349,13 +350,13 @@ static uLong ZCALLBACK zread_ins(voidpf opaque, voidpf stream, void* buf, uLong 
     return size;*/
 }
 
-static long ZCALLBACK ztell_ins(voidpf opaque, voidpf stream)
+static ZPOS64_T ZCALLBACK ztell_ins(voidpf opaque, voidpf stream)
 {
     (void)stream;
-    return (long)((Instream*)opaque)->pos();
+    return (ZPOS64_T)((Instream*)opaque)->pos();
 }
 
-static long ZCALLBACK zseek_ins(voidpf opaque, voidpf stream, uLong offset, int origin)
+static long ZCALLBACK zseek_ins(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
 {
     (void)stream;
 
@@ -380,7 +381,9 @@ bool CZipFile::open(Instream& ins, const string& strPwd)
         return false;
     }
 
-    return _open(&ins, (void*)zread_ins, (void*)ztell_ins, (void*)zseek_ins, (void*)zclose_ins, strPwd);
+    tell64_file_func ztell64_ins = ztell_ins;
+    seek64_file_func zseek64_ins = zseek_ins;
+    return _open(&ins, (void*)zread_ins, (void*)ztell64_ins, (void*)zseek64_ins, (void*)zclose_ins, strPwd);
 }
 
 static uLong ZCALLBACK zread_ifs(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -389,13 +392,13 @@ static uLong ZCALLBACK zread_ifs(voidpf opaque, voidpf stream, void* buf, uLong 
     return ((IFStream*)opaque)->read(buf, size);
 }
 
-static long ZCALLBACK ztell_ifs(voidpf opaque, voidpf stream)
+static ZPOS64_T ZCALLBACK ztell_ifs(voidpf opaque, voidpf stream)
 {
     (void)stream;
-    return (long)((IFStream*)opaque)->pos();
+    return (ZPOS64_T)((IFStream*)opaque)->pos();
 }
 
-static long ZCALLBACK zseek_ifs(voidpf opaque, voidpf stream, uLong offset, int origin)
+static long ZCALLBACK zseek_ifs(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
 {
     (void)stream;
 
@@ -421,7 +424,9 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
         return false;
     }
 
-    return _open(&ifs, (void*)zread_ifs, (void*)ztell_ifs, (void*)zseek_ifs, (void*)zclose_ifs, strPwd);
+    tell64_file_func ztell64_ifs = ztell_ifs;
+    seek64_file_func zseek64_ifs = zseek_ifs;
+    return _open(&ifs, (void*)zread_ifs, (void*)ztell64_ifs, (void*)zseek64_ifs, (void*)zclose_ifs, strPwd);
 }
 
 long CZipFile::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
@@ -560,18 +565,32 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<st
         closedir(pDir);
 }
 
+//#include <fstream>
 static int WriteInZipFile(zipFile zFile,const string& file)
 {
+    /*加DEFINES += _FILE_OFFSET_BITS=64后编译不过
     fstream f(file.c_str(),std::ios::binary | std::ios::in);
     f.seekg(0, std::ios::end);
     auto size = (unsigned long)f.tellg();
-    f.seekg(0, std::ios::beg);
-    if ( size <= 0 )
+    f.seekg(0, std::ios::beg);*/
+
+    auto pf = fsutil::fopen(file, "rb");
+    if (NULL == pf)
+    {
+        return -1;
+    }
+
+    fseek(pf, 0, SEEK_END);
+    auto size = ftell(pf);
+    fseek(pf, 0, SEEK_SET);
+    if (size <= 0)
     {
         return zipWriteInFileInZip(zFile,NULL,0);
     }
+
     char* buf = new char[size];
-    f.read(buf,size);
+    //f.read(buf,size);
+    (void)fread(buf, size, 1, pf);
     int ret = zipWriteInFileInZip(zFile,buf,size);
     delete[] buf;
     return ret;

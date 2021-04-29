@@ -9,19 +9,23 @@ QT       -= gui
 TARGET = xutil
 TEMPLATE = lib
 
-QMAKE_CXXFLAGS += -std=c++11 #c++1y #gnu++1y
+QMAKE_CXXFLAGS += -std=c++11  #c++1y  #gnu++1y
 
-DEFINES += QT_DEPRECATED_WARNINGS __UtilPrj
+DEFINES += QT_DEPRECATED_WARNINGS  __UtilPrj
 
 DEFINES += TIXML_USE_STL
 
 DEFINES += HAVE_BZIP2
 
-#for zlib-miniZip
-!win32: DEFINES += IOAPI_NO_64
-#_FILE_OFFSET_BITS=64 #加载这里<fstream>编译报错
-#_LARGEFILE_SOURCE _LARGEFILE64_SOURCE
-#gnu的ftello等系列函数一般可以用宏-D_FILE_OFFSET_BITS 64指定off_t的类型来控制函数是否支持2G以上的文件,也可以用_LARGEFILE_SOURCE来支持ftello64位之类
+!win32 {
+    DEFINES += IOAPI_NO_64 #for zlib
+
+    #安卓无效，只能用lseek64；ios、mac也不需要，因为long是64位的
+    #DEFINES += _FILE_OFFSET_BITS=64 #会导致<fstream>编译报错
+    #gnu的ftello等系列函数用宏-D_FILE_OFFSET_BITS 64指定off_t，用_LARGEFILE_SOURCE来开启ftello64
+    #DEFINES += _LARGEFILE_SOURCE  _LARGEFILE64_SOURCE
+    #？？DEFINES += __USE_FILE_OFFSET64  __USE_LARGEFILE64  _LARGEFILE64_SOURCE
+}
 
 DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
             CARES_BUILDING_LIBRARY #USE_ARES #安卓有问题  #USE_IPV6
