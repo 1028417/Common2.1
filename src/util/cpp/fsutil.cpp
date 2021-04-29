@@ -13,7 +13,7 @@ FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 	return pf;*/
 
 #else
-	return ::fopen(strutil::toUtf8(strFile).c_str(), strMode.c_str());
+    return ::fopen64(strutil::toUtf8(strFile).c_str(), strMode.c_str());
 #endif
 }
 
@@ -25,7 +25,7 @@ FILE* fsutil::fopen(const string& strFile, const string& strMode)
     (void)fopen_s(&pf, strFile.c_str(), strMode.c_str());
     return pf;*/
 #else
-    return ::fopen(strFile.c_str(), strMode.c_str());
+    return ::fopen64(strFile.c_str(), strMode.c_str());
 #endif
 }
 
@@ -575,7 +575,7 @@ bool fsutil::moveFile(cwstr strSrcFile, cwstr strDstFile, bool bReplaceExisting)
     return true;
 }
 
-long fsutil::fSeekTell(FILE *pf, long offset, int origin)
+/*long fsutil::fSeekTell(FILE *pf, long offset, int origin)
 {
     if (fseek(pf, offset, origin))
     {
@@ -585,15 +585,15 @@ long fsutil::fSeekTell(FILE *pf, long offset, int origin)
     return ftell(pf);
 }
 
-long long fsutil::fSeekTell64(FILE *pf, long long offset, int origin)
+int64_t fsutil::fSeekTell64(FILE *pf, int64_t offset, int origin)
 {
-    if (fseek64(pf, offset, origin))
+    if (0 != fseek64(pf, offset, origin))
     {
         return -1;
     }
 
     return ftell64(pf);
-}
+}*/
 
 #if __winvc
 #include <direct.h>
