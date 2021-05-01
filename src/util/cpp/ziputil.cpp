@@ -70,7 +70,7 @@ CUnzDir& CUnzDir::addSubDir(wstring strSubDir)
         strName.swap(strSubDir);
     }
 
-    auto& subDir = mapSubDir[strName];
+    auto& subDir = _addSubDir(strName);
     if (strSubDir.empty())
     {
         return subDir;
@@ -83,20 +83,10 @@ tagUnzFile& CUnzDir::addSubFile(wstring strSubFile)
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
     {
-        return mapSubFile[strName];
+        return m_mapSubFile[strName];
     }
 
-    return mapSubDir[strName].addSubFile(strSubFile);
-}
-
-inline const CUnzDir* CUnzDir::_subDir(cwstr strName) const
-{
-    auto itr = mapSubDir.find(strName);//(strutil::lowerCast_r(strName));
-    if (itr == mapSubDir.end())
-    {
-        return NULL;
-    }
-    return &itr->second;
+    return _addSubDir(strName).addSubFile(strSubFile);
 }
 
 const CUnzDir* CUnzDir::subDir(wstring strSubDir) const
@@ -120,8 +110,8 @@ const tagUnzFile* CUnzDir::subFile(wstring strSubFile) const
     cauto strName = _subPath(strSubFile);
     if (strSubFile.empty())
     {
-        auto itr = mapSubFile.find(strName);
-        if (itr == mapSubFile.end())
+        auto itr = m_mapSubFile.find(strName);
+        if (itr == m_mapSubFile.end())
         {
             return NULL;
         }
