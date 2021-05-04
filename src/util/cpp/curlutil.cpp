@@ -355,9 +355,9 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         return size;
     };
 
-    int nCurlCode = 0;
     for (UINT uIdx = 0; uIdx <= uRetryTime; uIdx++)
     {
+        m_nCurlCode = 0;
         m_uTotalSize = 0; //http头传过来的预期长度
         m_uRecvSize = 0; //已接收长度
         clear();
@@ -368,13 +368,13 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         auto curl = curl_easy_init();
         _initCurl(curl, m_curlOpt);
         curl_off_t total = 0;
-        nCurlCode = ::_curlDownload(curl, strUrl, cbWrite, fnProgress, &total);
+        m_nCurlCode = ::_curlDownload(curl, strUrl, cbWrite, fnProgress, &total);
         if (total > 0)
         {
             m_uTotalSize = (uint64_t)total;
         }
 
-        if (0 == nCurlCode)
+        if (0 == m_nCurlCode)
         {
             break;
         }
@@ -385,10 +385,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
             break;
         }
 
-//        if (nCurlCode > 0)
-//        {
-//            m_strErrMsg = curlutil::getCurlErrMsg((UINT)nCurlCode);
-//        }
+        //if (m_nCurlCode > 0) m_strErrMsg = curlutil::getCurlErrMsg((UINT)m_nCurlCode);
 
         if (m_uRecvSize > 0)
         {
@@ -396,7 +393,7 @@ int CCurlDownload::_syncDownload(const string& strUrl, UINT uRetryTime, CB_Downl
         }
     }
 
-    return nCurlCode;
+    return m_nCurlCode;
 }
 
 void CCurlDownload::asyncDownload(const string& strUrl, UINT uRetryTime, cfn_void_t<int> cbFinish
