@@ -586,12 +586,14 @@ static int WriteInZipFile(zipFile zFile,const string& file)
     fseek(pf, 0, SEEK_SET);
     if (size <= 0)
     {
+		fclose(pf);
         return zipWriteInFileInZip(zFile,NULL,0);
     }
 
     char* buf = new char[size];
     //f.read(buf,size);
     (void)fread(buf, size, 1, pf);
+	fclose(pf);
     int ret = zipWriteInFileInZip(zFile,buf,size);
     delete[] buf;
     return ret;
