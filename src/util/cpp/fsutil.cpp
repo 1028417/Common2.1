@@ -1,6 +1,11 @@
 ﻿
 #include "util.h"
 
+/*struct stat fileInfo;
+stat(src.c_str(), &fileInfo);
+if (S_ISREG(fileInfo.st_mode)) //文件
+if (S_ISDIR(fileInfo.st_mode)) //目录*/
+
 FILE* fsutil::fopen(cwstr strFile, const string& strMode)
 {
 #if __windows
@@ -500,10 +505,7 @@ bool fsutil::removeDir(cwstr strDir)
 
 bool fsutil::removeDir(const string& strDir)
 {
-#if !__windows
-#define _rmdir rmdir
-#endif
-    return 0 == ::_rmdir(strDir.c_str());
+    return 0 == _rmdir(strDir.c_str());
 }
 
 bool fsutil::removeFile(const string& strFile)

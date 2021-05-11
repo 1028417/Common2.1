@@ -1,27 +1,12 @@
 ﻿
 #include "util.h"
 
-#if __winvc
-#include "dirent.h"
-#else
-#include <dirent.h>
-#endif
-
-#include <sys/stat.h>
-#include <sys/types.h>
-
 extern "C"
 {
 #include "zlib.h"
 #include "contrib/minizip/unzip.h"
 #include "contrib/minizip/zip.h"
 }
-
-/*#if __windows
-#define mkdir(x) _mkdir(x)
-#else
-#define mkdir(x) mkdir(x, 0777)
-#endif*/
 
 inline static wstring _subPath(wstring& strSubPath)
 {
@@ -519,7 +504,13 @@ void CZipFile::close()
     }
 }
 
-static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<string>& vFiles)
+#if __winvc
+#include "dirent.h" //非sdk
+#else
+#include <dirent.h>
+#endif
+
+static void EnumDirFiles(const string& dirPrefix,const string& dirName,list<string>& lstFiles)
 {
     if (dirPrefix.empty() || dirName.empty())
         return;
@@ -533,10 +524,7 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<st
     if (dirPre.find_last_of(__cPathSeparator) != dirPre.length() - 1)
         dirPre.push_back(__cPathSeparator);
 
-    string path;
-
-    path = dirPre + dirNameTmp;
-
+    string path = dirPre + dirNameTmp;
 
     struct stat fileStat;
     DIR *pDir = opendir(path.c_str());
@@ -555,11 +543,11 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,vector<st
         string innerDir = dirNameTmp + pDirEnt->d_name;
         if ((fileStat.st_mode & S_IFDIR) == S_IFDIR)
         {
-            EnumDirFiles(dirPrefix,innerDir,vFiles);
+            EnumDirFiles(dirPrefix,innerDir,lstFiles);
             continue;
         }
 
-        vFiles.push_back(innerDir);
+        lstFiles.push_back(innerDir);
     }
 
     if (pDir)
@@ -599,93 +587,97 @@ static int WriteInZipFile(zipFile zFile,const string& file)
     return ret;
 }
 
-static int Minizip(string src, const string& dest, E_ZMethod method = E_ZMethod::ZM_Deflated, int level = 0)
+static int _MinizipFile(zipFile zFile, const string& path, const string& src, int method, int level)
 {
-    if (src.find_last_of(__cPathSeparator) == (src.length() - 1)) {
-        src = src.substr(0,src.length()-1);
+    zip_fileinfo zFileInfo;
+    memset(&zFileInfo, 0, sizeof (zFileInfo));
+    int ret = zipOpenNewFileInZip(zFile,path.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,method,level);
+    if (ret != ZIP_OK) {
+        //cout<<"openfile in zip failed"<<endl;
+        return ret;
     }
 
-	int t_method = 0;
-	if (E_ZMethod::ZM_Deflated == method)
-	{
-		t_method = Z_DEFLATED;
-	}
-	else if (E_ZMethod::ZM_BZip2ed == method)
-	{
-		t_method = Z_BZIP2ED;
-	}
+    ret = WriteInZipFile(zFile,src);
+    if (ret != ZIP_OK) {
+        //cout<<"write in zip failed"<<endl;
+        return ret;
+    }
+    return ZIP_OK;
+}
 
-    struct stat fileInfo;
-    stat(src.c_str(), &fileInfo);
-    if (S_ISREG(fileInfo.st_mode)) {
-        zipFile zFile = zipOpen(dest.c_str(),APPEND_STATUS_CREATE);
-        if (zFile == NULL) {
-            //cout<<"openfile failed"<<endl;
-            return -1;
-        }
+static int MinizipFile(const string& src, const string& dest, int method, int level)
+{
+     zipFile zFile = zipOpen(dest.c_str(),APPEND_STATUS_CREATE);
+     if (zFile == NULL) {
+         //cout<<"openfile failed"<<endl;
+         return -1;
+     }
 
-        zip_fileinfo zFileInfo;
-        memset(&zFileInfo, 0, sizeof (zFileInfo));
-        int ret = zipOpenNewFileInZip(zFile,src.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
-        if (ret != ZIP_OK) {
-            //cout<<"openfile in zip failed"<<endl;
-            zipClose(zFile, NULL);
-            return -1;
-        }
+     int ret = _MinizipFile(zFile, fsutil::GetFileName(src), src, method, level);
 
-        ret = WriteInZipFile(zFile,src);
+     zipClose(zFile, NULL);
+     //cout<<"zip ok"<<endl;
+
+     return ret;
+}
+
+static int MinizipDir(const string& src, const string& dest, int method, int level)
+{
+    zipFile zFile = zipOpen(dest.c_str(), APPEND_STATUS_CREATE);
+    if (zFile == NULL) {
+        //cout<<"openfile failed"<<endl;
+        return -1;
+    }
+
+    string dirName;
+    size_t pos = src.find_last_of("\\/");
+    if (pos == (src.length() - 1)) {
+        pos = src.find_last_of("\\/", pos);
+        dirName = src.substr(pos + 1);
+        dirName.pop_back();
+    }
+    else
+    {
+        dirName = src.substr(pos + 1);
+    }
+    string dirPrefix = src.substr(0, pos);
+
+    list<string> lstFiles;
+    EnumDirFiles(dirPrefix, dirName, lstFiles);
+
+    int ret = ZIP_OK;
+    for (cauto strFile : lstFiles)
+    {
+        auto path = strFile;
+        path.erase(0, path.find('/')+1);
+        strutil::replaceChar(path, '\\', '/');
+
+        ret = _MinizipFile(zFile, path, dirPrefix + '/' + path, method, level);
         if (ret != ZIP_OK) {
             //cout<<"write in zip failed"<<endl;
-            zipClose(zFile,NULL);
-            return -1;
+            break;
         }
-        zipClose(zFile, NULL);
-        //cout<<"zip ok"<<endl;
     }
-    else if (S_ISDIR(fileInfo.st_mode)) {
-        zipFile zFile = zipOpen(dest.c_str(), APPEND_STATUS_CREATE);
-        if (zFile == NULL) {
-            //cout<<"openfile failed"<<endl;
-            return -1;
-        }
 
-		size_t pos = src.find_last_of(__cPathSeparator);
-		string dirName = src.substr(pos + 1);
-		string dirPrefix = src.substr(0, pos);
-        vector<string> vFiles;
-        EnumDirFiles(dirPrefix, dirName, vFiles);
+    zipClose(zFile,NULL);
 
-        for (cauto strFile : vFiles)
-		{
-			zip_fileinfo zFileInfo;
-            memset(&zFileInfo, 0, sizeof (zFileInfo));
-
-			auto t_strFile = strFile;
-			t_strFile.erase(0, t_strFile.find(__cPathSeparator)+1);
-			strutil::replaceChar(t_strFile, '\\', '/');
-            int ret = zipOpenNewFileInZip(zFile,t_strFile.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
-            if (ret != ZIP_OK) {
-                //cout<<"openfile in zip failed"<<endl;
-                zipClose(zFile,NULL);
-                return -1;
-            }
-            ret = WriteInZipFile(zFile, dirPrefix + __cPathSeparator + strFile);
-            if (ret != ZIP_OK) {
-                //cout<<"write in zip failed"<<endl;
-                zipClose(zFile,NULL);
-                return -1;
-            }
-        }
-
-        zipClose(zFile,NULL);
-    }
-    return 0;
+    return ret;
 }
 
 bool ziputil::zipDir(const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
 {
 	//(void)::remove(strDstFile.c_str());
-	auto nRet = Minizip(strSrcDir, strDstFile, method, level);
+
+    int t_method = 0;
+    if (E_ZMethod::ZM_Deflated == method)
+    {
+        t_method = Z_DEFLATED;
+    }
+    else if (E_ZMethod::ZM_BZip2ed == method)
+    {
+        t_method = Z_BZIP2ED;
+    }
+    auto nRet = MinizipDir(strSrcDir, strDstFile, t_method, level);
 	if (nRet != 0)
 	{
 		return false;
