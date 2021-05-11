@@ -510,7 +510,7 @@ void CZipFile::close()
 #include <dirent.h>
 #endif
 
-static void EnumDirFiles(const string& dirPrefix,const string& dirName,list<string>& lstFiles)
+static void _EnumDirFiles(const string& dirPrefix,const string& dirName,list<string>& lstFiles)
 {
     if (dirPrefix.empty() || dirName.empty())
         return;
@@ -543,7 +543,7 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,list<stri
         string innerDir = dirNameTmp + pDirEnt->d_name;
         if ((fileStat.st_mode & S_IFDIR) == S_IFDIR)
         {
-            EnumDirFiles(dirPrefix,innerDir,lstFiles);
+            _EnumDirFiles(dirPrefix,innerDir,lstFiles);
             continue;
         }
 
@@ -579,6 +579,12 @@ static int _WriteInZipFile(zipFile zFile,const string& file)
     }
 
     char* buf = new char[size];
+	if (NULL == buf) // TODO 文件太大
+	{
+		fclose(pf);
+		return -1;
+	}
+
     //f.read(buf,size);
     (void)fread(buf, size, 1, pf);
 	fclose(pf);
@@ -617,7 +623,7 @@ static int _MinizipFile(zipFile zFile, const string& path, const string& src, E_
 
 static int _MinizipFile(const string& src, const string& dest, E_ZMethod method, int level)
 {
-     zipFile zFile = zipOpen(dest.c_str(),APPEND_STATUS_CREATE);
+     zipFile zFile = zipOpen64(dest.c_str(),APPEND_STATUS_CREATE);
      if (zFile == NULL) {
          //cout<<"openfile failed"<<endl;
          return -1;
@@ -633,7 +639,7 @@ static int _MinizipFile(const string& src, const string& dest, E_ZMethod method,
 
 static int _MinizipDir(bool bKeetRoot, const string& src, const string& dest, E_ZMethod method, int level)
 {
-    zipFile zFile = zipOpen(dest.c_str(), APPEND_STATUS_CREATE);
+    zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
     if (zFile == NULL) {
         //cout<<"openfile failed"<<endl;
         return -1;
@@ -653,7 +659,7 @@ static int _MinizipDir(bool bKeetRoot, const string& src, const string& dest, E_
     string dirPrefix = src.substr(0, pos);
 
     list<string> lstFiles;
-    EnumDirFiles(dirPrefix, dirName, lstFiles);
+    _EnumDirFiles(dirPrefix, dirName, lstFiles);
 
     int ret = ZIP_OK;
     for (cauto strFile : lstFiles)
@@ -665,7 +671,7 @@ static int _MinizipDir(bool bKeetRoot, const string& src, const string& dest, E_
 		}
         strutil::replaceChar(path, '\\', '/');
 
-        ret = _MinizipFile(zFile, path, dirPrefix + __cPathSeparator + path, method, level);
+        ret = _MinizipFile(zFile, path, dirPrefix + __cPathSeparator + strFile, method, level);
         if (ret != ZIP_OK) {
             //cout<<"write in zip failed"<<endl;
             break;
@@ -687,7 +693,6 @@ bool ziputil::zipFile(const string& strSrcFile, const string& strDstFile, E_ZMet
 		return false;
 	}
 	return true;
-
 }
 
 bool ziputil::zipDir(bool bKeetRoot, const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
