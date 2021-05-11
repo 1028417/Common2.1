@@ -555,7 +555,7 @@ static void EnumDirFiles(const string& dirPrefix,const string& dirName,list<stri
 }
 
 //#include <fstream>
-static int WriteInZipFile(zipFile zFile,const string& file)
+static int _WriteInZipFile(zipFile zFile,const string& file)
 {
     /*加DEFINES += _FILE_OFFSET_BITS=64后编译不过
     fstream f(file.c_str(),std::ios::binary | std::ios::in);
@@ -587,17 +587,27 @@ static int WriteInZipFile(zipFile zFile,const string& file)
     return ret;
 }
 
-static int _MinizipFile(zipFile zFile, const string& path, const string& src, int method, int level)
+static int _MinizipFile(zipFile zFile, const string& path, const string& src, E_ZMethod method, int level)
 {
+	int t_method = 0;
+	if (E_ZMethod::ZM_Deflated == method)
+	{
+		t_method = Z_DEFLATED;
+	}
+	else if (E_ZMethod::ZM_BZip2ed == method)
+	{
+		t_method = Z_BZIP2ED;
+	}
+
     zip_fileinfo zFileInfo;
     memset(&zFileInfo, 0, sizeof (zFileInfo));
-    int ret = zipOpenNewFileInZip(zFile,path.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,method,level);
+    int ret = zipOpenNewFileInZip(zFile,path.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
     if (ret != ZIP_OK) {
         //cout<<"openfile in zip failed"<<endl;
         return ret;
     }
 
-    ret = WriteInZipFile(zFile,src);
+    ret = _WriteInZipFile(zFile,src);
     if (ret != ZIP_OK) {
         //cout<<"write in zip failed"<<endl;
         return ret;
@@ -605,7 +615,7 @@ static int _MinizipFile(zipFile zFile, const string& path, const string& src, in
     return ZIP_OK;
 }
 
-static int MinizipFile(const string& src, const string& dest, int method, int level)
+static int _MinizipFile(const string& src, const string& dest, E_ZMethod method, int level)
 {
      zipFile zFile = zipOpen(dest.c_str(),APPEND_STATUS_CREATE);
      if (zFile == NULL) {
@@ -621,7 +631,7 @@ static int MinizipFile(const string& src, const string& dest, int method, int le
      return ret;
 }
 
-static int MinizipDir(const string& src, const string& dest, int method, int level)
+static int _MinizipDir(bool bKeetRoot, const string& src, const string& dest, E_ZMethod method, int level)
 {
     zipFile zFile = zipOpen(dest.c_str(), APPEND_STATUS_CREATE);
     if (zFile == NULL) {
@@ -632,7 +642,7 @@ static int MinizipDir(const string& src, const string& dest, int method, int lev
     string dirName;
     size_t pos = src.find_last_of("\\/");
     if (pos == (src.length() - 1)) {
-        pos = src.find_last_of("\\/", pos);
+        pos = src.find_last_of("\\/", pos-1);
         dirName = src.substr(pos + 1);
         dirName.pop_back();
     }
@@ -649,10 +659,13 @@ static int MinizipDir(const string& src, const string& dest, int method, int lev
     for (cauto strFile : lstFiles)
     {
         auto path = strFile;
-        path.erase(0, path.find('/')+1);
+		if (!bKeetRoot)
+		{
+			path.erase(0, path.find(__cPathSeparator) + 1);
+		}
         strutil::replaceChar(path, '\\', '/');
 
-        ret = _MinizipFile(zFile, path, dirPrefix + '/' + path, method, level);
+        ret = _MinizipFile(zFile, path, dirPrefix + __cPathSeparator + path, method, level);
         if (ret != ZIP_OK) {
             //cout<<"write in zip failed"<<endl;
             break;
@@ -664,20 +677,24 @@ static int MinizipDir(const string& src, const string& dest, int method, int lev
     return ret;
 }
 
-bool ziputil::zipDir(const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
+bool ziputil::zipFile(const string& strSrcFile, const string& strDstFile, E_ZMethod method, int level)
 {
 	//(void)::remove(strDstFile.c_str());
 
-    int t_method = 0;
-    if (E_ZMethod::ZM_Deflated == method)
-    {
-        t_method = Z_DEFLATED;
-    }
-    else if (E_ZMethod::ZM_BZip2ed == method)
-    {
-        t_method = Z_BZIP2ED;
-    }
-    auto nRet = MinizipDir(strSrcDir, strDstFile, t_method, level);
+	auto nRet = _MinizipFile(strSrcFile, strDstFile, method, level);
+	if (nRet != 0)
+	{
+		return false;
+	}
+	return true;
+
+}
+
+bool ziputil::zipDir(bool bKeetRoot, const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
+{
+	//(void)::remove(strDstFile.c_str());
+
+    auto nRet = _MinizipDir(bKeetRoot, strSrcDir, strDstFile, method, level);
 	if (nRet != 0)
 	{
 		return false;
