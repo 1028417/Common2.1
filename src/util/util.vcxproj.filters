@@ -62,9 +62,6 @@
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\util.cpp" />
     <ClCompile Include="cpp\strutil.cpp" />
-    <ClCompile Include="cpp\ziputil.cpp">
-      <Filter>fs\zip</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\3rd\zlib-1.2.11\adler32.c">
       <Filter>fs\zip\zlib</Filter>
     </ClCompile>
@@ -136,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="cpp\ThreadGroup.cpp" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\zip.c">
+      <Filter>fs\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\ziputil.cpp">
       <Filter>fs\zip</Filter>
     </ClCompile>
   </ItemGroup>

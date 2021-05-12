@@ -111,7 +111,7 @@ const tagUnzFile* CUnzDir::subFile(wstring strSubFile) const
     return subDir->subFile(strSubFile);
 }
 
-inline bool CZipFile::_unzOpen() const
+inline bool CUnZip::_unzOpen() const
 {
     int nRet = 0;
     if (m_strPwd.empty())
@@ -130,7 +130,7 @@ inline bool CZipFile::_unzOpen() const
     return true;
 }
 
-bool CZipFile::unzOpen(const tagUnzFile& unzFile) const
+bool CUnZip::unzOpen(const tagUnzFile& unzFile) const
 {
     unz64_file_pos file_pos { unzFile.pos_in_zip_directory, unzFile.num_of_file };
     int nRet = unzGoToFilePos64(m_pfile, &file_pos);
@@ -151,19 +151,19 @@ bool CZipFile::unzOpen(const tagUnzFile& unzFile) const
 
 #define _unzRead(buf, len) unzReadCurrentFile(m_pfile, buf, len)
 
-long CZipFile::unzRead(void *buf, size_t len) const
+long CUnZip::unzRead(void *buf, size_t len) const
 {
     return _unzRead(buf, len);
 }
 
 #define _unzClose() (void)unzCloseCurrentFile(m_pfile)
 
-void CZipFile::unzClose()
+void CUnZip::unzClose()
 {
     _unzClose();
 }
 
-long CZipFile::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
+long CUnZip::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
 {
     if (!unzOpen(unzFile))
 	{
@@ -176,7 +176,7 @@ long CZipFile::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
     return nCount;
 }
 
-bool CZipFile::_open(const char *szFile, void *zfunc, const string& strPwd)
+bool CUnZip::_open(const char *szFile, void *zfunc, const string& strPwd)
 {
     m_strPwd = strPwd;
 
@@ -265,7 +265,7 @@ static int ZCALLBACK ztesterror_opaque(voidpf opaque, voidpf stream)
     return 0;
 }
 
-bool CZipFile::_open(void *opaque, void *zread, void *ztell, void *zseek, void *zclose, const string& strPwd)
+bool CUnZip::_open(void *opaque, void *zread, void *ztell, void *zseek, void *zclose, const string& strPwd)
 {
     zlib_filefunc64_def zfunc;
     memzero(zfunc);
@@ -306,7 +306,7 @@ static int ZCALLBACK zclose_file(voidpf opaque, voidpf stream)
     return 0;
 }
 
-bool CZipFile::open(FILE *pf, const string& strPwd)
+bool CUnZip::open(FILE *pf, const string& strPwd)
 {
     tell64_file_func ztell64_file = ztell_file;
     seek64_file_func zseek64_file = zseek_file;
@@ -349,7 +349,7 @@ static int ZCALLBACK zclose_ins(voidpf opaque, voidpf stream)
     return 0;
 }
 
-bool CZipFile::open(Instream& ins, const string& strPwd)
+bool CUnZip::open(Instream& ins, const string& strPwd)
 {
     if (ins.size() == 0)
     {
@@ -392,7 +392,7 @@ static int ZCALLBACK zclose_ifs(voidpf opaque, voidpf stream)
     return 0;
 }
 
-bool CZipFile::open(IFStream& ifs, const string& strPwd)
+bool CUnZip::open(IFStream& ifs, const string& strPwd)
 {
     if (!ifs.is_open())
     {
@@ -404,7 +404,7 @@ bool CZipFile::open(IFStream& ifs, const string& strPwd)
     return _open(&ifs, (void*)zread_ifs, (void*)ztell64_ifs, (void*)zseek64_ifs, (void*)zclose_ifs, strPwd);
 }
 
-long CZipFile::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
+long CUnZip::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
 {
     if (!unzOpen(unzFile))
     {
@@ -424,7 +424,7 @@ long CZipFile::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
     return nCount;
 }
 
-bool CZipFile::unzipAll(cwstr strDstDir) const
+bool CUnZip::unzipAll(cwstr strDstDir) const
 {
     if (NULL == m_pfile)
 	{
@@ -490,7 +490,7 @@ bool CZipFile::unzipAll(cwstr strDstDir) const
 	return true;
 }
 
-void CZipFile::close()
+void CUnZip::close()
 {
     if (m_pfile)
 	{
@@ -593,118 +593,96 @@ static int _WriteInZipFile(zipFile zFile,const string& file)
     return ret;
 }
 
-static int _MinizipFile(zipFile zFile, const string& path, const string& src, E_ZMethod method, int level)
+static int _MinizipFile(zipFile zFile, const tagMinZipSrc& src)
 {
-	int t_method = 0;
-	if (E_ZMethod::ZM_Deflated == method)
+	int method = 0;
+	if (E_ZMethod::ZM_Deflated == src.method)
 	{
-		t_method = Z_DEFLATED;
+		method = Z_DEFLATED;
 	}
-	else if (E_ZMethod::ZM_BZip2ed == method)
+	else if (E_ZMethod::ZM_BZip2ed == src.method)
 	{
-		t_method = Z_BZIP2ED;
+		method = Z_BZIP2ED;
 	}
 
-    zip_fileinfo zFileInfo;
-    memset(&zFileInfo, 0, sizeof (zFileInfo));
-    int ret = zipOpenNewFileInZip(zFile,path.c_str(),&zFileInfo,NULL,0,NULL,0,NULL,t_method,level);
+    zip_fileinfo zfi;
+    memset(&zfi, 0, sizeof (zfi));
+    int ret = zipOpenNewFileInZip(zFile,src.strInnerPath.c_str(),&zfi,NULL,0,NULL,0,NULL,method,src.level);
     if (ret != ZIP_OK) {
-        //cout<<"openfile in zip failed"<<endl;
         return ret;
     }
 
-    ret = _WriteInZipFile(zFile,src);
+    ret = _WriteInZipFile(zFile,src.strFile);
     if (ret != ZIP_OK) {
-        //cout<<"write in zip failed"<<endl;
         return ret;
     }
     return ZIP_OK;
 }
 
-static int _MinizipFile(const string& src, const string& dest, E_ZMethod method, int level)
+//APPEND_STATUS_CREATE 新建zip包
+//APPEND_STATUS_CREATEAFTER 新建zip包到现有的非zip文件末尾
+// APPEND_STATUS_ADDINZIP 打开现有的zip包
+int ziputil::zDir(bool bKeetRoot, const string& src, const string& dest, E_ZMethod method, int level)
 {
-     zipFile zFile = zipOpen64(dest.c_str(),APPEND_STATUS_CREATE);
-     if (zFile == NULL) {
-         //cout<<"openfile failed"<<endl;
-         return -1;
-     }
+	zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
+	if (zFile == NULL) {
+		return -1;
+	}
 
-     int ret = _MinizipFile(zFile, fsutil::GetFileName(src), src, method, level);
+	string dirName;
+	size_t pos = src.find_last_of("\\/");
+	if (pos == (src.length() - 1)) {
+		pos = src.find_last_of("\\/", pos - 1);
+		dirName = src.substr(pos + 1);
+		dirName.pop_back();
+	}
+	else
+	{
+		dirName = src.substr(pos + 1);
+	}
+	string dirPrefix = src.substr(0, pos);
 
-     zipClose(zFile, NULL);
-     //cout<<"zip ok"<<endl;
+	list<string> lstFiles;
+	_EnumDirFiles(dirPrefix, dirName, lstFiles);
 
-     return ret;
-}
-
-static int _MinizipDir(bool bKeetRoot, const string& src, const string& dest, E_ZMethod method, int level)
-{
-    zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
-    if (zFile == NULL) {
-        //cout<<"openfile failed"<<endl;
-        return -1;
-    }
-
-    string dirName;
-    size_t pos = src.find_last_of("\\/");
-    if (pos == (src.length() - 1)) {
-        pos = src.find_last_of("\\/", pos-1);
-        dirName = src.substr(pos + 1);
-        dirName.pop_back();
-    }
-    else
-    {
-        dirName = src.substr(pos + 1);
-    }
-    string dirPrefix = src.substr(0, pos);
-
-    list<string> lstFiles;
-    _EnumDirFiles(dirPrefix, dirName, lstFiles);
-
-    int ret = ZIP_OK;
-    for (cauto strFile : lstFiles)
-    {
-        auto path = strFile;
+	int ret = 0;
+	for (cauto strFile : lstFiles)
+	{
+		auto strInnerPath = strFile;
 		if (!bKeetRoot)
 		{
-			path.erase(0, path.find(__cPathSeparator) + 1);
+			strInnerPath.erase(0, strInnerPath.find(__cPathSeparator) + 1);
 		}
-        strutil::replaceChar(path, '\\', '/');
+		strutil::replaceChar(strInnerPath, '\\', '/');
 
-        ret = _MinizipFile(zFile, path, dirPrefix + __cPathSeparator + strFile, method, level);
-        if (ret != ZIP_OK) {
-            //cout<<"write in zip failed"<<endl;
-            break;
-        }
-    }
+		ret = _MinizipFile(zFile, tagMinZipSrc(dirPrefix + __cPathSeparator + strFile, strInnerPath, method, level));
+		if (ret != ZIP_OK) {
+			break;
+		}
+	}
 
-    zipClose(zFile,NULL);
-
-    return ret;
+	zipClose(zFile, NULL);
+	return ret;
 }
 
-bool ziputil::zipFile(const string& strSrcFile, const string& strDstFile, E_ZMethod method, int level)
+int ziputil::zFiles(const list<tagMinZipSrc>& lstSrc, const string& dest)
 {
-	//(void)::remove(strDstFile.c_str());
-
-	auto nRet = _MinizipFile(strSrcFile, strDstFile, method, level);
-	if (nRet != 0)
-	{
-		return false;
+	zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
+	if (zFile == NULL) {
+		return -1;
 	}
-	return true;
-}
 
-bool ziputil::zipDir(bool bKeetRoot, const string& strSrcDir, const string& strDstFile, E_ZMethod method, int level)
-{
-	//(void)::remove(strDstFile.c_str());
-
-    auto nRet = _MinizipDir(bKeetRoot, strSrcDir, strDstFile, method, level);
-	if (nRet != 0)
+	int ret = 0;
+	for (cauto src : lstSrc)
 	{
-		return false;
+		ret = _MinizipFile(zFile, src);
+		if (ret != ZIP_OK) {
+			break;
+		}
 	}
-	return true;
+
+	zipClose(zFile, NULL);
+	return ret;
 }
 
 static int _zcompressFile(cwstr strSrcFile, cwstr strDstFile
