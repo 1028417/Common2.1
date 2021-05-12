@@ -48,7 +48,7 @@ bool fsutil::copyFile(const string& strSrcFile, const string& strDstFile)
 }
 #endif
 
-bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, const CB_CopyFile& cb, const string& strHeadData)
+bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, CB_CopyFile cb, const string& strHeadData)
 {
     IFStream ifs(strSrcFile);
     __EnsureReturn(ifs, false);
@@ -67,27 +67,41 @@ bool fsutil::copyFileEx(cwstr strSrcFile, cwstr strDstFile, const CB_CopyFile& c
 	}
 
     char lpBuff[4096] {0};
-    while (true)
-    {
-        size_t size = ifs.read(lpBuff, 1, sizeof(lpBuff));
-        if (0 == size)
-        {
-            return true;
-        }
+	if (cb)
+	{
+		while (true)
+		{
+			size_t size = ifs.read(lpBuff, 1, sizeof(lpBuff));
+			if (0 == size)
+			{
+				return true;
+			}
 
-        if (cb)
-        {
-            if (!cb(lpBuff, size))
-            {
-                break;
-            }
-        }
-
-        if (!ofs.writex(lpBuff, size))
-        {
-			break;
-        }
-    }
+			if (!cb(lpBuff, size))
+			{
+				break;
+			}
+			if (!ofs.writex(lpBuff, size))
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		while (true)
+		{
+			size_t size = ifs.read(lpBuff, 1, sizeof(lpBuff));
+			if (0 == size)
+			{
+				return true;
+			}
+			if (!ofs.writex(lpBuff, size))
+			{
+				break;
+			}
+		}
+	}
 
 	ofs.close();
 	(void)removeFile(strDstFile);
