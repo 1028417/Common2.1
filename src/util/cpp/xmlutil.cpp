@@ -1,7 +1,7 @@
 
 #include "util.h"
 
-#include "../../3rd/tinyxml/tinyxml.h"
+#include "tinyxml.h"
 
 static bool _findChild(tagXmlElementInfo& elementInfo, const list<string>& lstChildName
                 , list<string>::const_iterator& itrChildName, CB_XmlGetChild cb)

@@ -1,5 +1,55 @@
-
+﻿
 #include "util.h"
+
+#include "json/reader.h"
+#include "json/writer.h"
+
+//jsoncpp-1.9.4告警太多
+bool jsonutil::loadData(const string& strData, JValue& jRoot, bool bStrictRoot)
+{
+	/*Json::CharReaderBuilder builder;
+	if (bStrictRoot)
+	{
+		builder["strictRoot"] = true;
+	}
+	auto reader = builder.newCharReader();
+	auto begin = strData.c_str();
+    bool bRet = reader->parse(begin, begin + strData.size(), &jRoot, NULL);
+	delete reader;
+	return bRet;*/
+
+	if (bStrictRoot)
+	{
+		return Json::Reader(Json::Features::strictMode()).parse(strData, jRoot, false);
+	}
+	else
+	{
+		return Json::Reader().parse(strData, jRoot, false);
+	}
+}
+
+string jsonutil::toStr(const JValue& jRoot, bool bStyled)
+{
+	/*Json::StreamWriterBuilder builder;
+	if (bStyled)
+	{
+		//builder[] = ;
+	}
+	auto writer = builder.newStreamWriter();
+	stringstream sstream;
+	writer->write(jRoot, &sstream);
+	delete writer;
+	return sstream.str();*/
+
+    if (bStyled)
+    {
+        return Json::StyledWriter().write(jRoot);
+    }
+    else
+    {
+        return Json::FastWriter().write(jRoot);
+    }
+}
 
 bool jsonutil::get(const JValue& jValue, string& strRet)
 {

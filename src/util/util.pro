@@ -32,12 +32,34 @@ DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
 
 DEFINES += HAVE_UNISTD_H #for curl7.76
 
+#DEFINES += JSON_DLL_BUILD #告警太多
+win32 {
+DEFINES += JSON_API=__declspec(dllexport)
+} else {
+DEFINES += JSON_API=__attribute__((visibility("default")))
+}
+
+zlib_dir = ../../3rd/zlib-1.2.11
+bzip2_dir = ../../3rd/bzip2-1.0.6
+
+curl_dir = ../../3rd/curl-7.67.0
+cares_dir = ../../3rd/c-ares-1.15.0
+
+json_dir = ../../3rd/jsoncpp-1.8.0 #告警太大json_dir = ../../3rd/jsoncpp-1.9.4
+
+tinyxml_dir = ../../3rd/tinyxml-2.6.2
+
+sqlite_dir = ../../3rd/sqlite-3.35.5 # ../../3rd/sqlite-3.28.0
+
 INCLUDEPATH += ../../inc/util \
-    ../../3rd/zlib-1.2.11 \
-    ../../3rd/bzip2-1.0.6 \
+    $$zlib_dir $$bzip2_dir \
 #
-    ../../3rd/curl/include ../../3rd/curl/lib ../../3rd/curl/src \
-    ../../3rd/c-ares
+    $$curl_dir/include $$curl_dir/lib $$curl_dir/src \
+    $$cares_dir \
+#
+    $$tinyxml_dir \
+#
+    $$sqlite_dir
 
 android {
 INCLUDEPATH += ../../3rd/openssl-1.1.0f/include
@@ -71,7 +93,7 @@ win32 {
 android {
     LIBS += -L../../libs/armeabi-v7a
 
-    INCLUDEPATH += ../../3rd/curl/lib/curl_config_android
+    INCLUDEPATH += $$curl_dir/lib/curl_config_android
 
     platform = android
     DESTDIR = ..\..\libs\armeabi-v7a
@@ -79,14 +101,14 @@ android {
 } else: macx {
     LIBS += -L../../libs/mac  #-lnghttp2  -lz
 
-    INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
+    INCLUDEPATH += $$curl_dir/lib/curl_config_mac
 
     platform = mac
     DESTDIR = ../../bin/mac
 
     QMAKE_POST_LINK += cp -f $$DESTDIR/libxutil*.dylib $$XMusicDir/bin/mac/
 } else: ios {
-    INCLUDEPATH += ../../3rd/curl/lib/curl_config_mac
+    INCLUDEPATH += $$curl_dir/lib/curl_config_mac
 
     platform = ios
     DESTDIR = ../../../build/ioslib
@@ -142,95 +164,95 @@ SOURCES += \
     cpp/TxtWriter.cpp \
 #
     cpp/jsonutil.cpp \
-    ../../3rd/json/json_reader.cpp \
-    ../../3rd/json/json_value.cpp \
-    ../../3rd/json/json_writer.cpp \
+    $$json_dir/src/lib_json/json_reader.cpp \ #    $$json_dir/json_reader.cpp \
+    $$json_dir/src/lib_json/json_value.cpp \ #    $$json_dir/json_value.cpp \
+    $$json_dir/src/lib_json/json_writer.cpp \ #    $$json_dir/json_writer.cpp \
 #
     cpp/xmlutil.cpp \
-    ../../3rd/tinyxml/tinyxml.cpp \
-    ../../3rd/tinyxml/tinyxmlerror.cpp \
-    ../../3rd/tinyxml/tinyxmlparser.cpp \
-    #../../3rd/tinyxml/tinystr.cpp \
+    $$tinyxml_dir/tinyxml.cpp \
+    $$tinyxml_dir/tinyxmlerror.cpp \
+    $$tinyxml_dir/tinyxmlparser.cpp \
+    #$$tinyxml_dir/tinystr.cpp \
 #
     cpp/SQLiteDB.cpp \
-    ../../3rd/sqlite/shell.c \
-    ../../3rd/sqlite/sqlite3.c \
+    $$sqlite_dir/shell.c \
+    $$sqlite_dir/sqlite3.c \
 #
     cpp/ziputil.cpp \
-    ../../3rd/zlib-1.2.11/contrib/minizip/zip.c \
-    ../../3rd/zlib-1.2.11/contrib/minizip/unzip.c \
-    ../../3rd/zlib-1.2.11/contrib/minizip/ioapi.c \
-    ../../3rd/zlib-1.2.11/*.c \
+    $$zlib_dir/contrib/minizip/zip.c \
+    $$zlib_dir/contrib/minizip/unzip.c \
+    $$zlib_dir/contrib/minizip/ioapi.c \
+    $$zlib_dir/*.c \
 #
-    ../../3rd/bzip2-1.0.6/blocksort.c \
-    ../../3rd/bzip2-1.0.6/bzcompress.c \
-    ../../3rd/bzip2-1.0.6/bzip2.c \
-    ../../3rd/bzip2-1.0.6/bzlib.c \
-    ../../3rd/bzip2-1.0.6/crctable.c \
-    ../../3rd/bzip2-1.0.6/decompress.c \
-    ../../3rd/bzip2-1.0.6/huffman.c \
-    ../../3rd/bzip2-1.0.6/randtable.c \
+    $$bzip2_dir/blocksort.c \
+    $$bzip2_dir/bzcompress.c \
+    $$bzip2_dir/bzip2.c \
+    $$bzip2_dir/bzlib.c \
+    $$bzip2_dir/crctable.c \
+    $$bzip2_dir/decompress.c \
+    $$bzip2_dir/huffman.c \
+    $$bzip2_dir/randtable.c \
 #
     cpp/curlutil.cpp \
-    ../../3rd/curl/lib/vauth/*.c \
-    ../../3rd/curl/lib/vtls/*.c \
-    ../../3rd/curl/lib/vquic/*.c \
-    ../../3rd/curl/lib/vssh/*.c \
-    ../../3rd/curl/lib/*.c \
-    ../../3rd/curl/src/*.c
+    $$curl_dir/lib/vauth/*.c \
+    $$curl_dir/lib/vtls/*.c \
+    $$curl_dir/lib/vquic/*.c \
+    $$curl_dir/lib/vssh/*.c \
+    $$curl_dir/lib/*.c \
+    $$curl_dir/src/*.c
 
 macx {} else: ios {} else {
 SOURCES += \
-    ../../3rd/c-ares/ares__close_sockets.c \
-    ../../3rd/c-ares/ares__get_hostent.c \
-    ../../3rd/c-ares/ares__read_line.c \
-    ../../3rd/c-ares/ares__timeval.c \
-    ../../3rd/c-ares/ares_cancel.c \
-    ../../3rd/c-ares/ares_create_query.c \
-    ../../3rd/c-ares/ares_data.c \
-    ../../3rd/c-ares/ares_destroy.c \
-    ../../3rd/c-ares/ares_expand_name.c \
-    ../../3rd/c-ares/ares_free_hostent.c \
-    ../../3rd/c-ares/ares_free_string.c \
-    ../../3rd/c-ares/ares_gethostbyname.c \
-    ../../3rd/c-ares/ares_getsock.c \
-    ../../3rd/c-ares/ares_init.c \
-    ../../3rd/c-ares/ares_library_init.c\
-    ../../3rd/c-ares/ares_llist.c \
-    ../../3rd/c-ares/ares_nowarn.c \
-    ../../3rd/c-ares/ares_options.c \
-    ../../3rd/c-ares/ares_parse_a_reply.c \
-    ../../3rd/c-ares/ares_parse_aaaa_reply.c \
-    ../../3rd/c-ares/ares_process.c \
-    ../../3rd/c-ares/ares_query.c \
-    ../../3rd/c-ares/ares_search.c \
-    ../../3rd/c-ares/ares_send.c \
-    ../../3rd/c-ares/ares_strerror.c \
-    ../../3rd/c-ares/ares_timeout.c \
-    ../../3rd/c-ares/ares_version.c \
-    ../../3rd/c-ares/bitncmp.c \
-    ../../3rd/c-ares/inet_net_pton.c \
-    ../../3rd/c-ares/ares_strdup.c \
-    ../../3rd/c-ares/ares_getnameinfo.c \
-    ../../3rd/c-ares/ares_gethostbyaddr.c \
-    ../../3rd/c-ares/_inet_ntop.c \
-    ../../3rd/c-ares/ares_parse_ptr_reply.c \
-    ../../3rd/c-ares/ares_android.c \
-    ../../3rd/c-ares/ares_strsplit.c \
+    $$cares_dir/ares__close_sockets.c \
+    $$cares_dir/ares__get_hostent.c \
+    $$cares_dir/ares__read_line.c \
+    $$cares_dir/ares__timeval.c \
+    $$cares_dir/ares_cancel.c \
+    $$cares_dir/ares_create_query.c \
+    $$cares_dir/ares_data.c \
+    $$cares_dir/ares_destroy.c \
+    $$cares_dir/ares_expand_name.c \
+    $$cares_dir/ares_free_hostent.c \
+    $$cares_dir/ares_free_string.c \
+    $$cares_dir/ares_gethostbyname.c \
+    $$cares_dir/ares_getsock.c \
+    $$cares_dir/ares_init.c \
+    $$cares_dir/ares_library_init.c\
+    $$cares_dir/ares_llist.c \
+    $$cares_dir/ares_nowarn.c \
+    $$cares_dir/ares_options.c \
+    $$cares_dir/ares_parse_a_reply.c \
+    $$cares_dir/ares_parse_aaaa_reply.c \
+    $$cares_dir/ares_process.c \
+    $$cares_dir/ares_query.c \
+    $$cares_dir/ares_search.c \
+    $$cares_dir/ares_send.c \
+    $$cares_dir/ares_strerror.c \
+    $$cares_dir/ares_timeout.c \
+    $$cares_dir/ares_version.c \
+    $$cares_dir/bitncmp.c \
+    $$cares_dir/inet_net_pton.c \
+    $$cares_dir/ares_strdup.c \
+    $$cares_dir/ares_getnameinfo.c \
+    $$cares_dir/ares_gethostbyaddr.c \
+    $$cares_dir/_inet_ntop.c \
+    $$cares_dir/ares_parse_ptr_reply.c \
+    $$cares_dir/ares_android.c \
+    $$cares_dir/ares_strsplit.c \
 # just for win32???
-    ../../3rd/c-ares/ares_expand_string.c \
-    ../../3rd/c-ares/ares_fds.c \
-    ../../3rd/c-ares/ares_getenv.c \
-    ../../3rd/c-ares/ares_getopt.c \
-    ../../3rd/c-ares/ares_mkquery.c \
-    ../../3rd/c-ares/ares_parse_mx_reply.c \
-    ../../3rd/c-ares/ares_parse_naptr_reply.c \
-    ../../3rd/c-ares/ares_parse_ns_reply.c \
-    ../../3rd/c-ares/ares_parse_soa_reply.c \
-    ../../3rd/c-ares/ares_parse_srv_reply.c \
-    ../../3rd/c-ares/ares_parse_txt_reply.c \
-    ../../3rd/c-ares/ares_platform.c \
-    ../../3rd/c-ares/ares_strcasecmp.c \
-    ../../3rd/c-ares/ares_writev.c \
-    ../../3rd/c-ares/windows_port.c
+    $$cares_dir/ares_expand_string.c \
+    $$cares_dir/ares_fds.c \
+    $$cares_dir/ares_getenv.c \
+    $$cares_dir/ares_getopt.c \
+    $$cares_dir/ares_mkquery.c \
+    $$cares_dir/ares_parse_mx_reply.c \
+    $$cares_dir/ares_parse_naptr_reply.c \
+    $$cares_dir/ares_parse_ns_reply.c \
+    $$cares_dir/ares_parse_soa_reply.c \
+    $$cares_dir/ares_parse_srv_reply.c \
+    $$cares_dir/ares_parse_txt_reply.c \
+    $$cares_dir/ares_platform.c \
+    $$cares_dir/ares_strcasecmp.c \
+    $$cares_dir/ares_writev.c \
+    $$cares_dir/windows_port.c
 }

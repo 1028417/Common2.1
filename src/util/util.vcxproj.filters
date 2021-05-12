@@ -1,31 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\3rd\sqlite\shell.c">
+    <ClCompile Include="..\..\3rd\sqlite-3.35.5\shell.c">
       <Filter>fs\db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\sqlite\sqlite3.c">
+    <ClCompile Include="..\..\3rd\sqlite-3.35.5\sqlite3.c">
       <Filter>fs\db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\json\json_reader.cpp">
-      <Filter>fs\json</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\3rd\json\json_value.cpp">
-      <Filter>fs\json</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\3rd\json\json_writer.cpp">
-      <Filter>fs\json</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp">
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinystr.cpp">
       <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp">
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxml.cpp">
       <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp">
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxmlerror.cpp">
       <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlparser.cpp">
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxmlparser.cpp">
       <Filter>fs\xml\tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c">
@@ -138,6 +129,9 @@
     <ClCompile Include="cpp\ziputil.cpp">
       <Filter>fs\zip</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_reader.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_value.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />

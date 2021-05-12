@@ -27,9 +27,9 @@
     <ClCompile Include="..\..\3rd\zlib-1.2.11\compress.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c" />
-    <ClCompile Include="..\..\3rd\json\json_reader.cpp" />
-    <ClCompile Include="..\..\3rd\json\json_value.cpp" />
-    <ClCompile Include="..\..\3rd\json\json_writer.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_reader.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_value.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_writer.cpp" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\zip.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\crc32.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\deflate.c" />
@@ -51,8 +51,8 @@
     <ClCompile Include="cpp\Path.cpp" />
     <ClCompile Include="cpp\fsutil.cpp" />
     <ClCompile Include="cpp\SQLiteDB.cpp" />
-    <ClCompile Include="..\..\3rd\sqlite\shell.c" />
-    <ClCompile Include="..\..\3rd\sqlite\sqlite3.c" />
+    <ClCompile Include="..\..\3rd\sqlite-3.35.5\shell.c" />
+    <ClCompile Include="..\..\3rd\sqlite-3.35.5\sqlite3.c" />
     <ClCompile Include="cpp\tmutil.cpp" />
     <ClCompile Include="cpp\TxtWriter.cpp" />
     <ClCompile Include="cpp\timerutil.cpp" />
@@ -60,10 +60,10 @@
     <ClCompile Include="cpp\strutil.cpp" />
     <ClCompile Include="cpp\xmlutil.cpp" />
     <ClCompile Include="cpp\ziputil.cpp" />
-    <ClCompile Include="..\..\3rd\tinyxml\tinystr.cpp" />
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxml.cpp" />
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlerror.cpp" />
-    <ClCompile Include="..\..\3rd\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinystr.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxml.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxmlerror.cpp" />
+    <ClCompile Include="..\..\3rd\tinyxml-2.6.2\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\sstl\ArrList.h" />
@@ -152,8 +152,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../inc/util;../../3rd/tinyxml-2.6.2;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;../../3rd/sqlite-3.35.5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;JSON_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -194,8 +194,8 @@ Copy /Y "$(OutDir)..\libs\$(TargetName).lib" "$(OutDir)..\..\XMusic\libs\"
       <MkTypLibCompatible>false</MkTypLibCompatible>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>../../inc/util;../../inc/util/tinyxml;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../inc/util;../../3rd/tinyxml-2.6.2;../../3rd/zlib-1.2.11;../../3rd/bzip2-1.0.6;../../3rd/sqlite-3.35.5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;__UtilPrj;TIXML_USE_STL;HAVE_BZIP2;JSON_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
