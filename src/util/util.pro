@@ -32,11 +32,10 @@ DEFINES += BUILDING_LIBCURL  USE_OPENSSL  HAVE_OPENSSL \
 
 DEFINES += HAVE_UNISTD_H #for curl7.76
 
-#DEFINES += JSON_DLL_BUILD #告警太多
 win32 {
-DEFINES += JSON_API=__declspec(dllexport)
+DEFINES += JSON_API=__declspec(dllexport) #告警太多？？ JSON_DLL_BUILD
 } else {
-DEFINES += JSON_API=__attribute__((visibility("default")))
+DEFINES += JSON_DLL_BUILD #安卓报错 JSON_API=__attribute__((visibility("default")))
 }
 
 zlib_dir = ../../3rd/zlib-1.2.11
