@@ -27,9 +27,9 @@
     <ClCompile Include="..\..\3rd\zlib-1.2.11\compress.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\ioapi.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\unzip.c" />
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_reader.cpp" />
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_value.cpp" />
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_writer.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_reader.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_value.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_writer.cpp" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\contrib\minizip\zip.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\crc32.c" />
     <ClCompile Include="..\..\3rd\zlib-1.2.11\deflate.c" />

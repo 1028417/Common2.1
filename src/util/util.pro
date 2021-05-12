@@ -45,7 +45,8 @@ bzip2_dir = ../../3rd/bzip2-1.0.6
 curl_dir = ../../3rd/curl-7.67.0
 cares_dir = ../../3rd/c-ares-1.15.0
 
-json_dir = ../../3rd/jsoncpp-1.8.0 #告警太大json_dir = ../../3rd/jsoncpp-1.9.4
+#json_dir = ../../3rd/jsoncpp-1.8.0
+json_dir = ../../3rd/jsoncpp-1.9.4
 
 tinyxml_dir = ../../3rd/tinyxml-2.6.2
 

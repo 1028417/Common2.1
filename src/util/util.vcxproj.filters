@@ -129,9 +129,9 @@
     <ClCompile Include="cpp\ziputil.cpp">
       <Filter>fs\zip</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_reader.cpp" />
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_value.cpp" />
-    <ClCompile Include="..\..\3rd\jsoncpp-1.8.0\src\lib_json\json_writer.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_reader.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_value.cpp" />
+    <ClCompile Include="..\..\3rd\jsoncpp-1.9.4\src\lib_json\json_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\util\mtutil.h" />

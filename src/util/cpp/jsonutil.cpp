@@ -4,10 +4,9 @@
 #include "json/reader.h"
 #include "json/writer.h"
 
-//jsoncpp-1.9.4告警太多
 bool jsonutil::loadData(const string& strData, JValue& jRoot, bool bStrictRoot)
 {
-	/*Json::CharReaderBuilder builder;
+    Json::CharReaderBuilder builder;
 	if (bStrictRoot)
 	{
 		builder["strictRoot"] = true;
@@ -16,21 +15,21 @@ bool jsonutil::loadData(const string& strData, JValue& jRoot, bool bStrictRoot)
 	auto begin = strData.c_str();
     bool bRet = reader->parse(begin, begin + strData.size(), &jRoot, NULL);
 	delete reader;
-	return bRet;*/
+    return bRet;
 
-	if (bStrictRoot)
+    /*if (bStrictRoot)
 	{
 		return Json::Reader(Json::Features::strictMode()).parse(strData, jRoot, false);
 	}
 	else
 	{
 		return Json::Reader().parse(strData, jRoot, false);
-	}
+    }*/
 }
 
 string jsonutil::toStr(const JValue& jRoot, bool bStyled)
 {
-	/*Json::StreamWriterBuilder builder;
+    Json::StreamWriterBuilder builder;
 	if (bStyled)
 	{
 		//builder[] = ;
@@ -39,16 +38,16 @@ string jsonutil::toStr(const JValue& jRoot, bool bStyled)
 	stringstream sstream;
 	writer->write(jRoot, &sstream);
 	delete writer;
-	return sstream.str();*/
+    return sstream.str();
 
-    if (bStyled)
+    /*if (bStyled)
     {
         return Json::StyledWriter().write(jRoot);
     }
     else
     {
         return Json::FastWriter().write(jRoot);
-    }
+    }*/
 }
 
 bool jsonutil::get(const JValue& jValue, string& strRet)
