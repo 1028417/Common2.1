@@ -113,14 +113,19 @@ const tagUnzFile* CUnzDir::subFile(wstring strSubFile) const
 
 inline bool CUnZip::_unzOpen() const
 {
+	if (NULL == m_pUnz)
+	{
+		return false;
+	}
+
     int nRet = 0;
     if (m_strPwd.empty())
     {
-        nRet = unzOpenCurrentFile(m_pfile);
+        nRet = unzOpenCurrentFile(m_pUnz);
     }
     else
     {
-        nRet = unzOpenCurrentFilePassword(m_pfile, m_strPwd.c_str());
+        nRet = unzOpenCurrentFilePassword(m_pUnz, m_strPwd.c_str());
     }
     if (nRet != UNZ_OK)
     {
@@ -132,8 +137,13 @@ inline bool CUnZip::_unzOpen() const
 
 bool CUnZip::unzOpen(const tagUnzFile& unzFile) const
 {
+	if (NULL == m_pUnz)
+	{
+		return false;
+	}
+
     unz64_file_pos file_pos { unzFile.pos_in_zip_directory, unzFile.num_of_file };
-    int nRet = unzGoToFilePos64(m_pfile, &file_pos);
+    int nRet = unzGoToFilePos64(m_pUnz, &file_pos);
     if (nRet != UNZ_OK)
     {
         return false;
@@ -144,27 +154,42 @@ bool CUnZip::unzOpen(const tagUnzFile& unzFile) const
         return false;
     }
 
-   ((tagUnzFile&)unzFile).data_pos = unzGetCurrentFileZStreamPos64(m_pfile);
+   ((tagUnzFile&)unzFile).data_pos = unzGetCurrentFileZStreamPos64(m_pUnz);
 
     return true;
 }
 
-#define _unzRead(buf, len) unzReadCurrentFile(m_pfile, buf, len)
+#define _unzRead(buf, len) unzReadCurrentFile(m_pUnz, buf, len)
 
 long CUnZip::unzRead(void *buf, size_t len) const
 {
+	if (NULL == m_pUnz)
+	{
+		return -1;
+	}
+
     return _unzRead(buf, len);
 }
 
-#define _unzClose() (void)unzCloseCurrentFile(m_pfile)
+#define _unzClose() (void)unzCloseCurrentFile(m_pUnz)
 
 void CUnZip::unzClose()
 {
+	if (NULL == m_pUnz)
+	{
+		return;
+	}
+
     _unzClose();
 }
 
 long CUnZip::_read(const tagUnzFile& unzFile, void *buf, size_t len) const
 {
+	if (NULL == m_pUnz)
+	{
+		return -1;
+	}
+
     if (!unzOpen(unzFile))
 	{
 		return -1;
@@ -180,16 +205,16 @@ bool CUnZip::_open(const char *szFile, void *zfunc, const string& strPwd)
 {
     m_strPwd = strPwd;
 
-    unzFile pfile = NULL;
+    unzFile pUnz = NULL;
     if (zfunc)
 	{
-        pfile = ::unzOpen2_64(szFile, (zlib_filefunc64_def*)zfunc);
+        pUnz = ::unzOpen2_64(szFile, (zlib_filefunc64_def*)zfunc);
 	}
 	else
 	{
-        pfile = ::unzOpen64(szFile);
+        pUnz = ::unzOpen64(szFile);
 	}
-    if (NULL == pfile)
+    if (NULL == pUnz)
     {
 		return false;
     }
@@ -203,10 +228,10 @@ bool CUnZip::_open(const char *szFile, void *zfunc, const string& strPwd)
     unz64_file_pos file_pos{ 0,0 };
 
 	do {
-        int nRet = unzGetCurrentFileInfo64(pfile, &file_info, pszFileName, MAX_PATH, NULL, 0, NULL, 0);
+        int nRet = unzGetCurrentFileInfo64(pUnz, &file_info, pszFileName, MAX_PATH, NULL, 0, NULL, 0);
 		if (nRet != UNZ_OK)
 		{
-            (void)::unzClose(pfile);
+            (void)::unzClose(pUnz);
 			return false;
 		}
 
@@ -224,10 +249,10 @@ bool CUnZip::_open(const char *szFile, void *zfunc, const string& strPwd)
 		}
 		else
         {
-            nRet = unzGetFilePos64(pfile, &file_pos);
+            nRet = unzGetFilePos64(pUnz, &file_pos);
 			if (nRet != UNZ_OK)
 			{
-                (void)::unzClose(pfile);
+                (void)::unzClose(pUnz);
 				return false;
 			}
 
@@ -242,11 +267,11 @@ bool CUnZip::_open(const char *szFile, void *zfunc, const string& strPwd)
 
             m_lstSubFile.emplace_back(strPath, &unzFile);
 		}
-    } while (unzGoToNextFile(pfile) == UNZ_OK);
+    } while (unzGoToNextFile(pUnz) == UNZ_OK);
 
-    (void)unzGoToFirstFile(pfile);
+    (void)unzGoToFirstFile(pUnz);
 	
-    m_pfile = pfile;
+	m_pUnz = pUnz;
 
 	return true;
 }
@@ -426,7 +451,7 @@ long CUnZip::unzip(const tagUnzFile& unzFile, cwstr strDstFile) const
 
 bool CUnZip::unzipAll(cwstr strDstDir) const
 {
-    if (NULL == m_pfile)
+    if (NULL == m_pUnz)
 	{
 		return false;
 	}
@@ -442,7 +467,7 @@ bool CUnZip::unzipAll(cwstr strDstDir) const
         t_strDstDir.push_back(__cPathSeparator);
 	}
 
-    (void)unzGoToFirstFile(m_pfile);
+    (void)unzGoToFirstFile(m_pUnz);
 
     for (cauto pr : m_lstSubDir)
     {
@@ -484,7 +509,7 @@ bool CUnZip::unzipAll(cwstr strDstDir) const
 		} while (0);
 
 		_unzClose();
-        (void)unzGoToNextFile(m_pfile);
+        (void)unzGoToNextFile(m_pUnz);
 	}
 
 	return true;
@@ -492,16 +517,18 @@ bool CUnZip::unzipAll(cwstr strDstDir) const
 
 void CUnZip::close()
 {
-    if (m_pfile)
+	if (NULL == m_pUnz)
 	{
-        (void)::unzClose(m_pfile);
-        m_pfile = NULL;
+		return;
+	}
 
-        m_strPwd.clear();
-        m_root.clear();
-        m_lstSubDir.clear();
-        m_lstSubFile.clear();
-    }
+    (void)::unzClose(m_pUnz);
+	m_pUnz = NULL;
+
+    m_strPwd.clear();
+    m_root.clear();
+    m_lstSubDir.clear();
+    m_lstSubFile.clear();
 }
 
 #if __winvc
@@ -593,7 +620,7 @@ static int _WriteInZipFile(zipFile zFile,const string& file)
     return ret;
 }
 
-static int _MinizipFile(zipFile zFile, const tagMinZipSrc& src)
+static int _MinizipFile(zipFile zFile, const tagZipSrc& src)
 {
 	int method = 0;
 	if (E_ZMethod::ZM_Deflated == src.method)
@@ -622,10 +649,27 @@ static int _MinizipFile(zipFile zFile, const tagMinZipSrc& src)
 //APPEND_STATUS_CREATE 新建zip包
 //APPEND_STATUS_CREATEAFTER 新建zip包到现有的非zip文件末尾
 // APPEND_STATUS_ADDINZIP 打开现有的zip包
-int ziputil::zDir(bool bKeetRoot, const string& src, const string& dest, E_ZMethod method, int level)
+bool CZip::open(const string& strFile, const string& strPwd)
 {
-	zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
-	if (zFile == NULL) {
+	m_pZip = zipOpen64(strFile.c_str(), APPEND_STATUS_CREATE);
+	if (m_pZip == NULL) {
+		return false;
+	}
+	return true;
+}
+
+void CZip::close()
+{
+	if (m_pZip)
+	{
+		zipClose((zipFile*)m_pZip, NULL);
+	}
+}
+
+int CZip::zDir(bool bKeetRoot, const string& src, E_ZMethod method, int level)
+{
+	if (NULL == m_pZip)
+	{
 		return -1;
 	}
 
@@ -655,33 +699,30 @@ int ziputil::zDir(bool bKeetRoot, const string& src, const string& dest, E_ZMeth
 		}
 		strutil::replaceChar(strInnerPath, '\\', '/');
 
-		ret = _MinizipFile(zFile, tagMinZipSrc(dirPrefix + __cPathSeparator + strFile, strInnerPath, method, level));
+		ret = _MinizipFile(m_pZip, tagZipSrc(dirPrefix + __cPathSeparator + strFile, strInnerPath, method, level));
 		if (ret != ZIP_OK) {
 			break;
 		}
 	}
 
-	zipClose(zFile, NULL);
 	return ret;
 }
 
-int ziputil::zFiles(const list<tagMinZipSrc>& lstSrc, const string& dest)
+int CZip::zFiles(const list<tagZipSrc>& lstSrc)
 {
-	zipFile zFile = zipOpen64(dest.c_str(), APPEND_STATUS_CREATE);
-	if (zFile == NULL) {
+	if (NULL == m_pZip)
+	{
 		return -1;
 	}
-
+	
 	int ret = 0;
 	for (cauto src : lstSrc)
 	{
-		ret = _MinizipFile(zFile, src);
+		ret = _MinizipFile(m_pZip, src);
 		if (ret != ZIP_OK) {
 			break;
 		}
 	}
-
-	zipClose(zFile, NULL);
 	return ret;
 }
 
