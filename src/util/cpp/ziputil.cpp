@@ -620,7 +620,24 @@ static int _WriteInZipFile(zipFile zFile,const string& file)
     return ret;
 }
 
-static int _MinizipFile(zipFile zFile, const tagZipSrc& src)
+//minizip的zipOpenNewFileInZip函数改造，加上密码参数
+#ifndef VERSIONMADEBY
+# define VERSIONMADEBY   (0x0) /* platform depedent */
+#endif
+static int _zipOpenNewFileInZip(zipFile file, const char* filename, const zip_fileinfo* zipfi,
+	const void* extrafield_local, uInt size_extrafield_local,
+	const void*extrafield_global, uInt size_extrafield_global,
+	const char* comment, int method, int level, const char *password)
+{
+	return zipOpenNewFileInZip4_64(file, filename, zipfi,
+		extrafield_local, size_extrafield_local,
+		extrafield_global, size_extrafield_global,
+		comment, method, level, 0,
+		-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
+		password, 0, VERSIONMADEBY, 0, 0);
+}
+
+static int _MinizipFile(zipFile zFile, const tagZipSrc& src, const string& strPwd)
 {
 	int method = 0;
 	if (E_ZMethod::ZM_Deflated == src.method)
@@ -634,7 +651,8 @@ static int _MinizipFile(zipFile zFile, const tagZipSrc& src)
 
     zip_fileinfo zfi;
     memset(&zfi, 0, sizeof (zfi));
-    int ret = zipOpenNewFileInZip(zFile,src.strInnerPath.c_str(),&zfi,NULL,0,NULL,0,NULL,method,src.level);
+	auto password = !strPwd.empty() ? strPwd.c_str() : NULL;
+    int ret = _zipOpenNewFileInZip(zFile,src.strInnerPath.c_str(),&zfi,NULL,0,NULL,0,NULL,method,src.level, password);
     if (ret != ZIP_OK) {
         return ret;
     }
@@ -655,6 +673,7 @@ bool CZip::open(const string& strFile, const string& strPwd)
 	if (m_pZip == NULL) {
 		return false;
 	}
+	m_strPwd = strPwd;
 	return true;
 }
 
@@ -699,7 +718,8 @@ int CZip::zDir(bool bKeetRoot, const string& src, E_ZMethod method, int level)
 		}
 		strutil::replaceChar(strInnerPath, '\\', '/');
 
-		ret = _MinizipFile(m_pZip, tagZipSrc(dirPrefix + __cPathSeparator + strFile, strInnerPath, method, level));
+		tagZipSrc zipSrc(dirPrefix + __cPathSeparator + strFile, strInnerPath, method, level));
+		ret = _MinizipFile(m_pZip, zipSrc, m_strPwd);
 		if (ret != ZIP_OK) {
 			break;
 		}
@@ -718,7 +738,7 @@ int CZip::zFiles(const list<tagZipSrc>& lstSrc)
 	int ret = 0;
 	for (cauto src : lstSrc)
 	{
-		ret = _MinizipFile(m_pZip, src);
+		ret = _MinizipFile(m_pZip, src, m_strPwd);
 		if (ret != ZIP_OK) {
 			break;
 		}
