@@ -30,10 +30,12 @@ bool jsonutil::loadData(const string& strData, JValue& jRoot, bool bStrictRoot)
 string jsonutil::toStr(const JValue& jRoot, bool bStyled)
 {
     Json::StreamWriterBuilder builder;
-	if (bStyled)
+    if (!bStyled)
 	{
-		//builder[] = ;
+        builder["indentation"] = "";
 	}
+    builder["dropNullPlaceholders"] = true;
+
 	auto writer = builder.newStreamWriter();
 	stringstream sstream;
 	writer->write(jRoot, &sstream);
