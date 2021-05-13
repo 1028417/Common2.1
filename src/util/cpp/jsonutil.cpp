@@ -1,6 +1,8 @@
 ﻿
 #include "util.h"
 
+//通过预编译中的JSON_DLL_BUILD、JSON_API和头文件中的JSON_API控制json编译、链接
+
 #include "json/reader.h"
 #include "json/writer.h"
 
